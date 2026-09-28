@@ -6,7 +6,6 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "../utils/formatPrice";
-import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
 import {
   PLP_CARD_IMAGE_QUALITY,
   PLP_CARD_IMAGE_WIDTH,
@@ -35,6 +34,9 @@ export interface JewelleryProductCardProps {
   href: string;
   isBestseller?: boolean;
   isWishlisted?: boolean;
+  isHoverActive?: boolean;
+  onHoverStart?: () => void;
+  onHoverEnd?: () => void;
   onToggleWishlist?: () => void;
   priorityImage?: boolean;
 }
@@ -50,7 +52,7 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
   <div
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
-      "gap-[8px] px-[5px] text-sm md:gap-3 md:px-[12px] md:text-xl",
+      "md:gap-3 gap-2 lg:text-xl md:text-lg sm:text-base text-sm",
       "text-darkblack",
       "motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out",
       className,
@@ -59,13 +61,13 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
     <Link
       href={href}
       className={cn(
-        "max-w-full truncate font-gill text-sm font-light sm:text-base md:text-xl desktop:whitespace-nowrap",
+        "max-w-full truncate font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm desktop:whitespace-nowrap",
         productNameDisplayClassName,
       )}
     >
       {title}
     </Link>
-    <p className="w-full font-gill font-semibold">
+    <p className="w-full font-gill font-semibold lg:text-xl md:text-lg sm:text-base text-sm">
       <span aria-hidden>₹ </span>
       {formatJewelleryPrice(price)}
     </p>
@@ -83,7 +85,7 @@ const ProductImage = ({
   priority?: boolean;
   imageClassName?: string;
 }) => (
-  <div className="mx-auto size-[121px] w-full max-w-[121px] shrink-0 overflow-hidden md:aspect-square md:h-auto md:max-w-[303px] md:w-full desktop:size-[303px]">
+  <div className="mx-auto size-[110px] w-full max-w-[110px] shrink-0 overflow-hidden md:aspect-square md:h-auto md:max-w-[303px] md:w-full desktop:size-[303px]">
     <OptimizedImage
       src={src}
       alt={alt}
@@ -106,50 +108,40 @@ const JewelleryProductCard = ({
   href,
   isBestseller = false,
   isWishlisted = false,
+  isHoverActive = false,
+  onHoverStart,
+  onHoverEnd,
   onToggleWishlist,
   priorityImage = false,
 }: JewelleryProductCardProps) => {
-  const hasModalImage = Boolean(modalImage);
-  const hasHoverImage = Boolean(hoverImage);
   const [loadHoverImage, setLoadHoverImage] = useState(false);
   const [hoverImageReady, setHoverImageReady] = useState(false);
+  const lifestyleImage = hoverImage ?? modalImage;
+
   const prefetchHoverImage = useCallback(() => {
-    if (hasHoverImage) {
+    if (lifestyleImage) {
       setLoadHoverImage(true);
     }
-  }, [hasHoverImage]);
+  }, [lifestyleImage]);
 
-  const {
-    activeSlide,
-    dragOffset,
-    isDragging,
-    onPointerDown,
-    onPointerMove,
-    onPointerUp,
-    onPointerCancel,
-    handleLinkClick,
-  } = useCardImageSwipe({
-    slideCount: hasModalImage ? 2 : 1,
-    enabled: hasModalImage,
-  });
-
-  const isMobileLifestyle = activeSlide === 1 && hasModalImage;
   const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
   const displayedWishlisted = optimisticWishlisted ?? isWishlisted;
-  const canCrossfade = hasHoverImage && hoverImageReady;
+  const canCrossfade = Boolean(lifestyleImage) && hoverImageReady;
+  const showLifestyleOverlay = isHoverActive && Boolean(lifestyleImage);
+  const showLifestyleChrome = showLifestyleOverlay;
 
   useEffect(() => {
     setOptimisticWishlisted(null);
   }, [isWishlisted]);
 
   useEffect(() => {
-    if (!loadHoverImage || !hasHoverImage || hoverImageReady) {
+    if (!loadHoverImage || !lifestyleImage || hoverImageReady) {
       return;
     }
 
     let cancelled = false;
 
-    void preloadImage(getImageSrc(hoverImage!)).then(() => {
+    void preloadImage(getImageSrc(lifestyleImage)).then(() => {
       if (!cancelled) {
         setHoverImageReady(true);
       }
@@ -158,82 +150,51 @@ const JewelleryProductCard = ({
     return () => {
       cancelled = true;
     };
-  }, [hasHoverImage, hoverImage, hoverImageReady, loadHoverImage]);
+  }, [hoverImageReady, lifestyleImage, loadHoverImage]);
 
-  const swipeSurfaceProps = hasModalImage
-    ? {
-        onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
-          if (window.matchMedia("(min-width: 768px)").matches) return;
-          onPointerDown(event);
-        },
-        onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
-          if (window.matchMedia("(min-width: 768px)").matches) return;
-          onPointerMove(event);
-        },
-        onPointerUp,
-        onPointerCancel,
-      }
-    : {};
+  const handlePointerEnter = useCallback(() => {
+    if (!lifestyleImage) return;
+    prefetchHoverImage();
+    onHoverStart?.();
+  }, [lifestyleImage, onHoverStart, prefetchHoverImage]);
+
+  const handlePointerLeave = useCallback(() => {
+    onHoverEnd?.();
+  }, [onHoverEnd]);
 
   return (
     <article
       className={cn(
-        "group relative grid h-[260px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
-        "md:h-[420px] desktop:h-[496px]",
-        hasModalImage && "touch-pan-y select-none md:touch-auto md:select-auto",
-        isDragging && "cursor-grabbing md:cursor-auto",
+        "group relative grid h-[227px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
+        "lg:h-[496px] md:h-[450px]",
       )}
-      onPointerEnter={hasHoverImage ? prefetchHoverImage : undefined}
-      onFocus={hasHoverImage ? prefetchHoverImage : undefined}
-      {...swipeSurfaceProps}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onFocus={lifestyleImage ? prefetchHoverImage : undefined}
     >
-      {hasHoverImage && loadHoverImage ? (
+      {lifestyleImage && (loadHoverImage || showLifestyleOverlay) ? (
         <OptimizedImage
-          src={hoverImage!}
+          src={lifestyleImage}
           alt=""
           width={PLP_CARD_IMAGE_WIDTH}
           height={PLP_CARD_IMAGE_WIDTH}
-          sizes="33vw"
+          sizes="(max-width: 768px) 50vw, 33vw"
           quality={PLP_CARD_IMAGE_QUALITY}
           className={cn(
-            "pointer-events-none absolute inset-0 z-0 hidden h-full w-full object-cover opacity-0 md:block",
-            "motion-safe:transition-opacity motion-safe:ease-in-out",
-            canCrossfade &&
-              "motion-safe:duration-[400ms] md:group-hover:opacity-100 md:group-hover:delay-150 md:group-focus-visible:opacity-100 md:group-focus-visible:delay-150",
+            "pointer-events-none absolute inset-0 z-0 h-full w-full object-cover",
+            "motion-safe:transition-opacity motion-safe:ease-in-out motion-safe:duration-[400ms]",
+            showLifestyleOverlay
+              ? "opacity-100 motion-safe:delay-150"
+              : "opacity-0",
           )}
         />
-      ) : null}
-
-      {isMobileLifestyle && modalImage ? (
-        <div className="col-start-1 row-start-1 grid size-full md:hidden" aria-hidden>
-          <OptimizedImage
-            src={modalImage}
-            alt=""
-            width={PLP_CARD_IMAGE_WIDTH}
-            height={PLP_CARD_IMAGE_WIDTH}
-            className="col-start-1 row-start-1 size-full object-cover"
-            sizes="50vw"
-            quality={PLP_CARD_IMAGE_QUALITY}
-          />
-          <div
-            className="col-start-1 row-start-1 size-full bg-gradient-to-t from-black/60 to-transparent"
-            aria-hidden
-          />
-        </div>
       ) : null}
 
       <div
         className={cn(
           "col-start-1 row-start-1 z-10 flex w-full flex-col items-center",
-          "max-md:transition-opacity max-md:duration-700 max-md:ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "px-[16px] pt-[24px] md:px-6 md:pt-10",
-          isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
+          "px-4 pt-6 md:px-6 md:pt-10",
         )}
-        style={
-          isDragging && hasModalImage
-            ? { transform: `translate3d(${dragOffset * 0.15}px, 0, 0)` }
-            : undefined
-        }
       >
         <ProductImage
           src={primaryImage}
@@ -241,8 +202,9 @@ const JewelleryProductCard = ({
           priority={priorityImage}
           imageClassName={cn(
             "motion-safe:transition-opacity motion-safe:ease-out",
+            showLifestyleOverlay &&
             canCrossfade &&
-              "motion-safe:duration-[250ms] md:group-hover:opacity-0 md:group-focus-visible:opacity-0",
+            "motion-safe:duration-[250ms] opacity-0",
           )}
         />
       </div>
@@ -258,13 +220,12 @@ const JewelleryProductCard = ({
             "pointer-events-none absolute inset-x-0 bottom-0 h-[min(52%,220px)] md:h-[min(48%,260px)]",
             "bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0",
             "motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out",
-            canCrossfade &&
-              "md:group-hover:opacity-100 md:group-focus-visible:opacity-100",
+            showLifestyleChrome && "opacity-100",
           )}
         />
         <div
           className={cn(
-            "relative z-10 flex w-full flex-col items-center gap-3 px-[16px] pb-[24px] md:px-6 md:pb-10",
+            "relative z-10 flex w-full flex-col items-center gap-3 px-4 md:px-6 lg:pb-[58px] md:pb-10 pb-6",
           )}
         >
           {isBestseller ? (
@@ -276,18 +237,13 @@ const JewelleryProductCard = ({
             title={title}
             price={price}
             href={href}
-            className={cn(
-              isMobileLifestyle && "text-white",
-              canCrossfade &&
-                "md:group-hover:text-white md:group-focus-visible:text-white",
-            )}
+            className={cn(showLifestyleOverlay && "text-white")}
           />
         </div>
       </div>
 
       <Link
         href={href}
-        onClick={handleLinkClick}
         className="col-start-1 row-start-1 z-30 size-full"
         aria-label={`View ${title}`}
       />
@@ -303,7 +259,7 @@ const JewelleryProductCard = ({
             setOptimisticWishlisted(!displayedWishlisted);
             onToggleWishlist?.();
           }}
-          className="pointer-events-auto relative flex size-6 items-center justify-center md:size-[32px]"
+          className="pointer-events-auto relative flex size-6 items-center justify-center md:size-8"
         >
           <svg
             width="32"
@@ -316,13 +272,9 @@ const JewelleryProductCard = ({
               "motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out",
               displayedWishlisted
                 ? "fill-[#AB863B] text-linkGold"
-                : isMobileLifestyle
+                : showLifestyleOverlay
                   ? "fill-none text-white"
-                  : cn(
-                      "fill-none text-darkblack",
-                      canCrossfade &&
-                        "md:group-hover:text-white md:group-focus-visible:text-white",
-                    ),
+                  : "fill-none text-darkblack",
             )}
           >
             <path

@@ -23,7 +23,7 @@ const JewelleryListingPageSkeleton = () => (
 
     <nav className="border-b-[0.5px] border-neutral300 bg-white" aria-hidden>
       <div className="overflow-x-auto scrollbar-none md:overflow-visible">
-        <ul className="flex w-max items-center gap-3 px-4 py-6 md:w-full md:max-w-full md:justify-between md:gap-6 md:py-8 lg:justify-center lg:gap-8 lg:py-[40px]">
+        <ul className="flex w-max items-center gap-3 px-4 py-6 md:w-full md:max-w-full md:justify-between md:gap-6 md:py-8 lg:justify-center lg:gap-8 lg:py-10">
           {Array.from({ length: CATEGORY_SKELETON_COUNT }, (_, index) => (
             <li
               key={index}

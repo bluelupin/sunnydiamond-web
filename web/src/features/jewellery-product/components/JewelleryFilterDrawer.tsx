@@ -260,7 +260,7 @@ const FilterDrawerPanel = ({
         {hasPriceFacet && !isSingleCatalogPrice ? (
           <div className="space-y-4">
             <section className="flex gap-[24px]">
-              <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+              <label className="flex min-w-0 flex-1 flex-col gap-2">
                 <span className="font-gill text-base font-normal leading-110 text-darkblack">
                   Min Amount
                 </span>
@@ -300,7 +300,7 @@ const FilterDrawerPanel = ({
                   )}
                 />
               </label>
-              <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+              <label className="flex min-w-0 flex-1 flex-col gap-2">
                 <span className="font-gill text-base font-normal leading-110 text-darkblack">
                   Max Amount
                 </span>

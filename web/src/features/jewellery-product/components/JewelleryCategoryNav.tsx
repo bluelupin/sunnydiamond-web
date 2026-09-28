@@ -32,10 +32,10 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
       <div className="overflow-x-auto scrollbar-none md:overflow-visible">
         <ul
           className={cn(
-            "flex w-max items-center",
+            "flex w-full items-center",
             "px-4",
-            "md:w-full md:max-w-full md:justify-between",
-            "lg:justify-center lg:gap-8 md:gap-6 gap-3 lg:py-[40px] md:py-8 py-6",
+            "md:w-full md:max-w-full justify-between",
+            "lg:justify-center md:gap-8 sm:gap-6 gap-3 lg:py-10 md:py-8 py-6",
           )}
         >
           {categories.map((category) => {
@@ -48,7 +48,7 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                   onClick={() => onCategoryChange(category)}
                   aria-pressed={isActive}
                   className={cn(
-                    "flex w-[56px] flex-col items-center justify-center gap-[8px] md:w-full md:max-w-[86px] lg:w-[86px]",
+                    "flex w-[56px] flex-col items-center justify-center gap-2 md:w-full md:max-w-[86px] lg:w-[86px]",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
                   )}
                 >

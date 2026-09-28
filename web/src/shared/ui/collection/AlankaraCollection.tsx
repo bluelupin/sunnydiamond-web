@@ -460,7 +460,7 @@ function ProductCarouselPanel({
       className={cn(
         "relative overflow-hidden",
         isMobile
-          ? "mx-4 bg-gray300 py-[40px]"
+          ? "mx-4 bg-gray300 py-10"
           : "aspect-square h-auto w-full bg-white px-4 md:px-6 desktop:aspect-auto lg:h-[800px] md:h-[550px] desktop:px-6",
         total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         total > 1 && "touch-none select-none",

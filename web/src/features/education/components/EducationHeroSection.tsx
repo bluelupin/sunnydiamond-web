@@ -55,7 +55,7 @@ const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionPr
           >
             <h1
               id="education-hero-title"
-              className="w-full text-center font-larken font-light leading-none text-white lg:text-6xl md:text-5xl sm:text-4xl text-32"
+              className="w-full text-center font-larken font-light leading-none text-white md:text-5xl sm:text-4xl text-32"
             >
               {title}
             </h1>

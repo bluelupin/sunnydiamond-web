@@ -83,7 +83,7 @@ const GuaranteeItem = (item: GuaranteeBarItem) => (
     }}
   >
     <GuaranteeIcon item={item} size={guaranteeBarSpec.iconSize} />
-    <p className="whitespace-nowrap font-gill text-15 font-normal leading-110 text-darkblack desktop:text-xl desktop:whitespace-normal">
+    <p className="whitespace-nowrap font-gill font-normal leading-110 text-darkblack lg:text-xl md:text-lg text-base desktop:whitespace-normal">
       {item.label}
     </p>
   </li>
@@ -105,7 +105,7 @@ const GuaranteesBar = ({
 
   return (
     <section aria-label={ariaLabel} className={cn("relative z-10 bg-gray200", className)}>
-      <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-10 md:hidden">
+      <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-12 md:hidden">
         {visibleItems.map((item, index) => (
           <Fragment key={`${item.label}-${index}`}>
             {index > 0 ? <GuaranteeDivider orientation="horizontal" /> : null}

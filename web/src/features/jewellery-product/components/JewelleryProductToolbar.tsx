@@ -77,7 +77,7 @@ const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterContro
   <button
     type="button"
     onClick={onClick}
-    className="text-darkblack inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:py-[7px]"
+    className="text-darkblack inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 flex items-center justify-center h-10 px-3"
     style={{ gap, color }}
     aria-label="Open filters"
   >
@@ -112,14 +112,14 @@ const SortControl = ({
   <>
     {/* Desktop — original Sort By control; Gemstone Type-style dropdown menu */}
     <div
-      className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid"
+      className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid px-3 h-10"
       style={{
         gap,
         color,
-        paddingLeft: desktopSpec.sortPaddingX,
-        paddingRight: desktopSpec.sortPaddingX,
-        paddingTop: desktopSpec.sortPaddingY,
-        paddingBottom: desktopSpec.sortPaddingY,
+        // paddingLeft: desktopSpec.sortPaddingX,
+        // paddingRight: desktopSpec.sortPaddingX,
+        // paddingTop: desktopSpec.sortPaddingY,
+        // paddingBottom: desktopSpec.sortPaddingY,
       }}
     >
       <span
@@ -255,14 +255,9 @@ const JewelleryProductToolbar = ({
   return (
     <>
       {/* Desktop — sticky top bar (Figma 692:4232) */}
-      <div className="sticky top-0 z-20 hidden bg-white md:block">
+      <div className="hidden bg-white md:block">
         <div
-          className="flex w-full items-center justify-between bg-white"
-          style={{
-            height: desktopSpec.height,
-            paddingLeft: desktopSpec.paddingX,
-            paddingRight: desktopSpec.paddingX,
-          }}
+          className="flex w-full items-center justify-between bg-white py-6 px-10"
         >
           {isSearching ? (
             <span
