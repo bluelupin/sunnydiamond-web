@@ -187,28 +187,22 @@ const CareersApplicationForm = () => {
         data.workExperience.relevantWorkExp,
         applicationFlow.applicationForm.workExperienceOptions,
       );
-      if (data.fullName) setName((current) => current.trim() || data.fullName!);
-      if (data.emailId) setEmail((current) => current.trim() || data.emailId!);
-      if (phoneValue) {
-        setPhone((current) => current.trim() || phoneValue.phone);
-        setCountryCode((current) => phone.trim() ? current : phoneValue.countryCode);
-      }
-      if (education?.degree) setHighestDegree((current) => current.trim() || education.degree!);
-      if (education?.areaOfStudy) setAreaOfStudy((current) => current.trim() || education.areaOfStudy!);
-      if (education?.completionYear) setYearOfCompletion((current) => current.trim() || String(education.completionYear));
-      if (experienceOption) setRelevantExperience((current) => current || experienceOption);
+      setName(data.fullName ?? "");
+      setEmail(data.emailId ?? "");
+      setPhone(phoneValue?.phone ?? "");
+      setCountryCode(phoneValue?.countryCode ?? "+91");
+      setHighestDegree(education?.degree ?? "");
+      setAreaOfStudy(education?.areaOfStudy ?? "");
+      setYearOfCompletion(education?.completionYear ? String(education.completionYear) : "");
+      setRelevantExperience(experienceOption ?? "");
       const parsedCompany = data.workExperience.currentCompany || data.workExperience.positions?.[0]?.company;
       const parsedTitle = data.workExperience.currentJobTitle || data.workExperience.positions?.[0]?.jobTitle;
-      if (parsedCompany) {
-        setCurrentCompany((current) => current.trim() || parsedCompany);
-      }
-      if (parsedTitle) {
-        setCurrentJobTitle((current) => current.trim() || parsedTitle);
-      }
+      setCurrentCompany(parsedCompany ?? "");
+      setCurrentJobTitle(parsedTitle ?? "");
       const parsedSkills = [...new Set(data.skillsAndLanguages?.Skills?.map((item) => item.SkillName).filter(Boolean) ?? [])];
       const parsedLanguages = [...new Set(data.skillsAndLanguages?.Languages?.map((item) => item.SkillName).filter(Boolean) ?? [])];
-      setSkills((current) => current.length ? current : parsedSkills);
-      setLanguages((current) => current.length ? current : parsedLanguages);
+      setSkills(parsedSkills);
+      setLanguages(parsedLanguages);
       setResumeAutofillComplete(true);
       setResumeParseWarnings([
         ...(meta.warnings ?? []),
@@ -224,7 +218,7 @@ const CareersApplicationForm = () => {
         setIsParsingResume(false);
       }
     }
-  }, [applicationFlow.applicationForm.workExperienceOptions, phone]);
+  }, [applicationFlow.applicationForm.workExperienceOptions]);
 
   const dismissResumeValidationToast = useCallback(() => {
     if (resumeValidationToastTimeoutRef.current) {
