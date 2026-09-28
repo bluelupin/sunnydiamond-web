@@ -265,7 +265,7 @@ export const CheckoutSectionHeading = ({
 }: CheckoutSectionHeadingProps) => (
   <div className="flex items-center justify-between gap-4">
     <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">{children}</h2>
-    {onEdit ? (
+    {/* {onEdit ? (
       <DetailTextLink
         onClick={onEdit}
         disabled={editDisabled}
@@ -273,7 +273,7 @@ export const CheckoutSectionHeading = ({
       >
         EDIT
       </DetailTextLink>
-    ) : null}
+    ) : null} */}
   </div>
 );
 
