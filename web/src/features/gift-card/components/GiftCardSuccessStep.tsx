@@ -19,10 +19,18 @@ type GiftCardSuccessStepProps = {
   onClose: () => void;
 };
 
+// "2026-10-05" -> "5 Oct 2026"
+const formatDeliveryDate = (value: string) =>
+  new Date(`${value}T00:00:00`).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 /** Figma 4903:106197 (desktop) / 4903:100405 (mobile) — gift card success panel */
 const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   const router = useRouter();
-  const { cardType, orderNumber, estimatedDeliveryDate } = useGiftCardFlow();
+  const { cardType, orderNumber, estimatedDeliveryDate, digitalDeliveryDate } = useGiftCardFlow();
   const { success } = giftCardFlowContent;
 
   const trackingHref = orderNumber
@@ -32,7 +40,7 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   const message =
     cardType === "physical"
       ? `${success.physicalMessage} ${estimatedDeliveryDate}.`
-      : success.digitalMessage;
+      : `${success.digitalMessage} ${formatDeliveryDate(digitalDeliveryDate)}.`;
 
   const handleBackToShopping = () => {
     onClose();

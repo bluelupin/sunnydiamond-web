@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { GiftCardOrderPayload } from "@/features/gift-card/services/giftCardOrder.types";
 import { placeGiftCardMagentoOrder } from "@/services/gift-card/giftCardMagentoOrder.service";
+import { giftCardFlowContent } from "@/features/gift-card/data/content";
+
+const { min: MIN_AMOUNT, max: MAX_AMOUNT } = giftCardFlowContent.amount;
 
 export async function POST(request: Request) {
   let payload: GiftCardOrderPayload;
@@ -11,8 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!payload?.amount || payload.amount <= 0) {
-    return NextResponse.json({ error: "Gift card amount is required" }, { status: 400 });
+  // Magento re-checks the amount and prices the card; this only saves a round trip.
+  if (!Number.isInteger(payload?.amount) || payload.amount < MIN_AMOUNT || payload.amount > MAX_AMOUNT) {
+    return NextResponse.json({ error: "Choose a gift card amount within the allowed range" }, { status: 400 });
   }
 
   if (!payload.sender?.fullName?.trim() || !payload.sender.phone?.trim()) {
@@ -28,16 +32,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Delivery date is required for digital gift cards" }, { status: 400 });
   }
 
-  if (payload.cardType === "physical") {
-    const address = payload.deliveryAddress;
-    if (
-      !address?.addressLine1?.trim() ||
-      !address.pincode?.trim() ||
-      !address.city?.trim() ||
-      !address.state?.trim()
-    ) {
-      return NextResponse.json({ error: "Delivery address is required" }, { status: 400 });
-    }
+  // Physical: where the card is shipped. Digital: the buyer's billing address.
+  const address = payload.deliveryAddress;
+  if (
+    !address?.addressLine1?.trim() ||
+    !address.pincode?.trim() ||
+    !address.city?.trim() ||
+    !address.state?.trim()
+  ) {
+    return NextResponse.json({ error: "Address is required" }, { status: 400 });
   }
 
   try {

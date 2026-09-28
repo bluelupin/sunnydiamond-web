@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
@@ -57,6 +57,15 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
 
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
+
+  // What the shopper is typing; clamped only when they leave the box, so any amount can be typed.
+  const [amountDraft, setAmountDraft] = useState<string | null>(null);
+  const commitAmountDraft = () => {
+    if (amountDraft === null) return;
+    const typed = Number(amountDraft);
+    if (typed > 0) setAmount(clampAmount(typed));
+    setAmountDraft(null);
+  };
 
   const hasOccasionOptions = occasionOptions.length > 0;
   const hasRequiredOccasion = hasOccasionOptions ? occasion.trim().length > 0 : true;
@@ -142,11 +151,15 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={formatGiftCardAmount(amount)}
-                  onChange={(event) => {
-                    const digits = event.target.value.replace(/\D/g, "");
-                    if (!digits) return;
-                    setAmount(clampAmount(Number(digits)));
+                  value={
+                    amountDraft === null
+                      ? formatGiftCardAmount(amount)
+                      : `₹ ${amountDraft ? Number(amountDraft).toLocaleString("en-IN") : ""}`
+                  }
+                  onChange={(event) => setAmountDraft(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onBlur={commitAmountDraft}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") commitAmountDraft();
                   }}
                   aria-label="Gift card amount in rupees"
                   className="min-w-0 flex-1 bg-transparent font-gill text-xl font-normal leading-110 text-darkblack outline-none"
@@ -156,7 +169,7 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
 
             <div className="flex flex-col gap-2">
               <p className={giftCardFieldLabelClass}>{amountConfig.presetLabel}</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {amountConfig.presets.map((preset) => (
                   <GiftCardToggleOption
                     key={preset}

@@ -38,7 +38,7 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
   const { addresses, isLoading: addressesLoading } = useCustomerAddresses(isAuthenticated);
-  const { deliveryAddress, setDeliveryAddress, estimatedDeliveryDate } = useGiftCardFlow();
+  const { cardType, deliveryAddress, setDeliveryAddress, estimatedDeliveryDate } = useGiftCardFlow();
   const { initiatePayment, isPaying, statusToastNode } = useGiftCardPayment();
   const { detectAddress, isLocating } = useCurrentLocationAddress();
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
@@ -153,9 +153,11 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
         footer={
           <PanelFooter>
             <div className="flex flex-col gap-4">
-              <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
-                {address.estimatedDeliveryPrefix} {deliveryEstimate}
-              </p>
+              {cardType === "physical" ? (
+                <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
+                  {address.estimatedDeliveryPrefix} {deliveryEstimate}
+                </p>
+              ) : null}
               <CartPrimaryButton
                 type="button"
                 disabled={!isValid || isPaying}
@@ -181,7 +183,9 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
           </div>
 
           <div className="flex flex-col gap-4">
-            <p className={cn("mb-2", giftCardSectionHeadingClass)}>{address.heading}</p>
+            <p className={cn("mb-2", giftCardSectionHeadingClass)}>
+              {cardType === "digital" ? address.billingHeading : address.heading}
+            </p>
 
             <div className="flex flex-col gap-2">
               <label className={giftCardFieldLabelClass} htmlFor="gift-card-address-line-1">

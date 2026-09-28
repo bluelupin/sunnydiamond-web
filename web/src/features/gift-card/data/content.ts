@@ -9,9 +9,10 @@ export const giftCardFlowContent = {
   amount: {
     label: "Amount*",
     presetLabel: "or choose from",
-    presets: [1000, 5000, 10000] as const,
+    // R-GC-3: fixed amounts plus any whole amount from ₹1,000 to ₹1,00,000.
+    presets: [2000, 5000, 10000, 25000, 50000] as const,
     min: 1000,
-    max: 50000,
+    max: 100000,
     step: 500,
     default: 5000,
   },
@@ -40,6 +41,7 @@ export const giftCardFlowContent = {
     useCurrentLocationLabel: "USE CURRENT LOCATION",
     detectingLocationLabel: "DETECTING LOCATION...",
     heading: "Delivery Address",
+    billingHeading: "Billing Address",
     addressLine1Label: "Address line 1",
     addressLine2Label: "Address Line 2 (Optional)",
     pincodeLabel: "Pin code",
@@ -54,8 +56,7 @@ export const giftCardFlowContent = {
     title: "Your Gift Card Is on Its Way",
     physicalMessage:
       "Your physical gift card order has been placed and will be delivered to the recipient by",
-    digitalMessage:
-      "Your digital gift card has been sent to the recipient and will be available shortly.",
+    digitalMessage: "Your digital gift card order has been placed and will be emailed to the recipient on",
     image: {
       src: "/images/gift-card-success.png",
       alt: "Sunny Diamonds gift card",
