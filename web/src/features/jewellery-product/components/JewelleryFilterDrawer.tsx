@@ -195,7 +195,7 @@ const FilterDrawerPanel = ({
                 {formatJewelleryPrice(facets.minPrice)}
               </p>
             ) : (
-              <div className="flex flex-col gap-[12px]">
+              <div className="flex flex-col gap-3">
                 <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
                   <div
                     className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
@@ -374,7 +374,7 @@ const FilterDrawerPanel = ({
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col gap-[12px]">
+              <div className="flex flex-col gap-3">
                 {categoryRows.map((row, rowIndex) => (
                   <div key={rowIndex} className="flex flex-wrap gap-[7px]">
                     {row.map((category) => (

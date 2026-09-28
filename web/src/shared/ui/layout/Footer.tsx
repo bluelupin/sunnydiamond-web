@@ -131,8 +131,8 @@ const Footer = ({ className }: { className?: string }) => {
 
   return (
     <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className)}>
-      <FooterTrustBadgeSection />
-      <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-104 py-16">
+      <FooterTrustBadgeSection className="md:flex hidden" />
+      <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:pt-104 lg:pb-104 md:pt-16 md:pb-16 pt-8 pb-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
           <Reveal direction="up" className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">
@@ -160,9 +160,9 @@ const Footer = ({ className }: { className?: string }) => {
                   <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                     {column.title.toUpperCase()}
                   </Reveal>
-                  <ul className="flex flex-col gap-[12px]">
+                  <ul className="flex flex-col gap-3">
                     {column.links.map((link) => (
-                      <Reveal as="li" direction="up" key={link.id}>
+                      <Reveal as="li" direction="up" key={link.id} className="leading-[0px]">
                         <Link
                           href={link.url}
                           className="font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta"

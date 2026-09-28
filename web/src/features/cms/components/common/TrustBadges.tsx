@@ -11,6 +11,7 @@ import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.
 interface TrustBadgeMarqueeProps {
   id?: string;
   itemClassName?: string;
+  className?: string;
   items: TrustMarqueeItem[];
   isLoading: boolean;
 }
@@ -70,6 +71,7 @@ function TrustBadgeMarqueeItem({
 
 function TrustBadgeMarquee({
   id,
+  className,
   itemClassName = "text-gray500",
   items,
   isLoading,
@@ -92,7 +94,7 @@ function TrustBadgeMarquee({
       id={id}
       className={cn(
         pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300",
-        "shrink-0 overflow-hidden border-t border-ivory/10 text-ivory",
+        "shrink-0 overflow-hidden border-t border-ivory/10 text-ivory", className
       )}
     >
       <div
@@ -179,9 +181,11 @@ export function HomepageTrustBadgeSection({
 /** Site footer — `footerTickerItems` from homepage shell / global API (CMS array order). */
 export function FooterTrustBadgeSection({
   id,
+  className,
   itemClassName,
 }: {
   id?: string;
+  className?: string;
   itemClassName?: string;
 }) {
   const { data: shellData, isLoading } = useHomepageShell();
@@ -194,6 +198,7 @@ export function FooterTrustBadgeSection({
   return (
     <TrustBadgeMarquee
       id={id}
+      className={className}
       itemClassName={itemClassName}
       items={items}
       isLoading={isLoading}

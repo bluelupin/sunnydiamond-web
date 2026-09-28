@@ -47,10 +47,10 @@ function ShowroomLocationDetails({
     <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-2", "lg:size-6 size-5 shrink-0 sm:mt-0 mt-1.5")}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-2", "lg:size-6 size-5 shrink-0 sm:mt-0 lg:mt-1.5 mt-1")}>
             <path d="M11.2541 12.7421L3.53381 10.5859C3.38249 10.5395 3.24971 10.4465 3.15449 10.3201C3.05926 10.1936 3.00646 10.0403 3.00365 9.8821C3.00084 9.72386 3.04817 9.56878 3.13885 9.43907C3.22953 9.30935 3.35892 9.21165 3.5085 9.15994L20.0085 3.03994C20.1409 2.99493 20.2832 2.9878 20.4194 3.01937C20.5556 3.05095 20.6802 3.11996 20.7793 3.21863C20.8783 3.31729 20.9478 3.44168 20.98 3.57775C21.0121 3.71382 21.0055 3.85616 20.961 3.98869L14.841 20.4887C14.7893 20.6383 14.6916 20.7677 14.5619 20.8584C14.4322 20.949 14.2771 20.9964 14.1188 20.9935C13.9606 20.9907 13.8073 20.9379 13.6809 20.8427C13.5545 20.7475 13.4614 20.6147 13.4151 20.4634L11.2541 12.7421Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
+          <p className="font-gill text-xl font-light leading-110 text-darkblack">
             {location.address}
           </p>
         </div>
@@ -59,7 +59,7 @@ function ShowroomLocationDetails({
             <path d="M18 20V3.5C18 2.67157 17.3284 2 16.5 2L7.5 2C6.67157 2 6 2.67157 6 3.5L6 20C6 20.8284 6.67157 21.5 7.5 21.5H16.5C17.3284 21.5 18 20.8284 18 20Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M12 6.3125C12.5178 6.3125 12.9375 5.89277 12.9375 5.375C12.9375 4.85723 12.5178 4.4375 12 4.4375C11.4822 4.4375 11.0625 4.85723 11.0625 5.375C11.0625 5.89277 11.4822 6.3125 12 6.3125Z" fill="#0A0A0A" />
           </svg>
-          <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
+          <p className="font-gill text-xl font-light leading-110 text-darkblack">
             {location.phone}
           </p>
         </div>
@@ -97,7 +97,7 @@ function ShowroomsMobileAccordion({
       <ScrollReveal
         as="h2"
         delayMs={0}
-        className="w-full px-4 font-larken text-32 font-light leading-110 text-darkblack"
+        className="w-full px-4 font-larken !text-32 font-light leading-110 text-darkblack"
       >
         {sectionTitle}
       </ScrollReveal>
@@ -122,7 +122,7 @@ function ShowroomsMobileAccordion({
                 aria-expanded={isSelected}
                 aria-pressed={isSelected}
                 onClick={() => onSelect(location.id ?? null)}
-                className="flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack"
+                className="flex w-full items-center px-4 h-[62px] text-left font-larken text-xl font-light leading-110 text-darkblack"
               >
                 {location.name}
               </button>
@@ -137,7 +137,7 @@ function ShowroomsMobileAccordion({
                 )}
               >
                 <div className="min-h-0 overflow-hidden">
-                  <div className="flex flex-col gap-4 px-4 pb-6">
+                  <div className="flex flex-col gap-4 px-4 pb-5">
                     <div
                       className="h-[0.5px] w-full bg-neutral300"
                       aria-hidden
@@ -210,8 +210,8 @@ function ShowroomsDesktopLayout({
           </ScrollReveal>
         ) : null}
       </div>
-      <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
-        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px] h-full">
+      <div className="hidden lg:flex md:flex-row flex-col gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
+        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px] h-full xl:w-[593px] lg:w-[450px] flex-shrink-0">
           <div
             aria-label="Showroom locations"
             className="h-full flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-neutral300 overflow-x-auto"
@@ -223,7 +223,7 @@ function ShowroomsDesktopLayout({
                 <div
                   key={location.id}
                   className={cn(
-                    "2xl:pl-24 lg:pl-10 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
+                    "lg:px-10 lg:w-full w-fit border-b-[3px] lg:border-b-0 transition-all duration-300",
                     isSelected
                       ? "border-black bg-gray300"
                       : "border-transparent"
@@ -234,7 +234,7 @@ function ShowroomsDesktopLayout({
                     aria-pressed={isSelected}
                     onClick={() => onSelect(location.id ?? null)}
                     className={cn(
-                      "font-light w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
+                      "font-light w-full lg:h-[74px] h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
                       isSelected && "border-b border-gray50"
                     )}
                   >
@@ -251,7 +251,6 @@ function ShowroomsDesktopLayout({
                           {location.address}
                         </p>
                       </div>
-
                       <div className="mt-4 lg:mb-6 mb-8 flex gap-3 items-center">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-0.5", "text-black flex-shrink-0")}>
                           <path d="M18 20V3.5C18 2.67157 17.3284 2 16.5 2L7.5 2C6.67157 2 6 2.67157 6 3.5L6 20C6 20.8284 6.67157 21.5 7.5 21.5H16.5C17.3284 21.5 18 20.8284 18 20Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
@@ -265,7 +264,7 @@ function ShowroomsDesktopLayout({
                         <Link href={location.mapUrl ?? location.directionsUrl ?? ""}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%]">
+                          className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill text-sm uppercase leading-110 tracking-[1.8%]">
                           GET DIRECTIONS
                         </Link>
                       ) : null}
@@ -276,7 +275,6 @@ function ShowroomsDesktopLayout({
             })}
           </div>
         </ScrollReveal>
-
         <ScrollReveal
           delayMs={200}
           className="relative aspect-[350/480] h-478 w-full overflow-hidden px-5 md:aspect-[850/600] md:h-[529px] md:px-0 lg:aspect-[850/600]"

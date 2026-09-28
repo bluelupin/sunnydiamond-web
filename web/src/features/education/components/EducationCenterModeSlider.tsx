@@ -23,6 +23,7 @@ const CENTER_PADDING_RULES = [
   { maxWidth: 1280, padding: "270px" },
   { maxWidth: 1440, padding: "350px" },
   { maxWidth: 1600, padding: "400px" },
+  { maxWidth: 2400, padding: "500px" },
 ] as const;
 
 const DEFAULT_CENTER_PADDING = "800px";

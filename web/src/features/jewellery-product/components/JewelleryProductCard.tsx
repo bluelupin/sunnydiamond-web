@@ -50,7 +50,7 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
   <div
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
-      "gap-[8px] px-[5px] text-sm md:gap-[12px] md:px-[12px] md:text-xl",
+      "gap-[8px] px-[5px] text-sm md:gap-3 md:px-[12px] md:text-xl",
       "text-darkblack",
       "motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out",
       className,
