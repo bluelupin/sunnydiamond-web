@@ -16,7 +16,7 @@ const GiftingHeroSection = ({ hero }: GiftingHeroSectionProps) => {
       aria-labelledby="gifting-hero-title"
       className="relative grid h-[240px] w-full overflow-hidden bg-white md:h-320"
     >
-      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
+      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_67%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_67%]">
         <HeroBackgroundMedia
           desktopImageUrl={hero.image?.desktopUrl ?? ""}
           mobileImageUrl={hero.image?.mobileUrl}

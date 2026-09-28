@@ -2,10 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
-import {
-  collectRazorpayPayment,
-  verifyRazorpayPayment,
-} from "@/features/checkout/services/razorpayCheckout";
+import { collectRazorpayPayment } from "@/features/checkout/services/razorpayCheckout";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { placeGiftCardOrder } from "../services/giftCardOrder.service";
 
@@ -48,13 +45,8 @@ export function useGiftCardPayment() {
       });
 
       if (outcome.status === "paid") {
-        await verifyRazorpayPayment({
-          orderNumber: placedOrder.orderNumber,
-          paymentId: outcome.paymentId,
-          signature: outcome.signature,
-        }).catch(() => {
-          // Payment captured; Magento webhook can reconcile if verification fails.
-        });
+        // Magento confirm already started in the Razorpay handler. Waiting
+        // here kept the payment step on screen after payment succeeded.
         flow.markOrderComplete(placedOrder.orderNumber);
         return true;
       }
