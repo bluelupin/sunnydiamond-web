@@ -122,7 +122,8 @@ export type StrapiFeaturedCollection = {
   products?: unknown[] | null;
   /** New showcase wrapper */
   eyebrow?: string | null;
-  collections?: StrapiEditorialCollection[] | null;
+  /** CMS may return a single editorial collection or a legacy array. */
+  collections?: StrapiEditorialCollection | StrapiEditorialCollection[] | null;
 };
 
 export type StrapiFeaturedProductsBlock = {

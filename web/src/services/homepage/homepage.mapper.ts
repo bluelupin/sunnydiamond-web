@@ -27,6 +27,7 @@ import type { HomepageSeo } from "@/types/homepage/seo";
 import type {
   StrapiCraftingBrillianceSection,
   StrapiCategoryCard,
+  StrapiEditorialCollection,
   StrapiFeaturedCollection,
   StrapiFeaturedProductsBlock,
   StrapiGiftingBanner,
@@ -198,6 +199,13 @@ function mapCategoryCard(card: StrapiCategoryCard): CategoryNavigationItem {
   };
 }
 
+function normalizeEditorialCollections(
+  collections?: StrapiFeaturedCollection["collections"],
+): StrapiEditorialCollection[] {
+  if (!collections) return [];
+  return Array.isArray(collections) ? collections : [collections];
+}
+
 function mapFeaturedCollection(
   raw?: StrapiFeaturedCollection | null,
 ): FeaturedCollectionSection | null {
@@ -206,8 +214,8 @@ function mapFeaturedCollection(
   const sectionIsActive = resolveSectionActive(raw.isActive, raw.showField);
   if (sectionIsActive === false) return null;
 
-  // New shape: collection-showcase-section with editorial-collection relations
-  const collections = Array.isArray(raw.collections) ? raw.collections : [];
+  // New shape: collection-showcase-section with a single editorial collection or legacy array
+  const collections = normalizeEditorialCollections(raw.collections);
   if (collections.length > 0) {
     const activeCollections = collections.filter((item) => item?.isActive !== false);
     const selected = activeCollections[0];
