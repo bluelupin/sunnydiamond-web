@@ -59,6 +59,7 @@ export function useGiftCardPayment() {
         return true;
       }
 
+      showStatusToast("Payment was not completed, so you have not been charged. Press PAY NOW to try again.");
       return false;
     } catch (error) {
       showStatusToast(

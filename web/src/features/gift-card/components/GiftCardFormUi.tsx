@@ -174,6 +174,7 @@ export const GiftCardTextAreaField = ({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         rows={4}
+        maxLength={500}
         className={cn(
           "min-h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]",
           hasValue && "border border-darkblack",

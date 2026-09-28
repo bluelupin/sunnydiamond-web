@@ -4,6 +4,7 @@ import {
   clearPendingCheckoutPayment,
   getPaidPendingCheckoutPayment,
   markPendingCheckoutPaymentPaid,
+  readPendingCheckoutPayment,
 } from "./checkoutPendingPayment";
 
 const RAZORPAY_CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
@@ -269,7 +270,9 @@ export async function collectRazorpayPayment(input: {
       handler: (response: RazorpayPaymentResponse) => {
         const paymentId = response.razorpay_payment_id;
         const signature = response.razorpay_signature;
-        markPendingCheckoutPaymentPaid({ paymentId, signature });
+        if (readPendingCheckoutPayment()?.orderNumber === input.orderNumber) {
+          markPendingCheckoutPaymentPaid({ paymentId, signature });
+        }
         void verifyRazorpayPayment({
           orderNumber: input.orderNumber,
           paymentId,
@@ -287,7 +290,11 @@ export async function collectRazorpayPayment(input: {
       modal: {
         ondismiss: () => {
           const paidPending = getPaidPendingCheckoutPayment();
-          if (paidPending?.paymentId && paidPending.signature) {
+          if (
+            paidPending?.orderNumber === input.orderNumber &&
+            paidPending.paymentId &&
+            paidPending.signature
+          ) {
             settle({
               status: "paid",
               paymentId: paidPending.paymentId,
