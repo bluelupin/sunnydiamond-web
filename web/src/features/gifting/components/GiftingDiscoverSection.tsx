@@ -47,7 +47,7 @@ const GiftingDiscoverField = ({
       {label}
     </label>
     <Select
-      value={value || undefined}
+      value={value}
       onValueChange={(next) => {
         onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
       }}
@@ -105,12 +105,15 @@ const GiftingDiscoverSection = ({
   const [priceRangeLabel, setPriceRangeLabel] = useState("");
   const [occasion, setOccasion] = useState("");
 
-  const hasAnySelection = Boolean(
-    category.trim() || priceRangeLabel.trim() || occasion.trim(),
-  );
+  // A field with no CMS options can't be filled, so it doesn't block the CTA.
+  const hasAllSelections =
+    Boolean(category.trim() || priceRangeLabel.trim() || occasion.trim()) &&
+    (options.categories.length === 0 || Boolean(category.trim())) &&
+    (options.priceRanges.length === 0 || Boolean(priceRangeLabel.trim())) &&
+    (options.occasions.length === 0 || Boolean(occasion.trim()));
 
   const handleSubmit = () => {
-    if (!hasAnySelection) return;
+    if (!hasAllSelections) return;
 
     const selectedPriceRange = options.priceRanges.find(
       (range) => range.label === priceRangeLabel,
@@ -206,7 +209,7 @@ const GiftingDiscoverSection = ({
         <Reveal direction="up">
           <button
             type="button"
-            disabled={!hasAnySelection}
+            disabled={!hasAllSelections}
             onClick={handleSubmit}
             className={cn(careersDarkCtaClassName, "self-start md:w-full md:self-auto")}
           >

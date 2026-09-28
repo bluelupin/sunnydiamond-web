@@ -125,7 +125,7 @@ export const GiftCardSelectField = ({
       {label}
     </label>
     <Select
-      value={value || undefined}
+      value={value}
       onValueChange={(next) => {
         onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
       }}

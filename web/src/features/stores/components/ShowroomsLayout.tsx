@@ -241,10 +241,15 @@ function ShowroomsDesktopLayout({
 }) {
   const directionsText = getDirectionsLabel?.trim();
   const hasHeaderContent = Boolean(description || listHeader);
-  const matchedCount = matchedStoreIds?.length ?? 0;
+  const matchedIdSet = new Set(matchedStoreIds ?? []);
+  const matchedLocations = locations.filter((location) => matchedIdSet.has(location.id));
+  const matchedCount = matchedLocations.length;
   const showNearbyLabel = Boolean(
     nearbyStoresLabel?.trim() && matchedCount > 0 && locations.length > matchedCount,
   );
+  const orderedLocations = showNearbyLabel
+    ? [...matchedLocations, ...locations.filter((location) => !matchedIdSet.has(location.id))]
+    : locations;
 
   return (
     <>
@@ -276,7 +281,7 @@ function ShowroomsDesktopLayout({
                 </p>
               ) : null
             ) : (
-              locations.map((location, index) => {
+              orderedLocations.map((location, index) => {
                 const isSelected = location.id === activeId;
                 const insertNearbyLabel = showNearbyLabel && index === matchedCount;
 

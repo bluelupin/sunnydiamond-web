@@ -15,6 +15,7 @@ import {
   resolveBookStoreVisitStoresForPanel,
 } from "@/features/products/utils/bookStoreVisitStores";
 import {
+  storeLocatorExploreNearbyStoresLabel,
   storeLocatorExploreShowroomsTitle,
   storeLocatorListHeadingClassName,
   storeLocatorNoAreaSubtitle,
@@ -566,6 +567,7 @@ const BookStoreVisitPanel = ({
         noResultsMessage={noResultsMessage}
         listCopy={listCopy}
         listStatus={listStatus}
+        matchedStoreIds={matchedStores.map((store) => store.id)}
         isShowroomsLoading={isShowroomsLoading || isResolvingStores}
         nearbyStores={nearbyStores}
         onBookNearbyStore={(storeId) => {
@@ -685,6 +687,7 @@ type StoreSelectionStepProps = {
   noResultsMessage?: string | null;
   listCopy?: NormalizedStoreLocatorListCopy | null;
   listStatus?: StoreLocatorListStatus;
+  matchedStoreIds?: string[];
   isShowroomsLoading?: boolean;
   nearbyStores?: BookStoreVisitPanelProps["nearbyStores"];
   onBookNearbyStore?: (storeId: string) => void;
@@ -770,6 +773,7 @@ const StoreSelectionStep = ({
   noResultsMessage,
   listCopy,
   listStatus = "default",
+  matchedStoreIds,
   isShowroomsLoading = false,
   nearbyStores,
   onBookNearbyStore,
@@ -783,6 +787,7 @@ const StoreSelectionStep = ({
         onBookNearbyStore={onBookNearbyStore}
       />
     );
+    const isSearchMatch = listStatus === "search-match";
 
     return (
       <ShowroomsLayout
@@ -791,6 +796,8 @@ const StoreSelectionStep = ({
         onSelect={onSelectStore}
         getDirectionsLabel={getDirectionsLabel ?? undefined}
         listHeader={listHeader}
+        matchedStoreIds={isSearchMatch ? matchedStoreIds : undefined}
+        nearbyStoresLabel={isSearchMatch ? storeLocatorExploreNearbyStoresLabel : undefined}
         isLoading={isShowroomsLoading}
         emptyMessage={noResultsMessage?.trim() || undefined}
       />
