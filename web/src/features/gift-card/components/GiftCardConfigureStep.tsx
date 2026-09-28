@@ -58,8 +58,14 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
 
-  // What the shopper is typing; clamped only when they leave the box, so any amount can be typed.
+  // What the shopper is typing. An in-range value applies at once; the box is clamped
+  // only when they leave it, so any amount can be typed digit by digit.
   const [amountDraft, setAmountDraft] = useState<string | null>(null);
+  const changeAmountDraft = (digits: string) => {
+    setAmountDraft(digits);
+    const typed = Number(digits);
+    if (typed >= amountConfig.min && typed <= amountConfig.max) setAmount(typed);
+  };
   const commitAmountDraft = () => {
     if (amountDraft === null) return;
     const typed = Number(amountDraft);
@@ -135,7 +141,10 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
                   max={amountConfig.max}
                   step={amountConfig.step}
                   value={amount}
-                  onChange={(event) => setAmount(Number(event.target.value))}
+                  onChange={(event) => {
+                    setAmountDraft(null);
+                    setAmount(Number(event.target.value));
+                  }}
                   aria-label="Gift card amount"
                   className="absolute inset-0 size-full cursor-pointer opacity-0"
                 />
@@ -156,7 +165,7 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
                       ? formatGiftCardAmount(amount)
                       : `₹ ${amountDraft ? Number(amountDraft).toLocaleString("en-IN") : ""}`
                   }
-                  onChange={(event) => setAmountDraft(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onChange={(event) => changeAmountDraft(event.target.value.replace(/\D/g, "").slice(0, 6))}
                   onBlur={commitAmountDraft}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") commitAmountDraft();
@@ -169,13 +178,16 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
 
             <div className="flex flex-col gap-2">
               <p className={giftCardFieldLabelClass}>{amountConfig.presetLabel}</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {amountConfig.presets.map((preset) => (
                   <GiftCardToggleOption
                     key={preset}
                     label={preset.toLocaleString("en-IN")}
                     selected={amount === preset}
-                    onSelect={() => setAmount(preset)}
+                    onSelect={() => {
+                      setAmountDraft(null);
+                      setAmount(preset);
+                    }}
                   />
                 ))}
               </div>

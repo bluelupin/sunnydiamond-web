@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { GiftCardOrderPayload } from "@/features/gift-card/services/giftCardOrder.types";
 import { placeGiftCardMagentoOrder } from "@/services/gift-card/giftCardMagentoOrder.service";
 import { giftCardFlowContent } from "@/features/gift-card/data/content";
+import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 
 const { min: MIN_AMOUNT, max: MAX_AMOUNT } = giftCardFlowContent.amount;
 
@@ -47,9 +48,14 @@ export async function POST(request: Request) {
     const order = await placeGiftCardMagentoOrder(payload);
     return NextResponse.json(order);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to place the gift card order";
-
-    return NextResponse.json({ error: message }, { status: 502 });
+    // Magento's own refusals are written for shoppers; anything else stays in the server log.
+    if (error instanceof MagentoGraphqlError) {
+      return NextResponse.json({ error: error.message }, { status: 502 });
+    }
+    console.error("[gift-card] place order failed", error);
+    return NextResponse.json(
+      { error: "We could not place your gift card order. Please try again." },
+      { status: 502 },
+    );
   }
 }
