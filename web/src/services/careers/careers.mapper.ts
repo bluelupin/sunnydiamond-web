@@ -899,29 +899,44 @@ export const mapCareerListingPage = (
   };
 };
 
+export type CareerFilterEnums = {
+  locations: string[];
+  departments: string[];
+  experiences: string[];
+};
+
 export const mapCareersPageData = ({
   landing,
   listing,
   openings,
+  filterEnums,
 }: {
   landing?: StrapiCareerLandingPageEntity | null;
   listing?: StrapiCareerListingPageEntity | null;
   openings?: StrapiCareerOpeningEntity[] | null;
+  filterEnums?: CareerFilterEnums | null;
 }): NormalizedCareersPageData => {
   const mappedLanding = mapCareerLandingPage(landing);
   const mappedListing = mapCareerListingPage(listing);
   const mappedJobs = mapCareerOpenings(openings);
 
   const derivedFilters = deriveFilterOptionsFromJobs(mappedJobs);
-  const listingWithFilters =
+  const listingFilters =
     mappedListing.filterOptions.locations.length > 0 ||
     mappedListing.filterOptions.departments.length > 0 ||
     mappedListing.filterOptions.experiences.length > 0
-      ? mappedListing
-      : {
-          ...mappedListing,
-          filterOptions: derivedFilters,
-        };
+      ? mappedListing.filterOptions
+      : derivedFilters;
+  const pickFilterOptions = (fromCms: string[] | undefined, fallback: string[]) =>
+    fromCms && fromCms.length > 0 ? fromCms : fallback;
+  const listingWithFilters = {
+    ...mappedListing,
+    filterOptions: {
+      locations: pickFilterOptions(filterEnums?.locations, listingFilters.locations),
+      departments: pickFilterOptions(filterEnums?.departments, listingFilters.departments),
+      experiences: pickFilterOptions(filterEnums?.experiences, listingFilters.experiences),
+    },
+  };
 
   const openingsCopy = mappedLanding.openings;
   const listingWithLandingFallback = {

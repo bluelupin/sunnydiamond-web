@@ -61,7 +61,7 @@ const GiftingDiscoverField = ({
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="z-[80]">
+      <SelectContent className="z-[80] max-h-[min(24rem,var(--radix-select-content-available-height))]">
         <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
         {options.map((option, index) => (
           <SelectItem key={`${option.value}-${index}`} value={option.value}>

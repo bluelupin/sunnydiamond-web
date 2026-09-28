@@ -1,7 +1,8 @@
 import { cache } from "react";
 import { apiFetch } from "@/api/fetchClient";
+import { getStrapiApiToken } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { mapCareerOpening, mapCareersPageData } from "./careers.mapper";
+import { mapCareerOpening, mapCareersPageData, type CareerFilterEnums } from "./careers.mapper";
 import type {
   NormalizedCareerJob,
   NormalizedCareersPageData,
@@ -119,6 +120,48 @@ function mergeCareerPageSeo<T extends { SEO?: StrapiCareerSeo | null; seo?: Stra
   return { ...page, SEO: page.SEO ?? seo, seo: page.seo ?? seo };
 }
 
+type CareerOpeningSchemaEnum = { type?: string; enum?: unknown };
+
+type CareerOpeningSchemaResponse = {
+  schema?: { attributes?: Record<string, CareerOpeningSchemaEnum | undefined> };
+};
+
+const readSchemaEnum = (attribute?: CareerOpeningSchemaEnum): string[] =>
+  attribute?.type === "enumeration" && Array.isArray(attribute.enum)
+    ? attribute.enum.filter((value): value is string => typeof value === "string")
+    : [];
+
+/** Dropdown choices configured on the CMS job opening type (not only values used by jobs). */
+async function fetchCareerOpeningFilterEnums(
+  signal?: AbortSignal,
+): Promise<CareerFilterEnums | null> {
+  const fetchSchema = (authToken?: string) =>
+    apiFetch<CareerOpeningSchemaResponse>(STRAPI_ENDPOINTS.careerOpeningSchema, {
+      signal,
+      authToken,
+    });
+
+  let raw: CareerOpeningSchemaResponse | null = null;
+  try {
+    raw = await fetchSchema();
+  } catch {
+    try {
+      raw = await fetchSchema(getStrapiApiToken());
+    } catch {
+      return null;
+    }
+  }
+
+  const attributes = raw?.schema?.attributes;
+  if (!attributes) return null;
+
+  return {
+    locations: readSchemaEnum(attributes.location),
+    departments: readSchemaEnum(attributes.department),
+    experiences: readSchemaEnum(attributes.experience),
+  };
+}
+
 const CAREER_OPENING_BY_IDENTIFIER_QUERY = (identifier: string) =>
   `filters[$or][0][jobID][$eq]=${encodeURIComponent(identifier)}` +
   `&filters[$or][1][slug][$eq]=${encodeURIComponent(identifier)}` +
@@ -146,14 +189,21 @@ export const getCareerOpeningByJobId = cache(
 
 export const getCareersPageData = cache(
   async (signal?: AbortSignal): Promise<NormalizedCareersPageData> => {
-    const [landingResult, listingResult, openingsResult, landingSeoResult, listingSeoResult] =
-      await Promise.allSettled([
-        getCareerLandingPageRaw(signal),
-        getCareerListingPageRaw(signal),
-        getCareerOpeningsRaw(signal),
-        fetchCareerPageSeo(STRAPI_ENDPOINTS.careerLandingPage, signal),
-        fetchCareerPageSeo(STRAPI_ENDPOINTS.careerListingPage, signal),
-      ]);
+    const [
+      landingResult,
+      listingResult,
+      openingsResult,
+      landingSeoResult,
+      listingSeoResult,
+      filterEnumsResult,
+    ] = await Promise.allSettled([
+      getCareerLandingPageRaw(signal),
+      getCareerListingPageRaw(signal),
+      getCareerOpeningsRaw(signal),
+      fetchCareerPageSeo(STRAPI_ENDPOINTS.careerLandingPage, signal),
+      fetchCareerPageSeo(STRAPI_ENDPOINTS.careerListingPage, signal),
+      fetchCareerOpeningFilterEnums(signal),
+    ]);
 
     const landingSeo = landingSeoResult.status === "fulfilled" ? landingSeoResult.value : null;
     const listingSeo = listingSeoResult.status === "fulfilled" ? listingSeoResult.value : null;
@@ -168,6 +218,7 @@ export const getCareersPageData = cache(
         listingSeo,
       ),
       openings: openingsResult.status === "fulfilled" ? openingsResult.value : null,
+      filterEnums: filterEnumsResult.status === "fulfilled" ? filterEnumsResult.value : null,
     });
   },
 );

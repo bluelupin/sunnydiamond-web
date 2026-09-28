@@ -43,6 +43,8 @@ export const STRAPI_ENDPOINTS = {
   careerLandingPage: "api/career-landing-page",
   careerListingPage: "api/career-listing-page",
   careerOpenings: "api/career-openings",
+  /** Job opening schema — enum choices for location / department / experience filters. */
+  careerOpeningSchema: "api/content-type-builder/content-types/api::career-opening.career-opening",
   jobOpeningSubmissions: "api/submissions-job-openings",
   /** Custom CMS action — multipart `data` + `resume` (Postman-verified). */
   jobOpeningSubmissionsSubmit: "api/submissions-job-openings/submit",

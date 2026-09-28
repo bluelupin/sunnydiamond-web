@@ -92,6 +92,10 @@ export type CareerJobFilters = {
   experience?: string;
 };
 
+/** Case-insensitive so CMS dropdown values (e.g. `NEW DELHI`, `Sales`) match older job values. */
+const matchesFilter = (jobValue: string | undefined, filterValue: string) =>
+  (jobValue ?? "").trim().toLowerCase() === filterValue.trim().toLowerCase();
+
 export function filterCareerJobs(
   jobs: readonly CareerJob[],
   query: string,
@@ -100,15 +104,15 @@ export function filterCareerJobs(
   const normalized = query.trim().toLowerCase();
 
   return jobs.filter((job) => {
-    if (filters.location && job.location !== filters.location) {
+    if (filters.location && !matchesFilter(job.location, filters.location)) {
       return false;
     }
 
-    if (filters.department && job.department !== filters.department) {
+    if (filters.department && !matchesFilter(job.department, filters.department)) {
       return false;
     }
 
-    if (filters.experience && job.experienceLabel !== filters.experience) {
+    if (filters.experience && !matchesFilter(job.experienceLabel, filters.experience)) {
       return false;
     }
 
