@@ -33,6 +33,12 @@ export function resolveMagentoPaymentCode(
 ): string | null {
   const availableCodes = new Set(availableMethods.map((method) => method.code));
 
+  // Magento offers `free` only at a 0 grand total (e.g. a gift card covers the
+  // order) and then nothing else is payable — whatever the shopper picked.
+  if (availableCodes.has("free")) {
+    return "free";
+  }
+
   for (const code of PAYMENT_CODE_PREFERENCES[uiMethod]) {
     if (availableCodes.has(code)) {
       return code;

@@ -367,6 +367,15 @@ export function ProfileOrderDetailView({
                 </div>
               ) : null}
 
+              {priceBreakdown.giftCard ? (
+                <div className="flex items-center justify-between">
+                  <span className="font-light">Gift Card (••••{priceBreakdown.giftCard.last4})</span>
+                  <span className="font-normal">
+                    -{formatOrderTotal(priceBreakdown.giftCard.amount, priceBreakdown.currency)}
+                  </span>
+                </div>
+              ) : null}
+
               {hasShipping ? (
                 <div className="flex items-center justify-between">
                   <span className="font-light">

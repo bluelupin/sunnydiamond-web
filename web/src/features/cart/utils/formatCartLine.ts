@@ -88,17 +88,15 @@ export const resolveCartDisplayTotal = (
   shippingDisplay: CartShippingDisplay,
   offerDiscount = 0,
   giftCardDiscount = 0,
-  localGiftCardDiscount = 0,
   localOfferDiscount = 0,
 ) => {
-  const totalDiscount =
-    offerDiscount + giftCardDiscount + localGiftCardDiscount + localOfferDiscount;
+  const totalDiscount = offerDiscount + giftCardDiscount + localOfferDiscount;
 
   if (shippingDisplay.isEstimated && shippingDisplay.amount != null) {
     return subtotal - totalDiscount + taxes + shippingDisplay.amount;
   }
 
-  return grandTotal - localGiftCardDiscount - localOfferDiscount;
+  return grandTotal - localOfferDiscount;
 };
 
 export type CheckoutShippingDisplay = {
@@ -159,14 +157,12 @@ export const resolveCheckoutDisplayTotal = (
   shippingDisplay: CheckoutShippingDisplay,
   offerDiscount = 0,
   giftCardDiscount = 0,
-  localGiftCardDiscount = 0,
   localOfferDiscount = 0,
 ) => {
-  const totalDiscount =
-    offerDiscount + giftCardDiscount + localGiftCardDiscount + localOfferDiscount;
+  const totalDiscount = offerDiscount + giftCardDiscount + localOfferDiscount;
 
   if (shippingDisplay.isConfirmed) {
-    return grandTotal - localGiftCardDiscount - localOfferDiscount;
+    return grandTotal - localOfferDiscount;
   }
 
   if (shippingDisplay.amount != null) {

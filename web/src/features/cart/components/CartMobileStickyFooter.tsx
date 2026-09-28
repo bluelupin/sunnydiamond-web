@@ -36,14 +36,12 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
     totalPrice,
     offerDiscount,
     giftCardDiscount,
-    localGiftCardDiscount,
     localOfferDiscount,
     selectedShippingMethod,
     shippingMethods,
     estimatedShippingMethods,
   } = useCart();
   const displayOfferDiscount = offerDiscount + localOfferDiscount;
-  const displayGiftCardDiscount = giftCardDiscount + localGiftCardDiscount;
   const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
   const shippingLabel = getCartShippingLabel(
     shipping,
@@ -64,7 +62,6 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
     shippingDisplay,
     offerDiscount,
     giftCardDiscount,
-    localGiftCardDiscount,
     localOfferDiscount,
   );
 
@@ -92,10 +89,10 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
                   value={formatCartDiscountPrice(displayOfferDiscount)}
                 />
               ) : null}
-              {displayGiftCardDiscount > 0 ? (
+              {giftCardDiscount > 0 ? (
                 <CartPriceRow
                   label="Gift Card Applied"
-                  value={formatCartDiscountPrice(displayGiftCardDiscount)}
+                  value={formatCartDiscountPrice(giftCardDiscount)}
                 />
               ) : null}
               <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />

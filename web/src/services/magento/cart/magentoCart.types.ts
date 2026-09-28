@@ -96,6 +96,12 @@ export type MagentoCart = {
   shipping_addresses?: MagentoCartShippingAddress[] | null;
   available_payment_methods?: MagentoPaymentMethod[] | null;
   selected_payment_method?: MagentoPaymentMethod | null;
+  sunny_gift_card?: {
+    code_last4?: string | null;
+    amount?: { value?: number | null; currency?: string | null } | null;
+    /** Set when the card is on the cart but cannot be used; amount is 0 then. */
+    problem?: string | null;
+  } | null;
   itemsV2?: {
     items?: MagentoCartItem[] | null;
   } | null;
@@ -263,6 +269,18 @@ export type MagentoSetGiftOptionsResponse = {
   } | null;
 };
 
+export type MagentoApplyGiftCardResponse = {
+  sunnyApplyGiftCard?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoRemoveGiftCardResponse = {
+  sunnyRemoveGiftCard?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
 export type MagentoPlaceOrderResponse = {
   placeOrder?: {
     orderV2?: {
@@ -299,6 +317,7 @@ export type MappedMagentoCart = {
   offerDiscount: number;
   giftCardDiscount: number;
   appliedGiftCardCode: string | null;
+  giftCardProblem: string | null;
   grandTotal: number;
   currency: string;
   shippingMethods: MagentoShippingMethodOption[];

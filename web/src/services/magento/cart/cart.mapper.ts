@@ -9,7 +9,6 @@ import fallBackImage from "@/assets/fallBackImage.png";
 import type {
   MagentoCart,
   MagentoCartConfigurableOption,
-  MagentoCartDiscount,
   MagentoCartItem,
   MagentoShippingMethod,
   MagentoShippingMethodOption,
@@ -237,36 +236,22 @@ export function mapSelectedPaymentMethod(cart: MagentoCart): MagentoSelectedPaym
   };
 }
 
-function isGiftCardDiscount(discount: MagentoCartDiscount): boolean {
-  const label = discount.label?.toLowerCase() ?? "";
-  return label.includes("gift card") || label.includes("giftcard");
-}
-
 export function mapCartDiscounts(cart: MagentoCart) {
-  let offerDiscount = 0;
-  let giftCardDiscount = 0;
-  let appliedGiftCardCode: string | null = null;
+  const offerDiscount = (cart.prices?.discounts ?? []).reduce(
+    (sum, discount) => sum + Math.abs(discount.amount?.value ?? 0),
+    0,
+  );
 
-  for (const discount of cart.prices?.discounts ?? []) {
-    const amount = Math.abs(discount.amount?.value ?? 0);
-    if (amount <= 0) {
-      continue;
-    }
-
-    if (isGiftCardDiscount(discount)) {
-      giftCardDiscount += amount;
-      appliedGiftCardCode =
-        discount.coupon?.code?.trim() || appliedGiftCardCode;
-      continue;
-    }
-
-    offerDiscount += amount;
-  }
+  // The gift card is its own Magento total (not a discount); grand_total is already reduced by it.
+  // A card that cannot be used stays on the cart with amount 0 and a shopper-facing problem.
+  const giftCard = cart.sunny_gift_card;
+  const last4 = giftCard?.code_last4?.trim();
 
   return {
     offerDiscount,
-    giftCardDiscount,
-    appliedGiftCardCode,
+    giftCardDiscount: Math.abs(giftCard?.amount?.value ?? 0),
+    appliedGiftCardCode: last4 ? `••••${last4}` : null,
+    giftCardProblem: giftCard?.problem?.trim() || null,
   };
 }
 
@@ -283,7 +268,8 @@ export function mapMagentoCartTotals(cart: MagentoCart): MappedMagentoCart | nul
   );
   const shipping = cart.shipping_addresses?.[0]?.selected_shipping_method?.amount?.value ?? 0;
   const grandTotal = cart.prices?.grand_total?.value ?? subtotal + taxes + shipping;
-  const { offerDiscount, giftCardDiscount, appliedGiftCardCode } = mapCartDiscounts(cart);
+  const { offerDiscount, giftCardDiscount, appliedGiftCardCode, giftCardProblem } =
+    mapCartDiscounts(cart);
 
   return {
     cartId,
@@ -294,6 +280,7 @@ export function mapMagentoCartTotals(cart: MagentoCart): MappedMagentoCart | nul
     offerDiscount,
     giftCardDiscount,
     appliedGiftCardCode,
+    giftCardProblem,
     grandTotal,
     currency: cart.prices?.grand_total?.currency ?? "INR",
     shippingMethods: mapAvailableShippingMethods(cart),

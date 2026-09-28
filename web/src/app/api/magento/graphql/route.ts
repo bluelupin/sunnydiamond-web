@@ -5,6 +5,7 @@ import {
   MAGENTO_DEFAULT_STORE_CODE,
 } from "@/services/magento/config";
 import { CUSTOMER_TOKEN_COOKIE } from "@/services/auth/session";
+import { resolveClientIp } from "@/services/http/clientIp";
 
 type GraphqlBody = {
   query?: string;
@@ -26,11 +27,24 @@ export async function POST(request: NextRequest) {
 
   const query = body.query;
   const isCartOperation =
-    /\b(cart\s*\(|customerCart|createGuestCart|addSimpleProductsToCart|addProductsToCart|updateCartItems|removeItemFromCart|setGuestEmailOnCart|setShippingAddressesOnCart|setBillingAddressOnCart|setShippingMethodsOnCart|setPaymentMethodOnCart|placeOrder|estimateShippingMethods)\b/.test(
+    /\b(cart\s*\(|customerCart|createGuestCart|addSimpleProductsToCart|addProductsToCart|updateCartItems|removeItemFromCart|setGuestEmailOnCart|setShippingAddressesOnCart|setBillingAddressOnCart|setShippingMethodsOnCart|setPaymentMethodOnCart|placeOrder|estimateShippingMethods|sunnyApplyGiftCard|sunnyRemoveGiftCard)\b/.test(
       query,
     );
 
   const customerToken = request.cookies.get(CUSTOMER_TOKEN_COOKIE)?.value;
+
+  // Gift card attempts are rate-limited per shopper IP in Magento. Same contract as
+  // the OTP route: the IP only counts when it travels with the shared secret, so a
+  // missing secret degrades to one shared bucket, never to none. Server-side only.
+  const clientIp = /\bsunnyApplyGiftCard\b/.test(query) ? resolveClientIp(request) : null;
+  const forwardedSecret = process.env.MAGENTO_FORWARDED_IP_SECRET;
+  const forwardedHeaders: Record<string, string> =
+    clientIp && forwardedSecret
+      ? {
+          "X-Sunny-Client-Ip": clientIp,
+          "X-Sunny-Forwarded-Secret": forwardedSecret,
+        }
+      : {};
 
   try {
     const response = await fetch(getMagentoGraphqlUrl(), {
@@ -40,6 +54,7 @@ export async function POST(request: NextRequest) {
         Accept: "application/json",
         Store: MAGENTO_DEFAULT_STORE_CODE,
         ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}),
+        ...forwardedHeaders,
       },
       body: JSON.stringify({ query: body.query, variables: body.variables }),
       ...(isCartOperation || customerToken

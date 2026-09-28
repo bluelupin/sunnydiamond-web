@@ -15,11 +15,13 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import {
   addProductToGuestCart,
+  applyCartGiftCard,
   ensureGuestCartId,
   estimateGuestCartShippingMethods,
   fetchCustomerCart,
   fetchGuestCart,
   migrateLegacyLinesToGuestCart,
+  removeCartGiftCard,
   removeGuestCartItem,
   setCartGiftOptions,
   setGuestShippingMethod,
@@ -103,10 +105,10 @@ interface CartContextType {
   offerDiscount: number;
   giftCardDiscount: number;
   appliedGiftCardCode: string | null;
-  localGiftCardDiscount: number;
-  appliedLocalGiftCardCode: string | null;
-  applyLocalGiftCard: (code: string, balance: number) => void;
-  removeLocalGiftCard: () => void;
+  giftCardProblem: string | null;
+  /** Throws MagentoGraphqlError with Magento's shopper-facing message. */
+  applyGiftCard: (code: string) => Promise<void>;
+  removeGiftCard: () => Promise<void>;
   localOfferDiscount: number;
   appliedLocalOfferId: string | null;
   applyLocalOffer: (offerId: string) => void;
@@ -269,6 +271,7 @@ const emptyTotals = {
   offerDiscount: 0,
   giftCardDiscount: 0,
   appliedGiftCardCode: null as string | null,
+  giftCardProblem: null as string | null,
   grandTotal: 0,
   totalQuantity: 0,
   currency: "INR",
@@ -290,8 +293,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [cartRefreshError, setCartRefreshError] = useState<string | null>(null);
   const [cartStatusToastMessage, setCartStatusToastMessage] = useState<string | null>(null);
-  const [localGiftCardDiscount, setLocalGiftCardDiscount] = useState(0);
-  const [appliedLocalGiftCardCode, setAppliedLocalGiftCardCode] = useState<string | null>(null);
   const [localOfferDiscount, setLocalOfferDiscount] = useState(0);
   const [appliedLocalOfferId, setAppliedLocalOfferId] = useState<string | null>(null);
   const cartStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -655,20 +656,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [cartState?.items, removeItem],
   );
 
-  const applyLocalGiftCard = useCallback((code: string, balance: number) => {
-    const normalizedCode = code.trim();
-    if (!normalizedCode || balance <= 0) {
+  const applyGiftCard = useCallback(
+    async (code: string) => {
+      // Holds the customer cart id too — fetchCustomerCart stores it.
+      const cartId = getGuestCartId();
+      if (!cartId) {
+        return;
+      }
+
+      setIsUpdating(true);
+
+      try {
+        applyCartState(await applyCartGiftCard(cartId, code.trim(), lineMetadataRef.current));
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [applyCartState],
+  );
+
+  const removeGiftCard = useCallback(async () => {
+    const cartId = getGuestCartId();
+    if (!cartId) {
       return;
     }
 
-    setAppliedLocalGiftCardCode(normalizedCode);
-    setLocalGiftCardDiscount(balance);
-  }, []);
+    setIsUpdating(true);
 
-  const removeLocalGiftCard = useCallback(() => {
-    setAppliedLocalGiftCardCode(null);
-    setLocalGiftCardDiscount(0);
-  }, []);
+    try {
+      applyCartState(await removeCartGiftCard(cartId, lineMetadataRef.current));
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [applyCartState]);
 
   const applyLocalOffer = useCallback((offerId: string) => {
     const normalizedId = offerId.trim();
@@ -1114,6 +1134,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const giftCardDiscount = cartState?.totals.giftCardDiscount ?? emptyTotals.giftCardDiscount;
   const appliedGiftCardCode =
     cartState?.totals.appliedGiftCardCode ?? emptyTotals.appliedGiftCardCode;
+  const giftCardProblem = cartState?.totals.giftCardProblem ?? emptyTotals.giftCardProblem;
   const totalPrice = cartState?.totals.grandTotal ?? emptyTotals.grandTotal;
   const shippingMethods = cartState?.totals.shippingMethods ?? emptyTotals.shippingMethods;
   const selectedShippingMethod =
@@ -1143,10 +1164,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       offerDiscount,
       giftCardDiscount,
       appliedGiftCardCode,
-      localGiftCardDiscount,
-      appliedLocalGiftCardCode,
-      applyLocalGiftCard,
-      removeLocalGiftCard,
+      giftCardProblem,
+      applyGiftCard,
+      removeGiftCard,
       localOfferDiscount,
       appliedLocalOfferId,
       applyLocalOffer,
@@ -1177,10 +1197,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       offerDiscount,
       giftCardDiscount,
       appliedGiftCardCode,
-      localGiftCardDiscount,
-      appliedLocalGiftCardCode,
-      applyLocalGiftCard,
-      removeLocalGiftCard,
+      giftCardProblem,
+      applyGiftCard,
+      removeGiftCard,
       localOfferDiscount,
       appliedLocalOfferId,
       applyLocalOffer,

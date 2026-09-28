@@ -151,6 +151,11 @@ export type TrackedOrderDiscount = {
   amount: number;
 };
 
+export type TrackedOrderGiftCard = {
+  last4: string;
+  amount: number;
+};
+
 export type TrackedOrderTotals = {
   grandTotal: number;
   subtotalExclTax: number;
@@ -159,6 +164,7 @@ export type TrackedOrderTotals = {
   totalShipping: number;
   currency: string;
   discounts: TrackedOrderDiscount[];
+  giftCard: TrackedOrderGiftCard | null;
 };
 
 export type TrackedOrderComment = {

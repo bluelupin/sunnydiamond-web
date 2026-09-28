@@ -403,6 +403,12 @@ const ORDER_DETAIL_FIELDS = `
         currency
       }
     }
+    sunny_gift_card {
+      code_last4
+      amount {
+        value
+      }
+    }
   }
   payment_methods {
     name

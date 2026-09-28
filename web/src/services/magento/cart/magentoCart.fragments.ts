@@ -149,6 +149,14 @@ const cartFields = (productCustomOptions: string) => `
     code
     title
   }
+  sunny_gift_card {
+    code_last4
+    amount {
+      value
+      currency
+    }
+    problem
+  }
 `;
 
 /** Everything the cart UI needs except the catalog's own option lists. */

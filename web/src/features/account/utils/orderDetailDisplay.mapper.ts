@@ -72,6 +72,7 @@ function buildPriceBreakdown(order: TrackedOrder): ProfileOrderPriceBreakdownUi 
   return {
     orderAmount,
     orderDiscount,
+    ...(totals.giftCard ? { giftCard: totals.giftCard } : {}),
     ...(hasOrderShipping(order)
       ? {
           shipping: totals.totalShipping,

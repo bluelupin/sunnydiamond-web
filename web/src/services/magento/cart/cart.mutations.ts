@@ -48,6 +48,26 @@ export const MAGENTO_SET_GIFT_OPTIONS_MUTATION = `
   }
 ` as const;
 
+export const MAGENTO_APPLY_GIFT_CARD_MUTATION = `
+  mutation MagentoApplyGiftCard($input: SunnyApplyGiftCardInput!) {
+    sunnyApplyGiftCard(input: $input) {
+      cart {
+        ${MAGENTO_CART_FIELDS}
+      }
+    }
+  }
+` as const;
+
+export const MAGENTO_REMOVE_GIFT_CARD_MUTATION = `
+  mutation MagentoRemoveGiftCard($input: SunnyRemoveGiftCardInput!) {
+    sunnyRemoveGiftCard(input: $input) {
+      cart {
+        ${MAGENTO_CART_FIELDS}
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_ADD_SIMPLE_PRODUCTS_TO_CART_MUTATION = `
   mutation MagentoAddSimpleProductsToCart($cartId: String!, $sku: String!, $quantity: Float!) {
     addSimpleProductsToCart(

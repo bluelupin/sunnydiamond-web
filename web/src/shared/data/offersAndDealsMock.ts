@@ -14,11 +14,6 @@ export type MockOffer = {
   discountFixed?: number;
 };
 
-export type MockGiftCard = {
-  code: string;
-  balance: number;
-};
-
 /** Mock offers — replace with API later */
 export const mockAvailableOffers: MockOffer[] = [
   {
@@ -67,11 +62,6 @@ export const mockAvailableOffers: MockOffer[] = [
   },
 ];
 
-export const mockGiftCards: MockGiftCard[] = [
-  { code: "SUNNYGC1000", balance: 1000 },
-  { code: "GIFT500", balance: 500 },
-];
-
 export const findMockOfferByCode = (code: string) =>
   mockAvailableOffers.find((offer) => offer.code.toLowerCase() === code.trim().toLowerCase());
 
@@ -94,6 +84,3 @@ export const getMockOfferDiscountAmount = (offer: MockOffer, subtotal: number) =
 
   return 0;
 };
-
-export const findMockGiftCardByCode = (code: string) =>
-  mockGiftCards.find((card) => card.code.toLowerCase() === code.trim().toLowerCase());

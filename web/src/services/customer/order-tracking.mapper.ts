@@ -11,6 +11,7 @@ import type {
   TrackedOrderAddress,
   TrackedOrderComment,
   TrackedOrderDiscount,
+  TrackedOrderGiftCard,
   TrackedOrderItem,
   TrackedOrderItemOption,
   TrackedOrderItemSunnyFields,
@@ -153,6 +154,10 @@ export type MagentoCustomerOrderDetail = {
     total_tax?: MagentoMoney | null;
     total_shipping?: MagentoMoney | null;
     discounts?: MagentoOrderDiscount[] | null;
+    sunny_gift_card?: {
+      code_last4?: string | null;
+      amount?: { value?: number | null } | null;
+    } | null;
   } | null;
   payment_methods?: MagentoOrderPaymentMethod[] | null;
   comments?: MagentoOrderComment[] | null;
@@ -344,7 +349,16 @@ function mapMagentoOrderTotals(order: MagentoCustomerOrderDetail): TrackedOrderT
     totalShipping: order.total?.total_shipping?.value ?? 0,
     currency,
     discounts: mapMagentoOrderDiscounts(order.total?.discounts),
+    giftCard: mapMagentoOrderGiftCard(order.total?.sunny_gift_card),
   };
+}
+
+function mapMagentoOrderGiftCard(
+  giftCard: NonNullable<MagentoCustomerOrderDetail["total"]>["sunny_gift_card"],
+): TrackedOrderGiftCard | null {
+  const amount = Math.abs(giftCard?.amount?.value ?? 0);
+  const last4 = giftCard?.code_last4?.trim();
+  return amount > 0 && last4 ? { last4, amount } : null;
 }
 
 function mapMagentoOrderDiscounts(

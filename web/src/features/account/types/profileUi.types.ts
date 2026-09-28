@@ -45,6 +45,8 @@ export type ProfileOrderDetailItemUi = ProfileOrderItemUi & {
 export type ProfileOrderPriceBreakdownUi = {
   orderAmount: number;
   orderDiscount: number;
+  /** Gift card redeemed on the order; already deducted from orderTotal. */
+  giftCard?: { last4: string; amount: number };
   /** Present when Magento reports shipping on the order (amount may be 0 for free shipping). */
   shipping?: number;
   shippingMethod?: string;

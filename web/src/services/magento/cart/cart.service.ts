@@ -17,6 +17,8 @@ import {
   MAGENTO_UPDATE_CART_ITEMS_MUTATION,
   MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
   MAGENTO_SET_GIFT_OPTIONS_MUTATION,
+  MAGENTO_APPLY_GIFT_CARD_MUTATION,
+  MAGENTO_REMOVE_GIFT_CARD_MUTATION,
 } from "./cart.mutations";
 import {
   mapMagentoCartItems,
@@ -67,6 +69,8 @@ import type {
   PlacedGuestOrder,
   MagentoUpdateCartItemsResponse,
   MagentoSetGiftOptionsResponse,
+  MagentoApplyGiftCardResponse,
+  MagentoRemoveGiftCardResponse,
   MappedMagentoCart,
 } from "./magentoCart.types";
 import type { CartGiftingSelection, CartLineItem } from "@/features/cart/types/cart.types";
@@ -529,6 +533,38 @@ export async function setCartGiftOptions(
   });
 
   return mapGuestCartState(assertCart(data.setSunnyGiftOptions?.cart), lineMetadata);
+}
+
+/** Errors are shopper-facing Magento messages (MagentoGraphqlError.message). */
+export async function applyCartGiftCard(
+  cartId: string,
+  code: string,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const data = await magentoGraphqlFetch<MagentoApplyGiftCardResponse>({
+    query: MAGENTO_APPLY_GIFT_CARD_MUTATION,
+    variables: { input: { cart_id: cartId, code } },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.sunnyApplyGiftCard?.cart), lineMetadata);
+}
+
+export async function removeCartGiftCard(
+  cartId: string,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const data = await magentoGraphqlFetch<MagentoRemoveGiftCardResponse>({
+    query: MAGENTO_REMOVE_GIFT_CARD_MUTATION,
+    variables: { input: { cart_id: cartId } },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.sunnyRemoveGiftCard?.cart), lineMetadata);
 }
 
 export async function updateGuestCartItemQuantity(
