@@ -177,6 +177,14 @@ const OrderDetailView = ({
             {formatOrderTotal(order.totals.subtotalInclTax, order.totals.currency)}
           </dd>
         </div>
+        {order.totals.giftCard ? (
+          <div className="flex justify-between gap-4 text-neutral500">
+            <dt>Gift Card (••••{order.totals.giftCard.last4})</dt>
+            <dd className="text-darkblack">
+              -{formatOrderTotal(order.totals.giftCard.amount, order.totals.currency)}
+            </dd>
+          </div>
+        ) : null}
         <div className="flex justify-between gap-4 text-neutral500">
           <dt>Shipping</dt>
           <dd className="text-darkblack">

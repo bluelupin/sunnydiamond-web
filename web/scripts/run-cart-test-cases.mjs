@@ -193,7 +193,7 @@ function runStaticChecks() {
       ? "removeLocalOffer clears bank offer selection (by design)"
       : "removeLocalOffer not wired",
   );
-  assertSource("CART-050", "local gift card", cartContext, "applyLocalGiftCard", "Local gift card apply");
+  assertSource("CART-050", "gift card", cartContext, "applyGiftCard", "Magento gift card apply");
   assertSource("CART-051", "magento offer discount", cartContext, "offerDiscount", "Magento offer discount from cart");
 
   // I. Checkout

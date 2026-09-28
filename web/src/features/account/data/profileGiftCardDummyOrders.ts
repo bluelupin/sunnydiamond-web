@@ -8,7 +8,7 @@ import type {
 } from "../types/profileUi.types";
 
 /** Toggle off when gift card orders are returned by Magento. */
-export const PROFILE_GIFT_CARD_USE_DUMMY_ORDERS = true;
+export const PROFILE_GIFT_CARD_USE_DUMMY_ORDERS = false;
 
 const GIFT_CARD_IMAGE_SRC = "/images/gift-card-success.png";
 

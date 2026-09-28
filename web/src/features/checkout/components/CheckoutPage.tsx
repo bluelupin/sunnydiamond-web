@@ -79,6 +79,9 @@ const CheckoutPage = () => {
   // Magento is the only authority on whether this cart can be paid in cash: it
   // holds the order minimum and maximum and the engraved-item rule.
   const codOffered = isCodOfferedByBackend(paymentMethods);
+  // A gift card covering the whole order: Magento's grand total is 0 and the order is
+  // placed with its `free` method whatever option is selected (resolveMagentoPaymentCode).
+  const noPaymentNeeded = items.length > 0 && totalPrice === 0;
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
@@ -255,10 +258,10 @@ const CheckoutPage = () => {
     // Only act on a definite answer. An empty payment-method list means the cart
     // has not loaded yet, and switching the customer away from COD on that would
     // undo a choice they already made.
-    if (paymentMethods.length > 0 && payment.method === "cod" && !codOffered) {
+    if (!noPaymentNeeded && paymentMethods.length > 0 && payment.method === "cod" && !codOffered) {
       setPayment((prev) => ({ ...prev, method: "card" }));
     }
-  }, [codOffered, payment.method, paymentMethods.length]);
+  }, [codOffered, noPaymentNeeded, payment.method, paymentMethods.length]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -647,7 +650,12 @@ const CheckoutPage = () => {
   const placeOrder = () => {
     if (checkoutLockedRef.current || paymentInFlightRef.current) return;
 
-    paymentValidation.validateSubmit(() => {
+    // Nothing to validate when no payment is taken (the options are hidden).
+    const validatePayment = noPaymentNeeded
+      ? (onValid: () => void) => onValid()
+      : paymentValidation.validateSubmit;
+
+    validatePayment(() => {
       const submittedForm = { ...form };
       const submittedPayment = { ...payment };
       const submittedItems = [...items];
@@ -801,7 +809,9 @@ const CheckoutPage = () => {
         ? "Placing order..."
         : isUpdating
           ? "Updating..."
-          : "Pay Now"
+          : noPaymentNeeded
+            ? "PLACE ORDER"
+            : "Pay Now"
       : isSavingAddresses
         ? isAuthenticated
           ? "Continuing..."
@@ -957,6 +967,7 @@ const CheckoutPage = () => {
                 payment={payment}
                 hasEngravedItems={hasEngravedItems}
                 codOffered={codOffered}
+                noPaymentNeeded={noPaymentNeeded}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;

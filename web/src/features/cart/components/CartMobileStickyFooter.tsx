@@ -4,6 +4,7 @@ import { forwardRef } from "react";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
+import { GiftCardProblemRow } from "./PriceDetailsBreakdown";
 import { formatCartDiscountPrice, formatCartPrice, getCartShippingDisplay, getCartShippingLabel, resolveCartDisplayTotal } from "../utils/formatCartLine";
 import {
   CartDivider,
@@ -95,6 +96,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
                   value={formatCartDiscountPrice(giftCardDiscount)}
                 />
               ) : null}
+              <GiftCardProblemRow />
               <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
               <CartPriceRow label="Shipping" value={shippingLabel} />
               <CartDivider weight={1} />

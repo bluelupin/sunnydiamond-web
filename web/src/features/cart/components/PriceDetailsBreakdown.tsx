@@ -5,6 +5,7 @@ import {
   formatCartPrice,
 } from "@/features/cart/utils/formatCartLine";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "@/features/checkout/components/CheckoutUi";
+import { useCart } from "@/features/cart/context/CartContext";
 import { CartDivider, CartPriceRow } from "./CartFlowUi";
 
 type PriceDetailsBreakdownProps = {
@@ -16,6 +17,21 @@ type PriceDetailsBreakdownProps = {
   shippingLabel: string;
   total: number;
   showTitle?: boolean;
+};
+
+/** A card Magento kept on the cart but cannot use: named, with the reason, and no amount. */
+export const GiftCardProblemRow = () => {
+  const { appliedGiftCardCode, giftCardProblem } = useCart();
+  if (!appliedGiftCardCode || !giftCardProblem) return null;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="font-gill text-base font-light leading-110 text-darkblack">
+        Gift card {appliedGiftCardCode} not applied
+      </span>
+      <p className="font-gill text-sm font-light leading-110 text-neutral500">{giftCardProblem}</p>
+    </div>
+  );
 };
 
 const PriceDetailsBreakdown = ({
@@ -51,6 +67,7 @@ const PriceDetailsBreakdown = ({
           {giftCardDiscount > 0 ? (
             <PriceRow label="Gift Card Applied" value={formatCartDiscountPrice(giftCardDiscount)} />
           ) : null}
+          <GiftCardProblemRow />
         </div>
 
         <Divider />

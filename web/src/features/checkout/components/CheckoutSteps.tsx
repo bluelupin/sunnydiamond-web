@@ -355,6 +355,8 @@ type CheckoutPaymentStepProps = {
   hasEngravedItems?: boolean;
   /** Whether Magento offers a cod-family method for this cart. The only COD gate. */
   codOffered: boolean;
+  /** Cart grand total is 0 (gift card covers it): show a note instead of the options. */
+  noPaymentNeeded?: boolean;
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
@@ -390,6 +392,7 @@ export const CheckoutPaymentStep = ({
   payment,
   hasEngravedItems = false,
   codOffered,
+  noPaymentNeeded = false,
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
@@ -473,69 +476,73 @@ export const CheckoutPaymentStep = ({
           Payment Method
         </CheckoutSectionHeading>
 
-        <div id="checkout-payment-methods" className="flex flex-col gap-6">
-          <div className="flex items-center justify-between self-stretch">
+        {noPaymentNeeded ? (
+          <CheckoutSummaryText>No payment needed: your gift card covers this order.</CheckoutSummaryText>
+        ) : (
+          <div id="checkout-payment-methods" className="flex flex-col gap-6">
+            <div className="flex items-center justify-between self-stretch">
+              <CheckoutRadioRow
+                checked={payment.method === "card"}
+                onChange={() => onPaymentChange("method", "card")}
+                label="Credit/Debit Card"
+                disabled={fieldsDisabled}
+              />
+              {payment.method === "card" ? <PaymentCardLogos /> : null}
+            </div>
+
+            {payment.method === "card" ? <RazorpaySecureNote /> : null}
+
             <CheckoutRadioRow
-              checked={payment.method === "card"}
-              onChange={() => onPaymentChange("method", "card")}
-              label="Credit/Debit Card"
+              checked={payment.method === "upi"}
+              onChange={() => onPaymentChange("method", "upi")}
+              label="UPI"
               disabled={fieldsDisabled}
             />
-            {payment.method === "card" ? <PaymentCardLogos /> : null}
-          </div>
 
-          {payment.method === "card" ? <RazorpaySecureNote /> : null}
+            {payment.method === "upi" ? <RazorpaySecureNote /> : null}
 
-          <CheckoutRadioRow
-            checked={payment.method === "upi"}
-            onChange={() => onPaymentChange("method", "upi")}
-            label="UPI"
-            disabled={fieldsDisabled}
-          />
-
-          {payment.method === "upi" ? <RazorpaySecureNote /> : null}
-
-          <CheckoutRadioRow
-            checked={payment.method === "netbanking"}
-            onChange={() => onPaymentChange("method", "netbanking")}
-            label="Net Banking"
-            disabled={fieldsDisabled}
-          />
-
-          {payment.method === "netbanking" ? <RazorpaySecureNote /> : null}
-
-          <div className="flex flex-col gap-2">
             <CheckoutRadioRow
-              checked={payment.method === "cod"}
-              disabled={fieldsDisabled || !isCodAvailable}
-              onChange={() => onPaymentChange("method", "cod")}
-              align="start"
-              label={
-                <span className="flex flex-col gap-1">
-                  <span>Cash On Delivery</span>
-                  <span
-                    className={cn(
-                      "font-gill text-xs font-light leading-110",
-                      isCodAvailable ? "text-darkblack" : "text-neutral500",
-                    )}
-                  >
-                    {isCodAvailable
-                      ? "Pay in cash when your order arrives"
-                      : hasEngravedItems
-                        ? "Not available for engraved items"
-                        : "Not available for this order value"}
-                  </span>
-                </span>
-              }
+              checked={payment.method === "netbanking"}
+              onChange={() => onPaymentChange("method", "netbanking")}
+              label="Net Banking"
+              disabled={fieldsDisabled}
             />
-            {payment.method === "cod" ? (
-              <FormFieldError
-                id="checkout-cod-error"
-                message={validation.showError("cod") ? validation.errors.cod : undefined}
+
+            {payment.method === "netbanking" ? <RazorpaySecureNote /> : null}
+
+            <div className="flex flex-col gap-2">
+              <CheckoutRadioRow
+                checked={payment.method === "cod"}
+                disabled={fieldsDisabled || !isCodAvailable}
+                onChange={() => onPaymentChange("method", "cod")}
+                align="start"
+                label={
+                  <span className="flex flex-col gap-1">
+                    <span>Cash On Delivery</span>
+                    <span
+                      className={cn(
+                        "font-gill text-xs font-light leading-110",
+                        isCodAvailable ? "text-darkblack" : "text-neutral500",
+                      )}
+                    >
+                      {isCodAvailable
+                        ? "Pay in cash when your order arrives"
+                        : hasEngravedItems
+                          ? "Not available for engraved items"
+                          : "Not available for this order value"}
+                    </span>
+                  </span>
+                }
               />
-            ) : null}
+              {payment.method === "cod" ? (
+                <FormFieldError
+                  id="checkout-cod-error"
+                  message={validation.showError("cod") ? validation.errors.cod : undefined}
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
+        )}
       </CheckoutSectionCard>
     </div>
   );

@@ -1,8 +1,11 @@
 /**
- * Gift card checks against a Magento store (CR-C5 GC-0, GC-1, GC-3). Places no order:
- * the only placeOrder call is one the store must refuse.
+ * Gift card checks against a Magento store (CR-C5 GC-0 to GC-6). Places no order: the only
+ * placeOrder call is one the store must refuse.
  * Run: npm run test:gift-card
  *      npm run test:gift-card -- --graphql https://sunnydiamond-store-dev.on-forge.com/graphql
+ * Redemption with a real card: set GIFT_CARD_TEST_CODE to an active card's code (and
+ * optionally GIFT_CARD_USED_CODE to a used one). The codes are never printed. Applying a card
+ * reserves nothing, so the card stays active.
  */
 import assert from "node:assert/strict";
 
@@ -162,5 +165,78 @@ await check("a gift card added through the standard cart call (₹0) cannot be o
   assert.equal(placed.data?.placeOrder?.orderV2?.number, undefined, "a ₹0 gift card order was placed");
   assert.ok(placed.errors?.length, "placeOrder should be refused");
 });
+
+const APPLY = `mutation ($c: String!, $k: String!) {
+  sunnyApplyGiftCard(input: { cart_id: $c, code: $k }) {
+    cart { sunny_gift_card { code_last4 amount { value } problem } prices { grand_total { value } } }
+  }
+}`;
+const REMOVE = `mutation ($c: String!) {
+  sunnyRemoveGiftCard(input: { cart_id: $c }) { cart { sunny_gift_card { code_last4 } prices { grand_total { value } } } }
+}`;
+
+// A jewellery cart: the first in-stock simple product with no required options.
+async function jewelleryCart() {
+  const list = await gql(`{ products(search: "ring", pageSize: 40) { items { __typename sku stock_status
+    ... on CustomizableProductInterface { options { required } } } } }`);
+  const product = list.data.products.items.find(
+    (p) => p.__typename === "SimpleProduct" && p.stock_status === "IN_STOCK" && !(p.options ?? []).some((o) => o.required),
+  );
+  assert.ok(product, "no simple in-stock ring without required options to test with");
+  const cartId = await newCart();
+  await gql(`mutation ($c: String!, $s: String!) { addProductsToCart(cartId: $c, cartItems: [{ sku: $s, quantity: 1 }]) { cart { id } } }`, {
+    c: cartId,
+    s: product.sku,
+  });
+  const total = (await gql(`query ($c: String!) { cart(cart_id: $c) { prices { grand_total { value } } } }`, { c: cartId })).data.cart.prices
+    .grand_total.value;
+  return { cartId, total };
+}
+
+await check("wrong codes are refused, and a cart is blocked after 5 wrong codes", async () => {
+  const { cartId } = await jewelleryCart();
+  for (let i = 0; i < 5; i += 1) {
+    const result = await gql(APPLY, { c: cartId, k: `WRONG${i}WRONGWRONG1` });
+    assert.match(result.errors?.[0]?.message ?? "", /not valid/);
+  }
+  const blocked = await gql(APPLY, { c: cartId, k: "WRONGWRONGWRONG6" });
+  assert.match(blocked.errors?.[0]?.message ?? "", /Too many gift card attempts/);
+});
+
+const activeCode = process.env.GIFT_CARD_TEST_CODE?.trim();
+if (activeCode) {
+  await check("a real card comes off the total in full, typed in any case with spaces, and can be removed", async () => {
+    const { cartId, total } = await jewelleryCart();
+    const messy = activeCode.toLowerCase().replace(/(.{4})/g, "$1 ").trim();
+    const applied = await gql(APPLY, { c: cartId, k: messy });
+    const card = applied.data?.sunnyApplyGiftCard?.cart;
+    if (applied.errors) {
+      // Only acceptable refusal: the test cart is worth less than the card (R-GC-9).
+      assert.match(applied.errors[0].message, /add items to use it/);
+      console.log("    (card worth more than the test cart: refusal checked instead)");
+      return;
+    }
+    assert.equal(card.sunny_gift_card.problem, null);
+    assert.equal(Math.round((total - card.sunny_gift_card.amount.value) * 100), Math.round(card.prices.grand_total.value * 100));
+
+    const second = await gql(APPLY, { c: cartId, k: activeCode });
+    assert.match(second.errors?.[0]?.message ?? "", /already applied/);
+
+    const removed = await gql(REMOVE, { c: cartId });
+    assert.equal(removed.data.sunnyRemoveGiftCard.cart.sunny_gift_card, null);
+    assert.equal(removed.data.sunnyRemoveGiftCard.cart.prices.grand_total.value, total);
+  });
+} else {
+  console.log("--  real-card redemption skipped (set GIFT_CARD_TEST_CODE)");
+}
+
+const usedCode = process.env.GIFT_CARD_USED_CODE?.trim();
+if (usedCode) {
+  await check("a used card is refused", async () => {
+    const { cartId } = await jewelleryCart();
+    const result = await gql(APPLY, { c: cartId, k: usedCode });
+    assert.match(result.errors?.[0]?.message ?? "", /already been used|no longer be used/);
+  });
+}
 
 console.log(`\n${passed} gift card checks passed against ${GRAPHQL}`);

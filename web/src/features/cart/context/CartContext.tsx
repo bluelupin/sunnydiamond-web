@@ -661,7 +661,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // Holds the customer cart id too — fetchCustomerCart stores it.
       const cartId = getGuestCartId();
       if (!cartId) {
-        return;
+        throw new Error("Your shopping bag could not be found. Please try again.");
       }
 
       setIsUpdating(true);

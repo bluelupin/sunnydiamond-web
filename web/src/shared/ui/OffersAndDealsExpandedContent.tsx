@@ -186,7 +186,10 @@ const OffersAndDealsExpandedContent = ({
       await action();
       return true;
     } catch (error) {
-      setErrorMessage(error instanceof MagentoGraphqlError ? error.message : fallbackMessage);
+      // Only a real GraphQL error carries a shopper-facing message; network/HTTP failures do not.
+      setErrorMessage(
+        error instanceof MagentoGraphqlError && error.errors?.length ? error.message : fallbackMessage,
+      );
       return false;
     } finally {
       setGiftCardBusy(false);
