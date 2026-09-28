@@ -104,6 +104,8 @@ await check("a digital card needs a valid email and a date from today to a year 
   assert.match(await refusal({ delivery_date: "2020-01-01" }), /delivery date/);
   assert.match(await refusal({ recipient_phone: "call me" }), /valid recipient phone/);
   assert.match(await refusal({ sender_name: "Line\u0007break" }), /not valid/);
+  // A right-to-left override would disguise the name on the printed card.
+  assert.match(await refusal({ recipient_name: "Dee\u202Epa" }), /not valid/);
 });
 
 await check("a physical card ships free and is prepaid only (no COD)", async () => {
