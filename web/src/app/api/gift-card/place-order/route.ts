@@ -33,15 +33,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Delivery date is required for digital gift cards" }, { status: 400 });
   }
 
-  // Physical: where the card is shipped. Digital: the buyer's billing address.
+  // Digital cards need no address (gift card flow spec 6.2); Magento fills their billing from the sender.
   const address = payload.deliveryAddress;
   if (
-    !address?.addressLine1?.trim() ||
-    !address.pincode?.trim() ||
-    !address.city?.trim() ||
-    !address.state?.trim()
+    payload.cardType === "physical" &&
+    (!address?.addressLine1?.trim() ||
+      !address.pincode?.trim() ||
+      !address.city?.trim() ||
+      !address.state?.trim())
   ) {
-    return NextResponse.json({ error: "Address is required" }, { status: 400 });
+    return NextResponse.json({ error: "Delivery address is required" }, { status: 400 });
   }
 
   try {

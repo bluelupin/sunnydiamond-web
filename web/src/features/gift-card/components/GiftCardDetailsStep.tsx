@@ -15,6 +15,7 @@ import {
 } from "@/shared/utils/formValidation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
+import { useGiftCardPayment } from "../hooks/useGiftCardPayment";
 import { giftCardFlowContent } from "../data/content";
 import {
   GiftCardCheckbox,
@@ -32,9 +33,11 @@ const isGiftCardPartyComplete = (party: GiftCardPartyDetails): boolean =>
 const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
   const { status } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(status === "authenticated");
+  const { initiatePayment, isPaying, statusToastNode } = useGiftCardPayment();
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
 
   const {
+    cardType,
     sender,
     receiver,
     receiverSameAsSender,
@@ -89,24 +92,29 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     isGiftCardPartyComplete(sender) &&
     (receiverSameAsSender || isGiftCardPartyComplete(receiver));
 
-  const handleContinue = () => {
-    if (!canContinue) return;
+  const handleContinue = async () => {
+    if (!canContinue || isPaying) return;
 
-    // Digital cards also need the buyer's billing address before payment.
-    goToAddress();
+    if (cardType === "physical") {
+      goToAddress();
+      return;
+    }
+
+    await initiatePayment();
   };
 
   return (
     <>
+      {statusToastNode}
       <RightPanelScrollLayout
         footer={
           <PanelFooter>
             <CartPrimaryButton
               type="button"
-              disabled={!canContinue}
+              disabled={!canContinue || isPaying}
               onClick={handleContinue}
             >
-              {cta.addAddress}
+              {cardType === "digital" ? cta.payNow : cta.addAddress}
             </CartPrimaryButton>
           </PanelFooter>
         }

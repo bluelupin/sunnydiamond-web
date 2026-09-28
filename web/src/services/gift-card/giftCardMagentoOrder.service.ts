@@ -29,7 +29,7 @@ function formatPhone(party: GiftCardPartyDetails): string {
   return `${party.countryCode.trim() || "+91"} ${party.phone.replace(/\D/g, "")}`;
 }
 
-// The address step collects the delivery address (physical) or the billing address (digital).
+// Physical cards only: the address step collects the delivery address, also used for billing.
 function mapGiftCardPayloadToCheckoutForm(payload: GiftCardOrderPayload): CheckoutFormData {
   const receiver = payload.receiverSameAsSender ? payload.sender : payload.receiver;
   const address = payload.deliveryAddress;
@@ -75,6 +75,7 @@ export async function placeGiftCardMagentoOrder(payload: GiftCardOrderPayload) {
         type: isDigital ? "DIGITAL" : "PHYSICAL",
         amount: payload.amount,
         sender_name: payload.sender.fullName.trim(),
+        sender_phone: formatPhone(payload.sender),
         recipient_name: receiver.fullName.trim(),
         recipient_email: receiver.email.trim() || null,
         recipient_phone: formatPhone(receiver),
@@ -87,6 +88,7 @@ export async function placeGiftCardMagentoOrder(payload: GiftCardOrderPayload) {
   });
   await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail));
 
+  // A digital card's billing address (sender name and phone) is set by the mutation above.
   if (!isDigital) {
     const state = await setCheckoutShippingAddress(
       cartId,
@@ -94,8 +96,8 @@ export async function placeGiftCardMagentoOrder(payload: GiftCardOrderPayload) {
       noLineMetadata,
     );
     await selectFirstAvailableGuestShippingMethod(cartId, state, noLineMetadata);
+    await setGuestBillingAddress(cartId, mapCheckoutFormToBillingAddress(form), false, noLineMetadata);
   }
-  await setGuestBillingAddress(cartId, mapCheckoutFormToBillingAddress(form), false, noLineMetadata);
 
   const order = await completeGuestCheckout(cartId, "card", noLineMetadata);
 

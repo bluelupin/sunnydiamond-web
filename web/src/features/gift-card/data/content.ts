@@ -41,7 +41,6 @@ export const giftCardFlowContent = {
     useCurrentLocationLabel: "USE CURRENT LOCATION",
     detectingLocationLabel: "DETECTING LOCATION...",
     heading: "Delivery Address",
-    billingHeading: "Billing Address",
     addressLine1Label: "Address line 1",
     addressLine2Label: "Address Line 2 (Optional)",
     pincodeLabel: "Pin code",

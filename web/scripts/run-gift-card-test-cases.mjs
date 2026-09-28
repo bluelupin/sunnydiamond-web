@@ -43,6 +43,7 @@ const digital = (cartId, overrides = {}) => ({
     type: "DIGITAL",
     amount: 7250,
     sender_name: "QA Sender",
+    sender_phone: "+91 9744355555",
     recipient_name: "QA Recipient",
     recipient_email: "sdqa-giftcard@yopmail.com",
     recipient_phone: "+91 9876543210",
@@ -98,8 +99,10 @@ await check("amounts outside ₹1,000–₹1,00,000 are refused", async () => {
   assert.match(await refusal({ amount: 100001 }), /Choose an amount/);
 });
 
-await check("a digital card needs a valid email and a date from today to a year ahead", async () => {
+await check("a digital card needs a valid email, the sender's phone and a date from today to a year ahead", async () => {
   assert.match(await refusal({ recipient_email: null }), /Recipient Email is required/);
+  // No address is asked for a digital card, so the sender's phone is its billing contact.
+  assert.match(await refusal({ sender_phone: null }), /valid sender phone/);
   assert.match(await refusal({ recipient_email: "not-an-email" }), /valid recipient email/);
   assert.match(await refusal({ delivery_date: "2020-01-01" }), /delivery date/);
   assert.match(await refusal({ recipient_phone: "call me" }), /valid recipient phone/);
