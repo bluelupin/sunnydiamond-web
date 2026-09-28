@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { formatDistanceKm, type StoreWithDistance } from "../utils/geo";
+import { formatAddressWithPincode } from "../utils/storeLocatorFilters";
 
 // Built from existing store-locator styles; awaits OneThing design review (R-X-5).
 
@@ -126,7 +127,7 @@ const NearbyStoresList = ({ results, onBook }: NearbyStoresListProps) => (
           </p>
           <p className={textClassName}>{formatDistanceKm(distanceKm)}</p>
         </div>
-        <p className={textClassName}>{store.address}</p>
+        <p className={textClassName}>{formatAddressWithPincode(store.address, store.pincode)}</p>
         {store.openingHours ? (
           <p className={`${textClassName} whitespace-pre-line`}>{store.openingHours}</p>
         ) : null}

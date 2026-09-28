@@ -102,7 +102,7 @@ export function mapEditorialShowroomToBookStoreVisit(
     ...(heroImage ? { heroImage } : {}),
     ...(mobileHeroImage ? { mobileHeroImage } : {}),
     state: inferStateFromAddress(address),
-    pincode: extractPincodeFromAddress(address),
+    pincode: cleanText(location.pincode) || extractPincodeFromAddress(address),
   };
 }
 

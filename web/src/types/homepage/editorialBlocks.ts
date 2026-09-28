@@ -83,6 +83,7 @@ export type ShowroomSectionLocation = {
   name?: string | null;
   city?: string | null;
   address?: string | null;
+  pincode?: string | null;
   phone?: string | null;
   directionsUrl?: string | null;
   mapUrl?: string | null;

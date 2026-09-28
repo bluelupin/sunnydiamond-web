@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
+import { formatAddressWithPincode } from "@/features/stores/utils/storeLocatorFilters";
 
 const ADDRESS_ICON = "/icons/address-icon.svg";
 const PHONE_ICON = "/icons/phone-icon.svg";
@@ -34,7 +35,7 @@ export function BookStoreVisitLocationDetails({
             aria-hidden
             className="mt-1.5 size-5 shrink-0 sm:mt-0 lg:size-6"
           />
-          <p className={textClassName}>{store.address}</p>
+          <p className={textClassName}>{formatAddressWithPincode(store.address, store.pincode)}</p>
         </div>
       ) : null}
       {store.phone ? (

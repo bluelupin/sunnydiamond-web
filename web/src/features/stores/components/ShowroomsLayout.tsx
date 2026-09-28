@@ -9,6 +9,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
 import { ShowroomsLayoutSkeleton } from "./ShowroomsLayoutSkeleton";
+import { formatAddressWithPincode } from "../utils/storeLocatorFilters";
 
 const ADDRESS_ICON = "/icons/address-icon.svg";
 const PHONE_ICON = "/icons/phone-icon.svg";
@@ -444,11 +445,12 @@ export function mapBookStoreVisitStoreToLayoutItem(store: {
   heroImage?: string;
   mobileHeroImage?: string;
   imageAlt?: string;
+  pincode?: string;
 }): ShowroomLayoutItem {
   return {
     id: store.id,
     name: store.storeName,
-    address: store.address,
+    address: formatAddressWithPincode(store.address, store.pincode),
     phone: store.phone,
     directionsUrl: store.directionsUrl,
     ...(store.heroImage ? { desktopImage: store.heroImage } : {}),

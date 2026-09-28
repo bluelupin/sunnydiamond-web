@@ -11,6 +11,7 @@ import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedi
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ShowroomSectionLocation } from "@/types/homepage/editorialBlocks";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+import { formatAddressWithPincode } from "../utils/storeLocatorFilters";
 
 interface ShowroomsSectionProps {
   id?: string;
@@ -51,7 +52,7 @@ function ShowroomLocationDetails({
             <path d="M11.2541 12.7421L3.53381 10.5859C3.38249 10.5395 3.24971 10.4465 3.15449 10.3201C3.05926 10.1936 3.00646 10.0403 3.00365 9.8821C3.00084 9.72386 3.04817 9.56878 3.13885 9.43907C3.22953 9.30935 3.35892 9.21165 3.5085 9.15994L20.0085 3.03994C20.1409 2.99493 20.2832 2.9878 20.4194 3.01937C20.5556 3.05095 20.6802 3.11996 20.7793 3.21863C20.8783 3.31729 20.9478 3.44168 20.98 3.57775C21.0121 3.71382 21.0055 3.85616 20.961 3.98869L14.841 20.4887C14.7893 20.6383 14.6916 20.7677 14.5619 20.8584C14.4322 20.949 14.2771 20.9964 14.1188 20.9935C13.9606 20.9907 13.8073 20.9379 13.6809 20.8427C13.5545 20.7475 13.4614 20.6147 13.4151 20.4634L11.2541 12.7421Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <p className="font-gill text-xl font-light leading-110 text-darkblack">
-            {location.address}
+            {formatAddressWithPincode(location.address ?? "", location.pincode)}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -248,7 +249,7 @@ function ShowroomsDesktopLayout({
                           <path d="M11.2541 12.7421L3.53381 10.5859C3.38249 10.5395 3.24971 10.4465 3.15449 10.3201C3.05926 10.1936 3.00646 10.0403 3.00365 9.8821C3.00084 9.72386 3.04817 9.56878 3.13885 9.43907C3.22953 9.30935 3.35892 9.21165 3.5085 9.15994L20.0085 3.03994C20.1409 2.99493 20.2832 2.9878 20.4194 3.01937C20.5556 3.05095 20.6802 3.11996 20.7793 3.21863C20.8783 3.31729 20.9478 3.44168 20.98 3.57775C21.0121 3.71382 21.0055 3.85616 20.961 3.98869L14.841 20.4887C14.7893 20.6383 14.6916 20.7677 14.5619 20.8584C14.4322 20.949 14.2771 20.9964 14.1188 20.9935C13.9606 20.9907 13.8073 20.9379 13.6809 20.8427C13.5545 20.7475 13.4614 20.6147 13.4151 20.4634L11.2541 12.7421Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[0%] leading-130 font-gill">
-                          {location.address}
+                          {formatAddressWithPincode(location.address ?? "", location.pincode)}
                         </p>
                       </div>
                       <div className="mt-4 lg:mb-6 mb-8 flex gap-3 items-center">

@@ -632,6 +632,7 @@ function mapShowroomSectionLocation(
     name,
     city: cleanText(showroom.city),
     address,
+    pincode: cleanText(showroom.pincode),
     phone: cleanText(showroom.phone),
     mapUrl,
     directionsUrl: mapUrl,

@@ -42,6 +42,12 @@ export function extractPincodeFromAddress(address?: string | null): string | und
   return match?.[1];
 }
 
+/** Address line with the CMS pincode appended, unless the address already contains it. */
+export function formatAddressWithPincode(address: string, pincode?: string | null): string {
+  const pin = pincode?.trim();
+  return pin && !address.includes(pin) ? `${address} ${pin}` : address;
+}
+
 export function inferStateFromAddress(address?: string | null): string | undefined {
   if (!address) return undefined;
 
