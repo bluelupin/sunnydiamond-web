@@ -157,6 +157,9 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
   const close = () => {
     onOpenChange(false);
     setText("");
+    // The overlay stays mounted between openings; a row highlighted last time must not
+    // come back when the same words are typed again, or Enter would open it.
+    setHighlight({ key: "", index: -1 });
   };
 
   const go = (href: string, recentText: string, option?: Option) => {
