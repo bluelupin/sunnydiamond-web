@@ -59,17 +59,17 @@ const CareersJobPageHeader = ({
 
       {/* Desktop — title + chip + share, meta, posted aside */}
       <div className="hidden md:flex md:w-full md:items-start md:justify-between md:gap-6">
-        <div className="flex min-w-0 flex-col gap-6">
-          <div className="flex w-full max-w-[571px] flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <div className="flex w-full items-center gap-4">
             <p
               role="heading"
               aria-level={1}
-              className="font-larken text-32 font-light leading-110 text-darkblack"
+              className="min-w-0 font-larken text-32 font-light leading-110 text-darkblack"
             >
               {job.title}
             </p>
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
               <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />
               {onShare ? (
                 <button

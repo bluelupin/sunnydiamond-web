@@ -988,14 +988,16 @@ const CareersApplicationForm = () => {
                 />
               </FormField>
 
-              <CareersSelectField
-                id="careers-employee-job-title"
-                label={fields.employeeJobTitleLabel}
-                placeholder="Enter Employee Job Title"
-                value={employeeJobTitle}
-                onChange={setEmployeeJobTitle}
-                options={["Executive Director"]}
-              />
+              <FormField label={fields.employeeJobTitleLabel}>
+                <input
+                  id="careers-employee-job-title"
+                  type="text"
+                  placeholder="Enter Employee Job Title"
+                  value={employeeJobTitle}
+                  onChange={(event) => setEmployeeJobTitle(event.target.value)}
+                  className={careersFormFieldClassName}
+                />
+              </FormField>
             </div>
           ) : null}
         </section>
