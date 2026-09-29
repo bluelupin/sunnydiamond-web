@@ -178,7 +178,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             }}
             aria-disabled={isNavigatingToCheckout || undefined}
             className={cn(
-              "relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[140px]",
+              "relative shrink-0 overflow-hidden bg-white md:w-[140px] md:h-[105px] w-[112px] h-[84px]",
               isNavigatingToCheckout && "pointer-events-none",
             )}
           >
