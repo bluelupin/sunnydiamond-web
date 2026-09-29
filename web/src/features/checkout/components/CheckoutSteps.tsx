@@ -448,7 +448,7 @@ export const CheckoutPaymentStep = ({
           Delivery Address
         </CheckoutSectionHeading>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+          <p className="font-gill md:text-xl text-base font-normal leading-110 text-darkblack">SHIPPING ADDRESS</p>
           <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
         </div>
         <div className="flex flex-col gap-4">
