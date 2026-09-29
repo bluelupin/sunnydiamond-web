@@ -34,6 +34,7 @@ import {
   readJewelleryListingUrlParams,
   replaceJewelleryListingUrl,
   resolveCategoryUrlKeyFromPathname,
+  resolveCategoryQueryParamFromUrlKey,
   resolveCategoryUrlKeyFromQueryParam,
   resolveSelectedCategoryUrlKey,
   shouldSyncCategoryFromRouterPathname,
@@ -193,6 +194,10 @@ const JewelleryProductPage = ({
         })
       : undefined;
 
+  // /search has no category path, so a main category picked in the drawer lives in ?category=.
+  const searchCategoryUrlKey = searchQuery ? resolveCategoryUrlKeyFromQueryParam(searchParams?.get("category")) : null;
+  const listingCategoryUrlKey = searchQuery ? searchCategoryUrlKey : selectedCategoryUrlKey;
+
   const {
     products,
     totalCount,
@@ -205,7 +210,7 @@ const JewelleryProductPage = ({
     loadMore,
     retryListing,
   } = useMagentoJewelleryListing({
-    categoryUrlKey: selectedCategoryUrlKey,
+    categoryUrlKey: listingCategoryUrlKey,
     search: searchQuery,
     sortValue,
     filters,
@@ -295,7 +300,7 @@ const JewelleryProductPage = ({
       if (!searchQuery) return;
       const next = new URLSearchParams({ q: searchQuery });
       params.forEach((value, key) => {
-        if (key !== "q" && key !== "category") next.append(key, value);
+        if (key !== "q") next.append(key, value);
       });
       window.history.replaceState(window.history.state, "", `/search?${next.toString()}`);
     },
@@ -565,6 +570,23 @@ const JewelleryProductPage = ({
       // All-jewellery drawer: selecting one main category should behave like the tabs
       // so the next open shows that category's subfilters (not the mixed main list).
       // On /search it stays a filter: moving to the category page would drop the search.
+      if (searchQuery && !searchCategoryUrlKey) {
+        const mainCategoryUrlKey = resolveMainCategoryUrlKeyFromDrawerSelection(
+          nextFilters.categories,
+          facets,
+          navCategories,
+        );
+        const categoryParam = resolveCategoryQueryParamFromUrlKey(mainCategoryUrlKey);
+        if (categoryParam) {
+          setFilters({ ...nextFilters, categories: [] });
+          setIsFilterOpen(false);
+          const params = readJewelleryListingUrlParams(searchParams?.toString());
+          params.set("category", categoryParam);
+          replaceSearchUrl(params);
+          return;
+        }
+      }
+
       if (!selectedCategoryUrlKey && !searchQuery) {
         const mainCategoryUrlKey = resolveMainCategoryUrlKeyFromDrawerSelection(
           nextFilters.categories,
@@ -622,6 +644,7 @@ const JewelleryProductPage = ({
       navigateToCategory,
       resetPlpListingScope,
       searchQuery,
+      searchCategoryUrlKey,
       replaceSearchUrl,
     ],
   );
