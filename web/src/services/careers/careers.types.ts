@@ -333,6 +333,7 @@ export type StrapiCareerOpeningEntity = {
   isNew?: boolean | null;
   workplaceType?: string | null;
   workplaceLabel?: string | null;
+  postedDate?: string | null;
   publishedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;

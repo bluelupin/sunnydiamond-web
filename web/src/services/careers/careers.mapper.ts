@@ -243,8 +243,9 @@ const normalizeEmploymentType = (value?: string | null): CareerJobType | null =>
 
 const resolvePostedAt = (opening: StrapiCareerOpeningEntity): string | null => {
   const candidate =
-    cleanText(opening.postedAt) ??
+    cleanText(opening.postedDate) ??
     cleanText(opening.publishedAt) ??
+    cleanText(opening.postedAt) ??
     cleanText(opening.createdAt) ??
     cleanText(opening.updatedAt);
 
