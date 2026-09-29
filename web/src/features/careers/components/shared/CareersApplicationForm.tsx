@@ -58,7 +58,7 @@ import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
 import CareersSelectField from "./CareersSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
 import CareersResumeFileChip from "./CareersResumeFileChip";
-import CareersSearchIcon from "./CareersSearchIcon";
+import CareersSkillsSearch from "./CareersSkillsSearch";
 import CareersSubmitConfirmationModal from "./CareersSubmitConfirmationModal";
 
 type ApplicationField =
@@ -152,7 +152,6 @@ const CareersApplicationForm = () => {
   const [currentCtc, setCurrentCtc] = useState("");
   const [expectedCtc, setExpectedCtc] = useState("");
   const [noticePeriod, setNoticePeriod] = useState("");
-  const [skillSearch, setSkillSearch] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [hasCompanyRelation, setHasCompanyRelation] = useState<boolean | null>(null);
@@ -461,32 +460,6 @@ const CareersApplicationForm = () => {
     }
   };
 
-  const addSkill = () => {
-    const value = skillSearch.trim();
-    if (!value || skills.includes(value)) {
-      return;
-    }
-    setSkills((current) => [...current, value]);
-    setSkillSearch("");
-  };
-
-  const addLanguage = () => {
-    const value = skillSearch.trim();
-    if (!value || languages.includes(value)) {
-      return;
-    }
-    setLanguages((current) => [...current, value]);
-    setSkillSearch("");
-  };
-
-  const handleSkillSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") {
-      return;
-    }
-    event.preventDefault();
-    addSkill();
-  };
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
@@ -590,10 +563,7 @@ const CareersApplicationForm = () => {
   const fields = applicationForm.fields;
   const textPlaceholder = fields.fieldPlaceholder;
   const selectPlaceholder = fields.selectPlaceholder;
-  const skillSearchTerm = skillSearch.trim();
-  const showSkillSearchDropdown = skillSearchTerm.length > 0;
-  const skillsLabelText = fields.skillsLabel.replace(/\*+$/, "").trim();
-  const languagesLabelText = fields.languagesLabel.replace(/\*+$/, "").trim();
+
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
@@ -905,52 +875,15 @@ const CareersApplicationForm = () => {
             <p className="md:text-base text-sm font-gill font-normal text-darkblack">
               Add skills and known languages to your application
             </p>
-            <div className="relative">
-              <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
-                <input
-                  type="text"
-                  role="combobox"
-                  aria-autocomplete="list"
-                  value={skillSearch}
-                  placeholder={fields.skillsSearchPlaceholder}
-                  onChange={(event) => setSkillSearch(event.target.value)}
-                  onKeyDown={handleSkillSearchKeyDown}
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
-                  aria-expanded={showSkillSearchDropdown}
-                  aria-controls="careers-skills-languages-search-options"
-                />
-                <CareersSearchIcon />
-              </div>
-              {showSkillSearchDropdown ? (
-                <div
-                  id="careers-skills-languages-search-options"
-                  role="listbox"
-                  aria-label="Add search result"
-                  className="absolute left-0 right-0 top-full z-[90] mt-1 flex flex-col bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-                >
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={false}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={addSkill}
-                    className="flex h-14 w-full items-center p-3 text-left font-gill text-sm font-normal leading-110 text-darkblack transition-colors hover:bg-[#DECAA0]"
-                  >
-                    Add &quot;{skillSearchTerm}&quot; as {skillsLabelText}
-                  </button>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={false}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={addLanguage}
-                    className="flex h-14 w-full items-center p-3 text-left font-gill text-sm font-normal leading-110 text-darkblack transition-colors hover:bg-[#DECAA0]"
-                  >
-                    Add &quot;{skillSearchTerm}&quot; as {languagesLabelText}
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <CareersSkillsSearch
+              placeholder={fields.skillsSearchPlaceholder}
+              skills={skills}
+              languages={languages}
+              onSelect={(option) => {
+                const update = option.type === "Skill" ? setSkills : setLanguages;
+                update((current) => current.includes(option.label) ? current : [...current, option.label]);
+              }}
+            />
           </FormField>
           {skills.length > 0 ? (
             <div className="flex flex-col gap-4 items-start">

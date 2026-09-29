@@ -37,7 +37,7 @@ const CareersJobListingsSection = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const listingHeading = listing.featuredTitle ?? listing.title;
-  const searchPlaceholder = "Search Roles";
+  const searchPlaceholder = "Search roles";
   const hasActiveFilters = hasActiveListingFilters(
     searchQuery,
     locationFilter,
