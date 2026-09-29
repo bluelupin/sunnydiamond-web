@@ -40,12 +40,15 @@ export function useQuickSearch(rawQuery: string) {
     };
   }, [query, active]);
 
+  const failed = active && settled.query === query && settled.failed;
   return {
     query,
     active,
-    result: active ? settled.result : null,
+    // Earlier results stay visible (dimmed) only while the new lookup is in flight. Once it
+    // fails they would be answers to different words, so they are dropped.
+    result: active && !failed ? settled.result : null,
     loading: active && settled.query !== query,
-    failed: active && settled.query === query && settled.failed,
+    failed,
   };
 }
 

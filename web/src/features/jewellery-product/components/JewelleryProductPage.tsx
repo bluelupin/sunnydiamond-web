@@ -289,6 +289,19 @@ const JewelleryProductPage = ({
     return () => window.removeEventListener("popstate", syncCategoryFromBrowserUrl);
   }, []);
 
+  /** /search keeps its own URL: filters and sort are added next to q, never a listing path. */
+  const replaceSearchUrl = useCallback(
+    (params: URLSearchParams) => {
+      if (!searchQuery) return;
+      const next = new URLSearchParams({ q: searchQuery });
+      params.forEach((value, key) => {
+        if (key !== "q" && key !== "category") next.append(key, value);
+      });
+      window.history.replaceState(window.history.state, "", `/search?${next.toString()}`);
+    },
+    [searchQuery],
+  );
+
   const navigateToCategory = useCallback(
     (urlKey?: string | null) => {
       const nextUrlKey = urlKey?.trim() || null;
@@ -393,16 +406,21 @@ const JewelleryProductPage = ({
     lastFancyColourSlugRef.current = null;
     lastPriceParamsRef.current = "|";
     facetsSyncedRef.current = true;
-    replaceJewelleryListingUrl(null, new URLSearchParams());
 
-    const currentPath =
-      typeof window !== "undefined" ? window.location.pathname : pathname ?? JEWELLERY_PATH;
-    if (currentPath !== JEWELLERY_PATH && currentPath !== `${JEWELLERY_PATH}/`) {
-      router.replace(JEWELLERY_PATH, { scroll: false });
+    if (searchQuery) {
+      replaceSearchUrl(new URLSearchParams());
+    } else {
+      replaceJewelleryListingUrl(null, new URLSearchParams());
+
+      const currentPath =
+        typeof window !== "undefined" ? window.location.pathname : pathname ?? JEWELLERY_PATH;
+      if (currentPath !== JEWELLERY_PATH && currentPath !== `${JEWELLERY_PATH}/`) {
+        router.replace(JEWELLERY_PATH, { scroll: false });
+      }
     }
 
     setListingResetNonce((nonce) => nonce + 1);
-  }, [pathname, router]);
+  }, [pathname, router, searchQuery, replaceSearchUrl]);
 
   useEffect(() => {
     if (!awaitingClearListingRef.current || isLoading) {
@@ -546,7 +564,8 @@ const JewelleryProductPage = ({
     (nextFilters: JewelleryFilterState) => {
       // All-jewellery drawer: selecting one main category should behave like the tabs
       // so the next open shows that category's subfilters (not the mixed main list).
-      if (!selectedCategoryUrlKey) {
+      // On /search it stays a filter: moving to the category page would drop the search.
+      if (!selectedCategoryUrlKey && !searchQuery) {
         const mainCategoryUrlKey = resolveMainCategoryUrlKeyFromDrawerSelection(
           nextFilters.categories,
           facets,
@@ -578,7 +597,9 @@ const JewelleryProductPage = ({
         const params = readJewelleryListingUrlParams(searchParams?.toString());
         applyJewelleryPriceSearchParams(params, nextFilters, facets);
 
-        if (
+        if (searchQuery) {
+          replaceSearchUrl(params);
+        } else if (
           hasPrimaryListingContext(params) ||
           nextFilters.collection.trim() ||
           nextFilters.occasion.trim()
@@ -600,6 +621,8 @@ const JewelleryProductPage = ({
       searchParams,
       navigateToCategory,
       resetPlpListingScope,
+      searchQuery,
+      replaceSearchUrl,
     ],
   );
 
@@ -611,6 +634,11 @@ const JewelleryProductPage = ({
     (mutate: (params: URLSearchParams) => void) => {
       const params = readJewelleryListingUrlParams(searchParams?.toString());
       mutate(params);
+
+      if (searchQuery) {
+        replaceSearchUrl(params);
+        return;
+      }
 
       const currentPath =
         typeof window !== "undefined" ? window.location.pathname : pathname ?? JEWELLERY_PATH;
@@ -625,7 +653,7 @@ const JewelleryProductPage = ({
         router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
       }
     },
-    [pathname, router, searchParams, selectedCategoryUrlKey],
+    [pathname, router, searchParams, selectedCategoryUrlKey, searchQuery, replaceSearchUrl],
   );
 
   const handleSortChange = useCallback(

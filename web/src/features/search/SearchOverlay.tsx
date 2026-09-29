@@ -66,6 +66,9 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
   const { query, active, result, loading, failed } = useQuickSearch(text);
   const { popular } = useSearchSuggestions(open);
   const lastTracked = useRef("");
+  // Radix returns focus to a Dialog.Trigger; the header icons are plain buttons, so remember
+  // what had focus when search opened and give it back on close.
+  const returnFocus = useRef<HTMLElement | null>(null);
 
   // A new result set starts with nothing highlighted, so Enter goes to the results page.
   const listKey = active ? (result?.query ?? "") : "empty";
@@ -188,7 +191,7 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
       event.preventDefault();
       if (activeOption) {
         go(activeOption.href, activeOption.recent, activeOption);
-      } else if (query) {
+      } else if (active) {
         go(searchResultsHref(query), query);
       }
     }
@@ -205,7 +208,12 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
           className="fixed inset-0 z-[61] flex flex-col bg-white md:inset-x-0 md:bottom-auto md:max-h-[85vh]"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
+            returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             (event.currentTarget as HTMLElement).querySelector("input")?.focus();
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (returnFocus.current?.isConnected) returnFocus.current.focus();
           }}
         >
           <DialogPrimitive.Title className="sr-only">Search Sunny Diamonds</DialogPrimitive.Title>

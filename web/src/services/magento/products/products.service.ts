@@ -34,6 +34,7 @@ import {
   createEmptyFilterState,
   getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
+  hasActiveFilters,
   isDefaultPriceRange,
   PAGE_SIZE,
 } from "@/features/jewellery-product/data/filters";
@@ -344,8 +345,10 @@ async function fetchMagentoJewelleryProducts({
 
   // Search results keep Magento's relevance order unless the shopper picks a sort.
   const sort = search && sortValue === "featured" ? { relevance: "DESC" } : mapJewellerySortToMagento(sortValue);
-  // Magento counts every search call as a search; only the first page of results counts here.
-  const searchLogHeaders = search && page > 1 ? SEARCH_SUGGEST_HEADERS : undefined;
+  // Magento counts every search call as a search. Only the plain first page counts: a later
+  // page, a sort or a filter would add to the term's popularity and overwrite its result count.
+  const countsAsSearch = page === 1 && sortValue === "featured" && !hasActiveFilters(filters, facets);
+  const searchLogHeaders = search && !countsAsSearch ? SEARCH_SUGGEST_HEADERS : undefined;
 
   const fetchProducts = () =>
     magentoGraphqlFetch<MagentoProductsResponse>({

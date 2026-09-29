@@ -110,13 +110,18 @@ function toLinks(links: SearchConfigLink[] | null | undefined): Array<SearchLink
   });
 }
 
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** Matches `phrase` as whole words inside `text` ("emi" in "emi plan", not in "premium"). */
+const wordsPattern = (phrase: string, openEnd = false) =>
+  new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegExp(phrase)}${openEnd ? "" : "($|[^\\p{L}\\p{N}])"}`, "iu");
+
 /** "emi" matches keyword "emi"; "store near me" matches "near me"; "certif" matches "certification". */
 function keywordMatches(query: string, keywords: string[]): boolean {
   const q = query.toLowerCase();
   return keywords.some(
     (keyword) =>
       q === keyword ||
-      (keyword.length >= 3 && q.includes(keyword)) ||
+      wordsPattern(keyword).test(q) ||
       (q.length >= 3 && keyword.startsWith(q)),
   );
 }
@@ -202,7 +207,7 @@ async function searchArticles(query: string, config: SearchConfig | null): Promi
     [],
   );
   // Strapi matches inside words ("emi" in "Premium"); keep posts where the query starts a word.
-  const wordStart = new RegExp(`(^|[^\\p{L}\\p{N}])${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "iu");
+  const wordStart = wordsPattern(query, true);
   const blog = posts.flatMap((post) =>
     post?.title && post.slug && wordStart.test(`${post.title} ${post.excerpt ?? ""}`)
       ? [{ label: post.title, href: `/blogs/${post.slug}`, detail: "Blog" }]
@@ -213,12 +218,13 @@ async function searchArticles(query: string, config: SearchConfig | null): Promi
 }
 
 export async function quickSearch(query: string): Promise<QuickSearchResult> {
-  const config = await getSearchConfig();
-  const [products, categories, collections, articles] = await Promise.all([
+  const configRequest = getSearchConfig();
+  const [products, categories, collections, articles, config] = await Promise.all([
     settle(searchProducts(query), []),
     settle(searchCategories(query), []),
     settle(searchCollections(query), []),
-    searchArticles(query, config),
+    configRequest.then((loaded) => searchArticles(query, loaded)),
+    configRequest,
   ]);
   const services = toLinks(config?.serviceShortcuts)
     .filter((link) => keywordMatches(query, link.keywords))
