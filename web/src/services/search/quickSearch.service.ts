@@ -77,7 +77,7 @@ type SearchConfig = {
   educationLinks?: SearchConfigLink[] | null;
 };
 
-type BlogPost = { title?: string | null; slug?: string | null };
+type BlogPost = { title?: string | null; slug?: string | null; excerpt?: string | null };
 
 async function settle<T>(promise: Promise<T>, fallback: T): Promise<T> {
   try {
@@ -193,15 +193,20 @@ async function searchArticles(query: string, config: SearchConfig | null): Promi
         "filters[$or][1][excerpt][$containsi]": query,
         "fields[0]": "title",
         "fields[1]": "slug",
-        "pagination[pageSize]": 2,
+        "fields[2]": "excerpt",
+        "pagination[pageSize]": 10,
         sort: "publishedAt:desc",
       },
       next: { revalidate: RESULT_CACHE_SECONDS },
     }),
     [],
   );
+  // Strapi matches inside words ("emi" in "Premium"); keep posts where the query starts a word.
+  const wordStart = new RegExp(`(^|[^\\p{L}\\p{N}])${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "iu");
   const blog = posts.flatMap((post) =>
-    post?.title && post.slug ? [{ label: post.title, href: `/blogs/${post.slug}`, detail: "Blog" }] : [],
+    post?.title && post.slug && wordStart.test(`${post.title} ${post.excerpt ?? ""}`)
+      ? [{ label: post.title, href: `/blogs/${post.slug}`, detail: "Blog" }]
+      : [],
   );
 
   return [...education, ...blog].slice(0, 2);
