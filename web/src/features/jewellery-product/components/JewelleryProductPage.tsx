@@ -194,8 +194,11 @@ const JewelleryProductPage = ({
         })
       : undefined;
 
-  // /search has no category path, so a main category picked in the drawer lives in ?category=.
-  const searchCategoryUrlKey = searchQuery ? resolveCategoryUrlKeyFromQueryParam(searchParams?.get("category")) : null;
+  // /search has no category path, so a main category picked in the drawer lives in ?category=
+  // (read once on load; the URL is written with history.replaceState, which the hook does not see).
+  const [searchCategoryUrlKey, setSearchCategoryUrlKey] = useState(() =>
+    searchQuery ? resolveCategoryUrlKeyFromQueryParam(searchParams?.get("category")) : null,
+  );
   const listingCategoryUrlKey = searchQuery ? searchCategoryUrlKey : selectedCategoryUrlKey;
 
   const {
@@ -413,6 +416,7 @@ const JewelleryProductPage = ({
     facetsSyncedRef.current = true;
 
     if (searchQuery) {
+      setSearchCategoryUrlKey(null);
       replaceSearchUrl(new URLSearchParams());
     } else {
       replaceJewelleryListingUrl(null, new URLSearchParams());
@@ -578,6 +582,7 @@ const JewelleryProductPage = ({
         );
         const categoryParam = resolveCategoryQueryParamFromUrlKey(mainCategoryUrlKey);
         if (categoryParam) {
+          setSearchCategoryUrlKey(mainCategoryUrlKey);
           setFilters({ ...nextFilters, categories: [] });
           setIsFilterOpen(false);
           const params = readJewelleryListingUrlParams(searchParams?.toString());
