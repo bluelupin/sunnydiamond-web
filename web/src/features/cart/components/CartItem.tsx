@@ -170,7 +170,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       ) : null}
 
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
+        <div className="flex min-w-0 flex-1 gap-1 lg:max-w-[499.5px] lg:gap-6">
           <Link
             href={productViewHref}
             onClick={(event) => {

@@ -20,6 +20,7 @@ import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.ty
 import type { CustomerAddress } from "@/services/customer/customer-account.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
 import { isCheckoutEmailContact } from "@/shared/utils/formValidation";
+import Image from "next/image";
 
 type CheckoutFormValidationProps = {
   errors: Partial<Record<CheckoutFormField, string | undefined>>;
@@ -365,13 +366,34 @@ const RazorpaySecureNote = () => (
 const PaymentCardLogos = () => (
   <div className="flex h-6 items-center gap-2">
     <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
-      <VisaLogo className="h-4 w-10" />
+      <Image
+        src="/images/card-1.svg"
+        alt="Card-3"
+        width="40"
+        height="24"
+        aria-hidden
+        className="h-10 h-6shrink-0"
+      />
     </div>
     <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
-      <MastercardLogo className="h-6 w-10" />
+      <Image
+        src="/images/card-2.svg"
+        alt="Card-3"
+        width="40"
+        height="24"
+        aria-hidden
+        className="h-10 h-6shrink-0"
+      />
     </div>
     <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
-      <AmexLogo className="h-6 w-10" />
+      <Image
+        src="/images/card-3.svg"
+        alt="Card-3"
+        width="40"
+        height="24"
+        aria-hidden
+        className="h-10 h-6shrink-0"
+      />
     </div>
   </div>
 );
@@ -464,7 +486,6 @@ export const CheckoutPaymentStep = ({
         <CheckoutSectionHeading onEdit={onEditPayment} editDisabled={editDisabled}>
           Payment Method
         </CheckoutSectionHeading>
-
         {noPaymentNeeded ? (
           <CheckoutSummaryText>No payment needed: your gift card covers this order.</CheckoutSummaryText>
         ) : (
@@ -478,27 +499,21 @@ export const CheckoutPaymentStep = ({
               />
               {payment.method === "card" ? <PaymentCardLogos /> : null}
             </div>
-
             {payment.method === "card" ? <RazorpaySecureNote /> : null}
-
             <CheckoutRadioRow
               checked={payment.method === "upi"}
               onChange={() => onPaymentChange("method", "upi")}
               label="UPI"
               disabled={fieldsDisabled}
             />
-
             {payment.method === "upi" ? <RazorpaySecureNote /> : null}
-
             <CheckoutRadioRow
               checked={payment.method === "netbanking"}
               onChange={() => onPaymentChange("method", "netbanking")}
               label="Net Banking"
               disabled={fieldsDisabled}
             />
-
             {payment.method === "netbanking" ? <RazorpaySecureNote /> : null}
-
             <div className="flex flex-col gap-2">
               <CheckoutRadioRow
                 checked={payment.method === "cod"}

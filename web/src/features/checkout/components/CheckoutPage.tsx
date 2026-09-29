@@ -923,9 +923,9 @@ const CheckoutPage = () => {
   return (
     <section
       className={cn(
-        "bg-gray300 lg:pb-16",
+        "bg-gray300 lg:pb-104",
         "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
-        "md:max-lg:pb-16",
+        "pb-16",
       )}
     >
       <div className="mx-auto w-full px-4 pt-6 md:pt-10 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
