@@ -104,6 +104,7 @@ const CheckoutAddressFields = ({
     <CheckoutField
       id={`${idPrefix}-name`}
       label="Your Name"
+      placeholder="Enter Your Name"
       value={form[fields.name] as string}
       onChange={(value) => onChange(fields.name, value)}
       onBlur={() => validation.markTouched(fields.name)}
@@ -114,6 +115,7 @@ const CheckoutAddressFields = ({
     <CheckoutField
       id={`${idPrefix}-address-1`}
       label="Address Line 1"
+      placeholder="Enter Address Line 1"
       value={form[fields.addressLine1] as string}
       onChange={(value) => onChange(fields.addressLine1, value)}
       onBlur={() => validation.markTouched(fields.addressLine1)}
@@ -125,8 +127,9 @@ const CheckoutAddressFields = ({
     />
     <CheckoutField
       id={`${idPrefix}-address-2`}
-      label="Address Line 2"
-      optional
+      label="Address Line 2 (Optional)"
+      placeholder="Enter Address Line 2"
+      // optional
       value={form[fields.addressLine2] as string}
       onChange={(value) => onChange(fields.addressLine2, value)}
       onBlur={() => validation.markTouched(fields.addressLine2)}
@@ -140,6 +143,7 @@ const CheckoutAddressFields = ({
       <CheckoutField
         id={`${idPrefix}-pincode`}
         label="Pincode"
+        placeholder="Enter Pin Code"
         value={form[fields.pincode] as string}
         onChange={(value) => onChange(fields.pincode, value)}
         onBlur={() => validation.markTouched(fields.pincode)}
@@ -150,6 +154,7 @@ const CheckoutAddressFields = ({
       <CheckoutField
         id={`${idPrefix}-city`}
         label="City"
+        placeholder="Enter City"
         value={form[fields.city] as string}
         onChange={(value) => onChange(fields.city, value)}
         onBlur={() => validation.markTouched(fields.city)}
@@ -172,6 +177,7 @@ const CheckoutAddressFields = ({
     <CheckoutPhoneField
       id={`${idPrefix}-phone`}
       label="Phone Number"
+      placeholder="Enter Phone Number"
       value={form[fields.phone] as string}
       onChange={(value) => onChange(fields.phone, value)}
       onBlur={() => validation.markTouched(fields.phone)}
@@ -231,6 +237,7 @@ export const CheckoutFormStep = ({
         <CheckoutField
           id="checkout-name"
           label="Your Name*"
+          placeholder="Enter Your Name"
           value={form.name}
           onChange={(value) => onChange("name", value)}
           onBlur={() => validation.markTouched("name")}
@@ -241,7 +248,8 @@ export const CheckoutFormStep = ({
         {isAuthenticated ? (
           <CheckoutField
             id="checkout-email"
-            label="Email"
+            label="Phone No./Email ID"
+            placeholder="Enter Phone No./ Email ID"
             type="email"
             value={form.phoneOrEmail}
             onChange={(value) => onChange("phoneOrEmail", value)}
@@ -253,7 +261,8 @@ export const CheckoutFormStep = ({
         ) : (
           <CheckoutPhoneField
             id="checkout-phone-email"
-            label={emailOnly ? "Email ID*" : "PhoneNo / Email ID"}
+            label="Phone No./Email ID"
+            placeholder="Enter Phone No./ Email ID"
             mode={emailOnly ? "email" : "phoneOrEmail"}
             value={form.phoneOrEmail}
             onChange={(value) => onChange("phoneOrEmail", value)}
@@ -319,15 +328,6 @@ export const CheckoutFormStep = ({
               form={form}
               onChange={onChange}
               validation={validation}
-              disabled={fieldsDisabled}
-            />
-          ) : null}
-
-          {isAuthenticated ? (
-            <CheckoutCheckbox
-              checked={form.saveAddressToProfile}
-              onChange={(checked) => onChange("saveAddressToProfile", checked)}
-              label="Save this address to my profile"
               disabled={fieldsDisabled}
             />
           ) : null}

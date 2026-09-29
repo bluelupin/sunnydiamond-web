@@ -28,6 +28,7 @@ import {
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
 import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, validateRequiredEmail } from "@/shared/utils/formValidation";
+import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
 import { isCodOfferedByBackend } from "@/services/magento/cart/checkoutPayment.mapper";
 import {
   createEmptyCheckoutForm,
@@ -938,9 +939,7 @@ const CheckoutPage = () => {
         </h1>
 
         <div
-          className={cn(
-            "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6",
-          )}
+          className={cn(cartCheckoutAsideLayout.gridClassName)}
         >
           <div className={cn("flex min-w-0 flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
             {step === "form" ? (

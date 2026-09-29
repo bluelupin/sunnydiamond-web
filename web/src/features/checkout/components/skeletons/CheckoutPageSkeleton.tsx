@@ -1,3 +1,4 @@
+import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
 import { cn } from "@/shared/utils/cn";
 
 const pulse = "animate-pulse bg-gray200";
@@ -114,7 +115,7 @@ const CheckoutPageSkeleton = () => {
 
         <div
           className={cn(
-            "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6",
+            cartCheckoutAsideLayout.gridClassName,
           )}
         >
           <div className="flex min-w-0 flex-col gap-6">

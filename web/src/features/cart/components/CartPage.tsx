@@ -13,6 +13,7 @@ import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
 import type { NormalizedProductDisplayStrip } from "@/services/product-display/product-display-page.types";
 import CartEmptyState from "./CartEmptyState";
 import CartRefreshErrorState from "./CartRefreshErrorState";
+import { cartCheckoutAsideLayout } from "../data/cartFlowSpec";
 import CartPageSkeleton from "./skeletons/CartPageSkeleton";
 
 type CartPageProps = {
@@ -84,13 +85,12 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
 
           <div
             className={cn(
-              "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6",
+              cartCheckoutAsideLayout.gridClassName,
               isNavigatingToCheckout && "pointer-events-none",
             )}
             aria-busy={isNavigatingToCheckout || isUpdating || undefined}
           >
-            <div
-              className="flex min-w-0 flex-col gap-6"
+            <div className="flex min-w-0 flex-col gap-6"
               {...(isNavigatingToCheckout ? { inert: true } : {})}
             >
               {items.map((item) => (
@@ -108,8 +108,12 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
 
               <MobileStickyFooterSpacer height={clearancePx} />
             </div>
-
-            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex">
+            <aside
+              className={cn(
+                cartCheckoutAsideLayout.asideClassName,
+                "hidden h-fit min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex",
+              )}
+            >
               <CartPriceDetails />
               <CartBenefitsSection strip={benefitsStrip} />
             </aside>

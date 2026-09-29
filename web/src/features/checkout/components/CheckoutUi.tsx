@@ -149,6 +149,7 @@ type CheckoutPhoneFieldProps = {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  placeholder?: string;
   countryCode?: string;
   onCountryCodeChange?: (code: string) => void;
   verified?: boolean;
@@ -168,6 +169,7 @@ export const CheckoutPhoneField = ({
   value,
   onChange,
   onBlur,
+  placeholder = "Enter",
   countryCode = DEFAULT_COUNTRY_CODE,
   onCountryCodeChange,
   verified,
@@ -182,57 +184,57 @@ export const CheckoutPhoneField = ({
   const shouldShowVerify = showVerify;
 
   return (
-  <div className="flex flex-col gap-2">
-    <CheckoutFieldLabel id={id} label={label} optional={optional} />
-    <div
-      className={cn(
-        "relative flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
-        disabled && "cursor-not-allowed opacity-60",
-        invalid && invalidFieldContainerClassName,
-      )}
-    >
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        {!isEmailInput ? (
-          <PhoneCountryCodeSelect
-            id={`${id}-country-code`}
-            value={countryCode}
-            onChange={(code) => onCountryCodeChange?.(code)}
-            disabled={disabled || !onCountryCodeChange}
+    <div className="flex flex-col gap-2">
+      <CheckoutFieldLabel id={id} label={label} optional={optional} />
+      <div
+        className={cn(
+          "relative flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
+          disabled && "cursor-not-allowed opacity-60",
+          invalid && invalidFieldContainerClassName,
+        )}
+      >
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {!isEmailInput ? (
+            <PhoneCountryCodeSelect
+              id={`${id}-country-code`}
+              value={countryCode}
+              onChange={(code) => onCountryCodeChange?.(code)}
+              disabled={disabled || !onCountryCodeChange}
+            />
+          ) : null}
+          <input
+            id={id}
+            type={isEmailInput ? "email" : "tel"}
+            inputMode={isEmailInput ? "email" : "numeric"}
+            value={value}
+            disabled={disabled}
+            onChange={(event) => onChange(event.target.value)}
+            onBlur={onBlur}
+            placeholder={placeholder}
+            autoComplete={isEmailInput ? "email" : "tel"}
+            aria-invalid={invalid || undefined}
+            aria-describedby={error ? `${id}-error` : undefined}
+            className={cn(
+              "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+              disabled && "cursor-not-allowed",
+            )}
           />
+        </div>
+        {shouldShowVerify ? (
+          verified ? (
+            <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 10.75L6.25 16L18.25 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Verified
+            </span>
+          ) : (
+            <DetailTextLink onClick={onVerify} disabled={disabled}>VERIFY</DetailTextLink>
+          )
         ) : null}
-        <input
-          id={id}
-          type={isEmailInput ? "email" : "tel"}
-          inputMode={isEmailInput ? "email" : "numeric"}
-          value={value}
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
-          placeholder="Enter"
-          autoComplete={isEmailInput ? "email" : "tel"}
-          aria-invalid={invalid || undefined}
-          aria-describedby={error ? `${id}-error` : undefined}
-          className={cn(
-            "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-            disabled && "cursor-not-allowed",
-          )}
-        />
       </div>
-      {shouldShowVerify ? (
-        verified ? (
-          <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 10.75L6.25 16L18.25 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Verified
-          </span>
-        ) : (
-          <DetailTextLink onClick={onVerify} disabled={disabled}>VERIFY</DetailTextLink>
-        )
-      ) : null}
+      <FormFieldError id={`${id}-error`} message={error} />
     </div>
-    <FormFieldError id={`${id}-error`} message={error} />
-  </div>
   );
 };
 
@@ -264,7 +266,7 @@ export const CheckoutSectionHeading = ({
   editDisabled = false,
 }: CheckoutSectionHeadingProps) => (
   <div className="flex items-center justify-between gap-4">
-    <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">{children}</h2>
+    <h2 className="font-gill md:text-2xl text-xl font-normal leading-110 text-darkblack">{children}</h2>
     {/* {onEdit ? (
       <DetailTextLink
         onClick={onEdit}
@@ -307,27 +309,27 @@ export const CheckoutCheckbox = ({
   const isLocked = Boolean(readOnly || disabled);
 
   return (
-  <label className={cn("flex items-center gap-2", isLocked ? "cursor-default" : "cursor-pointer")}>
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      onClick={() => !isLocked && onChange(!checked)}
-      disabled={isLocked}
-      className={cn(
-        "flex size-4 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
-        checked && "border-transparent bg-linkGold",
-        isLocked && "cursor-not-allowed",
-        disabled && "opacity-60",
-      )}
-    >
-      <Check
-        className={cn("size-3 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
-        strokeWidth={2.5}
-      />
-    </button>
-    <span className="flex h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
-  </label>
+    <label className={cn("flex items-center gap-2", isLocked ? "cursor-default" : "cursor-pointer")}>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={checked}
+        onClick={() => !isLocked && onChange(!checked)}
+        disabled={isLocked}
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
+          checked && "border-transparent bg-linkGold",
+          isLocked && "cursor-not-allowed",
+          disabled && "opacity-60",
+        )}
+      >
+        <Check
+          className={cn("size-3 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
+          strokeWidth={2.5}
+        />
+      </button>
+      <span className="flex h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
+    </label>
   );
 };
 

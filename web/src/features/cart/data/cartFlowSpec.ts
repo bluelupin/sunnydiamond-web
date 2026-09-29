@@ -204,3 +204,10 @@ export const cartFlowSpec = {
     },
   },
 } as const;
+
+/** Shared cart/checkout two-column page layout — Figma sidebar 553px */
+export const cartCheckoutAsideLayout = {
+  gridClassName:
+    "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6",
+  asideClassName: "w-full max-w-[553px] lg:justify-self-end",
+} as const;
