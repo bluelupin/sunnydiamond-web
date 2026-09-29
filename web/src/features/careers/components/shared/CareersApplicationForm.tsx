@@ -576,7 +576,7 @@ const CareersApplicationForm = () => {
           <div className="flex flex-col gap-4">
             <h2 className={careersFormSectionTitleClassName}>{applicationForm.resumeHeading}</h2>
             <p className="font-gill text-base font-light leading-110 text-darkblack">
-              {applicationForm.resumeHint}
+              *{applicationForm.resumeHint}
             </p>
           </div>
 
