@@ -4,6 +4,7 @@ import { cn } from "@/shared/utils/cn";
 import type { CareerJob } from "@/features/careers/types";
 import {
   formatCareerDepartmentLabel,
+  formatCareerExperienceLabel,
   formatCareerJobTitle,
 } from "@/features/careers/utils/careersFormatting";
 import CareersJobMetaIcon from "./CareersJobMetaIcon";
@@ -70,7 +71,7 @@ const CareersJobMetaRow = ({
         <>
           <FigmaMetaItem
             icon="experience"
-            label={job.experienceLabel}
+            label={formatCareerExperienceLabel(job.experienceLabel)}
             iconClassName={iconClassName}
           />
           <MetaDivider />

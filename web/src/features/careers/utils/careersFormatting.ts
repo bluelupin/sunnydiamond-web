@@ -11,6 +11,18 @@ export function formatCareerJobTitle(title: string): string {
     .join(" ");
 }
 
+/** e.g. `Years 2-4` → `2-4 yrs`, `Years 6+` → `6+ yrs`; labels without a range or `+` stay as-is. */
+export function formatCareerExperienceLabel(experience: string): string {
+  const trimmed = experience.trim();
+  const range = trimmed.match(/(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)/i);
+  if (range) return `${range[1]}-${range[2]} yrs`;
+
+  const openEnded = trimmed.match(/(\d+(?:\.\d+)?)\s*\+/);
+  if (openEnded) return `${openEnded[1]}+ yrs`;
+
+  return trimmed;
+}
+
 /** e.g. `HR & ADMINISTRATION` → `HR & Administration`, `SALES` → `Sales` */
 export function formatCareerDepartmentLabel(department: string): string {
   return department
