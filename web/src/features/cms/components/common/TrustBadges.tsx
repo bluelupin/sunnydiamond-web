@@ -93,7 +93,7 @@ function TrustBadgeMarquee({
     <section
       id={id}
       className={cn(
-        pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300",
+        pathName === "/cart" || pathName === "/checkout" ? "bg-gray300" : "bg-gray300",
         "shrink-0 overflow-hidden border-t border-ivory/10 text-ivory", className
       )}
     >

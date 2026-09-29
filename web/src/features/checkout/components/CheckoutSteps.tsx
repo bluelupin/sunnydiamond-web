@@ -367,7 +367,7 @@ const PaymentCardLogos = () => (
     {PAYMENT_CARD_LOGOS.map(({ src, alt }) => (
       <div
         key={src}
-        className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-[4px] bg-white"
+        className="flex sm:h-6 sm:w-10 w-8 h-6 items-center justify-center overflow-hidden rounded-[4px] bg-white"
       >
         <Image
           src={src}
@@ -375,7 +375,7 @@ const PaymentCardLogos = () => (
           width={40}
           height={24}
           aria-hidden
-          className="h-6 w-10 shrink-0 object-contain"
+          className="sm:h-6 sm:w-10 w-8 h-6 shrink-0 object-contain"
         />
       </div>
     ))}

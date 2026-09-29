@@ -135,17 +135,14 @@ const Footer = ({ className }: { className?: string }) => {
     <footer
       className={cn(
         pathName === "/checkout" || (pathName === "/cart" && !isCartEmptyPageShell)
-          ? "bg-gray200"
+          ? "bg-gray300"
           : "bg-gray300",
         className,
         pathName === "/jewellery" && "md:pb-0 pb-16",
       )}
     >
       <FooterTrustBadgeSection
-        className={cn(
-          "md:flex hidden",
-          pathName === "/cart" && isCartEmptyPageShell && "bg-gray300",
-        )}
+        className={cn("md:flex hidden", pathName === "/cart" && isCartEmptyPageShell && "bg-gray300",)}
       />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:pt-104 lg:pb-104 md:pt-16 md:pb-16 pt-8 pb-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
