@@ -523,6 +523,14 @@ export type NormalizedCareerListingPage = {
     departments: string[];
     experiences: string[];
   };
+  /** Values allowed on the CMS job opening type; filter labels and job values map onto these. */
+  valueOptions: CareerValueOptions;
+};
+
+export type CareerValueOptions = {
+  locations: string[];
+  departments: string[];
+  experiences: string[];
 };
 
 export type NormalizedCareerLandingPage = {
@@ -578,6 +586,11 @@ export const EMPTY_CAREER_LISTING_PAGE: NormalizedCareerListingPage = {
   closeFiltersLabel: null,
   emptyResultsMessage: null,
   filterOptions: {
+    locations: [],
+    departments: [],
+    experiences: [],
+  },
+  valueOptions: {
     locations: [],
     departments: [],
     experiences: [],

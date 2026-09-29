@@ -2,6 +2,7 @@ import type { CareerBenefit, CareerJobType } from "@/features/careers/types";
 import { formatCareerJobTitle } from "@/features/careers/utils/careersFormatting";
 import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
+  CareerValueOptions,
   NormalizedCareerApplicationFlow,
   NormalizedCareerBenefitsSection,
   NormalizedCareerDiscoverSection,
@@ -896,47 +897,38 @@ export const mapCareerListingPage = (
     closeFiltersLabel: cleanText(raw.closeFiltersLabel) ?? null,
     emptyResultsMessage: cleanText(raw.emptyResultsMessage) ?? null,
     filterOptions,
+    valueOptions: EMPTY_CAREER_LISTING_PAGE.valueOptions,
   };
-};
-
-export type CareerFilterEnums = {
-  locations: string[];
-  departments: string[];
-  experiences: string[];
 };
 
 export const mapCareersPageData = ({
   landing,
   listing,
   openings,
-  filterEnums,
+  valueOptions,
 }: {
   landing?: StrapiCareerLandingPageEntity | null;
   listing?: StrapiCareerListingPageEntity | null;
   openings?: StrapiCareerOpeningEntity[] | null;
-  filterEnums?: CareerFilterEnums | null;
+  valueOptions?: CareerValueOptions | null;
 }): NormalizedCareersPageData => {
   const mappedLanding = mapCareerLandingPage(landing);
-  const mappedListing = mapCareerListingPage(listing);
+  const mappedListing = {
+    ...mapCareerListingPage(listing),
+    ...(valueOptions ? { valueOptions } : {}),
+  };
   const mappedJobs = mapCareerOpenings(openings);
 
   const derivedFilters = deriveFilterOptionsFromJobs(mappedJobs);
-  const listingFilters =
+  const listingWithFilters =
     mappedListing.filterOptions.locations.length > 0 ||
     mappedListing.filterOptions.departments.length > 0 ||
     mappedListing.filterOptions.experiences.length > 0
-      ? mappedListing.filterOptions
-      : derivedFilters;
-  const pickFilterOptions = (fromCms: string[] | undefined, fallback: string[]) =>
-    fromCms && fromCms.length > 0 ? fromCms : fallback;
-  const listingWithFilters = {
-    ...mappedListing,
-    filterOptions: {
-      locations: pickFilterOptions(filterEnums?.locations, listingFilters.locations),
-      departments: pickFilterOptions(filterEnums?.departments, listingFilters.departments),
-      experiences: pickFilterOptions(filterEnums?.experiences, listingFilters.experiences),
-    },
-  };
+      ? mappedListing
+      : {
+          ...mappedListing,
+          filterOptions: derivedFilters,
+        };
 
   const openingsCopy = mappedLanding.openings;
   const listingWithLandingFallback = {

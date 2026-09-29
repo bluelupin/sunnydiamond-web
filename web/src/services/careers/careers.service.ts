@@ -2,8 +2,9 @@ import { cache } from "react";
 import { apiFetch } from "@/api/fetchClient";
 import { getStrapiApiToken } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { mapCareerOpening, mapCareersPageData, type CareerFilterEnums } from "./careers.mapper";
+import { mapCareerOpening, mapCareersPageData } from "./careers.mapper";
 import type {
+  CareerValueOptions,
   NormalizedCareerJob,
   NormalizedCareersPageData,
   StrapiCareerLandingPageEntity,
@@ -131,10 +132,10 @@ const readSchemaEnum = (attribute?: CareerOpeningSchemaEnum): string[] =>
     ? attribute.enum.filter((value): value is string => typeof value === "string")
     : [];
 
-/** Dropdown choices configured on the CMS job opening type (not only values used by jobs). */
-async function fetchCareerOpeningFilterEnums(
+/** Location / department / experience values allowed on the CMS job opening type. */
+async function fetchCareerOpeningValueOptions(
   signal?: AbortSignal,
-): Promise<CareerFilterEnums | null> {
+): Promise<CareerValueOptions | null> {
   const fetchSchema = (authToken?: string) =>
     apiFetch<CareerOpeningSchemaResponse>(STRAPI_ENDPOINTS.careerOpeningSchema, {
       signal,
@@ -195,14 +196,14 @@ export const getCareersPageData = cache(
       openingsResult,
       landingSeoResult,
       listingSeoResult,
-      filterEnumsResult,
+      valueOptionsResult,
     ] = await Promise.allSettled([
       getCareerLandingPageRaw(signal),
       getCareerListingPageRaw(signal),
       getCareerOpeningsRaw(signal),
       fetchCareerPageSeo(STRAPI_ENDPOINTS.careerLandingPage, signal),
       fetchCareerPageSeo(STRAPI_ENDPOINTS.careerListingPage, signal),
-      fetchCareerOpeningFilterEnums(signal),
+      fetchCareerOpeningValueOptions(signal),
     ]);
 
     const landingSeo = landingSeoResult.status === "fulfilled" ? landingSeoResult.value : null;
@@ -218,7 +219,7 @@ export const getCareersPageData = cache(
         listingSeo,
       ),
       openings: openingsResult.status === "fulfilled" ? openingsResult.value : null,
-      filterEnums: filterEnumsResult.status === "fulfilled" ? filterEnumsResult.value : null,
+      valueOptions: valueOptionsResult.status === "fulfilled" ? valueOptionsResult.value : null,
     });
   },
 );

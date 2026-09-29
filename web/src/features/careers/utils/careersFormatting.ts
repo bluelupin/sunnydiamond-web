@@ -1,3 +1,4 @@
+import type { CareerValueOptions } from "@/services/careers/careers.types";
 import type { CareerJob } from "../types";
 
 /** Present CMS job titles in title case across careers UI. */
@@ -92,27 +93,98 @@ export type CareerJobFilters = {
   experience?: string;
 };
 
-/** Case-insensitive so CMS dropdown values (e.g. `NEW DELHI`, `Sales`) match older job values. */
-const matchesFilter = (jobValue: string | undefined, filterValue: string) =>
-  (jobValue ?? "").trim().toLowerCase() === filterValue.trim().toLowerCase();
+const EMPTY_CAREER_VALUE_OPTIONS: CareerValueOptions = {
+  locations: [],
+  departments: [],
+  experiences: [],
+};
+
+/** `HR & Administration`, `hr and administration` and `HR  &  ADMINISTRATION` compare equal. */
+const normalizeCareerValue = (value: string) =>
+  value.trim().toLowerCase().replace(/\s*&\s*/g, " and ").replace(/\s+/g, " ");
+
+/** Years range from an experience label; "Freshers" starts at 0 and `6+` has no upper limit. */
+function parseExperienceYears(label: string): { min: number; max: number } | null {
+  const numbers = label.match(/\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+  if (numbers.length === 0) {
+    return /fresher/i.test(label) ? { min: 0, max: 0 } : null;
+  }
+
+  const min = numbers[0];
+  const max = numbers.length > 1 ? numbers[1] : label.includes("+") ? Infinity : min;
+  return { min, max };
+}
+
+/**
+ * The CMS value a label or job value stands for: same name ignoring case and `&`/`and`,
+ * or for experience the range its starting year falls in (`Freshers` → `Years 0-2`, `5+ Yrs` → `Years 4-6`).
+ */
+export function toCareerValueOption(
+  value: string | undefined,
+  options: readonly string[],
+  matchByYears = false,
+): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed || options.length === 0) return undefined;
+
+  const normalized = normalizeCareerValue(trimmed);
+  const sameName = options.find((option) => normalizeCareerValue(option) === normalized);
+  if (sameName || !matchByYears) return sameName;
+
+  const years = parseExperienceYears(trimmed);
+  if (!years) return undefined;
+
+  return options.find((option) => {
+    const range = parseExperienceYears(option);
+    return (
+      range != null &&
+      years.min >= range.min &&
+      (years.min < range.max || years.min === range.min)
+    );
+  });
+}
+
+/** Compares the mapped CMS values; falls back to a case-insensitive match when either side has none. */
+const matchesFilter = (
+  jobValue: string | undefined,
+  filterValue: string,
+  options: readonly string[],
+  matchByYears = false,
+) => {
+  const jobOption = toCareerValueOption(jobValue, options, matchByYears);
+  const filterOption = toCareerValueOption(filterValue, options, matchByYears);
+  if (jobOption && filterOption) return jobOption === filterOption;
+
+  return (jobValue ?? "").trim().toLowerCase() === filterValue.trim().toLowerCase();
+};
 
 export function filterCareerJobs(
   jobs: readonly CareerJob[],
   query: string,
   filters: CareerJobFilters = {},
+  valueOptions: CareerValueOptions = EMPTY_CAREER_VALUE_OPTIONS,
 ): CareerJob[] {
   const normalized = query.trim().toLowerCase();
 
   return jobs.filter((job) => {
-    if (filters.location && !matchesFilter(job.location, filters.location)) {
+    if (
+      filters.location &&
+      !matchesFilter(job.location, filters.location, valueOptions.locations)
+    ) {
       return false;
     }
 
-    if (filters.department && !matchesFilter(job.department, filters.department)) {
+    if (
+      filters.department &&
+      !matchesFilter(job.department, filters.department, valueOptions.departments)
+    ) {
       return false;
     }
 
-    if (filters.experience && !matchesFilter(job.experienceLabel, filters.experience)) {
+    if (
+      filters.experience &&
+      !matchesFilter(job.experienceLabel, filters.experience, valueOptions.experiences, true)
+    ) {
       return false;
     }
 

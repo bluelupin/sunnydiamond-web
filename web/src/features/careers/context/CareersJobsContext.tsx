@@ -205,12 +205,17 @@ export function CareersJobsProvider({
 
   const filteredJobs = useMemo(
     () =>
-      filterCareerJobs(jobs, searchQuery, {
-        location: locationFilter || undefined,
-        department: departmentFilter || undefined,
-        experience: experienceFilter || undefined,
-      }),
-    [jobs, searchQuery, locationFilter, departmentFilter, experienceFilter],
+      filterCareerJobs(
+        jobs,
+        searchQuery,
+        {
+          location: locationFilter || undefined,
+          department: departmentFilter || undefined,
+          experience: experienceFilter || undefined,
+        },
+        cms.listing.valueOptions,
+      ),
+    [jobs, searchQuery, locationFilter, departmentFilter, experienceFilter, cms.listing.valueOptions],
   );
 
   const headerMode: CareersHeaderMode = headerModeForFlowStep(flowStep);

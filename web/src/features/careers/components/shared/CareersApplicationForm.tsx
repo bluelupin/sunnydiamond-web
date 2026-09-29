@@ -17,6 +17,7 @@ import {
   validateRequiredName,
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import { toCareerValueOption } from "@/features/careers/utils/careersFormatting";
 import CareersResumeAutofillLoading from "./CareersResumeAutofillLoading";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
@@ -516,13 +517,21 @@ const CareersApplicationForm = () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    const { valueOptions } = cms.listing;
+
     try {
       await submitCareerApplication({
         jobID: selectedJob.jobCode,
         jobTitle: selectedJob.title,
-        location: selectedJob.location,
-        department: selectedJob.department,
-        experience: selectedJob.experienceLabel,
+        location:
+          toCareerValueOption(selectedJob.location, valueOptions.locations) ??
+          selectedJob.location,
+        department:
+          toCareerValueOption(selectedJob.department, valueOptions.departments) ??
+          selectedJob.department,
+        experience:
+          toCareerValueOption(selectedJob.experienceLabel, valueOptions.experiences, true) ??
+          selectedJob.experienceLabel,
         personalDetails: {
           fullName: name.trim(),
           phone: `${countryCode}${phone.trim()}`,
