@@ -230,7 +230,7 @@ export const CheckoutFormStep = ({
   onSelectSavedShippingAddress,
   fieldsDisabled = false,
 }: CheckoutFormStepProps) => (
-  <div className="flex flex-col gap-6">
+  <div className="flex flex-col md:gap-6 gap-4">
     <CheckoutSectionCard>
       <CheckoutSectionHeading>Personal Information</CheckoutSectionHeading>
       <div className="space-y-4">
@@ -311,8 +311,8 @@ export const CheckoutFormStep = ({
             />
           </div>
 
-          <div className="lg:space-y-6 space-y-4">
-            <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
+          <div className="flex flex-col lg:gap-6 gap-4">
+            <CheckoutSubheading className="md:!text-xl !text-base">BILLING ADDRESS</CheckoutSubheading>
             <CheckoutCheckbox
               checked={form.billingSameAsShipping}
               onChange={(checked) => onChange("billingSameAsShipping", checked)}

@@ -29,7 +29,7 @@ const CheckoutOrderSummaryItem = ({ item }: { item: CartLineItem }) => {
   const isGift = Boolean(item.gifting || item.options.isGift);
 
   return (
-    <div className="relative flex items-start gap-6 bg-gray300 px-4 py-6">
+    <div className="relative flex items-start gap-6 bg-gray200 px-4 py-6">
       {isGift ? (
         <CartGiftBadge className="absolute left-0 top-0 z-10" />
       ) : null}
@@ -41,7 +41,7 @@ const CheckoutOrderSummaryItem = ({ item }: { item: CartLineItem }) => {
       <div className="flex w-[214px] max-w-[214px] shrink-0 flex-col gap-2">
         <p
           className={cn(
-            "font-gill text-base font-normal leading-normal tracking-[0.16px] text-darkblack",
+            "font-gill text-base font-normal leading-[100%] tracking-[1%] text-darkblack",
             productNameDisplayClassName,
           )}
         >

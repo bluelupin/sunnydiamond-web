@@ -664,7 +664,7 @@ const CheckoutPage = () => {
 
       checkoutLockedRef.current = true;
       paymentInFlightRef.current = true;
-    setSubmitting(true);
+      setSubmitting(true);
 
       void (async () => {
         try {
@@ -798,7 +798,7 @@ const CheckoutPage = () => {
         } finally {
           checkoutLockedRef.current = false;
           paymentInFlightRef.current = false;
-      setSubmitting(false);
+          setSubmitting(false);
         }
       })();
     });
@@ -928,7 +928,7 @@ const CheckoutPage = () => {
         "md:max-lg:pb-16",
       )}
     >
-      <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+      <div className="mx-auto w-full px-4 pt-6 md:pt-10 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
         <CheckoutPaymentFailedToast
           open={paymentFailedToastOpen}
           onDismiss={dismissPaymentFailedToast}

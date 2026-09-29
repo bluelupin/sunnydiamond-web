@@ -63,7 +63,7 @@ const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStic
           onToggle={onOffersToggle}
         />
 
-        <div className="flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
+        <div className="flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 [border-top-width:0.5px]">
           <div className="flex items-end justify-between gap-4">
             <p className="font-gill text-xl font-normal leading-110 text-darkblack">
               {formatCartPrice(displayTotal)}

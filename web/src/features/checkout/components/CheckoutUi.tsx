@@ -328,7 +328,7 @@ export const CheckoutCheckbox = ({
           strokeWidth={2.5}
         />
       </button>
-      <span className="flex h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
+      <span className="flex min-h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
     </label>
   );
 };
