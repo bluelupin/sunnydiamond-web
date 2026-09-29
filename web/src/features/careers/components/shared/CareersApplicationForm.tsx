@@ -545,7 +545,9 @@ const CareersApplicationForm = () => {
           yearOfCompletion: yearOfCompletion.trim(),
         },
         workExperience: {
-          relevantExperience,
+          relevantExperience:
+            toCareerValueOption(relevantExperience, valueOptions.experiences, true) ??
+            relevantExperience,
           currentCompany: currentCompany.trim(),
           currentJobTitle: currentJobTitle.trim(),
           currentCtc: currentCtc.trim(),
