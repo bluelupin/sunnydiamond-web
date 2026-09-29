@@ -100,7 +100,7 @@ const CheckoutAddressFields = ({
   validation: CheckoutFormValidationProps;
   disabled?: boolean;
 }) => (
-  <div className="sm:space-y-6 space-y-4">
+  <div className="space-y-4">
     <CheckoutField
       id={`${idPrefix}-name`}
       label="Your Name"
@@ -136,7 +136,7 @@ const CheckoutAddressFields = ({
       }
       disabled={disabled}
     />
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <CheckoutField
         id={`${idPrefix}-pincode`}
         label="Pincode"
@@ -227,49 +227,51 @@ export const CheckoutFormStep = ({
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
       <CheckoutSectionHeading>Personal Information</CheckoutSectionHeading>
-      <CheckoutField
-        id="checkout-name"
-        label="Your Name*"
-        value={form.name}
-        onChange={(value) => onChange("name", value)}
-        onBlur={() => validation.markTouched("name")}
-        invalid={validation.showError("name")}
-        error={validation.showError("name") ? validation.errors.name : undefined}
-        disabled={fieldsDisabled}
-      />
-      {isAuthenticated ? (
+      <div className="space-y-4">
         <CheckoutField
-          id="checkout-email"
-          label="Email"
-          type="email"
-          value={form.phoneOrEmail}
-          onChange={(value) => onChange("phoneOrEmail", value)}
-          onBlur={() => validation.markTouched("phoneOrEmail")}
-          invalid={validation.showError("phoneOrEmail")}
-          error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+          id="checkout-name"
+          label="Your Name*"
+          value={form.name}
+          onChange={(value) => onChange("name", value)}
+          onBlur={() => validation.markTouched("name")}
+          invalid={validation.showError("name")}
+          error={validation.showError("name") ? validation.errors.name : undefined}
           disabled={fieldsDisabled}
         />
-      ) : (
-        <CheckoutPhoneField
-          id="checkout-phone-email"
-          label={emailOnly ? "Email ID*" : "PhoneNo / Email ID"}
-          mode={emailOnly ? "email" : "phoneOrEmail"}
-          value={form.phoneOrEmail}
-          onChange={(value) => onChange("phoneOrEmail", value)}
-          onBlur={() => {
-            validation.markTouched("phoneOrEmail");
-            onContactBlur?.();
-          }}
-          countryCode={form.contactCountryCode}
-          onCountryCodeChange={(code) => onChange("contactCountryCode", code)}
-          verified={phoneVerified}
-          onVerify={onVerifyPhone}
-          showVerify={showVerify}
-          invalid={validation.showError("phoneOrEmail")}
-          error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
-          disabled={fieldsDisabled}
-        />
-      )}
+        {isAuthenticated ? (
+          <CheckoutField
+            id="checkout-email"
+            label="Email"
+            type="email"
+            value={form.phoneOrEmail}
+            onChange={(value) => onChange("phoneOrEmail", value)}
+            onBlur={() => validation.markTouched("phoneOrEmail")}
+            invalid={validation.showError("phoneOrEmail")}
+            error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+            disabled={fieldsDisabled}
+          />
+        ) : (
+          <CheckoutPhoneField
+            id="checkout-phone-email"
+            label={emailOnly ? "Email ID*" : "PhoneNo / Email ID"}
+            mode={emailOnly ? "email" : "phoneOrEmail"}
+            value={form.phoneOrEmail}
+            onChange={(value) => onChange("phoneOrEmail", value)}
+            onBlur={() => {
+              validation.markTouched("phoneOrEmail");
+              onContactBlur?.();
+            }}
+            countryCode={form.contactCountryCode}
+            onCountryCodeChange={(code) => onChange("contactCountryCode", code)}
+            verified={phoneVerified}
+            onVerify={onVerifyPhone}
+            showVerify={showVerify}
+            invalid={validation.showError("phoneOrEmail")}
+            error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+            disabled={fieldsDisabled}
+          />
+        )}
+      </div>
     </CheckoutSectionCard>
 
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
@@ -288,21 +290,8 @@ export const CheckoutFormStep = ({
         </p>
       ) : (
         <>
-          {/* {isAuthenticated && savedAddresses.length > 1 ? (
-            <CheckoutSelectField
-              id="checkout-saved-shipping-address"
-              label="Saved Address"
-              value={form.selectedShippingAddressUid ?? ""}
-              onChange={(value) => onSelectSavedShippingAddress?.(value)}
-              options={savedAddresses.map((address) => ({
-                value: address.uid,
-                label: `${address.fullName} — ${address.city}`,
-              }))}
-              disabled={fieldsDisabled}
-            />
-          ) : null} */}
           <div className="space-y-6">
-            <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+            <p className="font-gill text-base font-normal leading-110 text-darkblack">SHIPPING ADDRESS</p>
             <CheckoutAddressFields
               idPrefix="checkout-shipping"
               fields={SHIPPING_ADDRESS_FIELDS}

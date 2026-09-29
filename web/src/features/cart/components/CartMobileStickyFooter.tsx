@@ -124,7 +124,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
               onClick={proceedToCheckout}
               disabled={isNavigatingToCheckout}
             >
-              {isNavigatingToCheckout ? "Continuing..." : "Checkout"}
+              {isNavigatingToCheckout ? "Continuing..." : "CHECKOUT"}
             </CartPrimaryButton>
             <CartOutlineButton
               type="button"

@@ -247,7 +247,7 @@ export const CheckoutSectionCard = ({
   className,
   gapClassName = "gap-6",
 }: CheckoutSectionCardProps) => (
-  <section className={cn("flex flex-col bg-white px-4 py-6 lg:px-6", gapClassName, className)}>
+  <section className={cn("flex flex-col bg-white py-6 px-4", gapClassName, className)}>
     {children}
   </section>
 );

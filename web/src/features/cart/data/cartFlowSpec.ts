@@ -130,6 +130,25 @@ export const cartFlowSpec = {
     cardBackground: "#FFFFFF",
     borderRadius: 2,
   },
+  /** Figma desktop 4903:81077 / mobile 4903:74070 */
+  guestCheckout: {
+    desktopWidth: 560,
+    desktopPadding: 24,
+    sectionGap: 40,
+    innerGap: 24,
+    actionGap: 24,
+    mobileHeight: 310,
+    headerTop: 24,
+    dividerTop: 74,
+    bodyTop: 116,
+    contentInsetX: 16,
+    footerGradientHeight: 71,
+    footerPaddingX: 16,
+    footerPaddingY: 24,
+    footerGap: 16,
+    mobileOverlayColor: "rgba(0, 0, 0, 0.7)",
+    mobileOverlayBlur: 10,
+  },
   /** Figma 2083:8814 / intro panel 2083:8951; mobile intro 4903:73825 */
   gifting: {
     panelWidth: 560,

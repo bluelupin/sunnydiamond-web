@@ -933,7 +933,7 @@ const CheckoutPage = () => {
           onDismiss={dismissPaymentFailedToast}
           className="mb-6"
         />
-        <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
+        <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl md:text-4xl">
           Complete Checkout
         </h1>
 
