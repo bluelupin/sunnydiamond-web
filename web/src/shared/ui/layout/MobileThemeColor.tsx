@@ -7,6 +7,7 @@ import { resolveMobileThemeColor } from "@/shared/utils/themeColor";
 type MobileThemeColorProps = {
   pathname: string;
   headerVariant: HeaderVariant;
+  isCartEmptyPageShell?: boolean;
 };
 
 function setMetaContent(name: string, content: string) {
@@ -21,10 +22,17 @@ function setMetaContent(name: string, content: string) {
   meta.setAttribute("content", content);
 }
 
-const MobileThemeColor = ({ pathname, headerVariant }: MobileThemeColorProps) => {
+const MobileThemeColor = ({
+  pathname,
+  headerVariant,
+  isCartEmptyPageShell = false,
+}: MobileThemeColorProps) => {
   useEffect(() => {
-    setMetaContent("theme-color", resolveMobileThemeColor(pathname, headerVariant));
-  }, [pathname, headerVariant]);
+    setMetaContent(
+      "theme-color",
+      resolveMobileThemeColor(pathname, headerVariant, { isCartEmptyPageShell }),
+    );
+  }, [pathname, headerVariant, isCartEmptyPageShell]);
 
   return null;
 };

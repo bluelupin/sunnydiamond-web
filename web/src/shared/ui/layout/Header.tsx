@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/features/cart/context/CartContext";
+import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
@@ -72,9 +73,12 @@ const Header = () => {
   const jewelleryMenuMountedRef = useRef(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
+  const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const mounted = useMounted();
   const displayCartCount = mounted ? cartCount : 0;
   const pathname = usePathname() ?? "/";
+  const cartCheckoutHeaderSurfaceClass =
+    pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
   const canHoverNav = useCanHover();
   const isMobileHeader = useMobileHeaderLayout();
 
@@ -105,9 +109,9 @@ const Header = () => {
   const headerSurfaceClass = isScrollReturnSurface
     ? cn(
         "motion-safe:transition-colors motion-safe:duration-300",
-        isCartOrCheckoutRoute(pathname) ? "bg-gray300" : "bg-white",
+        isCartOrCheckoutRoute(pathname) ? cartCheckoutHeaderSurfaceClass : "bg-white",
       )
-    : getHeaderSurfaceClass(pathname, headerVariant);
+    : getHeaderSurfaceClass(pathname, headerVariant, { isCartEmptyPageShell });
   const isOverlay = headerVariant === "overlay";
   const isLightOverlay = isOverlay && !isAuthPage && !isScrollReturnSurface;
   const themeHeaderVariant = isScrollReturnSurface ? "solid" : headerVariant;
@@ -214,7 +218,11 @@ const Header = () => {
 
   return (
     <>
-      <MobileThemeColor pathname={pathname} headerVariant={themeHeaderVariant} />
+      <MobileThemeColor
+        pathname={pathname}
+        headerVariant={themeHeaderVariant}
+        isCartEmptyPageShell={isCartEmptyPageShell}
+      />
       <header
         className={cn(
           "fixed top-0 inset-x-0 z-50",

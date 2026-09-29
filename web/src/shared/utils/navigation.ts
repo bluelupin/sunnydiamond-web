@@ -88,16 +88,25 @@ export function isHeroOverlayRoute(pathname: string): boolean {
 
 export type HeaderVariant = "overlay" | "solid";
 
+type GetHeaderSurfaceClassOptions = {
+  isCartEmptyPageShell?: boolean;
+};
+
 /** Figma 692:6742 — solid white header on PDP and other non-hero pages. */
 export function getHeaderSurfaceClass(
   pathname: string,
   headerVariant: HeaderVariant,
+  options: GetHeaderSurfaceClassOptions = {},
 ): string {
   if (headerVariant === "overlay") {
     return "bg-transparent";
   }
 
   if (pathname === "/cart" || pathname === "/checkout") {
+    if (pathname === "/cart" && options.isCartEmptyPageShell) {
+      return "bg-gray200";
+    }
+
     return "bg-gray300";
   }
 

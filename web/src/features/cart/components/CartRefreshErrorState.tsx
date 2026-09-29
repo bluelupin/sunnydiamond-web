@@ -37,7 +37,7 @@ const CartRefreshErrorState = ({
 
   return (
     <section
-      className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center"
+      className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray200 px-4 py-20 text-center"
       role="alert"
       aria-live="polite"
     >

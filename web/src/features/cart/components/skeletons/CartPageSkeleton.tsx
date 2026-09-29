@@ -1,3 +1,6 @@
+"use client";
+
+import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { cn } from "@/shared/utils/cn";
 
 const pulse = "animate-pulse bg-gray200";
@@ -100,11 +103,15 @@ function SkeletonMobileStickyFooter() {
 }
 
 const CartPageSkeleton = () => {
+  const isCartEmptyPageShell = useIsCartEmptyPageShell();
+  const shellBackgroundClass = isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
+
   return (
     <>
       <section
         className={cn(
-          "bg-gray300 lg:pb-16",
+          shellBackgroundClass,
+          "lg:pb-16",
           "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
           "md:max-lg:pb-16",
         )}
@@ -141,7 +148,6 @@ const CartPageSkeleton = () => {
           </div>
         </div>
       </section>
-
       <SkeletonMobileStickyFooter />
     </>
   );

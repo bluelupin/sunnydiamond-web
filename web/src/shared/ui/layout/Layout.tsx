@@ -7,6 +7,7 @@ import BrowserBackScrollRestore from "@/shared/lib/providers/BrowserBackScrollRe
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { clearTransientErrorAutoRetry } from "@/shared/hooks/useTransientErrorAutoRetry";
+import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { isAuthRoute, isCartOrCheckoutRoute, shouldHideFooter, shouldHideFooterOnMobile, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
 
 const Layout = ({ children }: { children: ReactNode }) => {
@@ -16,6 +17,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const hideFooterOnMobile = shouldHideFooterOnMobile(pathname);
   const isAuthPage = isAuthRoute(pathname);
   const isCartCheckoutPage = isCartOrCheckoutRoute(pathname);
+  const isCartEmptyPageShell = useIsCartEmptyPageShell();
 
   useEffect(() => {
     clearTransientErrorAutoRetry(pathname);
@@ -32,7 +34,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
             : offsetMain
               ? cn(
                   "flex-1 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] md:landscape:pt-104 lg:landscape:pt-104",
-                  isCartCheckoutPage && "bg-gray300 max-md:bg-gray300",
+                  isCartCheckoutPage &&
+                    (isCartEmptyPageShell
+                      ? "bg-gray200 max-md:bg-gray200"
+                      : "bg-gray300 max-md:bg-gray300"),
                 )
               : "flex-1 min-h-screen"
         }

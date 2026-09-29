@@ -10,6 +10,7 @@ import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedi
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { FooterTrustBadgeSection } from "@/features/cms/components/common/TrustBadges";
 import Reveal from "@/shared/Animation/Reveal";
+import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { cn } from "@/shared/utils/cn";
 import ResponsiveImage from "../ResponsiveImage";
 
@@ -98,6 +99,7 @@ function resolveShellSocialLinks(
 
 const Footer = ({ className }: { className?: string }) => {
   const pathName = usePathname();
+  const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const { data: shellData } = useHomepageShell();
   const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
   const footerLinkGroups = useMemo(
@@ -130,8 +132,21 @@ const Footer = ({ className }: { className?: string }) => {
   const hasBottomRow = hasSocialLinks || hasCopyright || hasPaymentMethodLogos;
 
   return (
-    <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className, pathName === "/jewellery" && "md:pb-0 pb-16")}>
-      <FooterTrustBadgeSection className="md:flex hidden" />
+    <footer
+      className={cn(
+        pathName === "/checkout" || (pathName === "/cart" && !isCartEmptyPageShell)
+          ? "bg-gray200"
+          : "bg-gray300",
+        className,
+        pathName === "/jewellery" && "md:pb-0 pb-16",
+      )}
+    >
+      <FooterTrustBadgeSection
+        className={cn(
+          "md:flex hidden",
+          pathName === "/cart" && isCartEmptyPageShell && "bg-gray300",
+        )}
+      />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:pt-104 lg:pb-104 md:pt-16 md:pb-16 pt-8 pb-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
           <Reveal direction="up" className="shrink-0">

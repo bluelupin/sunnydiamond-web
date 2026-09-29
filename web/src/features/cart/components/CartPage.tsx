@@ -11,7 +11,7 @@ import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
 import type { NormalizedProductDisplayStrip } from "@/services/product-display/product-display-page.types";
-import { CartPrimaryLink } from "./CartFlowUi";
+import CartEmptyState from "./CartEmptyState";
 import CartRefreshErrorState from "./CartRefreshErrorState";
 import CartPageSkeleton from "./skeletons/CartPageSkeleton";
 
@@ -55,19 +55,7 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
   }
 
   if (items.length === 0) {
-    return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
-        <h1 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-32">
-          Your bag is empty
-        </h1>
-        <p className="max-w-md font-gill text-base font-light leading-110 text-neutral500">
-          Discover our exquisite diamond collection and find something that speaks to you.
-        </p>
-        <CartPrimaryLink href="/jewellery" className="mt-2 w-full max-w-xs">
-          Shop Now
-        </CartPrimaryLink>
-      </section>
-    );
+    return <CartEmptyState />;
   }
 
   return (
