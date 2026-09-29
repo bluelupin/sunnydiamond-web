@@ -89,7 +89,7 @@ const PriceBreakupPanel = ({
               RIGHT_PANEL_CONTENT_PADDING_CLASS,
             )}
           >
-          <div className="bg-gray300 px-4 py-6">
+          <div className="bg-gray200 px-4 py-6">
             <div className="flex items-center gap-4">
               <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">
                 <Image

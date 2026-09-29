@@ -42,7 +42,8 @@ const CartPriceDetails = ({
     estimatedShippingMethods,
     localOfferDiscount,
   } = useCart();
-  const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
+  const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout, giftingOptionsCtaLabel } =
+    useCartCheckout();
   const [offersOpen, setOffersOpen] = useState(false);
 
   const shippingDisplay = getCartShippingDisplay(
@@ -126,7 +127,7 @@ const CartPriceDetails = ({
               onClick={openGiftingOptions}
               disabled={isNavigatingToCheckout}
             >
-              View Gifting Options
+              {giftingOptionsCtaLabel}
             </CartOutlineButton>
           ) : null}
         </div>

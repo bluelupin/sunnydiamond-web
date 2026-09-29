@@ -70,24 +70,19 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
-        <div className={cn("flex justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
-          <RightPanelCloseButton onClick={onClose} aria-label="Close bag drawer" />
-        </div>
-
-        <div className="mx-auto flex w-full flex-col gap-6 px-4 pb-5 lg:px-6">
+        <RightPanelCloseButton onClick={onClose} aria-label="Close bag drawer" className="absolute md:top-10 top-6  right-6" />
+        <div className="mx-auto flex w-full flex-col gap-6 px-4 pb-5 lg:px-6 md:pt-10 pt-6">
           <CartBagDrawerSuccessHeader message={successMessage} />
-
           <div className="h-px w-full shrink-0 bg-aboutInactive" aria-hidden />
-
           {addedItem ? (
             <div className="flex min-h-0 flex-1 flex-col justify-between">
-              <div className="relative flex items-start justify-between bg-gray300 px-4 py-6">
+              <div className="relative flex items-start justify-between bg-gray200 px-4 py-6">
                 {isGift ? (
                   <CartGiftBadge className="absolute left-0 top-0 z-10" />
                 ) : null}
 
                 <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">
-                  <div className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[91px]">
+                  <div className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:w-[91px] lg:h-[68px]">
                     <OptimizedImage
                       src={addedItem.product.image}
                       alt={addedItem.product.name}
@@ -128,7 +123,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
       {addedItem ? (
-        <div className="px-4 md:px-6 md:py-10 py-6">
+        <div className="px-4 md:px-6 py-6">
           {otherCount > 0 ? <CartMoreItemsNote count={otherCount} /> : null}
         </div>)
         : null

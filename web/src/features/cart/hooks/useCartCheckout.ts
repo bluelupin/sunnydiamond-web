@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
+import { getGiftingOptionsCtaLabel, hasSavedGiftingNotes } from "../utils/cartGiftNotes";
 
 /** Checkout from the bag: nudge gifting, then guest welcome before /checkout when needed. */
 export function useCartCheckout() {
@@ -12,11 +14,21 @@ export function useCartCheckout() {
   const { items } = useCart();
   const {
     hasExploredGiftingOptions,
+    hasConsumedGiftingEdit,
     isNavigatingToCheckout,
     openGiftingPanel,
     openGuestCheckoutModal,
+    resetGiftingEditConsumed,
     startCheckoutNavigation,
   } = useCartUI();
+
+  useEffect(() => {
+    if (!hasSavedGiftingNotes(items)) {
+      resetGiftingEditConsumed();
+    }
+  }, [items, resetGiftingEditConsumed]);
+
+  const giftingOptionsCtaLabel = getGiftingOptionsCtaLabel(items, hasConsumedGiftingEdit);
 
   const navigateToCheckout = () => {
     if (status === "loading" || isNavigatingToCheckout) {
@@ -60,5 +72,11 @@ export function useCartCheckout() {
     openGiftingPanel("personalise");
   };
 
-  return { proceedToCheckout, openGiftingOptions, navigateToCheckout, isNavigatingToCheckout };
+  return {
+    proceedToCheckout,
+    openGiftingOptions,
+    navigateToCheckout,
+    isNavigatingToCheckout,
+    giftingOptionsCtaLabel,
+  };
 }

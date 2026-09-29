@@ -28,6 +28,7 @@ type CartUIContextType = {
   isGiftingPanelOpen: boolean;
   giftingStep: "intro" | "personalise";
   hasExploredGiftingOptions: boolean;
+  hasConsumedGiftingEdit: boolean;
   isGuestCheckoutModalOpen: boolean;
   isNavigatingToCheckout: boolean;
   tryBeginBagAction: () => boolean;
@@ -39,6 +40,9 @@ type CartUIContextType = {
   markGiftingOptionsExplored: () => void;
   /** Reset so checkout shows the gifting nudge again (e.g. newly marked gift). */
   clearGiftingOptionsExplored: () => void;
+  /** After the one allowed edit of saved gift notes, revert the cart CTA to View. */
+  markGiftingEditConsumed: () => void;
+  resetGiftingEditConsumed: () => void;
   openGuestCheckoutModal: () => void;
   closeGuestCheckoutModal: () => void;
   startCheckoutNavigation: () => void;
@@ -55,6 +59,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const [isGiftingPanelOpen, setIsGiftingPanelOpen] = useState(false);
   const [giftingStep, setGiftingStep] = useState<"intro" | "personalise">("intro");
   const [hasExploredGiftingOptions, setHasExploredGiftingOptions] = useState(false);
+  const [hasConsumedGiftingEdit, setHasConsumedGiftingEdit] = useState(false);
   const [isGuestCheckoutModalOpen, setIsGuestCheckoutModalOpen] = useState(false);
   const [isNavigatingToCheckout, setIsNavigatingToCheckout] = useState(false);
   const isBagDrawerOpenRef = useRef(false);
@@ -137,6 +142,14 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     setHasExploredGiftingOptions(false);
   }, []);
 
+  const markGiftingEditConsumed = useCallback(() => {
+    setHasConsumedGiftingEdit(true);
+  }, []);
+
+  const resetGiftingEditConsumed = useCallback(() => {
+    setHasConsumedGiftingEdit(false);
+  }, []);
+
   const openGuestCheckoutModal = useCallback(() => {
     setIsGuestCheckoutModalOpen(true);
   }, []);
@@ -194,6 +207,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         isGiftingPanelOpen,
         giftingStep,
         hasExploredGiftingOptions,
+        hasConsumedGiftingEdit,
         isGuestCheckoutModalOpen,
         isNavigatingToCheckout,
         tryBeginBagAction,
@@ -204,6 +218,8 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         closeGiftingPanel,
         markGiftingOptionsExplored,
         clearGiftingOptionsExplored,
+        markGiftingEditConsumed,
+        resetGiftingEditConsumed,
         openGuestCheckoutModal,
         closeGuestCheckoutModal,
         startCheckoutNavigation,
