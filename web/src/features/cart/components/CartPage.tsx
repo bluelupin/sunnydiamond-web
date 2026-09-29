@@ -62,12 +62,12 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
     <>
       <section
         className={cn(
-          "bg-gray300 lg:pb-16",
+          "bg-gray300 lg:pb-104",
           "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
-          "md:max-lg:pb-16",
+          "md:pb-16",
         )}
       >
-        <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+        <div className="mx-auto w-full px-4 max-md:pt-6 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
           <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
             Your Shopping Bag
           </h1>

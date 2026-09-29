@@ -10,6 +10,8 @@ import {
   type NormalizedVisitUsSection,
   type StrapiProductDisplayCard,
   type StrapiProductDisplayCardButton,
+  type StrapiProductDisplayCartStripItem,
+  type StrapiProductDisplayCartStripSection,
   type StrapiProductDisplayPage,
   type StrapiProductDisplayStripItem,
   type StrapiProductDisplayVisitShowroom,
@@ -113,15 +115,65 @@ function splitBenefitTitle(title: string): [string, string] {
   return [words.slice(0, midpoint).join(" "), words.slice(midpoint).join(" ")] as [string, string];
 }
 
+function unwrapStrapiComponentEntry<T extends Record<string, unknown>>(entry: unknown): T {
+  if (!entry || typeof entry !== "object") {
+    return entry as T;
+  }
+
+  if ("attributes" in entry) {
+    const record = entry as { id?: number; attributes?: Record<string, unknown> };
+    if (record.attributes && typeof record.attributes === "object") {
+      return { ...record.attributes, id: record.id } as unknown as T;
+    }
+  }
+
+  return entry as T;
+}
+
+function coerceStrapiComponentArray<T extends Record<string, unknown>>(value: unknown): T[] {
+  const list = Array.isArray(value)
+    ? value
+    : value && typeof value === "object" && Array.isArray((value as { data?: unknown }).data)
+      ? (value as { data: unknown[] }).data
+      : [];
+
+  return list
+    .map((entry) => unwrapStrapiComponentEntry<T>(entry))
+    .filter((entry): entry is T => Boolean(entry));
+}
+
+function resolveStripItemActive(raw: StrapiProductDisplayStripItem): boolean {
+  if (raw.isActive === false || raw.showField === false) {
+    return false;
+  }
+
+  return true;
+}
+
+function resolveStripItemIcon(icon?: StrapiProductDisplayStripItem["icon"]): string | undefined {
+  if (!icon) {
+    return undefined;
+  }
+
+  return (
+    resolveCmsMediaUrl(icon) ??
+    resolveCmsMediaUrl(
+      "desktopImage" in icon || "mobileImage" in icon ? icon.desktopImage : undefined,
+    ) ??
+    resolveCmsMediaUrl("mobileImage" in icon ? icon.mobileImage : undefined)
+  );
+}
+
 function mapStripItem(
   raw: StrapiProductDisplayStripItem,
 ): NormalizedProductDisplayBenefit | null {
-  if (!isSectionActive(raw.isActive)) {
+  if (!resolveStripItemActive(raw)) {
     return null;
   }
 
-  const title = cleanText(raw.title);
-  const icon = resolveCmsMediaUrl(raw.icon);
+  const title =
+    cleanText(raw.title) ?? cleanText(raw.label) ?? cleanText(raw.description);
+  const icon = resolveStripItemIcon(raw.icon);
 
   if (!title || !icon) {
     return null;
@@ -137,11 +189,16 @@ function mapStripItem(
   };
 }
 
-function mapStripSection(raw?: StrapiProductDisplayPage | null): NormalizedProductDisplayStrip {
-  const items = (Array.isArray(raw?.stripItems) ? raw.stripItems : [])
+function mapStripItems(rawItems: unknown): NormalizedProductDisplayBenefit[] {
+  return coerceStrapiComponentArray<StrapiProductDisplayStripItem>(rawItems)
     .map(mapStripItem)
     .filter((item): item is NormalizedProductDisplayBenefit => item !== null);
+}
 
+function mapStripMeta(raw?: StrapiProductDisplayPage | null): Pick<
+  NormalizedProductDisplayStrip,
+  "title" | "tnc"
+> {
   return {
     title: cleanText(raw?.stripTitle) ?? "",
     tnc: {
@@ -149,7 +206,75 @@ function mapStripSection(raw?: StrapiProductDisplayPage | null): NormalizedProdu
       href: cleanText(raw?.stripTnc?.url) ?? "",
       openInNewTab: raw?.stripTnc?.openInNewTab === true,
     },
-    items,
+  };
+}
+
+function mapPdpStripSection(raw?: StrapiProductDisplayPage | null): NormalizedProductDisplayStrip {
+  return {
+    ...mapStripMeta(raw),
+    items: mapStripItems(raw?.stripItems),
+  };
+}
+
+function resolveCartStripSection(
+  raw?: StrapiProductDisplayPage | null,
+): StrapiProductDisplayCartStripSection | null {
+  const section = unwrapStrapiComponentEntry<StrapiProductDisplayCartStripSection>(
+    raw?.stripCartItems,
+  );
+
+  return section ?? null;
+}
+
+function mapCartStripItem(
+  raw: StrapiProductDisplayCartStripItem,
+): NormalizedProductDisplayBenefit | null {
+  if (raw.showBadge === false) {
+    return null;
+  }
+
+  const title = cleanText(raw.badgeTitle);
+  const icon = resolveStripItemIcon(raw.icon);
+
+  if (!title || !icon) {
+    return null;
+  }
+
+  const lines = splitBenefitTitle(title);
+
+  return {
+    label: title,
+    mobileLabel: title,
+    lines,
+    icon,
+  };
+}
+
+function mapCartStripItems(rawItems: unknown): NormalizedProductDisplayBenefit[] {
+  return coerceStrapiComponentArray<StrapiProductDisplayCartStripItem>(rawItems)
+    .map(mapCartStripItem)
+    .filter((item): item is NormalizedProductDisplayBenefit => item !== null);
+}
+
+export function mapCartStripSection(
+  raw?: StrapiProductDisplayPage | null,
+): NormalizedProductDisplayStrip {
+  const section = resolveCartStripSection(raw);
+
+  if (!section) {
+    return EMPTY_PRODUCT_DISPLAY_PAGE.cartStrip;
+  }
+
+  const tncCta = section.tncCta;
+
+  return {
+    title: cleanText(section.title) ?? "",
+    tnc: {
+      label: cleanText(tncCta?.label) ?? "",
+      href: cleanText(tncCta?.url) ?? "",
+      openInNewTab: tncCta?.openInNewTab === true,
+    },
+    items: mapCartStripItems(section.items),
   };
 }
 
@@ -225,7 +350,8 @@ export function mapProductDisplayPage(
   }
 
   return {
-    strip: mapStripSection(raw),
+    strip: mapPdpStripSection(raw),
+    cartStrip: mapCartStripSection(raw),
     findYourSizeLabel: cleanText(raw.findYourSize?.label) ?? "",
     hereForYou: mapCardSection(raw.hereForYouCard),
     personalise: mapCardSection(raw.personaliseCard),

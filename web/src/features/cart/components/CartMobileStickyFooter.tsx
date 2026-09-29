@@ -80,7 +80,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
           onToggle={onOffersToggle}
         />
 
-        <div className="flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
+        <div className="min-h-[214px] flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
           {breakupOpen ? (
             <div className="flex flex-col gap-3">
               <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
@@ -108,7 +108,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
               {formatCartPrice(displayTotal)}
             </p>
             <CartTextLink onClick={onBreakupToggle} aria-expanded={breakupOpen} className="uppercase">
-              View Price Breakup
+              VIEW ORDER SUMMARY
             </CartTextLink>
           </div>
 
@@ -127,7 +127,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
               onClick={openGiftingOptions}
               disabled={isNavigatingToCheckout}
             >
-              Gifting Options
+              PERSONALISE YOUR GIFT
             </CartOutlineButton>
           </div>
         </div>

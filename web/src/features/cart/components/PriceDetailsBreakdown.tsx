@@ -48,7 +48,7 @@ const PriceDetailsBreakdown = ({
   const Divider = variant === "checkout" ? CheckoutSummaryDivider : () => <CartDivider weight={1} />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {showTitle ? (
         <div className="flex flex-col gap-6">
           <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
@@ -61,6 +61,8 @@ const PriceDetailsBreakdown = ({
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <PriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
+          <PriceRow label="Taxes" value={formatCartPrice(taxes)} />
+          <PriceRow label="Shipping" value={shippingLabel} />
           {offerDiscount > 0 ? (
             <PriceRow label="Offer Discount" value={formatCartDiscountPrice(offerDiscount)} />
           ) : null}
@@ -69,14 +71,6 @@ const PriceDetailsBreakdown = ({
           ) : null}
           <GiftCardProblemRow />
         </div>
-
-        <Divider />
-
-        <div className="flex flex-col gap-3">
-          <PriceRow label="Taxes" value={formatCartPrice(taxes)} />
-          <PriceRow label="Shipping" value={shippingLabel} />
-        </div>
-
         <Divider />
         <PriceRow label="Total" value={formatCartPrice(total)} emphasis />
       </div>

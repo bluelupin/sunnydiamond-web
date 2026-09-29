@@ -27,13 +27,41 @@ export type StrapiProductDisplayCta = {
 export type StrapiProductDisplayStripItem = {
   id?: number;
   title?: string | null;
+  label?: string | null;
   description?: string | null;
   isActive?: boolean | null;
-  icon?: {
-    url?: string | null;
-    alternativeText?: string | null;
-    alternateText?: string | null;
-  } | null;
+  showField?: boolean | null;
+  icon?:
+    | {
+        url?: string | null;
+        alternativeText?: string | null;
+        alternateText?: string | null;
+      }
+    | StrapiProductDisplayResponsiveImage
+    | null;
+};
+
+/** Cart benefits badge — CMS component item inside `stripCartItems.items`. */
+export type StrapiProductDisplayCartStripItem = {
+  id?: number;
+  badgeTitle?: string | null;
+  showBadge?: boolean | null;
+  icon?:
+    | {
+        url?: string | null;
+        alternativeText?: string | null;
+        alternateText?: string | null;
+      }
+    | StrapiProductDisplayResponsiveImage
+    | null;
+};
+
+/** Cart benefits strip — nested CMS component on product-display-page. */
+export type StrapiProductDisplayCartStripSection = {
+  id?: number;
+  title?: string | null;
+  tncCta?: StrapiProductDisplayCta | null;
+  items?: StrapiProductDisplayCartStripItem[] | null;
 };
 
 export type StrapiProductDisplayCardButton = {
@@ -97,6 +125,7 @@ export type StrapiProductDisplayPage = {
   pairItWith?: StrapiProductDisplayToggleSection | null;
   visitUsSection?: StrapiProductDisplayVisitUsSection | null;
   stripItems?: StrapiProductDisplayStripItem[] | null;
+  stripCartItems?: StrapiProductDisplayCartStripSection | null;
 };
 
 export type NormalizedProductDisplayBenefit = {
@@ -153,6 +182,7 @@ export type NormalizedVisitUsSection = {
 
 export type NormalizedProductDisplayPage = {
   strip: NormalizedProductDisplayStrip;
+  cartStrip: NormalizedProductDisplayStrip;
   findYourSizeLabel: string;
   hereForYou: NormalizedProductDisplayCard;
   personalise: NormalizedProductDisplayCard;
@@ -165,16 +195,19 @@ export type NormalizedProductDisplayPage = {
 };
 
 /** Empty shape returned when CMS is unavailable — no static PDP marketing copy. */
-export const EMPTY_PRODUCT_DISPLAY_PAGE: NormalizedProductDisplayPage = {
-  strip: {
-    title: "",
-    tnc: {
-      label: "",
-      href: "",
-      openInNewTab: false,
-    },
-    items: [],
+const EMPTY_PRODUCT_DISPLAY_STRIP: NormalizedProductDisplayStrip = {
+  title: "",
+  tnc: {
+    label: "",
+    href: "",
+    openInNewTab: false,
   },
+  items: [],
+};
+
+export const EMPTY_PRODUCT_DISPLAY_PAGE: NormalizedProductDisplayPage = {
+  strip: EMPTY_PRODUCT_DISPLAY_STRIP,
+  cartStrip: EMPTY_PRODUCT_DISPLAY_STRIP,
   findYourSizeLabel: "",
   hereForYou: {
     title: "",

@@ -272,21 +272,19 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
               }}
             />
           }
-          label="Mark this as a gift"
+          label="This is a gift"
         />
       </label>
 
       {supportsEngraving ? (
         <>
           <CartDivider weight={0.5} />
-
           <div className="flex flex-col gap-2 self-stretch">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+            <p className="font-gill text-base font-normal leading-110 text-darkblack">
               Engraving
             </p>
-
-            <div className="flex gap-2 self-stretch">
-              <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
+            <div className="flex sm:flex-row flex-col sm:gap-2 gap-4 self-stretch">
+              <div className="flex h-14 min-w-0 sm:flex-1 items-center bg-aboutInactive px-3">
                 <p
                   className={
                     hasEngraving
@@ -301,9 +299,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
                 type="button"
                 onClick={openEngravingDrawer}
                 disabled={isSavingEngraving || isNavigatingToCheckout}
-                className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
+                className="h-14 sm:w-auto w-fit shrink-0 px-5 uppercase lg:px-7"
               >
-                {hasEngraving ? "Modify" : "Add"}
+                {hasEngraving ? "UPDATE ENGRAVING" : "Add"}
               </CartOutlineButton>
             </div>
 

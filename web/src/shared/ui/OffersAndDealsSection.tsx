@@ -69,9 +69,9 @@ export type OffersAndDealsSectionProps = {
 };
 
 const toggleClassesByVariant: Record<OffersAndDealsVariant, string> = {
-  "sticky-gray200": "bg-gray300 px-4 py-3",
-  "sticky-gray300": "bg-gray300 px-4 py-3",
-  "panel-gray300": "bg-gray300 p-4",
+  "sticky-gray200": "bg-gray200 px-4 py-3",
+  "sticky-gray300": "bg-gray200 px-4 py-3",
+  "panel-gray300": "bg-gray200 p-4",
 };
 
 export type OffersAndDealsExpandedContentProps = {
@@ -123,7 +123,7 @@ const OffersAndDealsSection = ({
               labelRegular && "font-normal",
             )}
           >
-            Offers and Deals
+            Apply a Promo Code or Gift Card
           </span>
           <ChevronDownIcon
             aria-hidden

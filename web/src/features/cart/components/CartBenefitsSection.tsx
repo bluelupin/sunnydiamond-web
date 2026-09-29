@@ -7,7 +7,7 @@ const CartBenefitDivider = () => (
     aria-hidden
     className="flex w-full list-none items-center justify-center self-stretch md:max-lg:landscape:w-auto md:max-lg:landscape:shrink-0 lg:w-auto lg:shrink-0"
   >
-    <span className="h-[1px] w-full shrink-0 bg-gray600 md:max-lg:landscape:h-136 md:max-lg:landscape:w-hairline lg:h-136 lg:w-hairline" />
+    <span className="h-[0.5px] w-full shrink-0 bg-gray600 md:max-lg:landscape:h-136 md:max-lg:landscape:w-hairline lg:h-136 lg:w-hairline" />
   </li>
 );
 
@@ -16,7 +16,8 @@ type CartBenefitsSectionProps = {
 };
 
 const CartBenefitsSection = ({ strip }: CartBenefitsSectionProps) => {
-  const showBenefitsStrip = strip.items.length > 0 && strip.title.trim().length > 0;
+  const showBenefitsStrip = strip.items.length > 0;
+  const showStripTitle = strip.title.trim().length > 0;
   const showStripTnc = strip.tnc.label.trim().length > 0 && strip.tnc.href.trim().length > 0;
 
   if (!showBenefitsStrip) {
@@ -28,22 +29,28 @@ const CartBenefitsSection = ({ strip }: CartBenefitsSectionProps) => {
       aria-label="Shopping benefits"
       className="mt-0 flex flex-col gap-6 md:max-lg:mt-8 lg:mt-10"
     >
-      <div className="flex w-full items-center justify-between">
-        <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-          {strip.title}
-        </h2>
-        {showStripTnc ? (
-          <DetailTextLink
-            href={strip.tnc.href}
-            target={strip.tnc.openInNewTab ? "_blank" : undefined}
-            rel={strip.tnc.openInNewTab ? "noopener noreferrer" : undefined}
-          >
-            {strip.tnc.label}
-          </DetailTextLink>
-        ) : null}
-      </div>
+      {showStripTitle || showStripTnc ? (
+        <div className="flex w-full items-center justify-between">
+          {showStripTitle ? (
+            <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+              {strip.title}
+            </h2>
+          ) : (
+            <span className="sr-only">Shopping benefits</span>
+          )}
+          {showStripTnc ? (
+            <DetailTextLink
+              href={strip.tnc.href}
+              target={strip.tnc.openInNewTab ? "_blank" : undefined}
+              rel={strip.tnc.openInNewTab ? "noopener noreferrer" : undefined}
+            >
+              {strip.tnc.label}
+            </DetailTextLink>
+          ) : null}
+        </div>
+      ) : null}
 
-      <ul className="m-0 flex list-none flex-col items-stretch gap-6 overflow-x-auto p-4 md:max-lg:portrait:gap-4 md:max-lg:landscape:flex-row md:max-lg:landscape:items-center md:max-lg:landscape:justify-center md:max-lg:landscape:gap-4 md:max-lg:bg-gray200 md:max-lg:landscape:p-6 lg:flex-row lg:items-center lg:justify-center lg:gap-4 lg:bg-gray200 lg:p-6">
+      <ul className="m-0 flex list-none flex-col items-stretch gap-6 overflow-x-auto py-4 md:max-lg:portrait:gap-4 md:max-lg:landscape:flex-row md:max-lg:landscape:items-center md:max-lg:landscape:justify-center md:max-lg:landscape:gap-4 md:max-lg:bg-gray200 md:max-lg:landscape:p-6 lg:flex-row lg:items-center lg:justify-center lg:gap-4 lg:bg-gray200 lg:p-6">
         {strip.items.flatMap((benefit, index) => {
           const item = (
             <li
@@ -60,9 +67,8 @@ const CartBenefitsSection = ({ strip }: CartBenefitsSectionProps) => {
                   className="h-10 w-10 object-contain"
                 />
               </div>
-              <div className="flex flex-row items-center gap-1 font-gill text-sm font-normal leading-110 text-darkblack md:max-lg:landscape:flex-col md:max-lg:landscape:gap-0 md:max-lg:landscape:text-base lg:flex-col lg:gap-0 lg:text-base">
-                <span>{benefit.lines[0]}</span>
-                {benefit.lines[1] ? <span>{benefit.lines[1]}</span> : null}
+              <div className="!max-w-[120px] flex flex-row items-center gap-1 font-gill font-normal leading-110 text-darkblack md:max-lg:landscape:flex-col md:max-lg:landscape:gap-0 lg:flex-col lg:gap-0 text-base">
+                <span>{benefit.lines[0]} {benefit.lines[1]}</span>
               </div>
             </li>
           );

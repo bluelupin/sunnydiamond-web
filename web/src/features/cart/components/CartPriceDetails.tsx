@@ -105,7 +105,7 @@ const CartPriceDetails = ({
         <div
           className={cn(
             "flex flex-col gap-4",
-            !compact && "border-t border-neutral300 pt-6 [border-top-width:0.5px]",
+            !compact && "md:border-0 border-t border-neutral300 md:pt-0 pt-6 [border-top-width:0.5px]",
           )}
         >
           {showCheckoutCta ? (
@@ -115,7 +115,7 @@ const CartPriceDetails = ({
               onClick={proceedToCheckout}
               disabled={isNavigatingToCheckout}
             >
-              {isNavigatingToCheckout ? "Continuing..." : "Checkout"}
+              {isNavigatingToCheckout ? "Continuing..." : "CONTINUE TO CHECKOUT"}
             </CartPrimaryButton>
           ) : null}
 
