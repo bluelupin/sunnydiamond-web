@@ -17,14 +17,14 @@ const offersCollapseTransitionClassName =
 
 const collapsibleBackgroundByVariant: Record<OffersAndDealsVariant, string | null> = {
   "sticky-gray200": "bg-gray200",
-  "sticky-gray300": "bg-gray300",
-  "panel-gray300": "bg-gray300",
+  "sticky-gray300": "bg-gray200",
+  "panel-gray300": "bg-gray200",
 };
 
 const sectionShellBackgroundByVariant: Record<OffersAndDealsVariant, string> = {
   "sticky-gray200": "bg-gray200",
-  "sticky-gray300": "bg-gray300",
-  "panel-gray300": "md:bg-gray300",
+  "sticky-gray300": "bg-gray200",
+  "panel-gray300": "md:bg-gray200",
 };
 
 export type OffersAndDealsCollapsibleProps = {

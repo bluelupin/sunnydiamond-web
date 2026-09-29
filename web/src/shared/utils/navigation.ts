@@ -92,6 +92,18 @@ type GetHeaderSurfaceClassOptions = {
   isCartEmptyPageShell?: boolean;
 };
 
+/** Cart/checkout header surface — shared by default and scroll-return header states. */
+export function getCartCheckoutHeaderSurfaceClass(
+  pathname: string,
+  options: GetHeaderSurfaceClassOptions = {},
+): string {
+  if (pathname === "/cart" && options.isCartEmptyPageShell) {
+    return "bg-gray200";
+  }
+
+  return "bg-gray300";
+}
+
 /** Figma 692:6742 — solid white header on PDP and other non-hero pages. */
 export function getHeaderSurfaceClass(
   pathname: string,
@@ -103,11 +115,7 @@ export function getHeaderSurfaceClass(
   }
 
   if (pathname === "/cart" || pathname === "/checkout") {
-    if (pathname === "/cart" && options.isCartEmptyPageShell) {
-      return "bg-gray200";
-    }
-
-    return "bg-gray300";
+    return getCartCheckoutHeaderSurfaceClass(pathname, options);
   }
 
   return "bg-white";

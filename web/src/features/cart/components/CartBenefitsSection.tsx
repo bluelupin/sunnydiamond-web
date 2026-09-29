@@ -30,13 +30,11 @@ const CartBenefitsSection = ({ strip }: CartBenefitsSectionProps) => {
       className="mt-0 flex flex-col gap-6 md:max-lg:mt-8 lg:mt-10"
     >
       {showStripTitle || showStripTnc ? (
-        <div className="flex w-full items-center justify-between">
-          {showStripTitle ? (
-            <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+        <div className="flex w-full items-center justify-between gap-2">
+          {showStripTitle && (
+            <h2 className="md:font-larken font-gill text-xl md:font-light font-normal leading-110 text-darkblack lg:text-2xl">
               {strip.title}
             </h2>
-          ) : (
-            <span className="sr-only">Shopping benefits</span>
           )}
           {showStripTnc ? (
             <DetailTextLink
@@ -67,7 +65,7 @@ const CartBenefitsSection = ({ strip }: CartBenefitsSectionProps) => {
                   className="h-10 w-10 object-contain"
                 />
               </div>
-              <div className="!max-w-[120px] flex flex-row items-center gap-1 font-gill font-normal leading-110 text-darkblack md:max-lg:landscape:flex-col md:max-lg:landscape:gap-0 lg:flex-col lg:gap-0 text-base">
+              <div className="md:!max-w-[120px] flex flex-row items-center gap-1 font-gill font-normal leading-110 text-darkblack md:max-lg:landscape:flex-col md:max-lg:landscape:gap-0 lg:flex-col lg:gap-0 text-base">
                 <span>{benefit.lines[0]} {benefit.lines[1]}</span>
               </div>
             </li>

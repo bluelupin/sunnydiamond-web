@@ -13,10 +13,14 @@ function hasPersistedCartSession(): boolean {
 /** True on `/cart` when the page should use the empty-cart shell surfaces. */
 export function useIsCartEmptyPageShell(): boolean {
   const pathname = usePathname() ?? "/";
-  const { items, isHydrating } = useCart();
+  const { items, totalItems, isHydrating } = useCart();
   const { status } = useAuth();
 
-  if (pathname !== "/cart" || items.length > 0) {
+  if (pathname !== "/cart") {
+    return false;
+  }
+
+  if (items.length > 0 || totalItems > 0) {
     return false;
   }
 
@@ -24,7 +28,8 @@ export function useIsCartEmptyPageShell(): boolean {
     return true;
   }
 
-  if (status === "authenticated") {
+  // Auth/cart still resolving — prefer the filled-cart shell to avoid gray200 on non-empty carts.
+  if (status === "loading" || status === "authenticated") {
     return false;
   }
 

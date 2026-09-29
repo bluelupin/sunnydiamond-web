@@ -14,6 +14,7 @@ import SearchIcon from "@/assets/Icons/SearchIcon";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import {
   resolveHeaderNavHref,
+  getCartCheckoutHeaderSurfaceClass,
   getHeaderSurfaceClass,
   getHeaderVariant,
   isAuthRoute,
@@ -77,8 +78,7 @@ const Header = () => {
   const mounted = useMounted();
   const displayCartCount = mounted ? cartCount : 0;
   const pathname = usePathname() ?? "/";
-  const cartCheckoutHeaderSurfaceClass =
-    pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
+  const cartCheckoutHeaderSurfaceClass = pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
   const canHoverNav = useCanHover();
   const isMobileHeader = useMobileHeaderLayout();
 
@@ -111,7 +111,9 @@ const Header = () => {
         "motion-safe:transition-colors motion-safe:duration-300",
         isCartOrCheckoutRoute(pathname) ? cartCheckoutHeaderSurfaceClass : "bg-white",
       )
-    : getHeaderSurfaceClass(pathname, headerVariant, { isCartEmptyPageShell });
+    : isCartOrCheckoutRoute(pathname)
+      ? cartCheckoutHeaderSurfaceClass
+      : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
   const isLightOverlay = isOverlay && !isAuthPage && !isScrollReturnSurface;
   const themeHeaderVariant = isScrollReturnSurface ? "solid" : headerVariant;

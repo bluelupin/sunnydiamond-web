@@ -8,7 +8,11 @@ import { mockAvailableOffers, type MockOffer } from "@/shared/data/offersAndDeal
 import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
-import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
+import {
+  inputAutofillResetClassName,
+  inputAutofillSurfaceErrorClassName,
+  invalidFieldContainerClassName,
+} from "@/shared/utils/formValidation";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 
 export const OFFERS_EMPTY_MESSAGE =
@@ -65,7 +69,19 @@ const PromoField = ({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className={cn(couponFieldClassName, "bg-transparent px-0")}
+          autoComplete="off"
+          aria-invalid={hasError || undefined}
+          className={cn(
+            couponFieldClassName,
+            "bg-transparent px-0",
+            hasError
+              ? inputAutofillSurfaceErrorClassName
+              : cn(
+                  inputAutofillResetClassName,
+                  "[&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#FFFFFF]",
+                  "lg:[&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#F2F2F2]",
+                ),
+          )}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
@@ -240,7 +256,7 @@ const OffersAndDealsExpandedContent = ({
         </div>
       </div>
 
-      <div className="h-px w-full shrink-0 bg-neutral300 md:hidden" aria-hidden />
+      <div className="h-[0.5px] w-full shrink-0 bg-neutral300 md:hidden" aria-hidden />
 
       <div className="flex flex-col gap-2">
         <PromoField

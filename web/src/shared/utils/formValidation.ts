@@ -20,6 +20,13 @@ export const invalidFieldClassName =
 export const invalidFieldContainerClassName =
   "border border-[#F91616] bg-[#FEDCDC]";
 
+/** Keeps browser autofill from painting its own input background over field surfaces. */
+export const inputAutofillResetClassName =
+  "[&:-webkit-autofill]:[-webkit-text-fill-color:#0A0A0A] [&:-webkit-autofill]:[transition:background-color_9999s_ease-out_0s]";
+
+export const inputAutofillSurfaceErrorClassName =
+  `${inputAutofillResetClassName} [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#FEDCDC]`;
+
 export const validateRequiredName = (value: string): FieldValidation => {
   const trimmed = value.trim();
 
