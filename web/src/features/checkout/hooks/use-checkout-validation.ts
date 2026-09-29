@@ -81,21 +81,22 @@ export const useCheckoutFormValidation = (
 
 export const useCheckoutPaymentValidation = (
   values: CheckoutPaymentValues,
-  /** Whether Magento offers a cod-family method for this cart; the only COD gate. */
+  /** Whether Magento offers a cod-family method for this cart. */
   codOffered: boolean,
   hasEngravedItems = false,
+  orderTotal = Number.POSITIVE_INFINITY,
 ) => {
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<CheckoutPaymentField, boolean>>>({});
 
   const errors = useMemo(
-    () => getCheckoutPaymentErrors(values, codOffered, hasEngravedItems),
-    [codOffered, hasEngravedItems, values],
+    () => getCheckoutPaymentErrors(values, codOffered, hasEngravedItems, orderTotal),
+    [codOffered, hasEngravedItems, orderTotal, values],
   );
 
   const isValid = useMemo(
-    () => isCheckoutPaymentValid(values, codOffered, hasEngravedItems),
-    [codOffered, hasEngravedItems, values],
+    () => isCheckoutPaymentValid(values, codOffered, hasEngravedItems, orderTotal),
+    [codOffered, hasEngravedItems, orderTotal, values],
   );
 
   const markTouched = useCallback((field: CheckoutPaymentField) => {
@@ -112,11 +113,11 @@ export const useCheckoutPaymentValidation = (
     (onValid: () => void) => {
       setSubmitted(true);
 
-      if (isCheckoutPaymentValid(values, codOffered, hasEngravedItems)) {
+      if (isCheckoutPaymentValid(values, codOffered, hasEngravedItems, orderTotal)) {
         onValid();
       }
     },
-    [codOffered, hasEngravedItems, values],
+    [codOffered, hasEngravedItems, orderTotal, values],
   );
 
   const resetValidation = useCallback(() => {

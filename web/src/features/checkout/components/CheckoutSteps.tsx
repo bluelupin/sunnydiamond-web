@@ -232,7 +232,7 @@ export const CheckoutFormStep = ({
   fieldsDisabled = false,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col md:gap-6 gap-4">
-    <CheckoutSectionCard>
+    <CheckoutSectionCard id="checkout-personal-information">
       <CheckoutSectionHeading>Personal Information</CheckoutSectionHeading>
       <div className="space-y-4">
         <CheckoutField
@@ -350,51 +350,35 @@ type CheckoutPaymentStepProps = {
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
-  onEditPayment: () => void;
   validation: CheckoutPaymentValidationProps;
   isAuthenticated?: boolean;
   editDisabled?: boolean;
   fieldsDisabled?: boolean;
 };
 
-const RazorpaySecureNote = () => (
-  <CheckoutSummaryText>
-    You will complete this payment in Razorpay&apos;s secure window after reviewing your order.
-  </CheckoutSummaryText>
-);
+const PAYMENT_CARD_LOGOS = [
+  { src: "/images/card-1.svg", alt: "Mastercard" },
+  { src: "/images/card-2.svg", alt: "Visa" },
+  { src: "/images/card-3.svg", alt: "American Express" },
+] as const;
 
 const PaymentCardLogos = () => (
-  <div className="flex h-6 items-center gap-2">
-    <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
-      <Image
-        src="/images/card-1.svg"
-        alt="Card-3"
-        width="40"
-        height="24"
-        aria-hidden
-        className="h-10 h-6shrink-0"
-      />
-    </div>
-    <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
-      <Image
-        src="/images/card-2.svg"
-        alt="Card-3"
-        width="40"
-        height="24"
-        aria-hidden
-        className="h-10 h-6shrink-0"
-      />
-    </div>
-    <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
-      <Image
-        src="/images/card-3.svg"
-        alt="Card-3"
-        width="40"
-        height="24"
-        aria-hidden
-        className="h-10 h-6shrink-0"
-      />
-    </div>
+  <div className="flex h-6 shrink-0 items-center gap-2">
+    {PAYMENT_CARD_LOGOS.map(({ src, alt }) => (
+      <div
+        key={src}
+        className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-[4px] bg-white"
+      >
+        <Image
+          src={src}
+          alt={alt}
+          width={40}
+          height={24}
+          aria-hidden
+          className="h-6 w-10 shrink-0 object-contain"
+        />
+      </div>
+    ))}
   </div>
 );
 
@@ -407,7 +391,6 @@ export const CheckoutPaymentStep = ({
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
-  onEditPayment,
   validation,
   isAuthenticated = false,
   editDisabled = false,
@@ -482,38 +465,34 @@ export const CheckoutPaymentStep = ({
         </div>
       </CheckoutSectionCard>
 
-      <CheckoutSectionCard gapClassName="gap-6">
-        <CheckoutSectionHeading onEdit={onEditPayment} editDisabled={editDisabled}>
-          Payment Method
-        </CheckoutSectionHeading>
+      <CheckoutSectionCard id="checkout-payment-method" gapClassName="gap-6">
+        <CheckoutSectionHeading>Payment Method</CheckoutSectionHeading>
         {noPaymentNeeded ? (
           <CheckoutSummaryText>No payment needed: your gift card covers this order.</CheckoutSummaryText>
         ) : (
           <div id="checkout-payment-methods" className="flex flex-col gap-6">
-            <div className="flex items-center justify-between self-stretch">
+            <div className="flex w-full items-start justify-between gap-4">
               <CheckoutRadioRow
                 checked={payment.method === "card"}
                 onChange={() => onPaymentChange("method", "card")}
                 label="Credit/Debit Card"
                 disabled={fieldsDisabled}
               />
-              {payment.method === "card" ? <PaymentCardLogos /> : null}
+              <PaymentCardLogos />
             </div>
-            {payment.method === "card" ? <RazorpaySecureNote /> : null}
             <CheckoutRadioRow
               checked={payment.method === "upi"}
               onChange={() => onPaymentChange("method", "upi")}
               label="UPI"
+              align="start"
               disabled={fieldsDisabled}
             />
-            {payment.method === "upi" ? <RazorpaySecureNote /> : null}
             <CheckoutRadioRow
               checked={payment.method === "netbanking"}
               onChange={() => onPaymentChange("method", "netbanking")}
               label="Net Banking"
               disabled={fieldsDisabled}
             />
-            {payment.method === "netbanking" ? <RazorpaySecureNote /> : null}
             <div className="flex flex-col gap-2">
               <CheckoutRadioRow
                 checked={payment.method === "cod"}
@@ -530,10 +509,10 @@ export const CheckoutPaymentStep = ({
                       )}
                     >
                       {isCodAvailable
-                        ? "Pay in cash when your order arrives"
+                        ? "*for orders up to ₹40,000"
                         : hasEngravedItems
                           ? "Not available for engraved items"
-                          : "Not available for this order value"}
+                          : "*for orders up to ₹40,000"}
                     </span>
                   </span>
                 }

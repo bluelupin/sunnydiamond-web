@@ -29,7 +29,10 @@ import {
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
 import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, validateRequiredEmail } from "@/shared/utils/formValidation";
 import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
-import { isCodOfferedByBackend } from "@/services/magento/cart/checkoutPayment.mapper";
+import {
+  isCodAvailableForCheckout,
+  isCodOfferedByBackend,
+} from "@/services/magento/cart/checkoutPayment.mapper";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -80,6 +83,7 @@ const CheckoutPage = () => {
   // Magento is the only authority on whether this cart can be paid in cash: it
   // holds the order minimum and maximum and the engraved-item rule.
   const codOffered = isCodOfferedByBackend(paymentMethods);
+  const codAvailable = isCodAvailableForCheckout(codOffered, totalPrice);
   // A gift card covering the whole order: Magento's grand total is 0 and the order is
   // placed with its `free` method whatever option is selected (resolveMagentoPaymentCode).
   const noPaymentNeeded = items.length > 0 && totalPrice === 0;
@@ -113,6 +117,7 @@ const CheckoutPage = () => {
   const verifiedCheckoutOtpRef = useRef<string | null>(null);
   const lastCheckedGuestEmailRef = useRef("");
   const checkoutStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCheckoutScrollSectionRef = useRef<string | null>(null);
 
   const [step, setStep] = useState<CheckoutStep>(isPaymentReturn ? "success" : "form");
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -171,15 +176,36 @@ const CheckoutPage = () => {
     emailOnly: contactEmailOnly,
     requireDeliveryPhone: contactEmailOnly && !isAuthenticated,
   });
-  const paymentValidation = useCheckoutPaymentValidation(payment, codOffered, hasEngravedItems);
+  const paymentValidation = useCheckoutPaymentValidation(
+    payment,
+    codOffered,
+    hasEngravedItems,
+    totalPrice,
+  );
 
   // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
 
+  const scrollToCheckoutSection = useCallback((sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const requestCheckoutSectionScroll = useCallback((sectionId: string) => {
+    pendingCheckoutScrollSectionRef.current = sectionId;
+  }, []);
+
+  useEffect(() => {
+    const sectionId = pendingCheckoutScrollSectionRef.current;
+    if (!sectionId) {
+      return;
+    }
+
+    pendingCheckoutScrollSectionRef.current = null;
+    scrollToCheckoutSection(sectionId);
+  }, [step, scrollToCheckoutSection]);
+
   const showDeliveryAddressRequiredFeedback = () => {
-    document
-      .getElementById("checkout-delivery-address-required")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    scrollToCheckoutSection("checkout-delivery-address-required");
     toast({
       title: "Delivery address required",
       description:
@@ -248,7 +274,7 @@ const CheckoutPage = () => {
   ) => {
     if (checkoutLockedRef.current) return;
 
-    if (field === "method" && value === "cod" && !codOffered) {
+    if (field === "method" && value === "cod" && !codAvailable) {
       return;
     }
 
@@ -259,10 +285,10 @@ const CheckoutPage = () => {
     // Only act on a definite answer. An empty payment-method list means the cart
     // has not loaded yet, and switching the customer away from COD on that would
     // undo a choice they already made.
-    if (!noPaymentNeeded && paymentMethods.length > 0 && payment.method === "cod" && !codOffered) {
+    if (!noPaymentNeeded && paymentMethods.length > 0 && payment.method === "cod" && !codAvailable) {
       setPayment((prev) => ({ ...prev, method: "card" }));
     }
-  }, [codOffered, noPaymentNeeded, payment.method, paymentMethods.length]);
+  }, [codAvailable, noPaymentNeeded, payment.method, paymentMethods.length]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -965,22 +991,18 @@ const CheckoutPage = () => {
                 form={form}
                 payment={payment}
                 hasEngravedItems={hasEngravedItems}
-                codOffered={codOffered}
+                codOffered={codAvailable}
                 noPaymentNeeded={noPaymentNeeded}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;
+                  requestCheckoutSectionScroll("checkout-personal-information");
                   setStep("form");
                 }}
                 onEditDelivery={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;
+                  requestCheckoutSectionScroll("checkout-delivery-address");
                   setStep("form");
-                }}
-                onEditPayment={() => {
-                  if (checkoutLockedRef.current || paymentInFlightRef.current) return;
-                  document
-                    .getElementById("checkout-payment-methods")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 validation={paymentValidation}
                 isAuthenticated={isAuthenticated}

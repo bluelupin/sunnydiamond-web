@@ -15,6 +15,7 @@ import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName, invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
+import FormRadioButtonIcon from "@/assets/Icons/FormRadioButtonIcon";
 
 function formatRequiredFieldLabel(label: string): string {
   return label.endsWith("*") ? label : `${label}*`;
@@ -242,14 +243,16 @@ type CheckoutSectionCardProps = {
   children: React.ReactNode;
   className?: string;
   gapClassName?: string;
+  id?: string;
 };
 
 export const CheckoutSectionCard = ({
   children,
   className,
   gapClassName = "gap-6",
+  id,
 }: CheckoutSectionCardProps) => (
-  <section className={cn("flex flex-col bg-white py-6 px-4", gapClassName, className)}>
+  <section id={id} className={cn("flex flex-col bg-white py-6 px-4", gapClassName, className)}>
     {children}
   </section>
 );
@@ -265,17 +268,17 @@ export const CheckoutSectionHeading = ({
   onEdit,
   editDisabled = false,
 }: CheckoutSectionHeadingProps) => (
-  <div className="flex items-center justify-between gap-4">
+  <div className="flex items-start justify-between gap-4">
     <h2 className="font-gill md:text-2xl text-xl font-normal leading-110 text-darkblack">{children}</h2>
-    {/* {onEdit ? (
+    {onEdit ? (
       <DetailTextLink
         onClick={onEdit}
         disabled={editDisabled}
-        className={editDisabled ? "opacity-40" : undefined}
+        className={cn("shrink-0", editDisabled && "opacity-40")}
       >
         EDIT
       </DetailTextLink>
-    ) : null} */}
+    ) : null}
   </div>
 );
 
@@ -351,7 +354,7 @@ export const CheckoutRadioRow = ({
 }: Omit<CheckoutRadioOptionProps, "children">) => (
   <label
     className={cn(
-      "flex gap-2",
+      "flex min-w-0 gap-2",
       disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
       align === "start" ? "items-start" : "items-center",
     )}
@@ -366,19 +369,11 @@ export const CheckoutRadioRow = ({
           onChange();
         }
       }}
-      className={cn(
-        "flex size-6 shrink-0 items-center justify-center rounded-full border-[0.8px] border-darkblack bg-white",
-        align === "start" && "mt-1",
-      )}
+      className="flex size-6 shrink-0 items-center justify-center"
     >
-      <span
-        className={cn(
-          "size-2.5 rounded-full bg-darkblack transition-opacity",
-          checked ? "opacity-100" : "opacity-0",
-        )}
-      />
+      <FormRadioButtonIcon checked={checked} className="size-6" />
     </button>
-    <div className="font-gill text-base font-normal leading-110 text-darkblack">{label}</div>
+    <div className="min-w-0 font-gill text-base font-normal leading-110 text-darkblack">{label}</div>
   </label>
 );
 
