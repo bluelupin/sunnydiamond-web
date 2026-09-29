@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 import { sortOptions } from "../data/filters";
@@ -11,8 +11,6 @@ import {
   jewelleryListingToolbarAssets,
   jewelleryListingToolbarSpec,
 } from "../data/content";
-import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
-import SortByIcon from "@/assets/Icons/PLP/SortByIcon";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import {
   Select,
@@ -73,22 +71,41 @@ type FilterControlProps = {
   onClick: () => void;
 };
 
-const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterControlProps) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="text-darkblack inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 flex items-center justify-center h-10 px-3"
-    style={{ gap, color }}
-    aria-label="Open filters"
-  >
-    <span
-      className="whitespace-nowrap font-gill font-normal uppercase leading-110 lg:text-xl text-base"
+const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterControlProps) => {
+  const { windows } = useUiPlatform();
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-darkblack inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 flex items-center justify-center h-10 md:px-3"
+      style={{ gap, color }}
+      aria-label="Open filters"
     >
-      Filter
-    </span>
-    <FilterIcon className="size-6" />
-  </button>
-);
+      <span
+        className="whitespace-nowrap font-gill font-normal uppercase leading-110 lg:text-xl text-base"
+      >
+        Filter
+      </span>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={cn(!windows && "-translate-y-0.5", "md:size-6 size-5")}
+        aria-hidden
+      >
+        <path d="M8.125 8.125C9.16053 8.125 10 7.28553 10 6.25C10 5.21447 9.16053 4.375 8.125 4.375C7.08947 4.375 6.25 5.21447 6.25 6.25C6.25 7.28553 7.08947 8.125 8.125 8.125Z" stroke="#0A0A0A" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M13.125 15.625C14.1605 15.625 15 14.7855 15 13.75C15 12.7145 14.1605 11.875 13.125 11.875C12.0895 11.875 11.25 12.7145 11.25 13.75C11.25 14.7855 12.0895 15.625 13.125 15.625Z" stroke="#0A0A0A" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10 6.25H16.875" stroke="#0A0A0A" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3.125 6.25H6.25" stroke="#0A0A0A" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M15 13.75H16.875" stroke="#0A0A0A" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3.125 13.75H11.25" stroke="#0A0A0A" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+};
 
 type SortControlProps = {
   iconSize: number;
@@ -108,61 +125,81 @@ const SortControl = ({
   sortValue,
   onSortChange,
   onMobileOpen,
-}: SortControlProps) => (
-  <>
-    {/* Desktop — original Sort By control; Gemstone Type-style dropdown menu */}
-    <div
-      className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid px-3 h-10"
-      style={{
-        gap,
-        color,
-        // paddingLeft: desktopSpec.sortPaddingX,
-        // paddingRight: desktopSpec.sortPaddingX,
-        // paddingTop: desktopSpec.sortPaddingY,
-        // paddingBottom: desktopSpec.sortPaddingY,
-      }}
-    >
-      <span
-        className="pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-2 whitespace-nowrap font-gill text-base font-normal uppercase leading-110 text-darkblack lg:text-xl"
-      >
-        Sort By
-        <SortByIcon className="size-6" />
-      </span>
-      <Select value={sortValue} onValueChange={onSortChange}>
-        <SelectTrigger
-          aria-label="Sort products"
-          className="col-start-1 row-start-1 z-10 size-full h-full min-h-0 cursor-pointer border-0 bg-transparent opacity-0 shadow-none focus:ring-0 [&>svg]:hidden"
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="z-30">
-          {sortOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+}: SortControlProps) => {
+  const { windows } = useUiPlatform();
 
-    {/* Mobile — opens sort drawer (Figma 1279:1020) */}
-    <button
-      type="button"
-      onClick={onMobileOpen}
-      className="inline-flex h-8 items-center md:hidden"
-      style={{ gap, color }}
-      aria-label="Open sort options"
-    >
-      <span
-        className="whitespace-nowrap font-gill font-normal uppercase leading-110"
-        style={{ fontSize }}
+  return (
+    <>
+      {/* Desktop — original Sort By control; Gemstone Type-style dropdown menu */}
+      <div
+        className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid px-3 h-10"
+        style={{
+          gap,
+          color,
+        }}
       >
-        Sort By
-      </span>
-      <SortChevron size={iconSize} mobile />
-    </button>
-  </>
-);
+        <span
+          className="pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-2 whitespace-nowrap font-gill text-base font-normal uppercase leading-110 text-darkblack lg:text-xl"
+        >
+          Sort By
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={cn(!windows && "-translate-y-0.5", "md:size-6 size-5")}
+            aria-hidden
+          >
+            <path d="M19 9L12.5 15.5L6 9" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <Select value={sortValue} onValueChange={onSortChange}>
+          <SelectTrigger
+            aria-label="Sort products"
+            className="col-start-1 row-start-1 z-10 size-full h-full min-h-0 cursor-pointer border-0 bg-transparent opacity-0 shadow-none focus:ring-0 [&>svg]:hidden"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="z-30">
+            {sortOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Mobile — opens sort drawer (Figma 1279:1020) */}
+      <button
+        type="button"
+        onClick={onMobileOpen}
+        className="inline-flex h-8 items-center md:hidden"
+        style={{ gap, color }}
+        aria-label="Open sort options"
+      >
+        <span
+          className="whitespace-nowrap font-gill font-normal uppercase leading-110"
+          style={{ fontSize }}
+        >
+          Sort By
+        </span>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={cn(!windows && "-translate-y-0.5", "md:size-6 size-5")}
+          aria-hidden
+        >
+          <path d="M19 9L12.5 15.5L6 9" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </>
+  );
+};
 
 type SortDrawerProps = {
   open: boolean;
@@ -269,7 +306,6 @@ const JewelleryProductToolbar = ({
               aria-live="polite"
               aria-busy="true"
             >
-              {/* <Loader2 className="size-5 shrink-0 animate-spin" aria-hidden /> */}
               Searching products...
             </span>
           ) : (

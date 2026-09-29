@@ -2,7 +2,10 @@ import type { JewelleryFilterState, JewellerySortOption } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 
-export const PAGE_SIZE = 9;
+export const DESKTOP_PAGE_SIZE = 9;
+export const MOBILE_PAGE_SIZE = 10;
+/** Server prefetch and desktop PLP page size. */
+export const PAGE_SIZE = DESKTOP_PAGE_SIZE;
 
 export const DEFAULT_JEWELLERY_LISTING_SORT = "featured";
 

@@ -16,7 +16,6 @@ import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkelet
 import {
   createDefaultFilterState,
   createEmptyFilterState,
-  PAGE_SIZE,
   applyJewelleryPriceSearchParams,
   applyJewelleryListingSortParam,
   hasActiveFilters,
@@ -55,6 +54,7 @@ import {
   reportJewelleryPlpTtfb,
 } from "../utils/jewelleryPlpPerformance";
 import { useMagentoJewelleryListing, createJewelleryListingPrefetchParams } from "@/hooks/magento/useMagentoJewelleryListing";
+import { useJewelleryPlpPageSize } from "../hooks/useJewelleryPlpPageSize";
 import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { resolveActiveCategorySlugFromFilters, resolveMainCategoryUrlKeyFromDrawerSelection } from "../utils/plpCategoryNav";
@@ -176,6 +176,7 @@ const JewelleryProductPage = ({
   const plpTtfbReportedRef = useRef(false);
   const plpPrefetchReportedRef = useRef(false);
   const [listingResetNonce, setListingResetNonce] = useState(0);
+  const pageSize = useJewelleryPlpPageSize();
   const { isWishlisted, toggleWishlist } = useWishlist();
 
   const initialListingParams =
@@ -208,7 +209,7 @@ const JewelleryProductPage = ({
     search: searchQuery,
     sortValue,
     filters,
-    pageSize: PAGE_SIZE,
+    pageSize,
     initialListing,
     initialListingParams,
     listingResetNonce,
@@ -671,9 +672,9 @@ const JewelleryProductPage = ({
         isFilterOpen={isFilterOpen}
       />
 
-      <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
+      <section className="relative isolate z-0 w-full bg-gray200">
         {isLoading ? (
-          <JewelleryProductGridSkeleton count={PAGE_SIZE} />
+          <JewelleryProductGridSkeleton count={pageSize} />
         ) : showListingError ? (
           <JewelleryListingErrorState message={error} onRetry={retryListing} />
         ) : showFilterEmptyState ? (

@@ -191,6 +191,12 @@ export function useMagentoJewelleryListing({
         )
       : null;
 
+  const prefetchedPageSize = initialListingParams?.pageSize ?? initialListing?.pageSize;
+  const hasInitialPageSizeMismatch =
+    Boolean(initialListing) &&
+    prefetchedPageSize != null &&
+    prefetchedPageSize !== pageSize;
+
   const [products, setProducts] = useState<JewelleryListingProduct[]>(
     () => initialListing?.products ?? [],
   );
@@ -201,7 +207,9 @@ export function useMagentoJewelleryListing({
   );
   const [currentPage, setCurrentPage] = useState(() => initialListing?.currentPage ?? 1);
   const [pendingCount, setPendingCount] = useState(() => initialListing?.pendingProducts?.length ?? 0);
-  const [isLoading, setIsLoading] = useState(() => !initialListing);
+  const [isLoading, setIsLoading] = useState(
+    () => !initialListing || hasInitialPageSizeMismatch,
+  );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [resolvedListingQueryKey, setResolvedListingQueryKey] = useState<string | null>(
     () => initialListingQueryKey,
@@ -335,6 +343,14 @@ export function useMagentoJewelleryListing({
     }
 
     const currentScopeKey = buildListingScopeKey(categoryUrlKey, sortValue, pageSize);
+
+    if (
+      consumePrefetchedListingRef.current &&
+      initialListing &&
+      prefetchedScopeKey !== currentScopeKey
+    ) {
+      consumePrefetchedListingRef.current = false;
+    }
 
     if (
       consumePrefetchedListingRef.current &&
