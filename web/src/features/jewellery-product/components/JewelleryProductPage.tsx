@@ -416,8 +416,12 @@ const JewelleryProductPage = ({
     facetsSyncedRef.current = true;
 
     if (searchQuery) {
+      // Clear All removes filters; the chosen sort stays, as it does on screen.
       setSearchCategoryUrlKey(null);
-      replaceSearchUrl(new URLSearchParams());
+      const kept = new URLSearchParams();
+      const sort = new URLSearchParams(window.location.search).get("sort");
+      if (sort) kept.set("sort", sort);
+      replaceSearchUrl(kept);
     } else {
       replaceJewelleryListingUrl(null, new URLSearchParams());
 
