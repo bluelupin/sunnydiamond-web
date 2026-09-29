@@ -191,6 +191,8 @@ const CareersApplicationForm = () => {
       setEmail(data.emailId ?? "");
       setPhone(phoneValue?.phone ?? "");
       setCountryCode(phoneValue?.countryCode ?? "+91");
+      // Show the shared phone validation immediately for resume-populated values.
+      setTouched((current) => ({ ...current, phone: true }));
       setHighestDegree(education?.degree ?? "");
       setAreaOfStudy(education?.areaOfStudy ?? "");
       setYearOfCompletion(education?.completionYear ? String(education.completionYear) : "");
