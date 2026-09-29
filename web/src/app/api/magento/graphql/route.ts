@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
         Store: MAGENTO_DEFAULT_STORE_CODE,
         ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}),
         ...forwardedHeaders,
+        // Search-results pagination and facets must not count as searches (SunnyDiamonds_QuickSearch).
+        ...(request.headers.get("x-sunny-search-mode") === "suggest" ? { "X-Sunny-Search-Mode": "suggest" } : {}),
       },
       body: JSON.stringify({ query: body.query, variables: body.variables }),
       ...(isCartOperation || customerToken

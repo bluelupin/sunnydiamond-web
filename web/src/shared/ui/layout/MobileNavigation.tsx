@@ -24,6 +24,7 @@ type MobileNavigationProps = {
   appointmentLink?: HeaderNavLink;
   cartCount: number;
   onProfileOpen?: () => void;
+  onSearchOpen: () => void;
 };
 
 function scheduleEnterAnimation(onEnter: () => void) {
@@ -45,7 +46,6 @@ const MOBILE_NAV_TRANSITION_MS = 300;
 const MOBILE_NAV_BACKDROP_Z_CLASS = "z-[74]";
 const MOBILE_NAV_SHELL_Z_CLASS = "z-[75]";
 
-const SEARCH_HREF = "/coming-soon";
 
 function mobileNavShellMotionClass(visible: boolean) {
   return cn(
@@ -239,6 +239,7 @@ const MobileNavigation = ({
   appointmentLink,
   cartCount,
   onProfileOpen,
+  onSearchOpen,
 }: MobileNavigationProps) => {
   const pathname = usePathname() ?? "/";
   const [subPanel, setSubPanel] = useState<SubPanelId | null>(null);
@@ -427,14 +428,18 @@ const MobileNavigation = ({
                 aria-hidden
               />
             </button>
-            <Link
-              href={SEARCH_HREF}
-              onClick={handleClose}
+            <button
+              type="button"
+              onClick={() => {
+                handleClose();
+                onSearchOpen();
+              }}
               aria-label="Search"
+              aria-haspopup="dialog"
               className="inline-flex size-6 items-center justify-center"
             >
               <SearchIcon className="size-6 text-darkblack" />
-            </Link>
+            </button>
           </div>
 
           <Link href="/" aria-label="Sunny Diamonds home" onClick={handleClose} className="h-16 w-20 shrink-0">

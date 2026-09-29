@@ -57,6 +57,8 @@ type MagentoProductsBySkusResponse = {
 
 export type GetMagentoJewelleryProductsParams = {
   categoryUrlKey?: string | null;
+  /** Shopper's search text (/search?q=); empty for the normal listing. */
+  search?: string;
   page?: number;
   pageSize?: number;
   sortValue?: string;
@@ -68,6 +70,8 @@ export type GetMagentoJewelleryProductsParams = {
 };
 
 const NAV_CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000;
+/** Tells Magento not to count the call in its popular-search log (SunnyDiamonds_QuickSearch). */
+const SEARCH_SUGGEST_HEADERS = { "X-Sunny-Search-Mode": "suggest" };
 const JEWELLERY_NAV_CACHE_KEY = magentoQueryKeys.jewelleryNav;
 const LISTING_RESULT_CACHE_TTL_MS = 60_000;
 
@@ -83,6 +87,7 @@ function buildJewelleryListingRequestKey(params: GetMagentoJewelleryProductsPara
 
   return JSON.stringify({
     categoryUrlKey: params.categoryUrlKey ?? null,
+    search: params.search ?? "",
     page: params.page ?? 1,
     pageSize: params.pageSize ?? 9,
     sortValue: params.sortValue ?? "featured",
@@ -293,6 +298,7 @@ async function enrichFacetsWithDrawerAttributeOptions(
 
 async function fetchMagentoJewelleryProducts({
   categoryUrlKey,
+  search = "",
   page = 1,
   pageSize = 9,
   sortValue = "featured",
@@ -336,18 +342,22 @@ async function fetchMagentoJewelleryProducts({
     facets: facetsForFilter,
   });
 
-  const sort = mapJewellerySortToMagento(sortValue);
+  // Search results keep Magento's relevance order unless the shopper picks a sort.
+  const sort = search && sortValue === "featured" ? { relevance: "DESC" } : mapJewellerySortToMagento(sortValue);
+  // Magento counts every search call as a search; only the first page of results counts here.
+  const searchLogHeaders = search && page > 1 ? SEARCH_SUGGEST_HEADERS : undefined;
 
   const fetchProducts = () =>
     magentoGraphqlFetch<MagentoProductsResponse>({
       query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
       variables: {
-        search: "",
+        search,
         filter: magentoFilter,
         pageSize,
         currentPage: page,
         sort,
       },
+      headers: searchLogHeaders,
       signal,
     });
 
@@ -397,10 +407,11 @@ async function fetchMagentoJewelleryProducts({
         magentoGraphqlFetch<MagentoProductsResponse>({
           query: MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
           variables: {
-            search: "",
+            search,
             filter: facetScopeFilter,
             sort,
           },
+          headers: search ? SEARCH_SUGGEST_HEADERS : undefined,
           signal,
         }),
       { category: categoryUrlKey ?? "all" },

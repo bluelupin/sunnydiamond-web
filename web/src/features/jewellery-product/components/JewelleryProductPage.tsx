@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryHeroSection from "./JewelleryHeroSection";
@@ -70,6 +70,10 @@ type JewelleryProductPageProps = {
   prefetchedCategoryUrlKey?: string | null;
   hero?: NormalizedProductLandingHero | null;
   trustBadges?: NormalizedProductLandingTrustBadge[];
+  /** /search: the shopper's query; hides the category tabs, which would drop it. */
+  searchQuery?: string;
+  /** /search: shown instead of the grid when the query finds nothing and no filter is set. */
+  noResults?: ReactNode;
 };
 
 /** Clears drawer filters while keeping URL-driven listing params (occasion, shape, etc.). */
@@ -90,6 +94,8 @@ const JewelleryProductPage = ({
   prefetchedCategoryUrlKey,
   hero,
   trustBadges = [],
+  searchQuery,
+  noResults,
 }: JewelleryProductPageProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -199,6 +205,7 @@ const JewelleryProductPage = ({
     retryListing,
   } = useMagentoJewelleryListing({
     categoryUrlKey: selectedCategoryUrlKey,
+    search: searchQuery,
     sortValue,
     filters,
     pageSize: PAGE_SIZE,
@@ -633,6 +640,7 @@ const JewelleryProductPage = ({
   const showLoadMoreError = Boolean(error) && products.length > 0;
   const showFilterEmptyState =
     !isLoading && !showListingError && products.length === 0 && hasActiveFilters(filters, facets);
+  const showNoResults = Boolean(noResults) && !isLoading && !showListingError && !showFilterEmptyState && products.length === 0;
 
   const metalPurityQuery = useMemo(
     () => getSelectedMetalPurityQuery(filters.metalPurities, facets),
@@ -650,7 +658,9 @@ const JewelleryProductPage = ({
   return (
     <div className="pb-0 md:pb-0">
       {hero ? <JewelleryHeroSection {...hero} /> : null}
-      <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
+      {searchQuery ? null : (
+        <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
+      )}
 
       <JewelleryProductToolbar
         productCount={totalCount}
@@ -668,6 +678,8 @@ const JewelleryProductPage = ({
           <JewelleryListingErrorState message={error} onRetry={retryListing} />
         ) : showFilterEmptyState ? (
           <JewelleryListingEmptyState onClearFilters={handleClearFilters} />
+        ) : showNoResults ? (
+          noResults
         ) : (
           <JewelleryProductGrid
             products={products}

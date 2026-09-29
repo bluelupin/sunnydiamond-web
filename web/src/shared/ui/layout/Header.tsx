@@ -49,6 +49,8 @@ const JewelleryMegaMenu = dynamic(
   { ssr: false, loading: () => null },
 );
 
+const SearchOverlay = dynamic(() => import("@/features/search/SearchOverlay"), { ssr: false, loading: () => null });
+
 const preloadJewelleryMegaMenu = () => {
   void import("@/shared/ui/layout/JewelleryMegaMenu");
 };
@@ -56,10 +58,14 @@ const preloadJewelleryMegaMenu = () => {
 const iconButtonClass =
   "inline-flex size-6 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
-const SEARCH_HREF = "/coming-soon";
-
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchMounted, setSearchMounted] = useState(false);
+  const openSearch = () => {
+    setSearchMounted(true);
+    setSearchOpen(true);
+  };
   const [profileNavOpen, setProfileNavOpen] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const [jewelleryMenuMounted, setJewelleryMenuMounted] = useState(false);
@@ -236,13 +242,15 @@ const Header = () => {
               >
                 <MenuIcon className="size-6" />
               </button>
-              <Link
-                href={SEARCH_HREF}
+              <button
+                type="button"
                 className={cn(iconButtonClass, textClass, hoverClass)}
+                onClick={openSearch}
                 aria-label="Search"
+                aria-haspopup="dialog"
               >
                 <SearchIcon className="size-6" />
-              </Link>
+              </button>
             </div>
             <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-10">
               {Logo}
@@ -297,13 +305,15 @@ const Header = () => {
               <div className="pointer-events-auto">{Logo}</div>
             </div>
             <div className={cn("relative z-10 flex items-center gap-6 lg:gap-6", textClass)}>
-              <Link
-                href={SEARCH_HREF}
+              <button
+                type="button"
                 className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
+                onClick={openSearch}
                 aria-label="Search"
+                aria-haspopup="dialog"
               >
                 <SearchIcon className="size-6" />
-              </Link>
+              </button>
 
               <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
 
@@ -364,6 +374,7 @@ const Header = () => {
         appointmentLink={appointmentLink}
         cartCount={displayCartCount}
         onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+        onSearchOpen={openSearch}
       />
 
       <ProfileMobileNavSheet
@@ -372,6 +383,12 @@ const Header = () => {
         navItems={profileNavItems}
         cartCount={displayCartCount}
       />
+
+      {searchMounted ? (
+        <FeatureErrorBoundary featureName="SearchOverlay">
+          <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
+        </FeatureErrorBoundary>
+      ) : null}
     </>
   );
 };

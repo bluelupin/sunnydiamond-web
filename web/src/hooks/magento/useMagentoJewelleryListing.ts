@@ -34,6 +34,8 @@ export type JewelleryListingPrefetchParams = {
 
 type UseMagentoJewelleryListingParams = {
   categoryUrlKey?: string | null;
+  /** Search text for /search; fixed for the hook's lifetime (the page remounts per query). */
+  search?: string;
   sortValue: string;
   filters: JewelleryFilterState;
   pageSize?: number;
@@ -162,6 +164,7 @@ export function createJewelleryListingPrefetchParams(
 
 export function useMagentoJewelleryListing({
   categoryUrlKey,
+  search = "",
   sortValue,
   filters,
   pageSize = PAGE_SIZE,
@@ -270,6 +273,7 @@ export function useMagentoJewelleryListing({
     try {
       const { listing } = await getMagentoJewelleryInitialListing({
         categoryUrlKey,
+        search,
         pageSize,
         sortValue,
         filters: filtersRef.current,
@@ -323,7 +327,7 @@ export function useMagentoJewelleryListing({
         setResolvedListingQueryKey(resolvedKey);
       }
     }
-  }, [applyInitialListing, categoryUrlKey, pageSize, sortValue]);
+  }, [applyInitialListing, categoryUrlKey, search, pageSize, sortValue]);
 
   useEffect(() => {
     if (listingResetNonce !== lastListingResetNonceRef.current) {
@@ -464,6 +468,7 @@ export function useMagentoJewelleryListing({
           do {
             const data = await getMagentoJewelleryProducts({
               categoryUrlKey,
+              search,
               page: fetchedPage,
               pageSize,
               sortValue,
@@ -544,7 +549,7 @@ export function useMagentoJewelleryListing({
         }
       }
     })();
-  }, [categoryUrlKey, pageSize, sortValue]);
+  }, [categoryUrlKey, search, pageSize, sortValue]);
 
   const hasMore =
     pendingCount > 0 ||
