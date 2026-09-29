@@ -533,7 +533,7 @@ const CareersApplicationForm = () => {
         },
         addInfo: {
           hasCompanyRelation,
-          employeeName,
+          employeeName: employeeName.trim(),
           employeeJobTitle: employeeJobTitle.trim(),
         },
         resumeFile,
@@ -975,24 +975,25 @@ const CareersApplicationForm = () => {
 
           {hasCompanyRelation ? (
             <div className="grid gap-6 md:grid-cols-2">
-              <CareersSelectField
-                id="careers-employee-name"
-                label={fields.employeeNameLabel}
-                value={employeeName}
-                onChange={setEmployeeName}
-                options={applicationForm.employeeRelationOptions}
-                placeholder={selectPlaceholder}
-              />
-
-              <FormField label={fields.employeeJobTitleLabel}>
+              <FormField label={fields.employeeNameLabel}>
                 <input
+                  id="careers-employee-name"
                   type="text"
-                  placeholder={textPlaceholder}
-                  value={employeeJobTitle}
-                  onChange={(event) => setEmployeeJobTitle(event.target.value)}
+                  placeholder="Enter Employee Name"
+                  value={employeeName}
+                  onChange={(event) => setEmployeeName(event.target.value)}
                   className={careersFormFieldClassName}
                 />
               </FormField>
+
+              <CareersSelectField
+                id="careers-employee-job-title"
+                label={fields.employeeJobTitleLabel}
+                placeholder="Enter Employee Job Title"
+                value={employeeJobTitle}
+                onChange={setEmployeeJobTitle}
+                options={["Executive Director"]}
+              />
             </div>
           ) : null}
         </section>
@@ -1001,7 +1002,7 @@ const CareersApplicationForm = () => {
       <button
         type="submit"
         disabled={!isFormComplete || isSubmitting || isParsingResume}
-        className={cn(careersDarkCtaClassName, "w-full md:w-[193px]")}
+        className={cn(careersDarkCtaClassName, "w-full whitespace-nowrap md:w-auto md:min-w-[193px] md:self-start")}
       >
         <span className="relative z-10">
           {isSubmitting ? CAREERS_SUBMITTING_APPLICATION_LABEL : applicationForm.submitLabel}
