@@ -19,7 +19,7 @@ const CareersApplicationJobHeader = ({
 
   return (
     <div className={className}>
-      <CareersJobPageHeader job={jobWithPosted} titleId="careers-application-title" />
+      <CareersJobPageHeader job={jobWithPosted} titleId="careers-application-title" showPosted={false} />
 
       <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
     </div>

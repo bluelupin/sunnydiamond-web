@@ -30,6 +30,7 @@ import {
 } from "@/services/careers/career-resume-parser.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import {
+  CAREERS_APPLICATION_FIELD_LABELS,
   CAREERS_NUMERIC_ONLY_ERROR,
   CAREERS_AUTOFILL_RESUME_ACCEPT,
   CAREERS_RESUME_ACCEPT,
@@ -562,9 +563,7 @@ const CareersApplicationForm = () => {
     );
   }
 
-  const fields = applicationForm.fields;
-  const textPlaceholder = fields.fieldPlaceholder;
-  const selectPlaceholder = fields.selectPlaceholder;
+  const fields = { ...applicationForm.fields, ...CAREERS_APPLICATION_FIELD_LABELS };
 
 
   return (
@@ -640,7 +639,7 @@ const CareersApplicationForm = () => {
                 <input
                   type="text"
                   autoComplete="name"
-                  placeholder={fields.fieldPlaceholder}
+                  placeholder="Enter Name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   onBlur={() => markTouched("name")}
@@ -669,7 +668,7 @@ const CareersApplicationForm = () => {
                   <input
                     type="tel"
                     autoComplete="tel"
-                    placeholder={fields.fieldPlaceholder}
+                    placeholder="Enter"
                     value={phone}
                     onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, countryCode))}
                     onBlur={() => markTouched("phone")}
@@ -682,7 +681,7 @@ const CareersApplicationForm = () => {
                 <input
                   type="email"
                   autoComplete="email"
-                  placeholder={fields.fieldPlaceholder}
+                  placeholder="Enter Email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   onBlur={() => markTouched("email")}
@@ -705,7 +704,7 @@ const CareersApplicationForm = () => {
                   onBlur={() => markTouched("dateOfBirth")}
                   hasError={showError("dateOfBirth")}
                   aria-invalid={showError("dateOfBirth") || undefined}
-                  placeholder={fields.dateOfBirthPlaceholder}
+                  placeholder="Select Date"
                   displayFormat="dd/mm/yyyy"
                 />
               </FormField>
@@ -716,7 +715,7 @@ const CareersApplicationForm = () => {
                 onChange={setGender}
                 onBlur={() => markTouched("gender")}
                 options={applicationForm.genderOptions}
-                placeholder={selectPlaceholder}
+                placeholder="Select Gender"
                 error={showError("gender") ? errors.gender : undefined}
               />
             </div>
@@ -732,7 +731,7 @@ const CareersApplicationForm = () => {
             >
               <input
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Degree"
                 value={highestDegree}
                 onChange={(event) => setHighestDegree(event.target.value)}
                 onBlur={() => markTouched("highestDegree")}
@@ -748,7 +747,7 @@ const CareersApplicationForm = () => {
             >
               <input
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Area of Study"
                 value={areaOfStudy}
                 onChange={(event) => setAreaOfStudy(event.target.value)}
                 onBlur={() => markTouched("areaOfStudy")}
@@ -766,7 +765,7 @@ const CareersApplicationForm = () => {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={textPlaceholder}
+                placeholder="Enter Year of Completion"
                 value={yearOfCompletion}
                 onChange={(event) =>
                   setYearOfCompletion(
@@ -797,13 +796,13 @@ const CareersApplicationForm = () => {
               onChange={setRelevantExperience}
               onBlur={() => markTouched("relevantExperience")}
               options={applicationForm.workExperienceOptions}
-              placeholder={selectPlaceholder}
+              placeholder="Select Relevant Experience"
               error={showError("relevantExperience") ? errors.relevantExperience : undefined}
             />
             <FormField label={fields.currentCompanyLabel}>
               <input
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Current Company's Name"
                 value={currentCompany}
                 onChange={(event) => setCurrentCompany(event.target.value)}
                 className={careersFormFieldClassName}
@@ -812,7 +811,7 @@ const CareersApplicationForm = () => {
             <FormField label={fields.currentJobTitleLabel}>
               <input
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Current Job Title"
                 value={currentJobTitle}
                 onChange={(event) => setCurrentJobTitle(event.target.value)}
                 className={careersFormFieldClassName}
@@ -826,7 +825,7 @@ const CareersApplicationForm = () => {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={textPlaceholder}
+                placeholder="Enter Current CTC (In LPA)"
                 value={currentCtc}
                 onChange={(event) =>
                   setCurrentCtc(sanitizeCareersNumericInput(event.target.value))
@@ -846,7 +845,7 @@ const CareersApplicationForm = () => {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={textPlaceholder}
+                placeholder="Enter Expected CTC (In LPA)"
                 value={expectedCtc}
                 onChange={(event) =>
                   setExpectedCtc(sanitizeCareersNumericInput(event.target.value))
@@ -864,7 +863,7 @@ const CareersApplicationForm = () => {
               value={noticePeriod}
               onChange={setNoticePeriod}
               options={applicationForm.noticePeriodOptions}
-              placeholder={selectPlaceholder}
+              placeholder="Select Notice Period"
             />
           </div>
         </section>
@@ -878,7 +877,7 @@ const CareersApplicationForm = () => {
               Add skills and known languages to your application
             </p>
             <CareersSkillsSearch
-              placeholder={fields.skillsSearchPlaceholder}
+              placeholder="Search"
               skills={skills}
               languages={languages}
               onSelect={(option) => {

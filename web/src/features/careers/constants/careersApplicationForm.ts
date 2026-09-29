@@ -1,3 +1,24 @@
+/** Approved Figma copy for the application form. */
+export const CAREERS_APPLICATION_FIELD_LABELS = {
+  fullNameLabel: "Full Name*",
+  phoneLabel: "Phone No.*",
+  emailLabel: "Email ID*",
+  dateOfBirthLabel: "Date of Birth*",
+  genderLabel: "Gender*",
+  highestDegreeLabel: "Highest Degree*",
+  areaOfStudyLabel: "Area of Study*",
+  yearOfCompletionLabel: "Year of Completion*",
+  relevantExperienceLabel: "Relevant Work Experience*",
+  currentCompanyLabel: "Current Company's Name",
+  currentJobTitleLabel: "Current Job Title",
+  currentCtcLabel: "Current CTC",
+  expectedCtcLabel: "Expected CTC*",
+  noticePeriodLabel: "Notice Period",
+  companyRelationLabel: "Do you have any relation in the company?",
+  employeeNameLabel: "Employee Name*",
+  employeeJobTitleLabel: "Employee Job Title*",
+} as const;
+
 export const CAREERS_RESUME_ACCEPT =
   ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
