@@ -114,7 +114,7 @@ const AboutTimelineNav = ({
                     />
                     <span
                       className={cn(
-                        "font-gill leading-110 transition-all duration-500 ease-out motion-reduce:transition-none",
+                        "font-gill leading-normal transition-all duration-500 ease-out motion-reduce:transition-none",
                         isActive
                           ? "text-xl font-semibold text-white"
                           : "text-xl font-normal text-aboutInactive",

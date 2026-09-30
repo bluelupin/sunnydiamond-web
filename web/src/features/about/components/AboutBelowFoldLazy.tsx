@@ -47,7 +47,12 @@ const AboutBelowFoldLazy = ({
   <>
     {legacy ? <AboutSince1997Section {...legacy} /> : null}
     {team ? <AboutFacesSection {...team} /> : null}
-    {craft ? <AboutHandcraftedSection {...craft} /> : null}
+    {craft ? (
+      <AboutHandcraftedSection
+        {...craft}
+        showTimelineScrollLine={Boolean(timeline)}
+      />
+    ) : null}
     {timeline ? <AboutTimelineSection {...timeline} /> : null}
   </>
 );

@@ -120,6 +120,7 @@ export type StrapiAboutTrustBadge = {
 };
 
 export type StrapiAboutTrustBadgesSection = {
+  isActive?: boolean | null;
   trustBadge?: StrapiAboutTrustBadge[] | null;
 };
 
@@ -217,6 +218,8 @@ export type NormalizedCraftCard = {
 };
 
 export type NormalizedAboutCraft = {
+  showHero: boolean;
+  showMosaic: boolean;
   title: string;
   image: NormalizedResponsiveImage | null;
   videoUrl?: string;

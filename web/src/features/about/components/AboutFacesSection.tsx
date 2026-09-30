@@ -81,18 +81,18 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
               />
               <figcaption
                 className={cn(
-                  "absolute bottom-0 left-0 z-10 w-full text-left px-4 py-8 md:px-10 md:py-10 transition-all duration-500",
+                  "absolute bottom-0 left-0 z-10 w-full text-left px-4 py-8 lg:px-10 px-8 lg:py-10 py-8 transition-all duration-500",
                   member.image
                     ? "opacity-100 lg:translate-y-2 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100"
                     : "opacity-100",
                 )}
               >
                 <div className="flex flex-col items-start gap-2 leading-110">
-                  <p className="font-larken md:text-32 text-xl font-light text-white">
+                  <p className="font-larken lg:text-32 text-2xl text-xl font-light text-white">
                     {member.name}
                   </p>
                   {member.role ? (
-                    <p className="font-gill md:text-xl text-base font-light text-aboutInactive">
+                    <p className="font-gill lg:text-xl md:text-lg text-base font-light text-aboutInactive">
                       {member.role}
                     </p>
                   ) : null}

@@ -33,6 +33,10 @@ const AboutTimelineSection = ({
 
   const activeMilestone = milestoneByYear.get(activeYear);
 
+  if (milestones.length === 0 || years.length === 0) {
+    return null;
+  }
+
   return (
     <section ref={sectionRef} aria-label="Company timeline" className="relative">
       <div className="sticky top-0 z-10 h-screen overflow-hidden">
