@@ -37,6 +37,8 @@ import {
 import {
   buildOrderDeliveryTimelineFromStatus,
   formatOrderStatusLabel,
+  giftCardSubtitleForSku,
+  isDigitalGiftCardProfileOrder,
   normalizeOrderStatus,
 } from "./orderDeliveryTimeline.utils";
 import { resolveOrderItemImageUrl } from "./orderItemImage.utils";
@@ -439,11 +441,13 @@ function mapOrderItems(
   return order.items.map((item, index) => {
     const display = mapCustomerOrderItemToDisplayFields(item, giftMetadata);
     const imageUrl = resolveOrderItemImageUrl(item.imageUrl, item.productSku, imageBySku);
+    const subtitle = giftCardSubtitleForSku(item.productSku);
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
       name: item.productName,
       ...(imageUrl ? { imageSrc: imageUrl } : {}),
+      ...(subtitle ? { subtitle } : {}),
       size: display.size,
       metal: display.metal,
       engraving: display.engraving,
@@ -463,7 +467,11 @@ export function mapCustomerOrderToProfileUi(
 ): ProfileOrderUi {
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
-  const deliveryBy = resolveOrderDeliveryBy(order.sunnyDelivery);
+  const items = mapOrderItems(order, imageBySku);
+  // Digital gift cards are emailed, so they have no delivery date.
+  const deliveryBy = isDigitalGiftCardProfileOrder({ items })
+    ? undefined
+    : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
   const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
   const deliveryTimeline =
@@ -480,7 +488,7 @@ export function mapCustomerOrderToProfileUi(
     category,
     ...(subState ? { subState } : {}),
     ...(deliveryBy ? { deliveryBy } : {}),
-    items: mapOrderItems(order, imageBySku),
+    items,
     grandTotal: order.grandTotal,
     currency: order.currency,
     showTrack: actions ? actions.canTrack : category === "in_progress",
@@ -516,6 +524,20 @@ export function mapCustomerOrderToProfileUi(
       ),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
+    };
+  }
+
+  if (isDigitalGiftCardProfileOrder(base)) {
+    // Digital gift cards are emailed: no delivery steps, tracking, cancel or return. Contact Us
+    // and the invoice stay (gift card success-to-profile flow, 30 Sep).
+    return {
+      ...base,
+      showTrack: false,
+      showCancel: false,
+      showReturn: false,
+      showContactUs: true,
+      showCancelNote: false,
+      footnote: undefined,
     };
   }
 

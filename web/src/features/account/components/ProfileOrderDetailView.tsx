@@ -21,7 +21,7 @@ import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
 import {
   DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
   isDigitalGiftCardContactUsOnlyOrder,
-  isDigitalGiftCardProfileOrder,
+  isActiveDigitalGiftCardOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
 import { formatRefundNote } from "../utils/profileDisplayMappers";
@@ -177,7 +177,7 @@ export function ProfileOrderDetailView({
   const hasShipping = typeof priceBreakdown.shipping === "number";
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
   const timelineSteps = useMemo(() => {
-    if (isDigitalGiftCardProfileOrder(order)) {
+    if (isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
 

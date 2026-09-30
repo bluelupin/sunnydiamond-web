@@ -61,6 +61,7 @@ export const giftCardFlowContent = {
       alt: "Sunny Diamonds gift card",
     },
     trackOrderLabel: "TRACK ORDER",
+    viewDetailsLabel: "VIEW DETAILS",
     backToShoppingLabel: "GO BACK TO SHOPPING",
     backToShoppingHref: "/jewellery",
   },

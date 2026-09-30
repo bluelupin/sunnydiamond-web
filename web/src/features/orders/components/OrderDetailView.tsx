@@ -5,7 +5,10 @@ import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { CartMetaRow, CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { formatOrderDate, formatOrderTotal, formatAddressLines } from "@/features/account/utils/formatAccountData";
-import { buildOrderDeliveryTimelineFromStatus } from "@/features/account/utils/orderDeliveryTimeline.utils";
+import {
+  buildOrderDeliveryTimelineFromStatus,
+  giftCardSubtitleForSku,
+} from "@/features/account/utils/orderDeliveryTimeline.utils";
 import { ProfileOrderTimeline } from "@/features/account/components/ProfileOrderTimeline";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import type { TrackedOrder, TrackedOrderItem } from "@/services/customer/order-tracking.types";
@@ -71,7 +74,11 @@ const OrderDetailView = ({
   backHref = "/profile?section=orders",
   backLabel = "Back to My Orders",
 }: OrderDetailViewProps) => {
-  const deliveryTimeline = buildOrderDeliveryTimelineFromStatus(order.status);
+  // Digital gift cards are emailed, so they have no delivery steps.
+  const isDigitalGiftCard =
+    order.items.length > 0 &&
+    order.items.every((item) => giftCardSubtitleForSku(item.productSku) === "Digital Card");
+  const deliveryTimeline = isDigitalGiftCard ? [] : buildOrderDeliveryTimelineFromStatus(order.status);
 
   return (
   <div className="space-y-6">

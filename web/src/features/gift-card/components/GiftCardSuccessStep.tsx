@@ -14,6 +14,7 @@ import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
 import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
+import { giftCardSuccessHref } from "../utils/giftCardCta.utils";
 
 type GiftCardSuccessStepProps = {
   onClose: () => void;
@@ -33,14 +34,18 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   const { cardType, orderNumber, estimatedDeliveryDate, digitalDeliveryDate } = useGiftCardFlow();
   const { success } = giftCardFlowContent;
 
-  const trackingHref = orderNumber
-    ? `/order-tracking?order=${encodeURIComponent(orderNumber)}`
-    : "/order-tracking";
+  const isDigital = cardType === "digital";
+  const primaryHref = giftCardSuccessHref(cardType, orderNumber ?? "");
 
   const message =
     cardType === "physical"
       ? `${success.physicalMessage} ${estimatedDeliveryDate}.`
       : `${success.digitalMessage} ${formatDeliveryDate(digitalDeliveryDate)}.`;
+
+  const handlePrimary = () => {
+    onClose();
+    router.push(primaryHref);
+  };
 
   const handleBackToShopping = () => {
     onClose();
@@ -51,8 +56,8 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
     <RightPanelScrollLayout
       footer={
         <PanelFooter contentClassName="flex flex-col items-center gap-4">
-          <CartPrimaryLink href={trackingHref} className="w-full uppercase">
-            {success.trackOrderLabel}
+          <CartPrimaryLink href={primaryHref} onClick={handlePrimary} className="w-full uppercase">
+            {isDigital ? success.viewDetailsLabel : success.trackOrderLabel}
           </CartPrimaryLink>
           <CartTextLink
             href={success.backToShoppingHref}
