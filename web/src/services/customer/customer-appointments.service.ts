@@ -22,6 +22,16 @@ export type RescheduleCustomerAppointmentInput = {
   customerEmail?: string;
   /** Optional — updates booking note / description. */
   requestDetails?: string;
+  /** Optional — try-at-home address; sent only when the customer edits it. */
+  address?: RescheduleCustomerAppointmentAddress;
+};
+
+export type RescheduleCustomerAppointmentAddress = {
+  addressLine1: string;
+  addressLine2?: string;
+  pincode: string;
+  city: string;
+  state?: string;
 };
 
 export class CustomerAppointmentsApiError extends Error {
@@ -277,6 +287,15 @@ export async function rescheduleCustomerAppointment(
           : {}),
         ...(input.requestDetails?.trim()
           ? { requestDetails: input.requestDetails.trim() }
+          : {}),
+        ...(input.address
+          ? {
+              addressLine1: input.address.addressLine1,
+              addressLine2: input.address.addressLine2 ?? "",
+              pincode: input.address.pincode,
+              city: input.address.city,
+              ...(input.address.state ? { state: input.address.state } : {}),
+            }
           : {}),
       },
     }),

@@ -11,7 +11,11 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
-import { isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
+import {
+  getAppointmentBookingDateBounds,
+  isAppointmentTimeSlotAvailable,
+  type AppointmentBookingWindow,
+} from "@/shared/utils/appointmentTimeSlots";
 import {
   getMaxSelectableDate,
   getMinSelectableDate,
@@ -73,6 +77,8 @@ type AppointmentContactFieldsProps = {
   emailLocked?: boolean;
   /** Prefill-only mode (e.g. reschedule): contact + note are visible but not editable. */
   detailsReadOnly?: boolean;
+  /** Minimum notice + furthest day; omitted keeps today → +3 months with past slots disabled. */
+  bookingWindow?: AppointmentBookingWindow;
 };
 
 const AppointmentContactFields = ({
@@ -125,9 +131,12 @@ const AppointmentContactFields = ({
   phoneLocked = false,
   emailLocked = false,
   detailsReadOnly = false,
+  bookingWindow,
 }: AppointmentContactFieldsProps) => {
-  const minDate = getMinSelectableDate();
-  const maxDate = getMaxSelectableDate();
+  const bookingBounds = bookingWindow ? getAppointmentBookingDateBounds(bookingWindow) : null;
+  const minDate = bookingBounds?.minDate ?? getMinSelectableDate();
+  const maxDate = bookingBounds?.maxDate ?? getMaxSelectableDate();
+  const minNoticeMinutes = bookingWindow?.minNoticeMinutes ?? 0;
   // Explicit `[]` means no slots (CMS empty). Only default when prop is omitted.
   const slots = timeSlots ?? APPOINTMENT_TIME_SLOTS;
   const isPhoneLocked = phoneLocked || detailsReadOnly;
@@ -149,10 +158,10 @@ const AppointmentContactFields = ({
       return;
     }
 
-    if (!isAppointmentTimeSlotAvailable(selectedSlot, date)) {
+    if (!isAppointmentTimeSlotAvailable(selectedSlot, date, new Date(), minNoticeMinutes)) {
       onSelectedSlotChange(null);
     }
-  }, [date, onSelectedSlotChange, selectedSlot]);
+  }, [date, minNoticeMinutes, onSelectedSlotChange, selectedSlot]);
 
   return (
     <>
@@ -293,7 +302,8 @@ const AppointmentContactFields = ({
                 {[slots[row * 2], slots[row * 2 + 1]].filter(Boolean).map((slot) => {
                   const isSelected = selectedSlot === slot;
                   const isSlotAvailable =
-                    !date.trim() || isAppointmentTimeSlotAvailable(slot, date);
+                    !date.trim() ||
+                    isAppointmentTimeSlotAvailable(slot, date, new Date(), minNoticeMinutes);
 
                   return (
                     <button

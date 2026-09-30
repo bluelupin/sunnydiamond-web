@@ -1,3 +1,20 @@
+import type { AppointmentBookingWindow } from "@/shared/utils/appointmentTimeSlots";
+
+export const STORE_VISIT_BOOKING_WINDOW: AppointmentBookingWindow = {
+  minNoticeMinutes: 2 * 60,
+  maxDaysAhead: 60,
+};
+
+export const VIDEO_CALL_BOOKING_WINDOW: AppointmentBookingWindow = {
+  minNoticeMinutes: 2 * 60,
+  maxDaysAhead: 30,
+};
+
+export const TRY_AT_HOME_BOOKING_WINDOW: AppointmentBookingWindow = {
+  minNoticeMinutes: 48 * 60,
+  maxDaysAhead: 30,
+};
+
 export const APPOINTMENT_TIME_SLOTS = [
   "9:00 AM - 10:00 AM",
   "10:00 AM - 11:00 AM",

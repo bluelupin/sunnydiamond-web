@@ -324,6 +324,25 @@ function canModifyAppointment(workflowStatus: string): boolean {
   );
 }
 
+const APPOINTMENT_CANCELLED_ON_DISPLAY: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+};
+
+/** CMS has no dedicated cancelled-at field; the cancel is the last update on the record. */
+export function formatAppointmentCancelledOnNote(updatedAt: string | Date): string | undefined {
+  const date = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
+  if (Number.isNaN(date.getTime())) {
+    return undefined;
+  }
+
+  return profileTabsContent.appointments.cancelledNoteTemplate.replace(
+    "{date}",
+    date.toLocaleDateString("en-IN", APPOINTMENT_CANCELLED_ON_DISPLAY),
+  );
+}
+
 function resolveAppointmentWorkflowStatus(
   appointment: CustomerAppointment,
 ): string {
@@ -588,6 +607,10 @@ export function mapCustomerAppointmentToProfileUi(
       appointment.selectedTimeSlot,
     );
   const rescheduleDeadline = formatTryAtHomeRescheduleDeadline(appointment.requestedDate);
+  const isCancelled = workflowStatus.toLowerCase().includes("cancel");
+  const cancelledOnNote = isCancelled
+    ? formatAppointmentCancelledOnNote(appointment.updatedAt)
+    : undefined;
 
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,
@@ -620,6 +643,7 @@ export function mapCustomerAppointmentToProfileUi(
     canReschedule,
     rescheduleLimitReached,
     canCancel,
+    ...(isCancelled ? { isCancelled, ...(cancelledOnNote ? { cancelledOnNote } : {}) } : {}),
   };
 
   if (type === "try_at_home") {

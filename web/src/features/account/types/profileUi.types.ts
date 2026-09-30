@@ -167,6 +167,9 @@ export type ProfileAppointmentUi = {
   /** Reschedule limit (2) used up — hide RESCHEDULE and show the contact-us note. */
   rescheduleLimitReached: boolean;
   canCancel: boolean;
+  /** Cancelled appointments swap cancel/reschedule for CONTACT US and a cancelled-on note. */
+  isCancelled?: boolean;
+  cancelledOnNote?: string;
   /** When clubbed, cancel/reschedule applies to all underlying appointment ids. */
   clubbedAppointmentIds?: string[];
 };

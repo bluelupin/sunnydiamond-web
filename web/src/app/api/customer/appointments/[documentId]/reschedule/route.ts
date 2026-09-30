@@ -18,7 +18,37 @@ type RescheduleBody = {
   customerPhone?: string;
   customerEmail?: string;
   requestDetails?: string;
+  address?: {
+    addressLine1?: string;
+    addressLine2?: string;
+    pincode?: string;
+    city?: string;
+    state?: string;
+  };
 };
+
+function toRescheduleAddress(
+  address: RescheduleBody["address"],
+): RescheduleCustomerAppointmentInput["address"] {
+  const addressLine1 = address?.addressLine1?.trim() ?? "";
+  const pincode = address?.pincode?.trim() ?? "";
+  const city = address?.city?.trim() ?? "";
+
+  if (!addressLine1 || !pincode || !city) {
+    return undefined;
+  }
+
+  const addressLine2 = address?.addressLine2?.trim();
+  const state = address?.state?.trim();
+
+  return {
+    addressLine1,
+    pincode,
+    city,
+    ...(addressLine2 ? { addressLine2 } : {}),
+    ...(state ? { state } : {}),
+  };
+}
 
 function mapApiStatus(status: number): number {
   if (
@@ -48,6 +78,7 @@ function toRescheduleInput(body: RescheduleBody): RescheduleCustomerAppointmentI
   const customerPhone = body.customerPhone?.trim();
   const customerEmail = body.customerEmail?.trim();
   const requestDetails = body.requestDetails?.trim();
+  const address = toRescheduleAddress(body.address);
 
   return {
     requestedDate,
@@ -56,12 +87,13 @@ function toRescheduleInput(body: RescheduleBody): RescheduleCustomerAppointmentI
     ...(customerPhone ? { customerPhone } : {}),
     ...(customerEmail ? { customerEmail } : {}),
     ...(requestDetails ? { requestDetails } : {}),
+    ...(address ? { address } : {}),
   };
 }
 
 /**
  * POST /api/customer/appointments/:documentId/reschedule
- * Body: requestedDate, selectedTimeSlot, optional customerName/Phone/Email/requestDetails.
+ * Body: requestedDate, selectedTimeSlot, optional customerName/Phone/Email/requestDetails/address.
  * BFF injects trusted magentoCustomerId and calls CMS with API token.
  */
 export async function POST(request: Request, context: RouteContext) {

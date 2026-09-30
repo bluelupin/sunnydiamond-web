@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type AnimationEvent, type ReactNode } from "react";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 
@@ -13,6 +13,8 @@ type AppStatusToastProps = {
   open: boolean;
   message: string;
   action?: ReactNode;
+  /** Renders a close button when provided. */
+  onDismiss?: () => void;
 };
 
 type AppStatusToastActionProps = {
@@ -37,7 +39,7 @@ export const AppStatusToastAction = ({
 );
 
 /** Top-centered status toast — matches Add to Wishlist notification styling. */
-const AppStatusToast = ({ open, message, action }: AppStatusToastProps) => {
+const AppStatusToast = ({ open, message, action, onDismiss }: AppStatusToastProps) => {
   const [phase, setPhase] = useState<ToastPhase>("hidden");
   const [displayContent, setDisplayContent] = useState({ message, action });
 
@@ -102,7 +104,8 @@ const AppStatusToast = ({ open, message, action }: AppStatusToastProps) => {
         aria-live="polite"
         onAnimationEnd={handleAnimationEnd}
         className={cn(
-          "pointer-events-auto w-full max-w-[300px]",
+          "pointer-events-auto w-full",
+          onDismiss ? "max-w-[380px]" : "max-w-[300px]",
           phase === "enter" &&
             "animate-in fade-in slide-in-from-top-4 duration-300 ease-out",
           phase === "exit" &&
@@ -112,7 +115,7 @@ const AppStatusToast = ({ open, message, action }: AppStatusToastProps) => {
         <div
           className={cn(
             "flex w-full items-center gap-3 bg-darkblack px-4 py-3",
-            displayContent.action ? "justify-between" : "justify-center",
+            displayContent.action || onDismiss ? "justify-between" : "justify-center",
           )}
         >
           <div className="flex min-w-0 items-center gap-2">
@@ -121,7 +124,21 @@ const AppStatusToast = ({ open, message, action }: AppStatusToastProps) => {
               {displayContent.message}
             </p>
           </div>
-          {displayContent.action}
+          {displayContent.action || onDismiss ? (
+            <div className="flex shrink-0 items-center gap-3">
+              {displayContent.action}
+              {onDismiss ? (
+                <button
+                  type="button"
+                  onClick={onDismiss}
+                  className="inline-flex shrink-0 text-white"
+                  aria-label="Close notification"
+                >
+                  <X size={18} strokeWidth={1.25} aria-hidden />
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

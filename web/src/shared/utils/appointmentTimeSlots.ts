@@ -39,11 +39,38 @@ function startOfLocalDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-/** True when the slot's start time is still in the future for the selected booking date. */
+function toDateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export type AppointmentBookingWindow = {
+  /** A slot must start at least this long after now. */
+  minNoticeMinutes: number;
+  /** Last bookable day, counted from today (inclusive). */
+  maxDaysAhead: number;
+};
+
+/** Selectable calendar range (YYYY-MM-DD) for a booking window. */
+export function getAppointmentBookingDateBounds(
+  window: AppointmentBookingWindow,
+  referenceDate = new Date(),
+): { minDate: string; maxDate: string } {
+  const earliest = new Date(referenceDate.getTime() + window.minNoticeMinutes * 60_000);
+  const latest = startOfLocalDay(referenceDate);
+  latest.setDate(latest.getDate() + window.maxDaysAhead);
+
+  return { minDate: toDateInputValue(earliest), maxDate: toDateInputValue(latest) };
+}
+
+/** True when the slot starts after now plus the required notice for the selected booking date. */
 export function isAppointmentTimeSlotAvailable(
   slot: string,
   bookingDateValue: string,
   referenceDate = new Date(),
+  minNoticeMinutes = 0,
 ): boolean {
   const bookingDate = parseBookingDateLocal(bookingDateValue);
   const startMinutes = parseAppointmentSlotStartMinutes(slot);
@@ -55,7 +82,7 @@ export function isAppointmentTimeSlotAvailable(
   const bookingDay = startOfLocalDay(bookingDate);
   const today = startOfLocalDay(referenceDate);
 
-  if (bookingDay.getTime() > today.getTime()) {
+  if (bookingDay.getTime() > today.getTime() && minNoticeMinutes <= 0) {
     return true;
   }
 
@@ -73,7 +100,7 @@ export function isAppointmentTimeSlotAvailable(
     0,
   );
 
-  return slotStart.getTime() > referenceDate.getTime();
+  return slotStart.getTime() > referenceDate.getTime() + minNoticeMinutes * 60_000;
 }
 
 /** Drop slots whose start time has already passed when booking for today (or a past date). */

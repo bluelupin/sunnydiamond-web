@@ -49,7 +49,13 @@ import {
   appointmentFieldClassName,
   appointmentLabelClassName,
   APPOINTMENT_TIME_SLOTS,
+  STORE_VISIT_BOOKING_WINDOW,
 } from "@/shared/constants/appointmentForm";
+import {
+  DUPLICATE_APPOINTMENT_TOAST,
+  DUPLICATE_APPOINTMENT_VIEW_LABEL,
+  hasDuplicateAppointmentBooking,
+} from "@/features/products/utils/appointmentDuplicateBooking";
 import {
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
@@ -506,6 +512,34 @@ const BookStoreVisitPanel = ({
       // preferredShowroom is a Strapi relation — send documentId, not the display name
       const preferredShowroom =
         selectedStore.documentId ?? selectedStore.id;
+
+      const bookedProductId = productId?.trim() ?? "";
+      if (
+        customer?.id != null &&
+        bookedProductId &&
+        bookedProductId !== STORE_VISIT_PRODUCT_ID &&
+        (await hasDuplicateAppointmentBooking({
+          kind: "store_visit",
+          productId: bookedProductId,
+          date,
+          selectedSlot,
+          showroomId: preferredShowroom,
+        }))
+      ) {
+        showStatusToast(DUPLICATE_APPOINTMENT_TOAST, {
+          action: (
+            <AppStatusToastAction
+              onClick={() => {
+                handleClose();
+                router.push(buildProfileSectionHref("appointments"));
+              }}
+            >
+              {DUPLICATE_APPOINTMENT_VIEW_LABEL}
+            </AppStatusToastAction>
+          ),
+        });
+        return;
+      }
 
       await createProductSubmission({
         formTag: formTag || PRODUCT_STORE_VISIT_FORM_TAG,
@@ -1015,6 +1049,7 @@ const BookingFormStep = ({
       validatePurpose: purposeOptions.length > 0,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
+      bookingWindow: STORE_VISIT_BOOKING_WINDOW,
     });
 
   return (
@@ -1095,6 +1130,7 @@ const BookingFormStep = ({
                 notePlaceholder={notesPlaceholder}
                 phoneLocked={phoneLocked}
                 emailLocked={emailLocked}
+                bookingWindow={STORE_VISIT_BOOKING_WINDOW}
               />
             </div>
           </div>

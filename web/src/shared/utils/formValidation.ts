@@ -1,4 +1,8 @@
 import { CHECKOUT_COD_MAX_ORDER_TOTAL } from "@/features/checkout/constants/cod";
+import {
+  getAppointmentBookingDateBounds,
+  type AppointmentBookingWindow,
+} from "@/shared/utils/appointmentTimeSlots";
 
 export type FieldValidation = {
   valid: boolean;
@@ -148,6 +152,43 @@ export const validateRequiredDate = (value: string): FieldValidation => {
   return validateOptionalDate(value);
 };
 
+export const validateBookingWindowDate = (
+  value: string,
+  window: AppointmentBookingWindow,
+  required: boolean,
+): FieldValidation => {
+  if (!value.trim()) {
+    return required ? { valid: false, error: "Select a date" } : { valid: true };
+  }
+
+  const selected = parseDateOnly(value);
+  if (!selected) {
+    return { valid: false, error: "Enter a valid date" };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (selected < today) {
+    return { valid: false, error: "Date cannot be in the past" };
+  }
+
+  const { minDate, maxDate } = getAppointmentBookingDateBounds(window);
+  const min = parseDateOnly(minDate);
+  if (min && selected < min) {
+    return {
+      valid: false,
+      error: `Book at least ${Math.round(window.minNoticeMinutes / 60)} hours in advance`,
+    };
+  }
+
+  const max = parseDateOnly(maxDate);
+  if (max && selected > max) {
+    return { valid: false, error: `Date must be within ${window.maxDaysAhead} days from today` };
+  }
+
+  return { valid: true };
+};
+
 export const validateIndianPincode = (value: string): FieldValidation => {
   const trimmed = value.trim();
 
@@ -285,6 +326,8 @@ export type AppointmentContactValidationOptions = {
   validatePurpose?: boolean;
   dateRequired?: boolean;
   selectedSlotRequired?: boolean;
+  /** Replaces the default today → +3 months date range. */
+  bookingWindow?: AppointmentBookingWindow;
 };
 
 export type AppointmentContactField =
@@ -304,9 +347,11 @@ export const getAppointmentContactErrors = (
     ? validateRequiredNote(values.note)
     : validateOptionalNote(values.note);
 
-  const dateValidation = options.dateRequired
-    ? validateRequiredDate(values.date)
-    : validateOptionalDate(values.date);
+  const dateValidation = options.bookingWindow
+    ? validateBookingWindowDate(values.date, options.bookingWindow, Boolean(options.dateRequired))
+    : options.dateRequired
+      ? validateRequiredDate(values.date)
+      : validateOptionalDate(values.date);
 
   return {
     name: validateRequiredName(values.name).error,
