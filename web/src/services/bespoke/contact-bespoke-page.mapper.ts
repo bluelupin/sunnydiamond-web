@@ -353,6 +353,7 @@ const mapCustomDesignForm = (
   if (!form || form.showField === false) return null;
 
   const title = cleanText(form.title);
+  const description = cleanText(form.description);
   const fullNameLabel = cleanText(form.fullNameLabel);
   const phoneLabel = cleanText(form.phoneLabel);
   const emailLabel = cleanText(form.emailLabel);
@@ -378,6 +379,7 @@ const mapCustomDesignForm = (
 
   return {
     title,
+    ...(description ? { description } : {}),
     fullNameLabel: withRequiredAsterisk(fullNameLabel, true),
     phoneLabel: withRequiredAsterisk(phoneLabel, true),
     emailLabel: withRequiredAsterisk(emailLabel, true),

@@ -118,6 +118,7 @@ export type StrapiBespokeCustomDesignForm = {
   id?: number;
   showField?: boolean | null;
   title?: string | null;
+  description?: string | null;
   fullNameLabel?: string | null;
   phoneLabel?: string | null;
   emailLabel?: string | null;
@@ -228,6 +229,7 @@ export type NormalizedBespokeGetInTouch = {
 
 export type NormalizedBespokeCustomDesignForm = {
   title: string;
+  description?: string;
   fullNameLabel: string;
   phoneLabel: string;
   emailLabel: string;
