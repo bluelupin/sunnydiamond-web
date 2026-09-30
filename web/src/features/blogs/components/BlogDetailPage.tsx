@@ -35,7 +35,7 @@ const BlogDetailPage = ({ detail, relatedPosts }: BlogDetailPageProps) => {
             speechText={speechText}
           />
         </div>
-        <div className="flex flex-col gap-6 desktop:flex-row desktop:items-start desktop:justify-center desktop:gap-12">
+        <div className="flex flex-col gap-6 desktop:flex-row desktop:items-start desktop:justify-center desktop:gap-10">
           <BlogDetailArticle
             introParagraphs={detail.introParagraphs}
             sections={detail.sections}

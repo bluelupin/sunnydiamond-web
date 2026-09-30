@@ -99,7 +99,7 @@ function resolveShellSocialLinks(
 }
 
 const Footer = ({ className }: { className?: string }) => {
-  const pathName = usePathname();
+  const pathName = usePathname() ?? "";
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const { data: shellData } = useHomepageShell();
   const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;

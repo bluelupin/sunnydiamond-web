@@ -118,7 +118,7 @@ function renderSectionHeading(heading: string, headingHtml?: string) {
 
 const BlogDetailArticle = ({ introParagraphs, sections }: BlogDetailArticleProps) => {
   return (
-    <article className="min-w-0 flex-1 desktop:max-w-[875px]">
+    <article className="min-w-0 flex-1 desktop:max-w-[786px]">
       <div className="flex flex-col gap-6 md:gap-10">
         {introParagraphs.length > 0 ? (
           <div className="flex flex-col gap-6 font-gill text-base font-normal leading-[1.45] text-darkblack md:gap-8 md:text-xl md:font-light">
