@@ -14,7 +14,7 @@ const page = footerPages.blogs;
 
 /** Refresh CMS-driven blog listing without a full redeploy. */
 // TEMP (content verification): revert to 300 before release.
-export const revalidate = 0;
+export const revalidate = 300;
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

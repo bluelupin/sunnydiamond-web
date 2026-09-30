@@ -15,7 +15,7 @@ type PageProps = {
 
 /** Refresh CMS-driven blog posts without a full redeploy. */
 // TEMP (content verification): revert to 300 before release.
-export const revalidate = 0;
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   try {
