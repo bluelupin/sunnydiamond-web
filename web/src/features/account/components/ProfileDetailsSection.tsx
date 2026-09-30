@@ -335,6 +335,19 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   autoComplete="tel-national"
                   className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
                 />
+                {/* Only a number proven with a code signs in; offer the code for one typed in without it. */}
+                {otpLoginEnabled && phone && !phoneChanged ? (
+                  customer.phoneVerified ? (
+                    <ProfileEmailVerifiedBadge label={content.verifiedLabel} />
+                  ) : (
+                    <DetailTextLink
+                      onClick={() => setPhoneOtpOpen(true)}
+                      className="shrink-0 text-sm uppercase"
+                    >
+                      {content.verifyLabel}
+                    </DetailTextLink>
+                  )
+                ) : null}
               </div>
             </div>
           </div>
