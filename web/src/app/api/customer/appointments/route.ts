@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
+import { getSessionMagentoCustomerIdentity } from "@/services/auth/getSessionMagentoCustomerId";
 import {
   CustomerAppointmentsApiError,
   fetchCustomerAppointments,
 } from "@/services/customer/customer-appointments.service";
 
 export async function GET(request: Request) {
-  const magentoCustomerId = await getSessionMagentoCustomerId(request);
+  const customer = await getSessionMagentoCustomerIdentity(request);
 
-  if (magentoCustomerId == null) {
+  if (customer == null) {
     return NextResponse.json(
       { error: "Unauthorized", reason: "no_session" },
       { status: 401 },
@@ -21,7 +21,8 @@ export async function GET(request: Request) {
 
   try {
     const appointments = await fetchCustomerAppointments(
-      magentoCustomerId,
+      customer.id,
+      customer.email,
       page,
       pageSize,
     );

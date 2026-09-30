@@ -1047,6 +1047,7 @@ const BookingFormStep = ({
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
       validatePurpose: purposeOptions.length > 0,
+      emailRequired: true,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
       bookingWindow: STORE_VISIT_BOOKING_WINDOW,
@@ -1119,6 +1120,7 @@ const BookingFormStep = ({
                 namePlaceholder={namePlaceholder}
                 phoneLabel={phoneLabel}
                 phonePlaceholder={phonePlaceholder}
+                emailRequired
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}
