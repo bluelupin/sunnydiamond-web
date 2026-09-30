@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
@@ -20,6 +20,10 @@ import CheckoutOtpModal, { type CheckoutOtpVerifyResult } from "./CheckoutOtpMod
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import CheckoutPageSkeleton from "./skeletons/CheckoutPageSkeleton";
+import {
+  resetCheckoutSuccessHeaderActive,
+  setCheckoutSuccessHeaderActive,
+} from "../context/checkoutHeaderBridge";
 import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
 import { persistGuestCheckoutAddresses } from "../services/persistGuestCheckoutAddresses";
 import {
@@ -120,6 +124,13 @@ const CheckoutPage = () => {
   const pendingCheckoutScrollSectionRef = useRef<string | null>(null);
 
   const [step, setStep] = useState<CheckoutStep>(isPaymentReturn ? "success" : "form");
+  useLayoutEffect(() => {
+    setCheckoutSuccessHeaderActive(step === "success");
+
+    return () => {
+      resetCheckoutSuccessHeaderActive();
+    };
+  }, [step]);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [orderSuccessAuthenticated, setOrderSuccessAuthenticated] = useState(false);

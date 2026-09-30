@@ -11,6 +11,7 @@ export const THEME_COLORS = {
 
 type ResolveMobileThemeColorOptions = {
   isCartEmptyPageShell?: boolean;
+  isCheckoutSuccessScreen?: boolean;
 };
 
 export function resolveMobileThemeColor(
@@ -23,6 +24,10 @@ export function resolveMobileThemeColor(
   }
 
   if (pathname === "/cart" || pathname === "/checkout") {
+    if (pathname === "/checkout" && options.isCheckoutSuccessScreen) {
+      return THEME_COLORS.white;
+    }
+
     if (pathname === "/cart" && options.isCartEmptyPageShell) {
       return THEME_COLORS.gray200;
     }

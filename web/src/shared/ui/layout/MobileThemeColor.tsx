@@ -8,6 +8,7 @@ type MobileThemeColorProps = {
   pathname: string;
   headerVariant: HeaderVariant;
   isCartEmptyPageShell?: boolean;
+  isCheckoutSuccessScreen?: boolean;
 };
 
 function setMetaContent(name: string, content: string) {
@@ -26,13 +27,17 @@ const MobileThemeColor = ({
   pathname,
   headerVariant,
   isCartEmptyPageShell = false,
+  isCheckoutSuccessScreen = false,
 }: MobileThemeColorProps) => {
   useEffect(() => {
     setMetaContent(
       "theme-color",
-      resolveMobileThemeColor(pathname, headerVariant, { isCartEmptyPageShell }),
+      resolveMobileThemeColor(pathname, headerVariant, {
+        isCartEmptyPageShell,
+        isCheckoutSuccessScreen,
+      }),
     );
-  }, [pathname, headerVariant, isCartEmptyPageShell]);
+  }, [pathname, headerVariant, isCartEmptyPageShell, isCheckoutSuccessScreen]);
 
   return null;
 };
