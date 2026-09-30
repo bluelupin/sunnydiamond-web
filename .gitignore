@@ -1,2 +1,5 @@
 # Working QA notes kept locally, not shared
 docs/qa/passwordless-auth.md
+
+# Browser-tool session output (playwright-cli)
+.playwright-cli/
