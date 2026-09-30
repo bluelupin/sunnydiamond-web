@@ -40,6 +40,7 @@ export const MAGENTO_CUSTOMER_ME_QUERY = `
           value
         }
       }
+      sd_mobile_verified
     }
   }
 ` as const;
