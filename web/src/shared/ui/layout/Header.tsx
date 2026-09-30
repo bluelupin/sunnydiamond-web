@@ -19,6 +19,7 @@ import {
   getHeaderVariant,
   isAuthRoute,
   isCartOrCheckoutRoute,
+  isCheckoutSuccessRoute,
   isHeaderNavLinkActive,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
@@ -84,8 +85,12 @@ const Header = () => {
     pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
   const canHoverNav = useCanHover();
   const isMobileHeader = useMobileHeaderLayout();
+  const isCheckoutSuccessScreen =
+    isMobileHeader &&
+    (isCheckoutSuccessRoute(pathname) ||
+      (pathname === "/checkout" && isCheckoutSuccessHeader));
   const responsiveCheckoutHeaderSurfaceClass =
-    pathname === "/checkout" && isCheckoutSuccessHeader && isMobileHeader
+    isCartOrCheckoutRoute(pathname) && isCheckoutSuccessScreen
       ? "bg-white"
       : cartCheckoutHeaderSurfaceClass;
 
@@ -231,7 +236,7 @@ const Header = () => {
         pathname={pathname}
         headerVariant={themeHeaderVariant}
         isCartEmptyPageShell={isCartEmptyPageShell}
-        isCheckoutSuccessScreen={isCheckoutSuccessHeader && isMobileHeader}
+        isCheckoutSuccessScreen={isCheckoutSuccessScreen}
       />
       <header
         className={cn(

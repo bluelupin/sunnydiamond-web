@@ -108,14 +108,14 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
         <div className="sticky 2xl:top-0 md:top-10 top-[-150px] flex flex-col overflow-x-hidden bg-white">
-          <PageContainer className="shrink-0 2xl:pb-11 lg:pb-10 pb-8">
+          <PageContainer className="shrink-0 md:pb-10 pb-3">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"
-              className="font-larken text-3xl md:text-4xl lg:text-5xl xl:text-56 font-light leading-110 text-darkblack">
+              className="font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
               {title}
             </Reveal>
           </PageContainer>
-          <PageContainer data-since1997-page-container className="xl:pb-104 pb-16 pr-0">
+          <PageContainer data-since1997-page-container className="lg:pb-104 pb-16 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
               <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div
@@ -133,7 +133,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       captionClassName="text-base"
                     />
                     {story &&
-                      <p className="max-w-358 font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-neutral500">
+                      <p className="max-w-358 font-gill md:text-xl text-base font-light leading-110 text-darkblack">
                         {story}
                       </p>
                     }
@@ -175,7 +175,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
 
       {/* Mobile / tablet — original vertical layout; images 2+3 slide on scroll */}
       <div data-since1997-mode="mobile" className="md:hidden">
-        <div className="py-6 sm:py-10 md:py-16 lg:py-20">
+        <div className="pb-6 sm:py-10 md:py-16 lg:py-20">
           <PageContainer className="pb-0">
             <div className="mb-8 space-y-3">
               <Reveal as="h2" direction="up" className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
@@ -220,7 +220,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       sizes="320px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px] mt-[19px]"
                       frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
-                      captionClassName="text-base"
+                      captionClassName="md:text-base text-sm"
                     />
                     <GalleryImage
                       image={attending!.image}
@@ -229,7 +229,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       sizes="463px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[277px] md:h-[560px] sm:h-[520px] h-[277px]"
-                      captionClassName="text-base"
+                      captionClassName="md:text-base text-sm"
                       dataSince1997Last
                     />
                   </div>

@@ -19,7 +19,7 @@ const VerticalScrollLine = ({
   lineFill: lineFillProp,
   reducedMotion: reducedMotionProp,
   visible: visibleProp,
-  lineHeight = 80,
+  lineHeight = 58,
 }: VerticalScrollLineProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const externalLineFill = lineFillProp !== undefined;
@@ -41,13 +41,13 @@ const VerticalScrollLine = ({
           "w-px overflow-hidden",
           visible ? "opacity-100" : "opacity-0",
           !externalLineFill && !reducedMotion &&
-            `transition-opacity ${revealEase} motion-reduce:transition-none`,
+          `transition-opacity ${revealEase} motion-reduce:transition-none`,
         )}
         style={{ height: lineHeight }}
       >
         <div
           className={cn(
-            "w-px origin-top bg-gradient-to-b from-darkMagenta to-goldAccent",
+            "w-[1px] origin-top bg-gradient-to-b from-[#722257] to-[#DDA957]",
             reducedMotion || externalLineFill
               ? ""
               : "transition-transform duration-500 ease-out motion-reduce:transition-none",

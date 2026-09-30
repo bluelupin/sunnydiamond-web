@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from "react";
+import { isCheckoutRoute } from "@/shared/utils/navigation";
 
 let checkoutSuccessHeaderActive = false;
 const listeners = new Set<() => void>();
@@ -30,15 +31,15 @@ function subscribeCheckoutSuccessHeaderActive(listener: () => void) {
 /** Header sits outside CheckoutPage; sync mobile success header surface on /checkout. */
 export function useCheckoutSuccessHeaderActive(pathname: string): boolean {
   const [, setRevision] = useState(0);
-  const isCheckoutRoute = pathname === "/checkout";
+  const onCheckoutRoute = isCheckoutRoute(pathname);
 
   useLayoutEffect(() => {
-    if (!isCheckoutRoute) {
+    if (!onCheckoutRoute) {
       return;
     }
 
     return subscribeCheckoutSuccessHeaderActive(() => setRevision((value) => value + 1));
-  }, [isCheckoutRoute]);
+  }, [onCheckoutRoute]);
 
-  return isCheckoutRoute && getCheckoutSuccessHeaderActive();
+  return onCheckoutRoute && getCheckoutSuccessHeaderActive();
 }

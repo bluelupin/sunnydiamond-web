@@ -21,11 +21,11 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
       aria-labelledby="about-faces-title"
       className="bg-white lg:pb-104 md:pb-20 pb-16"
     >
-      <div className="max-w-1920 2xl:px-[60px] lg:px-10 px-4 flex flex-col items-center text-center lg:mb-10 mb-8">
+      <div className="max-w-1920 2xl:px-[60px] lg:px-10 px-4 flex flex-col items-center text-center md:mb-10 mb-6">
         <div className="flex max-w-full flex-col items-center lg:gap-4 gap-3">
           <Reveal as="h2" direction="up"
             id="about-faces-title"
-            className="font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-[40px] text-32"
+            className="font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 md:max-w-fit max-w-[332px]"
           >
             {title}
           </Reveal>
@@ -38,7 +38,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
       </div>
       <div className="pl-4 md:pl-0">
         <Reveal direction="up"
-          className="mt-10 flex w-full snap-x snap-mandatory gap-2 overflow-x-auto pl-4 lg:h-[600px] md:h-[450px] lg:gap-1 lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden"
+          className="flex w-full snap-x snap-mandatory gap-2 overflow-x-auto pl-4 lg:h-[600px] md:h-[450px] lg:gap-1 lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden"
           style={hideScrollbarStyle}
         >
           {members.map((member, index) => (
@@ -81,18 +81,18 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
               />
               <figcaption
                 className={cn(
-                  "absolute bottom-0 left-0 z-10 w-full text-left px-8 py-12 md:px-9 md:py-16 lg:px-10 transition-all duration-500",
+                  "absolute bottom-0 left-0 z-10 w-full text-left px-4 py-8 md:px-10 md:py-10 transition-all duration-500",
                   member.image
                     ? "opacity-100 lg:translate-y-2 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100"
                     : "opacity-100",
                 )}
               >
                 <div className="flex flex-col items-start gap-2 leading-110">
-                  <p className="font-larken xl:text-3xl lg:text-2xl text-xl font-light text-white">
+                  <p className="font-larken md:text-32 text-xl font-light text-white">
                     {member.name}
                   </p>
                   {member.role ? (
-                    <p className="font-gill xl:text-lg text-base font-light text-aboutInactive">
+                    <p className="font-gill md:text-xl text-base font-light text-aboutInactive">
                       {member.role}
                     </p>
                   ) : null}

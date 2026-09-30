@@ -12,6 +12,7 @@ import { FooterTrustBadgeSection } from "@/features/cms/components/common/TrustB
 import Reveal from "@/shared/Animation/Reveal";
 import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { cn } from "@/shared/utils/cn";
+import { isCheckoutRoute } from "@/shared/utils/navigation";
 import ResponsiveImage from "../ResponsiveImage";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
@@ -134,7 +135,7 @@ const Footer = ({ className }: { className?: string }) => {
   return (
     <footer
       className={cn(
-        pathName === "/checkout" || (pathName === "/cart" && !isCartEmptyPageShell)
+        isCheckoutRoute(pathName) || (pathName === "/cart" && !isCartEmptyPageShell)
           ? "bg-gray300"
           : "bg-gray300",
         className,

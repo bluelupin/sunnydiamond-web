@@ -1,4 +1,5 @@
 import type { HeaderVariant } from "@/shared/utils/navigation";
+import { isCheckoutRoute, isCheckoutSuccessRoute } from "@/shared/utils/navigation";
 
 /** Matches root viewport theme_color. */
 export const THEME_COLORS = {
@@ -23,8 +24,8 @@ export function resolveMobileThemeColor(
     return THEME_COLORS.brand;
   }
 
-  if (pathname === "/cart" || pathname === "/checkout") {
-    if (pathname === "/checkout" && options.isCheckoutSuccessScreen) {
+  if (pathname === "/cart" || isCheckoutRoute(pathname)) {
+    if (options.isCheckoutSuccessScreen || isCheckoutSuccessRoute(pathname)) {
       return THEME_COLORS.white;
     }
 
