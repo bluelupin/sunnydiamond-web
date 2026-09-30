@@ -34,6 +34,9 @@ type CartUIContextType = {
   tryBeginBagAction: () => boolean;
   endBagAction: () => void;
   openBagDrawer: (result: AddItemResult, options?: { mode?: BagDrawerMode }) => void;
+  /** Refresh drawer content after add-to-bag completes without re-opening the panel. */
+  updateBagDrawerResult: (result: AddItemResult, options?: { mode?: BagDrawerMode }) => void;
+  handleBagDrawerOpenChange: (open: boolean) => void;
   closeBagDrawer: () => void;
   openGiftingPanel: (step?: "intro" | "personalise") => void;
   closeGiftingPanel: () => void;
@@ -50,6 +53,8 @@ type CartUIContextType = {
 
 const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
 
+/** Ignore dismiss gestures briefly after opening so Vaul/Radix cannot close-then-reopen the drawer. */
+const BAG_DRAWER_DISMISS_LOCK_MS = 500;
 export function CartUIProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isBagDrawerOpen, setIsBagDrawerOpen] = useState(false);
@@ -64,7 +69,8 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const [isNavigatingToCheckout, setIsNavigatingToCheckout] = useState(false);
   const isBagDrawerOpenRef = useRef(false);
   const bagActionInFlightRef = useRef(false);
-  const lastBagDrawerOpenRef = useRef<{ lineItemId: string; at: number } | null>(null);
+  /** Ignore dismiss gestures while add-to-bag is in flight or the open animation is settling. */
+  const bagDrawerDismissLockedUntilRef = useRef(0);
 
   const tryBeginBagAction = useCallback(() => {
     if (bagActionInFlightRef.current) {
@@ -92,37 +98,52 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const updateBagDrawerResult = useCallback(
+    (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
+      applyBagDrawerResult(result, options);
+    },
+    [applyBagDrawerResult],
+  );
+
   const openBagDrawer = useCallback(
     (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
-      const now = Date.now();
-      const lastOpen = lastBagDrawerOpenRef.current;
-      const isDuplicateOpen =
-        isBagDrawerOpenRef.current &&
-        lastOpen?.lineItemId === result.lineItemId &&
-        now - lastOpen.at < 1000;
-
       applyBagDrawerResult(result, options);
 
-      if (isDuplicateOpen) {
+      if (isBagDrawerOpenRef.current) {
         return;
       }
 
-      lastBagDrawerOpenRef.current = { lineItemId: result.lineItemId, at: now };
-
-      if (!isBagDrawerOpenRef.current) {
-        isBagDrawerOpenRef.current = true;
-        setIsBagDrawerOpen(true);
-      }
+      isBagDrawerOpenRef.current = true;
+      bagDrawerDismissLockedUntilRef.current = Date.now() + BAG_DRAWER_DISMISS_LOCK_MS;
+      setIsBagDrawerOpen(true);
     },
     [applyBagDrawerResult],
   );
 
   const closeBagDrawer = useCallback(() => {
     isBagDrawerOpenRef.current = false;
-    lastBagDrawerOpenRef.current = null;
+    bagDrawerDismissLockedUntilRef.current = 0;
     setIsBagDrawerOpen(false);
     setBagDrawerMode("add");
   }, []);
+
+  const handleBagDrawerOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        return;
+      }
+
+      if (
+        bagActionInFlightRef.current ||
+        Date.now() < bagDrawerDismissLockedUntilRef.current
+      ) {
+        return;
+      }
+
+      closeBagDrawer();
+    },
+    [closeBagDrawer],
+  );
 
   const openGiftingPanel = useCallback((step: "intro" | "personalise" = "intro") => {
     setGiftingStep(step);
@@ -213,6 +234,8 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         tryBeginBagAction,
         endBagAction,
         openBagDrawer,
+        updateBagDrawerResult,
+        handleBagDrawerOpenChange,
         closeBagDrawer,
         openGiftingPanel,
         closeGiftingPanel,

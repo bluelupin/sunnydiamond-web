@@ -10,7 +10,13 @@ import { buildOptimisticAddItemResult } from "@/features/cart/utils/optimisticAd
 
 export function useAddToBagWithDrawer() {
   const { addItem, replaceLineItem, showCartStatusToast, totalItems } = useCart();
-  const { openBagDrawer, closeBagDrawer, tryBeginBagAction, endBagAction } = useCartUI();
+  const {
+    openBagDrawer,
+    updateBagDrawerResult,
+    closeBagDrawer,
+    tryBeginBagAction,
+    endBagAction,
+  } = useCartUI();
 
   const addToBagAndOpenDrawer = useCallback(
     async (payload: AddToBagPayload | Product) => {
@@ -22,7 +28,7 @@ export function useAddToBagWithDrawer() {
 
       try {
         const result = await addItem(payload);
-        openBagDrawer(result);
+        updateBagDrawerResult(result);
       } catch (error) {
         closeBagDrawer();
         console.error("Add to bag failed:", error);
@@ -39,6 +45,7 @@ export function useAddToBagWithDrawer() {
       showCartStatusToast,
       totalItems,
       tryBeginBagAction,
+      updateBagDrawerResult,
     ],
   );
 

@@ -141,7 +141,8 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 };
 
 const CartBagDrawer = () => {
-  const { isBagDrawerOpen, bagDrawerMode, closeBagDrawer } = useCartUI();
+  const { isBagDrawerOpen, bagDrawerMode, closeBagDrawer, handleBagDrawerOpenChange } =
+    useCartUI();
   const drawerTitle = BAG_DRAWER_SR_TITLES[bagDrawerMode];
   const [isMobile, setIsMobile] = useState(
     () => window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY).matches,
@@ -166,7 +167,7 @@ const CartBagDrawer = () => {
   }
 
   return (
-    <Sheet open={isBagDrawerOpen} onOpenChange={(open) => !open && closeBagDrawer()}>
+    <Sheet open={isBagDrawerOpen} onOpenChange={handleBagDrawerOpenChange}>
       <SheetContent
         side="right"
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
