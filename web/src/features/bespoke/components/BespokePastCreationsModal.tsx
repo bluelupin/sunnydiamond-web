@@ -192,7 +192,7 @@ const BespokePastCreationsModal = ({
       </button>
       <div
         ref={galleryRef}
-        className="inline-flex min-h-max w-max min-w-full items-start gap-4 md:gap-6"
+        className="inline-flex min-h-max w-max min-w-full items-start gap-2"
       >
         {columns.map((column, columnIndex) => {
           const isOddColumn = columnIndex % 2 === 0;
@@ -201,7 +201,7 @@ const BespokePastCreationsModal = ({
             <div
               key={`past-creations-column-${columnIndex}`}
               className={cn(
-                "flex shrink-0 flex-col gap-4 md:gap-6",
+                "flex shrink-0 flex-col gap-2",
                 isOddColumn && "relative -mt-[100px]",
               )}
               style={{ width: layout.columnWidth }}

@@ -64,10 +64,13 @@ export const bespokeFeaturedStoriesFigmaSpec = {
   galleryGap: 16,
   /** Center + 2 neighbors + partial outer peeks (react-slick center mode) */
   galleryVisibleSlides: 5,
+  /** Center + 2 partial peeks on mobile/tablet (slidesToShow 1 + centerPadding) */
+  galleryVisibleSlidesMobile: 3,
   /** Full slots between peeks; keep in sync with galleryVisibleSlides (5 - 2 peeks = 3) */
   gallerySlidesToShow: 3,
-  galleryCenterPaddingDesktop: 100,
-  galleryCenterPaddingMobile: 72,
+  /** Matches react-slick center mode reference (60px outer peeks) */
+  galleryCenterPaddingDesktop: 20,
+  galleryCenterPaddingMobile: 20,
   sideWidth: 400,
   sideHeight: 300,
   centerWidth: 560,

@@ -229,7 +229,7 @@ const FeaturedStoryModalPagination = ({
               key={`${image.src}-${index}-active`}
               aria-hidden
               className="w-12 block h-1 rounded-[24px] bg-white transition-all duration-300"
-              // style={{ width: spec.paginationActiveWidth }}
+            // style={{ width: spec.paginationActiveWidth }}
             />
           );
         }
@@ -336,7 +336,7 @@ const FeaturedStoryModalPanel = ({
       </div>
 
       <div
-        className="absolute inset-x-0 bottom-0 z-10 flex w-full flex-col gap-6 bg-transparent px-4 pb-10 pt-5 md:gap-6 md:px-6"
+        className="absolute inset-x-0 bottom-0 z-10 flex w-full flex-col bg-transparent px-4 pb-10 pt-5 md:px-6"
         style={{
           backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)",
         }}
@@ -347,18 +347,16 @@ const FeaturedStoryModalPanel = ({
           onSelect={setActiveImageIndex}
         />
 
-        <div className="flex flex-col gap-2 md:gap-4">
+        <div className="flex flex-col gap-2 md:gap-4 md:mb-10 mb-6 mt-6">
           <h2 className="font-larken text-2xl font-light leading-110 text-white md:text-32">
             {slide.modalTitle}
           </h2>
           <p
             className="line-clamp-2 font-gill text-base font-light leading-110 text-white md:text-xl"
-            style={{ fontSize: spec.bodySize }}
           >
             {slide.modalDescription}
           </p>
         </div>
-
         <DetailTextLink
           light
           disabled={saveDisabled}
