@@ -49,7 +49,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
           className="absolute inset-x-0 top-0 h-[104px] bg-gradient-to-b from-white to-transparent md:hidden"
           aria-hidden
         />
-        <div className="relative mx-auto lg:h-[475px] md:h-[330px] 2xl:max-w-1920 max-w-1440 flex-col items-center px-4 md:flex md:flex-row md:items-center md:px-10">
+        <div className="relative z-10 mx-auto lg:h-[475px] md:h-[330px] 2xl:max-w-1920 max-w-1440 flex-col items-center px-4 md:flex md:flex-row md:items-center md:px-10">
           <div className="w-full xl:w-[490px] lg:w-[400px] md:w-[450px] xl:ml-28 md:ml-10 sm:ml-8 ml-6">
             {giftCard.title &&
               <Reveal
@@ -79,7 +79,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
         {cutoutSrc &&
           <Reveal
             direction="up"
-            className="relative mx-auto mt-6 min-h-[240px] w-full max-w-[400px] px-0 md:absolute md:bottom-0 md:right-0 md:mt-0 md:block lg:h-[527px] lg:w-[791px] md:max-w-none md:px-0"
+            className="pointer-events-none relative mx-auto mt-6 min-h-[240px] w-full max-w-[400px] px-0 md:absolute md:bottom-0 md:right-0 md:mt-0 md:block md:w-[min(791px,58vw)] lg:h-[527px] lg:w-[791px] md:max-w-none md:px-0"
           >
             <Image
               src={cutoutSrc}
