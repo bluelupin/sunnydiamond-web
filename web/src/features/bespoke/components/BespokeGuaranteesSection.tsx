@@ -25,7 +25,7 @@ const BespokeGuaranteesSection = ({ guarantees }: BespokeGuaranteesSectionProps)
               as="li"
               direction="up"
               className={cn(
-                "flex lg:w-[260px] md:w-[235px] w-full shrink-0 flex-col items-center justify-center gap-3 md:p-3 p-4 text-center",
+                "flex lg:w-[260px] md:w-[235px] w-full shrink-0 flex-col items-center justify-center md:gap-3 gap-2 md:p-3 p-4 text-center",
               )}
             >
               <div className="flex lg:size-16 size-10 items-center justify-center">
