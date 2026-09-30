@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizePhoneForMagento } from "@/lib/auth/magentoPhone";
+import { mapAuthErrorMessage } from "@/services/auth/authErrorMessages";
 import { validateOptionalEmail } from "@/shared/utils/formValidation";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
@@ -80,7 +81,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const message =
-      error instanceof MagentoGraphqlError ? error.message : "Could not send OTP";
+      error instanceof MagentoGraphqlError
+        ? mapAuthErrorMessage(error.message, "Could not send OTP")
+        : "Could not send OTP";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

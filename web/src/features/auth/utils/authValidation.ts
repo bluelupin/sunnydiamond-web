@@ -26,8 +26,6 @@ export const normalizeLoginPhoneDigits = (value: string, countryCode: string): s
 
 export const isEmailIdentifier = (value: string): boolean => value.trim().includes("@");
 
-export const isIndianCountryCode = (code: string): boolean => code === "+91";
-
 export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: string): string => {
   const national = nationalDigits.replace(/\D/g, "");
   if (!national) {

@@ -25,7 +25,8 @@
     "test:nearest-store": "node --experimental-strip-types --no-warnings scripts/run-nearest-store-test-cases.mjs",
     "test:gift-card": "node scripts/run-gift-card-test-cases.mjs",
     "test:gift-card-orders": "node --experimental-strip-types --no-warnings scripts/check-gift-card-order-display.mjs",
-    "test:search": "node scripts/run-search-test-cases.mjs"
+    "test:search": "node scripts/run-search-test-cases.mjs",
+    "test:intl-otp": "node --experimental-strip-types --no-warnings scripts/check-intl-otp.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

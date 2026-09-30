@@ -1,0 +1,163 @@
+- generic [active] [ref=f24e1]:
+  - generic [ref=f24e2]:
+    - banner [ref=f24e3]:
+      - generic [ref=f24e5]:
+        - generic [ref=f24e6]:
+          - link "Sunny Diamonds" [ref=f24e7] [cursor=pointer]:
+            - /url: /
+          - navigation "Main navigation" [ref=f24e11]:
+            - link "Jewellery" [ref=f24e13] [cursor=pointer]:
+              - /url: /jewellery
+            - link "Gifting" [ref=f24e14] [cursor=pointer]:
+              - /url: /gifting
+            - link "Bespoke" [ref=f24e15] [cursor=pointer]:
+              - /url: /bespoke-jewellery
+            - link "World of Sunny" [ref=f24e16] [cursor=pointer]:
+              - /url: /world-of-sunny
+            - link "Book an Appointment" [ref=f24e17] [cursor=pointer]:
+              - /url: /book-an-appointment
+        - generic [ref=f24e18]:
+          - button "Search" [ref=f24e19] [cursor=pointer]
+          - link "Wishlist" [ref=f24e23] [cursor=pointer]:
+            - /url: /wishlist
+          - link "Cart" [ref=f24e26] [cursor=pointer]:
+            - /url: /cart
+          - button "Sign in" [ref=f24e30] [cursor=pointer]
+    - main [ref=f24e34]:
+      - paragraph [ref=f24e36]: Loading your profile
+    - contentinfo [ref=f24e37]:
+      - generic [ref=f24e39]:
+        - generic [ref=f24e40]:
+          - generic [ref=f24e41]:
+            - generic [ref=f24e42]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f24e43]: •
+          - generic [ref=f24e44]:
+            - generic [ref=f24e45]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f24e46]: •
+          - generic [ref=f24e47]:
+            - generic [ref=f24e48]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f24e49]: •
+          - generic [ref=f24e50]:
+            - generic [ref=f24e51]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f24e52]: •
+          - generic [ref=f24e53]:
+            - generic [ref=f24e54]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f24e55]: •
+          - generic [ref=f24e56]:
+            - generic [ref=f24e57]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f24e58]: •
+          - generic [ref=f24e59]:
+            - generic [ref=f24e60]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f24e61]: •
+          - generic [ref=f24e62]:
+            - generic [ref=f24e63]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f24e64]: •
+        - generic [aria-hidden] [ref=f24e65]:
+          - generic [ref=f24e66]:
+            - generic [ref=f24e67]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f24e68]: •
+          - generic [ref=f24e69]:
+            - generic [ref=f24e70]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f24e71]: •
+          - generic [ref=f24e72]:
+            - generic [ref=f24e73]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f24e74]: •
+          - generic [ref=f24e75]:
+            - generic [ref=f24e76]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f24e77]: •
+          - generic [ref=f24e78]:
+            - generic [ref=f24e79]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f24e80]: •
+          - generic [ref=f24e81]:
+            - generic [ref=f24e82]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f24e83]: •
+          - generic [ref=f24e84]:
+            - generic [ref=f24e85]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f24e86]: •
+          - generic [ref=f24e87]:
+            - generic [ref=f24e88]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f24e89]: •
+      - generic [ref=f24e90]:
+        - generic [ref=f24e91]:
+          - link "Sunny Diamonds" [ref=f24e93] [cursor=pointer]:
+            - /url: /
+            - img "Sunny Diamonds" [ref=f24e94]
+          - navigation "Footer navigation" [ref=f24e95]:
+            - generic [ref=f24e96]:
+              - paragraph [ref=f24e97]: OUR COMPANY
+              - list [ref=f24e98]:
+                - listitem [ref=f24e99]:
+                  - link "Our Story" [ref=f24e100] [cursor=pointer]:
+                    - /url: /world-of-sunny
+                - listitem [ref=f24e101]:
+                  - link "Learn About Diamonds" [ref=f24e102] [cursor=pointer]:
+                    - /url: /education
+                - listitem [ref=f24e103]:
+                  - link "Diamonds For Everyone" [ref=f24e104] [cursor=pointer]:
+                    - /url: /diamonds-for-everyone
+                - listitem [ref=f24e105]:
+                  - link "Bespoke Jewellery" [ref=f24e106] [cursor=pointer]:
+                    - /url: /bespoke-jewellery
+                - listitem [ref=f24e107]:
+                  - link "Careers" [ref=f24e108] [cursor=pointer]:
+                    - /url: /careers
+                - listitem [ref=f24e109]:
+                  - link "Blogs" [ref=f24e110] [cursor=pointer]:
+                    - /url: /blogs
+            - generic [ref=f24e111]:
+              - paragraph [ref=f24e112]: SUPPORT
+              - list [ref=f24e113]:
+                - listitem [ref=f24e114]:
+                  - link "Contact Us" [ref=f24e115] [cursor=pointer]:
+                    - /url: /contact
+                - listitem [ref=f24e116]:
+                  - link "Store Locator" [ref=f24e117] [cursor=pointer]:
+                    - /url: /store-locator
+            - generic [ref=f24e118]:
+              - paragraph [ref=f24e119]: SERVICES
+              - list [ref=f24e120]:
+                - listitem [ref=f24e121]:
+                  - link "Book an Appointment" [ref=f24e122] [cursor=pointer]:
+                    - /url: /book-an-appointment
+                - listitem [ref=f24e123]:
+                  - link "Try at Home" [ref=f24e124] [cursor=pointer]:
+                    - /url: /finance-options
+                - listitem [ref=f24e125]:
+                  - link "Schedule a Video Call" [ref=f24e126] [cursor=pointer]:
+                    - /url: /gifting
+                - listitem [ref=f24e127]:
+                  - link "Gifting" [ref=f24e128] [cursor=pointer]:
+                    - /url: /gifting
+            - generic [ref=f24e129]:
+              - paragraph [ref=f24e130]: LEGAL
+              - list [ref=f24e131]:
+                - listitem [ref=f24e132]:
+                  - link "Privacy Policy" [ref=f24e133] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=privacy-policy
+                - listitem [ref=f24e134]:
+                  - link "Terms & Conditions" [ref=f24e135] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=terms-and-conditions
+                - listitem [ref=f24e136]:
+                  - link "Certifications" [ref=f24e137] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=certifications
+                - listitem [ref=f24e138]:
+                  - link "100% Money Back Policy" [ref=f24e139] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=100-percent-money-back-policy
+                - listitem [ref=f24e140]:
+                  - link "15 Day Return Policy" [ref=f24e141] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=15-day-return-policy
+                - listitem [ref=f24e142]:
+                  - link "Cancellation Policy" [ref=f24e143] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=cancellation-policy
+        - generic [ref=f24e144]:
+          - generic [ref=f24e145]:
+            - link "Instagram" [ref=f24e146] [cursor=pointer]:
+              - /url: https://www.instagram.com/sunnydiamondsofficial/
+            - link "Facebook" [ref=f24e148] [cursor=pointer]:
+              - /url: https://www.facebook.com/SunnyDiamonds.jewellery
+            - link "X" [ref=f24e150] [cursor=pointer]:
+              - /url: https://x.com/SunnyDiamond_4c
+            - link "linkedIn" [ref=f24e152] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/sunny-diamonds/
+          - paragraph [ref=f24e156]: © 2026 Sunny Diamonds. All Rights Reserved.
+  - alert [ref=f24e157]

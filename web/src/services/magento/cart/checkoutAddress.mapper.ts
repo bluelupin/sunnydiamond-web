@@ -7,6 +7,7 @@ import type {
 import { getIndiaMagentoRegionId } from "../regions/indiaRegionIds";
 import type { MagentoCartAddressInput, MagentoShippingAddressInput } from "./magentoCart.types";
 import { splitFullName } from "@/shared/utils/customerName";
+import { canonicalAddressPhone, joinAddressPhone } from "@/lib/auth/magentoPhone";
 
 export { splitFullName } from "@/shared/utils/customerName";
 
@@ -21,9 +22,17 @@ export function resolveGuestCheckoutEmail(phoneOrEmail: string): string {
   return `guest+${phone || "checkout"}@sunnydiamond.com`;
 }
 
-function resolveTelephone(primary: string, fallback: string): string {
-  const digits = (primary || fallback).replace(/\D/g, "");
-  return digits || "0000000000";
+type PhoneWithCode = { phone: string; countryCode?: string };
+
+/**
+ * The address telephone, keeping its country code (joinAddressPhone). Falls back to
+ * the contact number; an email contact is no number at all.
+ */
+function resolveTelephone(primary: PhoneWithCode, fallback: PhoneWithCode): string {
+  const usable = (entry: PhoneWithCode) =>
+    !entry.phone.includes("@") && entry.phone.replace(/\D/g, "") !== "";
+  const source = usable(primary) ? primary : usable(fallback) ? fallback : null;
+  return (source && joinAddressPhone(source.countryCode, source.phone)) || "0000000000";
 }
 
 function mapAddressBlock(input: {
@@ -33,8 +42,8 @@ function mapAddressBlock(input: {
   pincode: string;
   city: string;
   state: string;
-  phone: string;
-  phoneFallback: string;
+  phone: PhoneWithCode;
+  phoneFallback: PhoneWithCode;
 }): MagentoCartAddressInput {
   const regionId = getIndiaMagentoRegionId(input.state);
 
@@ -70,8 +79,8 @@ export function mapCheckoutFormToShippingAddress(form: CheckoutFormData): Magent
     pincode: form.pincode,
     city: form.city,
     state: form.state,
-    phone: form.shippingPhone,
-    phoneFallback: form.phoneOrEmail,
+    phone: { phone: form.shippingPhone, countryCode: form.shippingCountryCode },
+    phoneFallback: { phone: form.phoneOrEmail, countryCode: form.contactCountryCode },
   });
 }
 
@@ -83,10 +92,12 @@ export function mapCheckoutFormToBillingAddress(form: CheckoutFormData): Magento
     pincode: form.billingPincode,
     city: form.billingCity,
     state: form.billingState,
-    phone: form.billingPhone,
+    phone: { phone: form.billingPhone, countryCode: form.billingCountryCode },
     // Shipping phone first: the contact field is an email whenever mobile sign-in is
     // off, and falling straight back to it would put "0000000000" on the address.
-    phoneFallback: form.shippingPhone || form.phoneOrEmail,
+    phoneFallback: form.shippingPhone
+      ? { phone: form.shippingPhone, countryCode: form.shippingCountryCode }
+      : { phone: form.phoneOrEmail, countryCode: form.contactCountryCode },
   });
 }
 
@@ -97,8 +108,8 @@ function mapCheckoutAddressFieldsToCustomerInput(input: {
   pincode: string;
   city: string;
   state: string;
-  phone: string;
-  phoneFallback: string;
+  phone: PhoneWithCode;
+  phoneFallback: PhoneWithCode;
 }): CustomerAddressInput | null {
   const name = input.name.trim();
   const addressLine1 = input.addressLine1.trim();
@@ -132,8 +143,8 @@ export function mapCheckoutFormToCustomerAddressInput(
     pincode: form.pincode,
     city: form.city,
     state: form.state,
-    phone: form.shippingPhone,
-    phoneFallback: form.phoneOrEmail,
+    phone: { phone: form.shippingPhone, countryCode: form.shippingCountryCode },
+    phoneFallback: { phone: form.phoneOrEmail, countryCode: form.contactCountryCode },
   });
 }
 
@@ -147,17 +158,15 @@ export function mapCheckoutFormToBillingCustomerAddressInput(
     pincode: form.billingPincode,
     city: form.billingCity,
     state: form.billingState,
-    phone: form.billingPhone,
-    phoneFallback: form.shippingPhone || form.phoneOrEmail,
+    phone: { phone: form.billingPhone, countryCode: form.billingCountryCode },
+    phoneFallback: form.shippingPhone
+      ? { phone: form.shippingPhone, countryCode: form.shippingCountryCode }
+      : { phone: form.phoneOrEmail, countryCode: form.contactCountryCode },
   });
 }
 
 function normalizeCheckoutCompareValue(value: string): string {
   return value.trim().toLowerCase();
-}
-
-function normalizeCheckoutPhone(value: string): string {
-  return value.replace(/\D/g, "");
 }
 
 export function doesCheckoutShippingMatchSavedAddress(
@@ -175,7 +184,8 @@ export function doesCheckoutShippingMatchSavedAddress(
     normalizeCheckoutCompareValue(form.pincode) === normalizeCheckoutCompareValue(mapped.pincode) &&
     normalizeCheckoutCompareValue(form.city) === normalizeCheckoutCompareValue(mapped.city) &&
     normalizeCheckoutCompareValue(form.state) === normalizeCheckoutCompareValue(mapped.state) &&
-    normalizeCheckoutPhone(form.shippingPhone) === normalizeCheckoutPhone(mapped.phone)
+    joinAddressPhone(form.shippingCountryCode, form.shippingPhone) ===
+      canonicalAddressPhone(mapped.phone)
   );
 }
 

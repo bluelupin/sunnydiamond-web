@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
+import { validatePhone } from "@/shared/utils/formValidation";
 
 const CHECKOUT_OTP_MOBILE_QUERY = "(max-width: 1023px)";
 
@@ -33,6 +35,8 @@ type CheckoutOtpModalProps = {
   open: boolean;
   /** The contact being verified: a mobile number, or an email address (contains "@"). */
   phone: string;
+  /** Dial code of `phone` when it is a mobile number ("+91", "+1"). */
+  countryCode?: string;
   /** "login" (default) signs the guest in; "link" attaches the number to the signed-in account. */
   purpose?: "login" | "link";
   onClose: () => void;
@@ -42,18 +46,19 @@ type CheckoutOtpModalProps = {
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
 
-const maskPhone = (phone: string) => {
+const maskPhone = (phone: string, countryCode: string) => {
   if (phone.includes("@")) {
     const [user, domain] = phone.trim().split("@");
     return `${user.slice(0, 2)}****@${domain}`;
   }
   const digits = phone.replace(/\D/g, "");
-  if (digits.length < 4) return "+91 ******";
-  return `+91 ${digits.slice(0, 2)}******${digits.slice(-2)}`;
+  if (digits.length < 4) return `${countryCode} ******`;
+  return `${countryCode} ${digits.slice(0, 2)}******${digits.slice(-2)}`;
 };
 
 type CheckoutOtpFieldsProps = {
   phone: string;
+  countryCode: string;
   otp: string[];
   secondsLeft: number;
   otpError?: string;
@@ -66,6 +71,7 @@ type CheckoutOtpFieldsProps = {
 
 const CheckoutOtpFields = ({
   phone,
+  countryCode,
   otp,
   secondsLeft,
   otpError,
@@ -79,7 +85,7 @@ const CheckoutOtpFields = ({
     <div className="flex w-full flex-col gap-4">
       <div className="flex items-center gap-2">
         <p className="font-gill text-base font-light leading-110 text-darkblack">
-          Please enter the OTP sent to {maskPhone(phone)}
+          Please enter the OTP sent to {maskPhone(phone, countryCode)}
         </p>
         <DetailTextLink>EDIT</DetailTextLink>
       </div>
@@ -202,6 +208,7 @@ const CheckoutOtpDesktopPanel = ({
 const CheckoutOtpModal = ({
   open,
   phone,
+  countryCode = "+91",
   purpose = "login",
   onClose,
   onVerify,
@@ -215,19 +222,21 @@ const CheckoutOtpModal = ({
 
   const phoneDigits = phone.replace(/\D/g, "");
   const isEmail = phone.includes("@");
+  // E.164 with the chosen country: bare digits would be read as an Indian number.
+  const phoneE164 = formatLoginPhoneForMagento(countryCode, phoneDigits);
   const target: OtpTarget = isEmail
     ? { kind: "email", email: phone.trim().toLowerCase() }
-    : { kind: "phone", phone: phoneDigits };
+    : { kind: "phone", phone: phoneE164 };
 
   const sendOtp = useCallback(async () => {
-    if (!isEmail && phoneDigits.length < 10) {
+    if (!isEmail && !validatePhone(phoneDigits, countryCode).valid) {
       setOtpError("Enter a valid phone number before requesting an OTP.");
       return;
     }
 
     const result =
       purpose === "link"
-        ? await requestPhoneLinkOtp(phoneDigits)
+        ? await requestPhoneLinkOtp(phoneE164)
         : await requestLoginOtp(target);
     if (!result.success) {
       setOtpError(result.error);
@@ -237,7 +246,7 @@ const CheckoutOtpModal = ({
     setOtpError(undefined);
     setSecondsLeft(result.resendAfterSeconds);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `target` derives from `phone`
-  }, [phone, phoneDigits, isEmail, purpose]);
+  }, [phone, phoneDigits, phoneE164, countryCode, isEmail, purpose]);
 
   useEffect(() => {
     if (!open) {
@@ -288,7 +297,7 @@ const CheckoutOtpModal = ({
 
     const result =
       purpose === "link"
-        ? await verifyPhoneLink(phoneDigits, otp.join(""))
+        ? await verifyPhoneLink(phoneE164, otp.join(""))
         : await verifyLoginOtp(target, otp.join(""));
     setIsVerifying(false);
 
@@ -306,6 +315,7 @@ const CheckoutOtpModal = ({
 
   const otpFieldsProps = {
     phone,
+    countryCode,
     otp,
     secondsLeft,
     otpError,

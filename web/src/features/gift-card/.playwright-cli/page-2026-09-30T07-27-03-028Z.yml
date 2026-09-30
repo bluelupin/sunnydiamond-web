@@ -1,0 +1,258 @@
+- generic [active] [ref=f8e28]:
+  - generic [ref=f8e29]:
+    - banner [ref=f8e30]:
+      - generic [ref=f8e32]:
+        - generic [ref=f8e33]:
+          - link "Sunny Diamonds" [ref=f8e34] [cursor=pointer]:
+            - /url: /
+          - navigation "Main navigation" [ref=f8e38]:
+            - link "Jewellery" [ref=f8e40] [cursor=pointer]:
+              - /url: /jewellery
+            - link "Gifting" [ref=f8e41] [cursor=pointer]:
+              - /url: /gifting
+            - link "Bespoke" [ref=f8e42] [cursor=pointer]:
+              - /url: /bespoke-jewellery
+            - link "World of Sunny" [ref=f8e43] [cursor=pointer]:
+              - /url: /world-of-sunny
+            - link "Book an Appointment" [ref=f8e44] [cursor=pointer]:
+              - /url: /book-an-appointment
+        - generic [ref=f8e45]:
+          - button "Search" [ref=f8e46] [cursor=pointer]
+          - link "Wishlist" [ref=f8e50] [cursor=pointer]:
+            - /url: /wishlist
+          - link "Cart" [ref=f8e53] [cursor=pointer]:
+            - /url: /cart
+          - link "My profile, Sunny" [ref=f8e57] [cursor=pointer]:
+            - /url: /profile
+            - generic [ref=f8e59]: S
+    - main [ref=f8e60]:
+      - generic [ref=f8e61]:
+        - img "Sunny Diamonds profile banner" [ref=f8e63]
+        - generic "Sunny avatar" [ref=f8e67]: S
+      - generic [ref=f8e70]:
+        - complementary [ref=f8e71]:
+          - navigation "Profile sections" [ref=f8e72]:
+            - link "PROFILE" [ref=f8e73] [cursor=pointer]:
+              - /url: /profile?section=details
+            - link "MY ORDERS" [ref=f8e74] [cursor=pointer]:
+              - /url: /profile
+            - link "MY ADDRESSES" [ref=f8e75] [cursor=pointer]:
+              - /url: /profile?section=addresses
+            - link "MY WISHLIST" [ref=f8e76] [cursor=pointer]:
+              - /url: /profile?section=wishlist
+            - link "MY APPOINTMENTS" [ref=f8e77] [cursor=pointer]:
+              - /url: /profile?section=appointments
+            - link "DIAMONDS FOR EVERYONE" [ref=f8e78] [cursor=pointer]:
+              - /url: /profile?section=diamonds_for_everyone
+            - link "BESPOKE INSPIRATIONS" [ref=f8e79] [cursor=pointer]:
+              - /url: /profile?section=bespoke
+            - link "HELP & SUPPORT" [ref=f8e80] [cursor=pointer]:
+              - /url: /profile?section=support
+        - generic [ref=f8e82]:
+          - generic [ref=f8e83]:
+            - paragraph [ref=f8e84]: "Filter by:"
+            - generic [ref=f8e85]:
+              - button "In Progress" [ref=f8e86] [cursor=pointer]
+              - button "Delivered" [ref=f8e87] [cursor=pointer]
+              - button "Cancelled" [ref=f8e88] [cursor=pointer]
+              - button "Returned" [ref=f8e89] [cursor=pointer]
+          - list [ref=f8e90]:
+            - listitem [ref=f8e91]:
+              - article [ref=f8e92]:
+                - generic [ref=f8e93]:
+                  - generic [ref=f8e94]:
+                    - generic [ref=f8e95]: Closed
+                    - generic [ref=f8e98]:
+                      - generic [ref=f8e99]:
+                        - generic [ref=f8e100]:
+                          - generic [ref=f8e101]:
+                            - text: "Order ID:"
+                            - generic [ref=f8e102]: "000000214"
+                          - button "Copy order ID" [ref=f8e103] [cursor=pointer]
+                        - generic [ref=f8e108]: "Placed On: 28 September 2026"
+                      - generic [ref=f8e109]:
+                        - generic [ref=f8e110]: "Delivery by:"
+                        - text: 8 October 2026
+                  - generic [ref=f8e111]:
+                    - generic [ref=f8e112]:
+                      - generic [ref=f8e113]: Estimated Delivery
+                      - generic [ref=f8e114]: 8 October 2026
+                    - list [ref=f8e118]:
+                      - listitem [ref=f8e119]:
+                        - generic [ref=f8e120]: "1"
+                        - generic [ref=f8e121]: In Production
+                      - listitem [ref=f8e122]:
+                        - generic [ref=f8e123]: "2"
+                        - generic [ref=f8e124]: Packaged
+                      - listitem [ref=f8e125]:
+                        - generic [ref=f8e126]: "3"
+                        - generic [ref=f8e127]: Shipped
+                      - listitem [ref=f8e128]:
+                        - generic [ref=f8e129]: "4"
+                        - generic [ref=f8e130]: Out for Delivery
+                      - listitem [ref=f8e131]:
+                        - generic [ref=f8e132]: "5"
+                        - generic [ref=f8e133]: Delivered
+                  - generic [ref=f8e137]:
+                    - img "Gift Card (Physical)" [ref=f8e139]
+                    - generic [ref=f8e140]:
+                      - link "Gift Card (Physical)" [ref=f8e141] [cursor=pointer]:
+                        - /url: /product/sd-gift-card-physical
+                      - paragraph [ref=f8e142]: Physical Card
+                  - button "VIEW ORDER DETAILS" [ref=f8e144] [cursor=pointer]
+                  - generic [ref=f8e146]:
+                    - generic [ref=f8e147]: Total Order Amount
+                    - generic [ref=f8e148]: ₹7,250.00
+                  - button "TRACK" [ref=f8e151] [cursor=pointer]
+                  - paragraph [ref=f8e156]: Orders can only be cancelled before they are shipped.
+      - generic [ref=f8e159]:
+        - generic [ref=f8e161]:
+          - generic [ref=f8e162]:
+            - heading "We're Here To Help" [level=3] [ref=f8e163]
+            - paragraph [ref=f8e164]: Reach out to our experts for support with your orders, plans, or jewellery care.
+          - generic [ref=f8e165]:
+            - button "+91 9744355555" [ref=f8e166] [cursor=pointer]
+            - link "EMAIL US" [ref=f8e167] [cursor=pointer]:
+              - /url: mailto:customerservice@sunnydiamonds.com
+        - generic [ref=f8e170]:
+          - generic [ref=f8e171]:
+            - heading "15-Day Return Policy" [level=3] [ref=f8e172]
+            - paragraph [ref=f8e173]: Hassle-free returns available within 15 days of delivery on eligible orders.
+          - link "SEE RETURN POLICY" [ref=f8e175] [cursor=pointer]:
+            - /url: /policy-and-certifications?policy=15-day-return-policy
+    - contentinfo [ref=f8e176]:
+      - generic [ref=f8e178]:
+        - generic [ref=f8e179]:
+          - generic [ref=f8e180]:
+            - generic [ref=f8e181]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f8e182]: •
+          - generic [ref=f8e183]:
+            - generic [ref=f8e184]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f8e185]: •
+          - generic [ref=f8e186]:
+            - generic [ref=f8e187]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f8e188]: •
+          - generic [ref=f8e189]:
+            - generic [ref=f8e190]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f8e191]: •
+          - generic [ref=f8e192]:
+            - generic [ref=f8e193]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f8e194]: •
+          - generic [ref=f8e195]:
+            - generic [ref=f8e196]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f8e197]: •
+          - generic [ref=f8e198]:
+            - generic [ref=f8e199]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f8e200]: •
+          - generic [ref=f8e201]:
+            - generic [ref=f8e202]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f8e203]: •
+        - generic [aria-hidden] [ref=f8e204]:
+          - generic [ref=f8e205]:
+            - generic [ref=f8e206]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f8e207]: •
+          - generic [ref=f8e208]:
+            - generic [ref=f8e209]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f8e210]: •
+          - generic [ref=f8e211]:
+            - generic [ref=f8e212]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f8e213]: •
+          - generic [ref=f8e214]:
+            - generic [ref=f8e215]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f8e216]: •
+          - generic [ref=f8e217]:
+            - generic [ref=f8e218]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f8e219]: •
+          - generic [ref=f8e220]:
+            - generic [ref=f8e221]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f8e222]: •
+          - generic [ref=f8e223]:
+            - generic [ref=f8e224]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f8e225]: •
+          - generic [ref=f8e226]:
+            - generic [ref=f8e227]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f8e228]: •
+      - generic [ref=f8e229]:
+        - generic [ref=f8e230]:
+          - link "Sunny Diamonds" [ref=f8e232] [cursor=pointer]:
+            - /url: /
+            - img "Sunny Diamonds" [ref=f8e233]
+          - navigation "Footer navigation" [ref=f8e234]:
+            - generic [ref=f8e235]:
+              - paragraph [ref=f8e236]: OUR COMPANY
+              - list [ref=f8e237]:
+                - listitem [ref=f8e238]:
+                  - link "Our Story" [ref=f8e239] [cursor=pointer]:
+                    - /url: /world-of-sunny
+                - listitem [ref=f8e240]:
+                  - link "Learn About Diamonds" [ref=f8e241] [cursor=pointer]:
+                    - /url: /education
+                - listitem [ref=f8e242]:
+                  - link "Diamonds For Everyone" [ref=f8e243] [cursor=pointer]:
+                    - /url: /diamonds-for-everyone
+                - listitem [ref=f8e244]:
+                  - link "Bespoke Jewellery" [ref=f8e245] [cursor=pointer]:
+                    - /url: /bespoke-jewellery
+                - listitem [ref=f8e246]:
+                  - link "Careers" [ref=f8e247] [cursor=pointer]:
+                    - /url: /careers
+                - listitem [ref=f8e248]:
+                  - link "Blogs" [ref=f8e249] [cursor=pointer]:
+                    - /url: /blogs
+            - generic [ref=f8e250]:
+              - paragraph [ref=f8e251]: SUPPORT
+              - list [ref=f8e252]:
+                - listitem [ref=f8e253]:
+                  - link "Contact Us" [ref=f8e254] [cursor=pointer]:
+                    - /url: /contact
+                - listitem [ref=f8e255]:
+                  - link "Store Locator" [ref=f8e256] [cursor=pointer]:
+                    - /url: /store-locator
+            - generic [ref=f8e257]:
+              - paragraph [ref=f8e258]: SERVICES
+              - list [ref=f8e259]:
+                - listitem [ref=f8e260]:
+                  - link "Book an Appointment" [ref=f8e261] [cursor=pointer]:
+                    - /url: /book-an-appointment
+                - listitem [ref=f8e262]:
+                  - link "Try at Home" [ref=f8e263] [cursor=pointer]:
+                    - /url: /finance-options
+                - listitem [ref=f8e264]:
+                  - link "Schedule a Video Call" [ref=f8e265] [cursor=pointer]:
+                    - /url: /gifting
+                - listitem [ref=f8e266]:
+                  - link "Gifting" [ref=f8e267] [cursor=pointer]:
+                    - /url: /gifting
+            - generic [ref=f8e268]:
+              - paragraph [ref=f8e269]: LEGAL
+              - list [ref=f8e270]:
+                - listitem [ref=f8e271]:
+                  - link "Privacy Policy" [ref=f8e272] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=privacy-policy
+                - listitem [ref=f8e273]:
+                  - link "Terms & Conditions" [ref=f8e274] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=terms-and-conditions
+                - listitem [ref=f8e275]:
+                  - link "Certifications" [ref=f8e276] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=certifications
+                - listitem [ref=f8e277]:
+                  - link "100% Money Back Policy" [ref=f8e278] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=100-percent-money-back-policy
+                - listitem [ref=f8e279]:
+                  - link "15 Day Return Policy" [ref=f8e280] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=15-day-return-policy
+                - listitem [ref=f8e281]:
+                  - link "Cancellation Policy" [ref=f8e282] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=cancellation-policy
+        - generic [ref=f8e283]:
+          - generic [ref=f8e284]:
+            - link "Instagram" [ref=f8e285] [cursor=pointer]:
+              - /url: https://www.instagram.com/sunnydiamondsofficial/
+            - link "Facebook" [ref=f8e287] [cursor=pointer]:
+              - /url: https://www.facebook.com/SunnyDiamonds.jewellery
+            - link "X" [ref=f8e289] [cursor=pointer]:
+              - /url: https://x.com/SunnyDiamond_4c
+            - link "linkedIn" [ref=f8e291] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/sunny-diamonds/
+          - paragraph [ref=f8e295]: © 2026 Sunny Diamonds. All Rights Reserved.
+  - alert [ref=f8e296]: My Profile

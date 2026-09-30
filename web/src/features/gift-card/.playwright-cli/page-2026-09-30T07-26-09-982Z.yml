@@ -1,0 +1,243 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - banner [ref=f5e3]:
+      - generic [ref=f5e5]:
+        - generic [ref=f5e6]:
+          - link "Sunny Diamonds" [ref=f5e7] [cursor=pointer]:
+            - /url: /
+          - navigation "Main navigation" [ref=f5e11]:
+            - link "Jewellery" [ref=f5e13] [cursor=pointer]:
+              - /url: /jewellery
+            - link "Gifting" [ref=f5e14] [cursor=pointer]:
+              - /url: /gifting
+            - link "Bespoke" [ref=f5e15] [cursor=pointer]:
+              - /url: /bespoke-jewellery
+            - link "World of Sunny" [ref=f5e16] [cursor=pointer]:
+              - /url: /world-of-sunny
+            - link "Book an Appointment" [ref=f5e17] [cursor=pointer]:
+              - /url: /book-an-appointment
+        - generic [ref=f5e18]:
+          - button "Search" [ref=f5e19] [cursor=pointer]
+          - link "Wishlist" [ref=f5e23] [cursor=pointer]:
+            - /url: /wishlist
+          - link "Cart" [ref=f5e26] [cursor=pointer]:
+            - /url: /cart
+          - link "My profile, Sunny" [ref=f5e158] [cursor=pointer]:
+            - /url: /profile
+            - generic [ref=f5e160]: S
+    - main [ref=f5e34]:
+      - region "Reach Out to Us" [ref=f5e260]:
+        - img "Reach Out to Us" [ref=f5e262]
+        - generic:
+          - heading "Reach Out to Us" [level=1]
+      - generic [ref=f5e263]:
+        - region [ref=f5e264]:
+          - generic [ref=f5e265]:
+            - paragraph [ref=f5e266]: Connect with our team for personalised assistance. We're always here to help with any questions you may have.
+            - generic [ref=f5e267]:
+              - generic [ref=f5e268]:
+                - heading "Call Us" [level=2] [ref=f5e269]
+                - generic [ref=f5e270]:
+                  - generic [ref=f5e272]:
+                    - generic [ref=f5e273]:
+                      - generic [ref=f5e274]: "Monday to Saturday:"
+                      - generic [ref=f5e275]: 9:00 AM to 7:00 PM
+                    - generic [ref=f5e276]:
+                      - generic [ref=f5e277]: "Sunday:"
+                      - generic [ref=f5e278]: 9:00 AM to 4:00 PM
+                  - button "+91 9744355555" [ref=f5e280] [cursor=pointer]
+              - generic [ref=f5e281]:
+                - heading "Email Us" [level=2] [ref=f5e282]
+                - generic [ref=f5e283]:
+                  - paragraph [ref=f5e285]: Our customer support team would be delighted to help resolve your concerns
+                  - link "GETINTOUCH@SUNNYDIAMONDS.COM" [ref=f5e287] [cursor=pointer]:
+                    - /url: mailto:getintouch@sunnydiamonds.com
+              - generic [ref=f5e288]:
+                - heading "Personal Concierge" [level=2] [ref=f5e289]
+                - generic [ref=f5e290]:
+                  - paragraph [ref=f5e292]: Get quick assistance from our dedicated member of our team
+                  - link "WHATSAPP" [ref=f5e294] [cursor=pointer]:
+                    - /url: https://wa.me/9744355555?text=Thank%20you%20for%20contacting%20!%20How%20can%20we%20assist%20you%3F
+        - region [ref=f5e295]:
+          - heading "How Can We Help?" [level=2] [ref=f5e296]
+          - generic [ref=f5e297]:
+            - generic [ref=f5e298]:
+              - generic [ref=f5e299]:
+                - generic [ref=f5e301]:
+                  - generic [ref=f5e302]: Full Name*
+                  - textbox "Full Name*" [ref=f5e303]:
+                    - /placeholder: Enter your full name
+                - generic [ref=f5e304]:
+                  - generic [ref=f5e306]:
+                    - generic [ref=f5e307]: Phone No.*
+                    - generic [ref=f5e308]:
+                      - button "Country code" [ref=f5e310] [cursor=pointer]:
+                        - generic [ref=f5e311]: "+91"
+                      - textbox "Phone No.*" [ref=f5e316]:
+                        - /placeholder: Enter your mobile number
+                  - generic [ref=f5e317]:
+                    - generic [ref=f5e318]: Email ID*
+                    - textbox "Email ID*" [ref=f5e319]:
+                      - /placeholder: Enter your email address
+                - generic [ref=f5e320]:
+                  - generic [ref=f5e321]: Reason for contacting us*
+                  - combobox "Reason for contacting us*" [ref=f5e322] [cursor=pointer]:
+                    - generic: Select a reason
+                  - combobox [aria-hidden] [ref=f5e325]
+                - generic [ref=f5e327]:
+                  - generic [ref=f5e328]: Message*
+                  - textbox "Message*" [ref=f5e329]:
+                    - /placeholder: Tell us how we can help
+              - generic [ref=f5e331]:
+                - checkbox "Accept terms and privacy policy" [ref=f5e333] [cursor=pointer]
+                - paragraph [ref=f5e334]:
+                  - text: I agree to the
+                  - link "TERMS & CONDITIONS" [ref=f5e335] [cursor=pointer]:
+                    - /url: /terms-and-conditions
+                  - text: and
+                  - link "PRIVACY POLICY" [ref=f5e336] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=privacy-policy
+                  - text: . My information will be securely stored for up to 90 days to help us manage my enquiry.
+            - button "SEND ENQUIRY" [disabled] [ref=f5e337]
+      - region [ref=f5e338]:
+        - generic [ref=f5e341]:
+          - generic [ref=f5e342]:
+            - heading "Visit Us" [level=2] [ref=f5e343]
+            - paragraph [ref=f5e344]: We'd be delighted to welcome you and help you discover your perfect piece.
+          - button "BOOK AN APPOINTMENT" [ref=f5e345] [cursor=pointer]
+    - contentinfo [ref=f5e37]:
+      - generic [ref=f5e39]:
+        - generic [ref=f5e40]:
+          - generic [ref=f5e41]:
+            - generic [ref=f5e42]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f5e43]: •
+          - generic [ref=f5e44]:
+            - generic [ref=f5e45]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f5e46]: •
+          - generic [ref=f5e47]:
+            - generic [ref=f5e48]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f5e49]: •
+          - generic [ref=f5e50]:
+            - generic [ref=f5e51]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f5e52]: •
+          - generic [ref=f5e53]:
+            - generic [ref=f5e54]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f5e55]: •
+          - generic [ref=f5e56]:
+            - generic [ref=f5e57]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f5e58]: •
+          - generic [ref=f5e59]:
+            - generic [ref=f5e60]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f5e61]: •
+          - generic [ref=f5e62]:
+            - generic [ref=f5e63]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f5e64]: •
+        - generic [aria-hidden] [ref=f5e65]:
+          - generic [ref=f5e66]:
+            - generic [ref=f5e67]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f5e68]: •
+          - generic [ref=f5e69]:
+            - generic [ref=f5e70]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f5e71]: •
+          - generic [ref=f5e72]:
+            - generic [ref=f5e73]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f5e74]: •
+          - generic [ref=f5e75]:
+            - generic [ref=f5e76]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f5e77]: •
+          - generic [ref=f5e78]:
+            - generic [ref=f5e79]: BIS HALMARK FOR JEWELLERY
+            - generic [aria-hidden] [ref=f5e80]: •
+          - generic [ref=f5e81]:
+            - generic [ref=f5e82]: CASH ON DELIVERY
+            - generic [aria-hidden] [ref=f5e83]: •
+          - generic [ref=f5e84]:
+            - generic [ref=f5e85]: 100% MONEYBACK GUARANTEED
+            - generic [aria-hidden] [ref=f5e86]: •
+          - generic [ref=f5e87]:
+            - generic [ref=f5e88]: INTERNALLY FLAWLESS DIAMONDS
+            - generic [aria-hidden] [ref=f5e89]: •
+      - generic [ref=f5e90]:
+        - generic [ref=f5e91]:
+          - link "Sunny Diamonds" [ref=f5e93] [cursor=pointer]:
+            - /url: /
+            - img "Sunny Diamonds" [ref=f5e94]
+          - navigation "Footer navigation" [ref=f5e95]:
+            - generic [ref=f5e96]:
+              - paragraph [ref=f5e97]: OUR COMPANY
+              - list [ref=f5e98]:
+                - listitem [ref=f5e99]:
+                  - link "Our Story" [ref=f5e100] [cursor=pointer]:
+                    - /url: /world-of-sunny
+                - listitem [ref=f5e101]:
+                  - link "Learn About Diamonds" [ref=f5e102] [cursor=pointer]:
+                    - /url: /education
+                - listitem [ref=f5e103]:
+                  - link "Diamonds For Everyone" [ref=f5e104] [cursor=pointer]:
+                    - /url: /diamonds-for-everyone
+                - listitem [ref=f5e105]:
+                  - link "Bespoke Jewellery" [ref=f5e106] [cursor=pointer]:
+                    - /url: /bespoke-jewellery
+                - listitem [ref=f5e107]:
+                  - link "Careers" [ref=f5e108] [cursor=pointer]:
+                    - /url: /careers
+                - listitem [ref=f5e109]:
+                  - link "Blogs" [ref=f5e110] [cursor=pointer]:
+                    - /url: /blogs
+            - generic [ref=f5e111]:
+              - paragraph [ref=f5e112]: SUPPORT
+              - list [ref=f5e113]:
+                - listitem [ref=f5e114]:
+                  - link "Contact Us" [ref=f5e115] [cursor=pointer]:
+                    - /url: /contact
+                - listitem [ref=f5e116]:
+                  - link "Store Locator" [ref=f5e117] [cursor=pointer]:
+                    - /url: /store-locator
+            - generic [ref=f5e118]:
+              - paragraph [ref=f5e119]: SERVICES
+              - list [ref=f5e120]:
+                - listitem [ref=f5e121]:
+                  - link "Book an Appointment" [ref=f5e122] [cursor=pointer]:
+                    - /url: /book-an-appointment
+                - listitem [ref=f5e123]:
+                  - link "Try at Home" [ref=f5e124] [cursor=pointer]:
+                    - /url: /finance-options
+                - listitem [ref=f5e125]:
+                  - link "Schedule a Video Call" [ref=f5e126] [cursor=pointer]:
+                    - /url: /gifting
+                - listitem [ref=f5e127]:
+                  - link "Gifting" [ref=f5e128] [cursor=pointer]:
+                    - /url: /gifting
+            - generic [ref=f5e129]:
+              - paragraph [ref=f5e130]: LEGAL
+              - list [ref=f5e131]:
+                - listitem [ref=f5e132]:
+                  - link "Privacy Policy" [ref=f5e133] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=privacy-policy
+                - listitem [ref=f5e134]:
+                  - link "Terms & Conditions" [ref=f5e135] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=terms-and-conditions
+                - listitem [ref=f5e136]:
+                  - link "Certifications" [ref=f5e137] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=certifications
+                - listitem [ref=f5e138]:
+                  - link "100% Money Back Policy" [ref=f5e139] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=100-percent-money-back-policy
+                - listitem [ref=f5e140]:
+                  - link "15 Day Return Policy" [ref=f5e141] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=15-day-return-policy
+                - listitem [ref=f5e142]:
+                  - link "Cancellation Policy" [ref=f5e143] [cursor=pointer]:
+                    - /url: /policy-and-certifications?policy=cancellation-policy
+        - generic [ref=f5e144]:
+          - generic [ref=f5e145]:
+            - link "Instagram" [ref=f5e146] [cursor=pointer]:
+              - /url: https://www.instagram.com/sunnydiamondsofficial/
+            - link "Facebook" [ref=f5e148] [cursor=pointer]:
+              - /url: https://www.facebook.com/SunnyDiamonds.jewellery
+            - link "X" [ref=f5e150] [cursor=pointer]:
+              - /url: https://x.com/SunnyDiamond_4c
+            - link "linkedIn" [ref=f5e152] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/sunny-diamonds/
+          - paragraph [ref=f5e156]: © 2026 Sunny Diamonds. All Rights Reserved.
+  - alert [ref=f5e157]: Contact Us | Sunny Diamonds

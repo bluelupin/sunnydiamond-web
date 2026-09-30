@@ -1,0 +1,203 @@
+- generic:
+  - generic [aria-hidden]:
+    - banner:
+      - generic:
+        - generic:
+          - generic:
+            - link:
+              - /url: /
+            - navigation:
+              - generic:
+                - link:
+                  - /url: /jewellery
+                  - text: Jewellery
+              - link:
+                - /url: /gifting
+                - text: Gifting
+              - link:
+                - /url: /bespoke-jewellery
+                - text: Bespoke
+              - link:
+                - /url: /world-of-sunny
+                - text: World of Sunny
+              - link:
+                - /url: /book-an-appointment
+                - text: Book an Appointment
+          - generic:
+            - button
+            - link:
+              - /url: /wishlist
+            - link:
+              - /url: /cart
+            - button
+    - main
+    - contentinfo:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: BIS HALMARK FOR JEWELLERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: CASH ON DELIVERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: 100% MONEYBACK GUARANTEED
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: INTERNALLY FLAWLESS DIAMONDS
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: BIS HALMARK FOR JEWELLERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: CASH ON DELIVERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: 100% MONEYBACK GUARANTEED
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: INTERNALLY FLAWLESS DIAMONDS
+              - generic [aria-hidden]: •
+          - generic [aria-hidden]:
+            - generic:
+              - generic: BIS HALMARK FOR JEWELLERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: CASH ON DELIVERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: 100% MONEYBACK GUARANTEED
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: INTERNALLY FLAWLESS DIAMONDS
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: BIS HALMARK FOR JEWELLERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: CASH ON DELIVERY
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: 100% MONEYBACK GUARANTEED
+              - generic [aria-hidden]: •
+            - generic:
+              - generic: INTERNALLY FLAWLESS DIAMONDS
+              - generic [aria-hidden]: •
+      - generic:
+        - generic:
+          - generic:
+            - link:
+              - /url: /
+          - navigation:
+            - generic:
+              - paragraph: OUR COMPANY
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /world-of-sunny
+                    - text: Our Story
+                - listitem:
+                  - link:
+                    - /url: /education
+                    - text: Learn About Diamonds
+                - listitem:
+                  - link:
+                    - /url: /diamonds-for-everyone
+                    - text: Diamonds For Everyone
+                - listitem:
+                  - link:
+                    - /url: /bespoke-jewellery
+                    - text: Bespoke Jewellery
+                - listitem:
+                  - link:
+                    - /url: /careers
+                    - text: Careers
+                - listitem:
+                  - link:
+                    - /url: /blogs
+                    - text: Blogs
+            - generic:
+              - paragraph: SUPPORT
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /contact
+                    - text: Contact Us
+                - listitem:
+                  - link:
+                    - /url: /store-locator
+                    - text: Store Locator
+            - generic:
+              - paragraph: SERVICES
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /book-an-appointment
+                    - text: Book an Appointment
+                - listitem:
+                  - link:
+                    - /url: /finance-options
+                    - text: Try at Home
+                - listitem:
+                  - link:
+                    - /url: /gifting
+                    - text: Schedule a Video Call
+                - listitem:
+                  - link:
+                    - /url: /gifting
+                    - text: Gifting
+            - generic:
+              - paragraph: LEGAL
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /policy-and-certifications?policy=privacy-policy
+                    - text: Privacy Policy
+                - listitem:
+                  - link:
+                    - /url: /policy-and-certifications?policy=terms-and-conditions
+                    - text: Terms & Conditions
+                - listitem:
+                  - link:
+                    - /url: /policy-and-certifications?policy=certifications
+                    - text: Certifications
+                - listitem:
+                  - link:
+                    - /url: /policy-and-certifications?policy=100-percent-money-back-policy
+                    - text: 100% Money Back Policy
+                - listitem:
+                  - link:
+                    - /url: /policy-and-certifications?policy=15-day-return-policy
+                    - text: 15 Day Return Policy
+                - listitem:
+                  - link:
+                    - /url: /policy-and-certifications?policy=cancellation-policy
+                    - text: Cancellation Policy
+        - generic:
+          - generic:
+            - link:
+              - /url: https://www.instagram.com/sunnydiamondsofficial/
+            - link:
+              - /url: https://www.facebook.com/SunnyDiamonds.jewellery
+            - link:
+              - /url: https://x.com/SunnyDiamond_4c
+            - link:
+              - /url: https://www.linkedin.com/company/sunny-diamonds/
+          - paragraph: © 2026 Sunny Diamonds. All Rights Reserved.
+  - alert
+  - dialog [ref=f8e2]:
+    - heading "Gift card" [level=2] [ref=f8e3]
+    - generic [ref=f8e5]:
+      - generic [ref=f8e7]:
+        - generic [ref=f8e8]:
+          - button "Close gift card flow" [active] [ref=f8e14] [cursor=pointer]
+          - generic [ref=f8e18]:
+            - heading "Your Gift Card Is on Its Way" [level=2] [ref=f8e19]
+            - paragraph [ref=f8e20]: Your digital gift card order has been placed and will be emailed to the recipient on 5 Oct 2026.
+        - img "Sunny Diamonds gift card" [ref=f8e22]
+      - generic [ref=f8e24]:
+        - link "VIEW DETAILS" [ref=f8e25] [cursor=pointer]:
+          - /url: /profile?section=orders
+        - link "GO BACK TO SHOPPING" [ref=f8e27] [cursor=pointer]:
+          - /url: /jewellery
