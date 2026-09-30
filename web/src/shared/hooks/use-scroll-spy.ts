@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  getSavedHomeActiveSection,
   SCROLL_RESTORED_EVENT,
 } from "@/shared/lib/browserBackScrollRestore";
 
@@ -13,15 +12,6 @@ interface UseScrollSpyOptions {
 
 const NAV_START_VIEWPORT_OFFSET = 110;
 const NAV_UNLOCK_STORAGE_KEY = "sd:home-section-nav-unlocked";
-
-function readInitialActiveSection(sectionIds: readonly string[]): string {
-  const saved = getSavedHomeActiveSection();
-  if (saved && sectionIds.includes(saved)) {
-    return saved;
-  }
-
-  return sectionIds[0] ?? "";
-}
 
 function readPersistedNavUnlock(): boolean {
   if (typeof window === "undefined") return false;
@@ -128,15 +118,16 @@ export function useScrollSpy({
   visibilityThresholdIndex = 3,
   navStartSectionId,
 }: UseScrollSpyOptions) {
-  const [activeId, setActiveId] = useState<string>(() => readInitialActiveSection(sectionIds));
-  const [isVisible, setIsVisible] = useState(() => readPersistedNavUnlock());
+  // Keep server HTML and the first client render identical. Browser restoration
+  // is applied by the effect once hydration has finished.
+  const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? "");
+  const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const rafRef = useRef<number | null>(null);
-  const navUnlockedRef = useRef(readPersistedNavUnlock());
+  const navUnlockedRef = useRef(false);
 
   useEffect(() => {
     navUnlockedRef.current = readPersistedNavUnlock();
-    setIsVisible(navUnlockedRef.current);
 
     const compute = () => {
       rafRef.current = null;
@@ -192,7 +183,7 @@ export function useScrollSpy({
     window.addEventListener("popstate", onScroll);
     window.addEventListener(SCROLL_RESTORED_EVENT, onScroll);
 
-    compute();
+    onScroll();
 
     const hydrationTimers = [0, 50, 150, 300, 600, 1000, 2000, 3500].map((delay) =>
       window.setTimeout(onScroll, delay),

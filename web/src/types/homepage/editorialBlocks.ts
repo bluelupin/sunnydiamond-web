@@ -41,6 +41,8 @@ export type DiamondSourcingSectionData = {
 };
 
 export type CraftsmanshipSectionData = CraftsmanshipStepsSection & {
+  url?: string;
+  mime?: string;
   sectionTitle?: string | null;
   isActive?: boolean | null;
   showField?: boolean;
