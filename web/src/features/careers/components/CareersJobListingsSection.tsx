@@ -51,7 +51,7 @@ const CareersJobListingsSection = () => {
       <section
         id="job-listing"
         aria-labelledby="careers-openings-empty-title"
-        className="bg-white px-4 py-10 md:px-10 md:py-104"
+        className="bg-white px-4 pt-10 pb-10 md:px-10 md:pb-104"
       >
         <CareersOpeningsEmptyState />
       </section>
@@ -66,7 +66,7 @@ const CareersJobListingsSection = () => {
     <section
       id="job-listing"
       aria-labelledby="careers-job-listing-title"
-      className="bg-white px-4 py-10 md:px-10 md:py-104"
+      className="bg-white px-4 pt-10 pb-10 md:px-10 md:pb-104"
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-6">
         <CareersJobFiltersSidebar />

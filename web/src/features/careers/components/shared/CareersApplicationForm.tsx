@@ -78,11 +78,13 @@ type ApplicationField =
   | "resume";
 
 function FormField({
+  htmlFor,
   label,
   error,
   children,
   className,
 }: {
+  htmlFor?: string;
   label: string;
   error?: string;
   children: React.ReactNode;
@@ -90,7 +92,7 @@ function FormField({
 }) {
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label className={careersFormLabelClassName}>{label}</label>
+      {label ? <label htmlFor={htmlFor} className={careersFormLabelClassName}>{label}</label> : null}
       {children}
       {error ? <FormFieldError message={error} /> : null}
     </div>
@@ -635,8 +637,8 @@ const CareersApplicationForm = () => {
           </h2>
           <div className={careersFormFieldsStackClassName}>
             <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
-              <FormField label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
-                <input
+              <FormField htmlFor="careers-name" label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
+                <input id="careers-name"
                   type="text"
                   autoComplete="name"
                   placeholder="Enter Name"
@@ -649,7 +651,7 @@ const CareersApplicationForm = () => {
                   )}
                 />
               </FormField>
-              <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
+              <FormField htmlFor="careers-phone" label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
                 <div
                   className={cn(
                     "flex h-14 w-full items-center gap-2 border border-transparent bg-[#F2F2F2] p-3",
@@ -665,7 +667,7 @@ const CareersApplicationForm = () => {
                     }}
                     onBlur={() => markTouched("phone")}
                   />
-                  <input
+                  <input id="careers-phone"
                     type="tel"
                     autoComplete="tel"
                     placeholder="Enter"
@@ -677,8 +679,8 @@ const CareersApplicationForm = () => {
                   />
                 </div>
               </FormField>
-              <FormField label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
-                <input
+              <FormField htmlFor="careers-email" label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
+                <input id="careers-email"
                   type="email"
                   autoComplete="email"
                   placeholder="Enter Email"
@@ -691,7 +693,7 @@ const CareersApplicationForm = () => {
                   )}
                 />
               </FormField>
-              <FormField
+              <FormField htmlFor="careers-date-of-birth"
                 label={fields.dateOfBirthLabel}
                 error={showError("dateOfBirth") ? errors.dateOfBirth : undefined}
               >
@@ -725,11 +727,11 @@ const CareersApplicationForm = () => {
         <section className={careersFormSectionClassName}>
           <h2 className={careersFormSectionTitleClassName}>Education Details</h2>
           <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
-            <FormField
+            <FormField htmlFor="careers-highest-degree"
               label={fields.highestDegreeLabel}
               error={showError("highestDegree") ? errors.highestDegree : undefined}
             >
-              <input
+              <input id="careers-highest-degree"
                 type="text"
                 placeholder="Enter Degree"
                 value={highestDegree}
@@ -741,11 +743,11 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-area-of-study"
               label={fields.areaOfStudyLabel}
               error={showError("areaOfStudy") ? errors.areaOfStudy : undefined}
             >
-              <input
+              <input id="careers-area-of-study"
                 type="text"
                 placeholder="Enter Area of Study"
                 value={areaOfStudy}
@@ -757,11 +759,11 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-year-of-completion"
               label={fields.yearOfCompletionLabel}
               error={showError("yearOfCompletion") ? errors.yearOfCompletion : undefined}
             >
-              <input
+              <input id="careers-year-of-completion"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -799,8 +801,8 @@ const CareersApplicationForm = () => {
               placeholder="Select Relevant Experience"
               error={showError("relevantExperience") ? errors.relevantExperience : undefined}
             />
-            <FormField label={fields.currentCompanyLabel}>
-              <input
+            <FormField htmlFor="careers-current-company" label={fields.currentCompanyLabel}>
+              <input id="careers-current-company"
                 type="text"
                 placeholder="Enter Current Company's Name"
                 value={currentCompany}
@@ -808,8 +810,8 @@ const CareersApplicationForm = () => {
                 className={careersFormFieldClassName}
               />
             </FormField>
-            <FormField label={fields.currentJobTitleLabel}>
-              <input
+            <FormField htmlFor="careers-current-job-title" label={fields.currentJobTitleLabel}>
+              <input id="careers-current-job-title"
                 type="text"
                 placeholder="Enter Current Job Title"
                 value={currentJobTitle}
@@ -817,11 +819,11 @@ const CareersApplicationForm = () => {
                 className={careersFormFieldClassName}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-current-ctc"
               label={fields.currentCtcLabel}
               error={showError("currentCtc") ? errors.currentCtc : undefined}
             >
-              <input
+              <input id="careers-current-ctc"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -837,11 +839,11 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-expected-ctc"
               label={fields.expectedCtcLabel}
               error={showError("expectedCtc") ? errors.expectedCtc : undefined}
             >
-              <input
+              <input id="careers-expected-ctc"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -976,7 +978,7 @@ const CareersApplicationForm = () => {
 
           {hasCompanyRelation ? (
             <div className="grid gap-6 md:grid-cols-2">
-              <FormField label={fields.employeeNameLabel}>
+              <FormField htmlFor="careers-employee-name" label={fields.employeeNameLabel}>
                 <input
                   id="careers-employee-name"
                   type="text"
@@ -987,7 +989,7 @@ const CareersApplicationForm = () => {
                 />
               </FormField>
 
-              <FormField label={fields.employeeJobTitleLabel}>
+              <FormField htmlFor="careers-employee-job-title" label={fields.employeeJobTitleLabel}>
                 <input
                   id="careers-employee-job-title"
                   type="text"

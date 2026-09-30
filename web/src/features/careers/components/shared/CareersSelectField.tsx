@@ -1,5 +1,6 @@
 "use client";
 
+import { useId, useState } from "react";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   Select,
@@ -46,27 +47,39 @@ const CareersSelectField = ({
   triggerClassName,
   className,
 }: CareersSelectFieldProps) => {
+  const generatedId = useId();
+  const fieldId = id ?? generatedId;
+  const [open, setOpen] = useState(false);
   const selectPlaceholder = placeholder.trim() || "Select";
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={id} className={labelClassName}>
+      <label
+        htmlFor={fieldId}
+        className={labelClassName}
+        onClick={(event) => {
+          event.preventDefault();
+          setOpen(true);
+        }}
+      >
         {label}
       </label>
       <Select
+        open={open}
         value={value || CAREERS_SELECT_EMPTY_VALUE}
         onValueChange={(next) => {
           onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
           onBlur?.();
         }}
         onOpenChange={(open) => {
+          setOpen(open);
           if (!open) {
             onBlur?.();
           }
         }}
       >
         <SelectTrigger
-          id={id}
+          id={fieldId}
           className={cn(
             careersSelectTriggerClassName,
             (!value || value === CAREERS_SELECT_EMPTY_VALUE) &&
