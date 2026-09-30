@@ -144,7 +144,7 @@ const BlogDetailSidebar = ({
 
   return (
     <aside
-      className="flex w-full flex-col gap-8 border-r border-neutral300 bg-gray300 p-4 desktop:w-[437px] desktop:shrink-0 desktop:gap-6 desktop:p-6 desktop:shadow-[0px_4px_2px_rgba(0,0,0,0.1)]"
+      className="flex w-full flex-col gap-8 border-r border-neutral300 bg-gray300 p-4 desktop:w-[374px] desktop:shrink-0 desktop:gap-6 desktop:p-6 desktop:shadow-[0px_4px_2px_rgba(0,0,0,0.1)]"
       aria-label="Blog navigation"
     >
       <div className="flex flex-col gap-8 desktop:gap-6">

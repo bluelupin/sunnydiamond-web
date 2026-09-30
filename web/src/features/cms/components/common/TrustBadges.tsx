@@ -77,7 +77,7 @@ function TrustBadgeMarquee({
   items,
   isLoading,
 }: TrustBadgeMarqueeProps) {
-  const pathName = usePathname();
+  const pathName = usePathname() ?? "";
 
   const isSingleItem = items.length === 1;
   const marqueeItems = useMemo(
