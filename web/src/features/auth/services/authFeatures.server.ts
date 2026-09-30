@@ -2,6 +2,7 @@
 // Client code reads the flags via AuthFeaturesContext instead.
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { MAGENTO_CATALOG_REVALIDATE_SECONDS } from "@/services/magento/config";
+import { parseOtpCountryCodes } from "@/lib/auth/magentoPhone";
 import {
   DEFAULT_AUTH_FEATURE_FLAGS,
   type AuthFeatureFlags,
@@ -15,6 +16,7 @@ const MAGENTO_AUTH_FEATURES_QUERY = `
   query MagentoAuthFeatures {
     storeConfig {
       sd_otp_login_enabled
+      sd_otp_countries
       sd_email_otp_login_enabled
       sd_google_login_enabled
       sd_apple_login_enabled
@@ -25,6 +27,7 @@ const MAGENTO_AUTH_FEATURES_QUERY = `
 type MagentoAuthFeaturesResponse = {
   storeConfig: {
     sd_otp_login_enabled: boolean | null;
+    sd_otp_countries?: string | null;
     sd_email_otp_login_enabled: boolean | null;
     sd_google_login_enabled: boolean | null;
     sd_apple_login_enabled: boolean | null;
@@ -32,16 +35,17 @@ type MagentoAuthFeaturesResponse = {
 };
 
 /**
- * Same query without the newest field, for the window where the frontend has
- * deployed ahead of Magento. GraphQL rejects the whole document over one unknown
- * field, so without this fallback a single missing field fails every login method
- * closed at once — which is exactly what happened on the first deploy of
- * sd_email_otp_login_enabled.
+ * Same query without the newest field (sd_otp_countries), for the window where the
+ * frontend has deployed ahead of Magento. GraphQL rejects the whole document over
+ * one unknown field, so without this fallback a single missing field fails every
+ * login method closed at once — which is exactly what happened on the first deploy
+ * of sd_email_otp_login_enabled.
  */
 const MAGENTO_AUTH_FEATURES_LEGACY_QUERY = `
   query MagentoAuthFeaturesLegacy {
     storeConfig {
       sd_otp_login_enabled
+      sd_email_otp_login_enabled
       sd_google_login_enabled
       sd_apple_login_enabled
     }
@@ -52,6 +56,7 @@ const toFlags = (
   config: MagentoAuthFeaturesResponse["storeConfig"] | undefined,
 ): AuthFeatureFlags => ({
   otpLoginEnabled: config?.sd_otp_login_enabled === true,
+  otpCountryCodes: parseOtpCountryCodes(config?.sd_otp_countries),
   emailOtpLoginEnabled: config?.sd_email_otp_login_enabled === true,
   googleLoginEnabled: config?.sd_google_login_enabled === true,
   appleLoginEnabled: config?.sd_apple_login_enabled === true,
@@ -80,7 +85,7 @@ export async function fetchAuthFeatureFlags(): Promise<AuthFeatureFlags> {
       return DEFAULT_AUTH_FEATURE_FLAGS;
     }
 
-    // Magento predates the email OTP field — keep the older methods working
+    // Magento predates the newest field — keep the older methods working
     // rather than dropping the customer into a sign-in page with no channels.
     console.warn("[auth] storeConfig missing a field; retrying without it", error);
     try {

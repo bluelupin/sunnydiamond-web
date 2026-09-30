@@ -1,3 +1,4 @@
+import { canonicalAddressPhone } from "@/lib/auth/magentoPhone";
 import { formatCustomerFullName, splitFullName } from "@/shared/utils/customerName";
 import {
   getIndiaMagentoRegionId,
@@ -213,7 +214,7 @@ export function mapCustomerAddressInputToMagento(input: CustomerAddressInput) {
     throw new Error("Address line 1 is required");
   }
 
-  const phone = input.phone.replace(/\D/g, "");
+  const phone = canonicalAddressPhone(input.phone);
   if (!phone) {
     throw new Error("Please enter a valid phone number");
   }
@@ -254,7 +255,7 @@ function normalizeAddressCompareValue(value: string): string {
 }
 
 function normalizeAddressPhone(value: string): string {
-  return value.replace(/\D/g, "");
+  return canonicalAddressPhone(value);
 }
 
 export function doesCustomerAddressMatchInput(
@@ -300,7 +301,7 @@ export function mapOrderShippingAddressToCustomerAddressInput(
   const city = address.city?.trim() ?? "";
   const state = address.region?.trim() ?? "";
   const pincode = address.postcode?.trim() ?? "";
-  const phone = address.telephone?.replace(/\D/g, "") ?? "";
+  const phone = canonicalAddressPhone(address.telephone);
 
   if (!name || !addressLine1 || !city || !state || !pincode || !phone) {
     return null;

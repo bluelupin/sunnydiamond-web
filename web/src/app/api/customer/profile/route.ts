@@ -31,9 +31,9 @@ export async function PATCH(request: Request) {
         );
       }
       const phone = normalizePhoneForMagento(body.phone.trim());
-      if (phone && !/^\+91\d{10}$/.test(phone)) {
+      if (phone && !/^\+\d{8,15}$/.test(phone)) {
         return NextResponse.json(
-          { error: "Enter a valid 10-digit mobile number" },
+          { error: "Enter a valid mobile number" },
           { status: 400 },
         );
       }

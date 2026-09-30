@@ -650,9 +650,11 @@ export type ProfileAddressFormValues = {
   city: string;
   state: string;
   phone: string;
+  /** Dial code for `phone`; India when absent. */
+  phoneCountryCode?: string;
 };
 
-export type ProfileAddressFormField = keyof ProfileAddressFormValues;
+export type ProfileAddressFormField = Exclude<keyof ProfileAddressFormValues, "phoneCountryCode">;
 
 export const getProfileAddressFormErrors = (
   values: ProfileAddressFormValues,
@@ -664,7 +666,7 @@ export const getProfileAddressFormErrors = (
   pincode: validateIndianPincode(values.pincode).error,
   city: validateCity(values.city).error,
   state: validateIndianState(values.state, states).error,
-  phone: validatePhone(values.phone, "+91").error,
+  phone: validatePhone(values.phone, values.phoneCountryCode ?? "+91").error,
 });
 
 export const isProfileAddressFormValid = (

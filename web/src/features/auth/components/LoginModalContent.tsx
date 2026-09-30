@@ -20,6 +20,10 @@ type LoginModalContentProps = {
   identifierError?: string;
   emailOnly: boolean;
   otpBlockedForCountry: boolean;
+  /** Dial codes that can get an SMS code. */
+  otpCountryCodes: readonly string[];
+  /** The SMS could not be sent and email codes work: offer them instead. */
+  offerEmailFallback: boolean;
   noSignInMethod: boolean;
   showGoogle: boolean;
   showApple: boolean;
@@ -57,6 +61,8 @@ const LoginModalContent = ({
   identifierError,
   emailOnly,
   otpBlockedForCountry,
+  otpCountryCodes,
+  offerEmailFallback,
   noSignInMethod,
   showGoogle,
   showApple,
@@ -111,6 +117,7 @@ const LoginModalContent = ({
           countryCode={countryCode}
           error={identifierError}
           emailOnly={emailOnly}
+          countryCodes={otpCountryCodes}
           inputRef={identifierInputRef}
           onIdentifierChange={onIdentifierChange}
           onCountryCodeChange={onCountryCodeChange}
@@ -127,9 +134,10 @@ const LoginModalContent = ({
 
         {!noSignInMethod && otpBlockedForCountry ? (
           <div role="status" className="flex flex-col gap-1">
-            {/* Wording fixed by the Authentication & Registration Flow document. */}
+            {/* Adapted from the Authentication & Registration Flow document's wording,
+                now that SMS codes reach some countries (CR-B3). */}
             <p className="font-gill text-sm font-light leading-110 text-neutral500">
-              International mobile OTP is currently not supported. Please use your Email
+              SMS codes aren&apos;t available for this country yet. Please use your Email
               Address, Google Sign-In, or Apple Sign-In to continue.
             </p>
             <button
@@ -140,6 +148,16 @@ const LoginModalContent = ({
               Use email instead
             </button>
           </div>
+        ) : null}
+
+        {!noSignInMethod && !otpBlockedForCountry && offerEmailFallback ? (
+          <button
+            type="button"
+            onClick={onUseEmailInstead}
+            className="self-start font-gill text-sm font-normal leading-110 text-darkblack underline-offset-2 hover:underline"
+          >
+            Get the code by email instead
+          </button>
         ) : null}
       </div>
 

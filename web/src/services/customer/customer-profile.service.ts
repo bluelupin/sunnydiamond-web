@@ -1,6 +1,7 @@
 import type { CustomerAddress } from "./customer-account.types";
 import type { CustomerProfileContact } from "./customer-profile.types";
 import { formatCustomerFullName } from "@/shared/utils/customerName";
+import { splitPhoneNumber } from "@/lib/auth/magentoPhone";
 
 type AuthMePayload = {
   customer: {
@@ -12,17 +13,6 @@ type AuthMePayload = {
   } | null;
 };
 
-function mapCountryCodeToPhonePrefix(countryCode: string): string {
-  switch (countryCode.toUpperCase()) {
-    case "US":
-      return "+1";
-    case "GB":
-      return "+44";
-    default:
-      return "+91";
-  }
-}
-
 function pickProfileAddressPhone(addresses: CustomerAddress[]): CustomerProfileContact | null {
   const preferred =
     addresses.find((address) => address.isDefaultShipping && address.phone.trim()) ??
@@ -32,10 +22,9 @@ function pickProfileAddressPhone(addresses: CustomerAddress[]): CustomerProfileC
     return null;
   }
 
-  return {
-    phone: preferred.phone.replace(/\D/g, ""),
-    countryCode: mapCountryCodeToPhonePrefix(preferred.countryCode),
-  };
+  // Address telephones are bare digits for India and "+<code>…" elsewhere.
+  const { countryCode, national } = splitPhoneNumber(preferred.phone);
+  return { phone: national, countryCode };
 }
 
 /**
@@ -64,10 +53,10 @@ export async function getCustomerProfileContact(
     };
 
     // The account's own mobile number wins; the address-book phone is a fallback.
-    const accountDigits = customer.phone?.replace(/\D/g, "") ?? "";
-    if (accountDigits.length >= 10) {
-      contact.phone = accountDigits.slice(-10);
-      contact.countryCode = `+${accountDigits.slice(0, -10) || "91"}`;
+    const account = splitPhoneNumber(customer.phone);
+    if (account.national.length >= 7) {
+      contact.phone = account.national;
+      contact.countryCode = account.countryCode;
       return contact;
     }
 

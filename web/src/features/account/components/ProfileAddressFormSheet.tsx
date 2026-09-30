@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckoutField, CheckoutSelectField } from "@/features/checkout/components/CheckoutUi";
+import {
+  CheckoutField,
+  CheckoutPhoneField,
+  CheckoutSelectField,
+} from "@/features/checkout/components/CheckoutUi";
+import { joinAddressPhone, splitPhoneNumber } from "@/lib/auth/magentoPhone";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
@@ -26,6 +31,8 @@ import { profileTabsContent } from "../data/profileContent";
 
 const addressContent = profileTabsContent.addresses;
 
+type AddressFormState = CustomerAddressInput & { phoneCountryCode: string };
+
 const emptyAddressForm = (): CustomerAddressInput => ({
   name: "",
   addressLine1: "",
@@ -38,19 +45,15 @@ const emptyAddressForm = (): CustomerAddressInput => ({
 
 const stateOptions = INDIAN_STATES.map((state) => ({ value: state, label: state }));
 
-function normalizeProfileAddressForm(input: CustomerAddressInput): CustomerAddressInput {
-  const phoneDigits = input.phone.replace(/\D/g, "");
-  const normalizedPhone =
-    phoneDigits.length === 12 && phoneDigits.startsWith("91")
-      ? phoneDigits.slice(2)
-      : phoneDigits.length === 11 && phoneDigits.startsWith("0")
-        ? phoneDigits.slice(1)
-        : phoneDigits;
+/** Saved telephones are bare digits for India and "+<code>…" elsewhere (joinAddressPhone). */
+function normalizeProfileAddressForm(input: CustomerAddressInput): AddressFormState {
+  const { countryCode, national } = splitPhoneNumber(input.phone);
 
   return {
     ...input,
     pincode: sanitizePincodeInput(input.pincode),
-    phone: sanitizePhoneInput(normalizedPhone, "+91"),
+    phone: sanitizePhoneInput(national, countryCode),
+    phoneCountryCode: countryCode,
   };
 }
 
@@ -75,7 +78,7 @@ export function ProfileAddressFormSheet({
 }: ProfileAddressFormSheetProps) {
   const isMobile = useIsMobile();
   const { detectAddress, isLocating } = useCurrentLocationAddress();
-  const [form, setForm] = useState<CustomerAddressInput>(
+  const [form, setForm] = useState<AddressFormState>(
     normalizeProfileAddressForm(initialValues ?? emptyAddressForm()),
   );
   const [formError, setFormError] = useState<string | null>(null);
@@ -106,14 +109,14 @@ export function ProfileAddressFormSheet({
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
-  const handleChange = (field: keyof CustomerAddressInput, value: string) => {
+  const handleChange = (field: keyof AddressFormState, value: string) => {
     if (field === "pincode" && typeof value === "string") {
       setForm((current) => ({ ...current, pincode: sanitizePincodeInput(value) }));
       return;
     }
 
     if (field === "phone" && typeof value === "string") {
-      setForm((current) => ({ ...current, phone: sanitizePhoneInput(value, "+91") }));
+      setForm((current) => ({ ...current, phone: sanitizePhoneInput(value, current.phoneCountryCode) }));
       return;
     }
 
@@ -167,7 +170,8 @@ export function ProfileAddressFormSheet({
     }
 
     try {
-      await onSubmit(form);
+      const { phoneCountryCode, ...address } = form;
+      await onSubmit({ ...address, phone: joinAddressPhone(phoneCountryCode, address.phone) });
     } catch (error) {
       setFormError(error instanceof Error ? error.message : addressContent.saveErrorToast);
     }
@@ -279,11 +283,19 @@ export function ProfileAddressFormSheet({
               placeholder="Select"
               disabled={isSaving}
             />
-            <CheckoutField
+            <CheckoutPhoneField
               id="profile-address-phone"
               label="Phone"
-              type="tel"
+              showVerify={false}
               value={form.phone}
+              countryCode={form.phoneCountryCode}
+              onCountryCodeChange={(code) =>
+                setForm((current) => ({
+                  ...current,
+                  phoneCountryCode: code,
+                  phone: sanitizePhoneInput(current.phone, code),
+                }))
+              }
               onChange={(value) => handleChange("phone", value)}
               onBlur={() => markTouched("phone")}
               invalid={showError("phone")}
