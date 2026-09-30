@@ -88,6 +88,13 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     setSender,
   ]);
 
+  const handleReceiverSameAsSenderChange = (checked: boolean) => {
+    setReceiverSameAsSender(checked);
+    if (!checked) {
+      setReceiver({ fullName: "", phone: "", countryCode: "+91", email: "" });
+    }
+  };
+
   const canContinue =
     isGiftCardPartyComplete(sender) &&
     (receiverSameAsSender || isGiftCardPartyComplete(receiver));
@@ -154,7 +161,7 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
             <p className={cn("mb-2", giftCardSectionHeadingClass)}>{details.receiverHeading}</p>
             <GiftCardCheckbox
               checked={receiverSameAsSender}
-              onChange={setReceiverSameAsSender}
+              onChange={handleReceiverSameAsSenderChange}
               label={details.sameAsSenderLabel}
             />
             {!receiverSameAsSender ? (

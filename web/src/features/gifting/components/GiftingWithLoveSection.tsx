@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import CraftingRarityScrollLine from "@/features/about/components/CraftingRarityScrollLine";
 import { useCraftingRarityScrollReveal } from "@/features/about/hooks/useCraftingRarityScrollReveal";
+import { splitTitleLinesOnNewline } from "@/lib/homepage/resolveHomepageAboveFold";
 import Reveal from "@/shared/Animation/Reveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
@@ -17,24 +18,25 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
   useCraftingRarityScrollReveal(sectionRef);
 
   const imageAlt = intro.background?.alt?.trim() || intro.title;
+  const descriptionLines = splitTitleLinesOnNewline(intro.description ?? "");
 
   return (
     <section
       ref={sectionRef}
       aria-labelledby="gifting-with-love-title"
-      className="bg-white pt-10 sm:pt-16 lg:min-h-[700px] lg:pt-104"
+      className="bg-white pt-10 sm:pt-16 lg:min-h-[700px] lg:pt-104 lg:pb-104"
     >
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full max-w-[700px] flex-col items-center text-center lg:max-w-[950px]">
           <div
             data-reveal-mask="heading"
-            className="mb-8 w-full overflow-hidden pt-0"
+            className="mb-8 w-full overflow-hidden pt-0 lg:mb-6"
           >
             <Reveal
               as="h2"
               id="gifting-with-love-title"
               direction="up"
-              className="whitespace-pre-line font-larken font-light leading-110 text-darkblack text-32 md:text-4xl lg:text-5xl"
+              className="whitespace-pre-line font-larken font-light leading-110 text-darkblack text-32 md:text-4xl lg:text-5xl lg:leading-110"
             >
               {intro.title}
             </Reveal>
@@ -43,7 +45,7 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
             <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
               <Reveal
                 direction="up"
-                className="mx-auto h-[300px] w-[300px] lg:h-[350px] lg:w-[350px]"
+                className="mx-auto h-[300px] w-[300px] lg:h-[246px] lg:w-[250px]"
               >
                 <ResponsiveImage
                   desktopSrc={intro.background.desktopUrl}
@@ -58,14 +60,18 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
               </Reveal>
             </div>
           ) : null}
-          <CraftingRarityScrollLine className="mt-5 lg:mt-[23px]" />
-          {intro.description ? (
+          <CraftingRarityScrollLine className="mt-5 lg:mt-[11px]" />
+          {descriptionLines.length > 0 ? (
             <Reveal
               as="p"
               direction="up"
-              className="mx-auto mt-2.5 max-w-full font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:max-w-[450px] lg:mt-[13px] lg:text-xl lg:max-w-[650px] 2xl:text-22"
+              className="mx-auto mt-2.5 max-w-full font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:max-w-[450px] lg:mt-[13px] lg:text-xl lg:leading-110 lg:max-w-[592px] 2xl:max-w-[650px] 2xl:text-22"
             >
-              {intro.description}
+              {descriptionLines.map((line, index) => (
+                <span key={`${line}-${index}`} className="block">
+                  {line}
+                </span>
+              ))}
             </Reveal>
           ) : null}
         </div>

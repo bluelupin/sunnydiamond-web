@@ -123,12 +123,22 @@ export default function FeaturedProductsCenterModeSlider({
   const pathname = usePathname();
   const isGiftingPage = pathname === "/gifting";
   return (
-    <div className="slider-container relative w-full overflow-hidden centerModeSliderComponent">
+    <div
+      className={cn(
+        "slider-container relative w-full overflow-hidden centerModeSliderComponent",
+        isGiftingPage && "xl:[&_.slick-slide>div>div]:align-top",
+      )}
+    >
       <Slider ref={sliderRef} {...settings}>
         {items.map((item) => (
           <div key={String(item.id)}>
             <div className="flex w-full items-center justify-center">
-              <div className="h-[170px] w-[170px] md:h-[200px] md:w-[200px] lg:h-[250px] lg:w-[250px] xl:h-[300px] xl:w-[300px]">
+              <div
+                className={cn(
+                  "h-[170px] w-[170px] md:h-[200px] md:w-[200px] lg:h-[250px] lg:w-[250px] xl:h-[300px] xl:w-[300px]",
+                  isGiftingPage && "xl:h-[259px] xl:w-[600px]",
+                )}
+              >
                 <Image
                   src={item.image}
                   alt={item.name}
@@ -150,6 +160,7 @@ export default function FeaturedProductsCenterModeSlider({
             <p
               className={cn(
                 "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                isGiftingPage && "lg:leading-110",
                 productNameDisplayClassName,
               )}
             >
@@ -157,7 +168,12 @@ export default function FeaturedProductsCenterModeSlider({
             </p>
           ) : null}
           {typeof activeItem.price === "number" ? (
-            <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
+            <p
+              className={cn(
+                "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                isGiftingPage && "lg:leading-110",
+              )}
+            >
               <span aria-hidden="true">₹ </span>
               {formatPrice(activeItem.price)}
             </p>
@@ -177,7 +193,7 @@ export default function FeaturedProductsCenterModeSlider({
       </div>
       <div className={cn(
         "pointer-events-none absolute inset-x-0 xl:top-[150px] lg:top-[125px] md:top-[100px] z-20 -translate-y-1/2 justify-center flex",
-        isGiftingPage ? "bottom-0" : "md:bottom-0 bottom-[50px]",
+        isGiftingPage ? "bottom-0 xl:top-[129.5px]" : "md:bottom-0 bottom-[50px]",
       )}
       >
         <div className="pointer-events-auto flex lg:w-[487px] md:w-[400px] sm:w-[387px] w-[303px] items-center justify-between">

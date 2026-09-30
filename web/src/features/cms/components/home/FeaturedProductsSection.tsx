@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
 import { isSectionActive } from "@/shared/utils/cmsSection";
@@ -32,6 +33,9 @@ function FeaturedProductsHeader({
   description: string;
   titleId?: string;
 }) {
+  const isGiftingPage = usePathname() === "/gifting";
+  const desktopLeadingClassName = isGiftingPage ? " lg:leading-110" : "";
+
   return (
     <div className="flex w-full flex-col items-center md:gap-4 gap-3 px-4 text-center md:px-0">
       {title ? (
@@ -39,7 +43,7 @@ function FeaturedProductsHeader({
           as="h2"
           id={titleId}
           direction="up"
-          className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl"
+          className={`font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl${desktopLeadingClassName}`}
         >
           {title}
         </Reveal>
@@ -47,7 +51,7 @@ function FeaturedProductsHeader({
       {description ? (
         <Reveal
           direction="up"
-          className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl"
+          className={`max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl${desktopLeadingClassName}`}
         >
           {description}
         </Reveal>
