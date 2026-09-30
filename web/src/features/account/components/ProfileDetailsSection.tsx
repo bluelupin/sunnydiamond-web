@@ -117,8 +117,9 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   );
 
   // Re-sync the field when the stored number changes (initial load, post-save refresh).
+  // Starts unsynced so a number already known on the first render fills the field too.
   const initialPhoneKey = `${initialCountryCode} ${initialPhone}`;
-  const [syncedPhone, setSyncedPhone] = useState(initialPhoneKey);
+  const [syncedPhone, setSyncedPhone] = useState<string | null>(null);
   if (syncedPhone !== initialPhoneKey) {
     setSyncedPhone(initialPhoneKey);
     setPhone(initialPhone);
