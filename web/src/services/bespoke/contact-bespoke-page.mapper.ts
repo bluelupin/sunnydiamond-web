@@ -129,6 +129,8 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
         card.image?.desktopImage ?? card.image?.mobileImage ?? card.media;
       const cardAlt = resolveCmsAltText(cardImage) ?? "";
 
+      const cardVideoSrc = resolveVisionCardVideoUrl(card);
+
       return {
         number: stepNumber,
         title: stepTitle,
@@ -137,6 +139,7 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
           src: cmsImage,
           alt: cardAlt,
         },
+        ...(cardVideoSrc ? { videoSrc: cardVideoSrc } : {}),
       };
     })
     .filter((step): step is NormalizedBespokeStoryStep => step != null);
@@ -145,8 +148,7 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
 
   const videoSrc =
     resolveCmsMediaUrl(section.video) ??
-    resolveCmsMediaUrl(section.videoUrl?.heroVideo) ??
-    cmsCards.map(resolveVisionCardVideoUrl).find((src): src is string => Boolean(src));
+    resolveCmsMediaUrl(section.videoUrl?.heroVideo);
 
   const ctaLabel =
     cleanText(section.cta?.label) ?? cleanText(section.primaryCta?.label);

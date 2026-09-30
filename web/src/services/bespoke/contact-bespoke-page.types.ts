@@ -165,6 +165,7 @@ export type NormalizedBespokeStoryStep = {
   title: string;
   description: string;
   image: { src: string; alt: string };
+  videoSrc?: string;
 };
 
 export type NormalizedBespokeStory = {
