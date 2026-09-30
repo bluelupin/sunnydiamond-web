@@ -55,6 +55,7 @@ const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
 
 /** Ignore dismiss gestures briefly after opening so Vaul/Radix cannot close-then-reopen the drawer. */
 const BAG_DRAWER_DISMISS_LOCK_MS = 500;
+
 export function CartUIProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isBagDrawerOpen, setIsBagDrawerOpen] = useState(false);
