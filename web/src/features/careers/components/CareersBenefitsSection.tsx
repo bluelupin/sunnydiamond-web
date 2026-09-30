@@ -136,16 +136,16 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
           {activeImage ? (
             <Reveal
               direction="up"
-              className="relative w-full overflow-hidden md:flex-1"
+              className="relative aspect-[1025/737] w-full overflow-hidden md:aspect-auto md:min-w-0 md:flex-1 md:self-stretch"
             >
               <ResponsiveImage
                 key={activeImage.desktopUrl}
                 desktopSrc={activeImage.desktopUrl}
                 mobileSrc={activeImage.mobileUrl}
                 alt={activeImage.alt}
-                width={activeImage.width ?? 1025}
-                height={activeImage.height ?? 737}
-                className="size-full object-cover object-center"
+                fill
+                sizes="(min-width: 768px) 60vw, 100vw"
+                className="object-cover object-center md:object-top"
               />
             </Reveal>
           ) : null}

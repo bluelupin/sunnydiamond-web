@@ -59,6 +59,10 @@ const CareersJobMetaRow = ({
 }: CareersJobMetaRowProps) => {
   const showExperience = Boolean(job.experienceLabel?.trim());
   const showDepartment = Boolean(job.department?.trim());
+  const city = formatCareerJobTitle(job.location).trim();
+  const locationLabel = !city || /(?:^|,)\s*India$/i.test(city)
+    ? city
+    : `${city}, India`;
 
   return (
     <div
@@ -79,7 +83,7 @@ const CareersJobMetaRow = ({
       ) : null}
       <FigmaMetaItem
         icon="map"
-        label={formatCareerJobTitle(job.location)}
+        label={locationLabel}
         iconClassName={iconClassName}
       />
       {showDepartment ? (
