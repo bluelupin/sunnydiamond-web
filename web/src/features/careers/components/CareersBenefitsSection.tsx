@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedCareerBenefitsSection } from "@/services/careers/careers.types";
 
@@ -15,6 +14,8 @@ const clamp = (value: number, min = 0, max = 1) =>
 
 const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const [stickyTop, setStickyTop] = useState<number>();
   const items = benefits.items;
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -24,6 +25,28 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
     [activeId, items],
   );
   const activeImage = activeItem?.image ?? null;
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const headerOffset = window.innerWidth >= 768 ? 104 : 64;
+        setStickyTop(Math.min(headerOffset, window.innerHeight - panel.offsetHeight));
+      });
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(panel);
+    window.addEventListener("resize", measure);
+    measure();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -44,13 +67,15 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
 
       const rect = section.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      const scrollTrack = section.offsetHeight - viewportHeight;
+      const panelHeight = panelRef.current?.offsetHeight ?? viewportHeight;
+      const top = stickyTop ?? (window.innerWidth >= 768 ? 104 : 64);
+      const scrollTrack = section.offsetHeight - panelHeight;
       const progress =
         scrollTrack <= 0
           ? rect.top <= viewportHeight * 0.5
             ? 1
             : 0
-          : clamp(-rect.top / scrollTrack);
+          : clamp((top - rect.top) / scrollTrack);
       const nextIndex = Math.min(
         items.length - 1,
         Math.max(0, Math.floor(progress * items.length)),
@@ -68,7 +93,7 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
       window.removeEventListener("scroll", syncFromScroll);
       window.removeEventListener("resize", syncFromScroll);
     };
-  }, [items, reducedMotion]);
+  }, [items, reducedMotion, stickyTop]);
 
   const scrollTrackStyle =
     !reducedMotion && items.length > 1
@@ -84,6 +109,8 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
       style={scrollTrackStyle}
     >
       <div
+        ref={panelRef}
+        style={{ top: stickyTop }}
         className={cn(
           "flex w-full flex-col gap-8 bg-white md:gap-10 md:py-16 md:py-104",
           !reducedMotion &&
@@ -91,23 +118,21 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
             "sticky top-16 min-h-[calc(100vh-4rem)] md:top-[104px] md:min-h-[calc(100vh-104px)] md:justify-center",
         )}
       >
-        <Reveal
-          as="h2"
+        <h2
           id="careers-benefits-title"
-          direction="up"
           className="2xl:px-[60px] lg:px-10 px-8 w-full font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
         >
           <span className="whitespace-pre-line">
             {benefits.title.replace(/\s+(Your Best Work)\s*$/i, "\n$1")}
           </span>
-        </Reveal>
+        </h2>
         <div className="flex w-full flex-col md:min-h-[346px] md:flex-row lg:gap-6 md:gap-4 gap-4 md:px-0 px-4">
           <div className="flex w-full flex-col xl:w-[593px] lg:w-[493px] md:w-[393px] md:shrink-0 md:self-stretch md:border-r md:border-r-[0.5px] md:border-neutral300">
             {items.map((item) => {
               const isActive = item.id === activeId;
 
               return (
-                <Reveal key={item.id} direction="up" className="w-full">
+                <div key={item.id} className="w-full">
                   <div
                     className={cn(
                       "flex w-full text-left transition-colors",
@@ -129,13 +154,12 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
                       </>
                     ) : null}
                   </div>
-                </Reveal>
+                </div>
               );
             })}
           </div>
           {activeImage ? (
-            <Reveal
-              direction="up"
+            <div
               className="relative aspect-[1025/737] w-full overflow-hidden md:aspect-auto md:min-w-0 md:flex-1 md:self-stretch"
             >
               <ResponsiveImage
@@ -147,7 +171,7 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
                 sizes="(min-width: 768px) 60vw, 100vw"
                 className="object-cover object-center md:object-top"
               />
-            </Reveal>
+            </div>
           ) : null}
         </div>
       </div>

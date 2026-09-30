@@ -90,7 +90,12 @@ const CareersSelectField = ({
         >
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>
-        <SelectContent className="z-[80]">
+        <SelectContent
+          position="popper"
+          collisionPadding={12}
+          data-vaul-no-drag
+          className="z-[90] flex max-h-[min(24rem,var(--radix-select-content-available-height))] flex-col [&>[data-radix-select-viewport]]:min-h-0 [&>[data-radix-select-viewport]]:overscroll-contain [&>[data-radix-select-viewport]]:touch-pan-y"
+        >
           <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{selectPlaceholder}</SelectItem>
           {options.map((option) => (
             <SelectItem key={option} value={option}>
