@@ -300,7 +300,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                 className="aspect-square h-auto w-[min(72vw,280px)] will-change-transform sm:w-[min(68vw,320px)] md:h-[400px] md:w-[400px] md:aspect-[400/400] md:max-lg:portrait:h-[320px] md:max-lg:portrait:w-[320px] md:max-lg:portrait:aspect-square lg:h-[550px] lg:w-[550px] lg:aspect-[550/550]"
                 style={{
                   transformStyle: "preserve-3d",
-                  transform: desktopIsVideo || mobileIsVideo ? undefined : `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
                   transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
                   filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
                 }}
