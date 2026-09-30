@@ -39,7 +39,7 @@ export default function CraftsmanshipMedia({ src, mobileSrc, alt, mobileAlt, isV
       ref={videoRef}
       src={url}
       aria-label={label || "Diamond 4Cs video"}
-      className={background ? "absolute inset-0 h-full w-full object-cover object-[75%_center] lg:object-center" : "h-full w-full object-contain"}
+      className={background ? "absolute inset-0 h-full w-full origin-right scale-110 object-cover object-right lg:scale-100 lg:object-center" : "h-full w-full object-contain"}
       autoPlay={!reducedMotion}
       muted
       loop
