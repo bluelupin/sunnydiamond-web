@@ -97,7 +97,9 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
           direction="up"
           className="2xl:px-[60px] lg:px-10 px-8 w-full font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
         >
-          {benefits.title}
+          <span className="whitespace-pre-line">
+            {benefits.title.replace(/\s+(Your Best Work)\s*$/i, "\n$1")}
+          </span>
         </Reveal>
         <div className="flex w-full flex-col md:min-h-[346px] md:flex-row lg:gap-6 md:gap-4 gap-4 md:px-0 px-4">
           <div className="flex w-full flex-col xl:w-[593px] lg:w-[493px] md:w-[393px] md:shrink-0 md:self-stretch md:border-r md:border-r-[0.5px] md:border-neutral300">

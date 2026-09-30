@@ -43,7 +43,7 @@ const CAREERS_AUTOFILL_ALLOWED_EXTENSIONS = new Set([".pdf", ".docx"]);
 
 export type CareersResumeValidationError = "size" | "format";
 
-function getCareersResumeFileExtension(fileName: string): string {
+export function getCareersResumeFileExtension(fileName: string): string {
   const parts = fileName.trim().toLowerCase().split(".");
 
   if (parts.length < 2) {

@@ -13,7 +13,7 @@ type CareersOpeningsSectionProps = {
 
 const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
   const { jobs, goToDetail, goToListings } = useCareersJobs();
-  const recentJobs = getRelatedCareerJobs(jobs, openings.relatedJobIds, 3);
+  const recentJobs = getRelatedCareerJobs(jobs, openings.relatedJobIds);
 
   if (recentJobs.length === 0) {
     return null;

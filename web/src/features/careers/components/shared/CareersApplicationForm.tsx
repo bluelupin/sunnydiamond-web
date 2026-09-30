@@ -945,7 +945,7 @@ const CareersApplicationForm = () => {
                     setHasCompanyRelation(true);
                     markTouched("companyRelation");
                   }}
-                  className="size-6 accent-darkblack"
+                  className="size-6 shrink-0 cursor-pointer appearance-none rounded-full border border-gray600 bg-transparent checked:bg-[radial-gradient(circle,#C5A156_0_6px,transparent_6px)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C5A156]"
                 />
                 <span className="font-gill text-base leading-110 text-darkblack">
                   {fields.companyRelationYes}
@@ -962,7 +962,7 @@ const CareersApplicationForm = () => {
                     setEmployeeJobTitle("");
                     markTouched("companyRelation");
                   }}
-                  className="size-6 accent-darkblack"
+                  className="size-6 shrink-0 cursor-pointer appearance-none rounded-full border border-gray600 bg-transparent checked:bg-[radial-gradient(circle,#C5A156_0_6px,transparent_6px)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C5A156]"
                 />
                 <span className="font-gill text-base leading-110 text-darkblack">
                   {fields.companyRelationNo}

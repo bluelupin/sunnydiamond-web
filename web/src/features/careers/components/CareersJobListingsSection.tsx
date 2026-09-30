@@ -95,7 +95,7 @@ const CareersJobListingsSection = () => {
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className="min-w-0 flex-1 bg-transparent font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack outline-none"
+                  className="min-w-0 flex-1 bg-transparent font-gill text-sm font-light leading-110 text-darkblack placeholder:text-gray600 outline-none"
                   aria-label={searchPlaceholder}
                 />
               </div>

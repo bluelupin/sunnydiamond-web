@@ -1,14 +1,41 @@
 "use client";
 
 import { cn } from "@/shared/utils/cn";
-import { formatCareersFileSize } from "@/features/careers/constants/careersApplicationForm";
+import {
+  formatCareersFileSize,
+  getCareersResumeFileExtension,
+} from "@/features/careers/constants/careersApplicationForm";
 
 const DOCUMENT_ICON_SRC = "/icons/icon-resume-document.svg";
 const FOLD_ICON_SRC = "/icons/icon-resume-fold.svg";
 const REMOVE_ICON_SRC = "/icons/icon-resume-remove.svg";
 
-/** Figma 1480:1040 — PDF/document glyph in resume file chip. */
-function CareersResumeFileIcon({ className }: { className?: string }) {
+/** Preserve the PDF glyph and identify Word resumes by their extension. */
+function CareersResumeFileIcon({ fileName, className }: { fileName: string; className?: string }) {
+  const extension = getCareersResumeFileExtension(fileName);
+  if (extension !== ".pdf") {
+    const label = extension === ".docx" ? "DOCX" : extension === ".doc" ? "DOC" : "";
+    return (
+      <svg
+        viewBox="0 0 37 40"
+        className={cn("h-[39.385px] w-[36.923px] shrink-0 text-darkblack", className)}
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M7 20V9a1 1 0 0 1 1-1h14l8 8v4M22 8v8h8"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <text x="18.5" y="33" textAnchor="middle" fill="currentColor" fontFamily="Arial, sans-serif" fontSize={label === "DOCX" ? 8 : 10} fontWeight="600">
+          {label}
+        </text>
+      </svg>
+    );
+  }
+
   return (
     <span
       className={cn(
@@ -55,7 +82,7 @@ const CareersResumeFileChip = ({
       )}
     >
       <div className="flex items-center gap-2">
-        <CareersResumeFileIcon />
+        <CareersResumeFileIcon fileName={fileName} />
         <div className="flex w-[146px] min-w-0 flex-col gap-2 leading-110">
           <p className="truncate font-gill text-base font-normal text-darkblack">
             {fileName}

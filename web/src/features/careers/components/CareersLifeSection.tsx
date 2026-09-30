@@ -91,7 +91,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
             alt={lifeAt.rightImage.alt}
             width={474}
             height={496}
-            className="absolute top-[-29.32%] left-[-140.28%] h-[179.11%] w-[257.26%] max-w-none object-cover"
+            className="absolute top-[-29.32%] left-[-140.28%] h-[179.11%] w-[257.26%] max-w-none object-fit"
           />
         </Reveal>
       </div>

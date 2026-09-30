@@ -206,9 +206,9 @@ const mapHero = (hero?: StrapiCareerHero | null): NormalizedCareerHero | null =>
   const image =
     mapResponsiveImage(hero.backgroundImage) ?? mapResponsiveImage(hero.image);
 
-  if (!title || !ctaLabel) return null;
+  if (!title) return null;
 
-  return { title, ctaLabel, image };
+  return { title, ctaLabel: ctaLabel ?? "", image };
 };
 
 const resolveOpeningId = (opening: StrapiCareerOpeningEntity): string | null => {

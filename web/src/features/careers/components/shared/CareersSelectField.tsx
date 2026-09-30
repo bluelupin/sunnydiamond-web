@@ -69,6 +69,8 @@ const CareersSelectField = ({
           id={id}
           className={cn(
             careersSelectTriggerClassName,
+            (!value || value === CAREERS_SELECT_EMPTY_VALUE) &&
+              "text-gray600 [&>span]:text-gray600",
             error && invalidFieldClassName,
             triggerClassName,
           )}

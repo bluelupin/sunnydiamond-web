@@ -49,7 +49,6 @@ export function getCareerJobById(
 export function getRelatedCareerJobs(
   jobs: readonly CareerJob[],
   relatedJobIds: readonly string[],
-  limit = 3,
 ): CareerJob[] {
   if (relatedJobIds.length === 0) {
     return [];
@@ -59,6 +58,6 @@ export function getRelatedCareerJobs(
     .map((jobId) => getCareerJobById(jobs, jobId))
     .filter(Boolean) as CareerJob[];
 
-  return ordered.slice(0, limit);
+  return ordered;
 }
 
