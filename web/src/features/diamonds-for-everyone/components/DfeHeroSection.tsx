@@ -31,7 +31,7 @@ const DfeHeroSection = ({ hero }: DfeHeroSectionProps) => {
           <MediaContentOverlay gradient="bottom-strong" />
         </div>
       ) : null}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-4 pb-10 lg:pb-16">
         <h1
           id="dfe-hero-title"
           className="w-full text-center font-larken font-light leading-none text-white lg:text-5xl md:text-4xl text-32"
