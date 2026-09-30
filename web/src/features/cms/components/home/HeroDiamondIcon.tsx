@@ -1,17 +1,9 @@
 "use client";
 
-import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
-import { cn } from "@/shared/utils/cn";
-
 export function HeroDiamondIcon() {
-  const { windows } = useUiPlatform();
-
   return (
     <div
-      className={cn(
-        "flex shrink-0 items-center justify-center leading-none",
-        !windows && "-translate-y-0.5",
-      )}
+      className="flex shrink-0 items-center justify-center leading-none -translate-y-0.5 [[data-ui-platform=windows]_&]:translate-y-0"
       aria-hidden
     >
       <svg
