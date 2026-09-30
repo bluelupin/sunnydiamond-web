@@ -115,8 +115,6 @@ const TagChip = ({ label, onRemove }: { label: string; onRemove: () => void }) =
   );
 }
 
-const careersBirthDateBounds = getCareersBirthDateBounds();
-
 const CareersApplicationForm = () => {
   const { cms, selectedJob, goToSuccess, applicationEntry, pendingResumeFile, clearPendingResume } =
     useCareersJobs();
@@ -124,6 +122,7 @@ const CareersApplicationForm = () => {
     () => resolveCareerApplicationFlow(cms.landing.applicationFlow),
     [cms.landing.applicationFlow],
   );
+  const careersBirthDateBounds = useMemo(() => getCareersBirthDateBounds(), []);
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
   const { contact: profileContact } = useCustomerProfileContact(isAuthenticated);
@@ -706,7 +705,7 @@ const CareersApplicationForm = () => {
                   onBlur={() => markTouched("dateOfBirth")}
                   hasError={showError("dateOfBirth")}
                   aria-invalid={showError("dateOfBirth") || undefined}
-                  placeholder="Select Date"
+                  placeholder={fields.dateOfBirthPlaceholder || "Select Date"}
                   displayFormat="dd/mm/yyyy"
                 />
               </FormField>

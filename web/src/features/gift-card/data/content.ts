@@ -22,7 +22,7 @@ export const giftCardFlowContent = {
   },
   date: {
     label: "Date*",
-    placeholder: "DD / MM / YYYY",
+    placeholder: "Select Date",
   },
   message: {
     label: "Add a Message",

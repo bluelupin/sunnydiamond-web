@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
@@ -12,15 +12,16 @@ import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
-import { getGiftCardDigitalDateBounds } from "../utils/giftCardDigitalDateBounds";
+import {
+  getGiftCardDigitalDateBounds,
+  isGiftCardDigitalDeliveryDateInBounds,
+} from "../utils/giftCardDigitalDateBounds";
 import {
   GiftCardSelectField,
   GiftCardTextAreaField,
   GiftCardToggleOption,
   giftCardFieldLabelClass,
 } from "./GiftCardFormUi";
-
-const giftCardDigitalDateBounds = getGiftCardDigitalDateBounds();
 
 function formatGiftCardAmount(amount: number): string {
   return `₹ ${amount.toLocaleString("en-IN")}`;
@@ -55,6 +56,8 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
     message: messageConfig,
   } = giftCardFlowContent;
 
+  const giftCardDigitalDateBounds = useMemo(() => getGiftCardDigitalDateBounds(), []);
+
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
 
@@ -76,7 +79,9 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
   const hasOccasionOptions = occasionOptions.length > 0;
   const hasRequiredOccasion = hasOccasionOptions ? occasion.trim().length > 0 : true;
   const hasRequiredDigitalDate =
-    cardType === "digital" ? digitalDeliveryDate.trim().length > 0 : true;
+    cardType === "digital"
+      ? isGiftCardDigitalDeliveryDateInBounds(digitalDeliveryDate)
+      : true;
   const canContinue = hasRequiredOccasion && hasRequiredDigitalDate;
 
   const handleContinue = () => {
