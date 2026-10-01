@@ -43,6 +43,7 @@ function OccasionCardItem({
 
   return (
     <OccasionLedCard
+      variant="homepage"
       title={card.title?.trim() || ""}
       description={description}
       href={href}

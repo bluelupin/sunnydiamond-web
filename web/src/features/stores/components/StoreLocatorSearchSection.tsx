@@ -55,10 +55,7 @@ const StoreLocatorSearchSection = ({
               <SearchIcon className="size-6 shrink-0 text-darkblack" />
               <input
                 type="text"
-                inputMode="numeric"
-                autoComplete="postal-code"
-                pattern="[0-9]*"
-                maxLength={6}
+                autoComplete="off"
                 value={searchQuery}
                 onChange={(event) =>
                   onSearchQueryChange(sanitizeStoreLocatorSearchInput(event.target.value))

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
-import CraftsmanshipMedia, { useCraftsmanshipMobile } from "./CraftsmanshipMedia";
+import CraftsmanshipMedia from "./CraftsmanshipMedia";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { resolveCraftsmanshipSection } from "@/shared/utils/resolveCraftsmanshipSection";
 import {
@@ -187,8 +187,9 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
   const resolvedDesktopImage = desktopImageUrl ?? mobileImageUrl;
   const resolvedMobileImage = mobileImageUrl ?? desktopImageUrl;
-  const isMobileMedia = useCraftsmanshipMobile();
-  const hasVideoBackground = isMobileMedia ? mobileIsVideo : desktopIsVideo;
+  const hasDesktopVideoBackground = desktopIsVideo && Boolean(resolvedDesktopImage);
+  const hasMobileVideoBackground = mobileIsVideo && Boolean(resolvedMobileImage);
+  const hasAnyVideoBackground = hasDesktopVideoBackground || hasMobileVideoBackground;
   const { activeIndex, progress, containerRef } = useStepScroll(Math.max(stepCount, 1));
 
   // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
@@ -217,29 +218,57 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       aria-label={sectionTitle}
       className="min-h-[750px] craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200"
     >
-      <div className="sticky top-0 h-[800px] lg:h-[750px)] overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh] pt-16 pb-16 md:pt-104 md:pb-[77px]">
-        {hasVideoBackground && resolvedDesktopImage && resolvedMobileImage ? (
+      <div className="relative sticky top-0 h-[800px] overflow-hidden bg-gray200 lg:h-[750px] md:max-lg:portrait:h-[85vh] pt-16 pb-16 md:pt-104 md:pb-[77px]">
+        {hasAnyVideoBackground ? (
           <>
-            <CraftsmanshipMedia
-              src={resolvedDesktopImage}
-              mobileSrc={resolvedMobileImage}
-              alt={imageDesktopAlt || imageAlt}
-              mobileAlt={imageMobileAlt || imageAlt}
-              isVideo={desktopIsVideo}
-              mobileIsVideo={mobileIsVideo}
-              background
+            <CraftsmanshipBackground
+              desktopSrc={silkDesktopSrc}
+              mobileSrc={silkMobileSrc}
+              alt={silkAlt}
             />
+            {hasDesktopVideoBackground ? (
+              <div className="pointer-events-none absolute inset-0 z-[1] hidden lg:block">
+                <CraftsmanshipMedia
+                  variant="desktop"
+                  src={resolvedDesktopImage!}
+                  mobileSrc={resolvedMobileImage!}
+                  alt={imageDesktopAlt || imageAlt}
+                  mobileAlt={imageMobileAlt || imageAlt}
+                  isVideo={desktopIsVideo}
+                  mobileIsVideo={mobileIsVideo}
+                  scrollProgress={progress}
+                  background
+                />
+              </div>
+            ) : null}
+            {hasMobileVideoBackground ? (
+              <div className="pointer-events-none absolute inset-0 z-[1] lg:hidden">
+                <CraftsmanshipMedia
+                  variant="mobile"
+                  src={resolvedDesktopImage!}
+                  mobileSrc={resolvedMobileImage!}
+                  alt={imageDesktopAlt || imageAlt}
+                  mobileAlt={imageMobileAlt || imageAlt}
+                  isVideo={desktopIsVideo}
+                  mobileIsVideo={mobileIsVideo}
+                  scrollProgress={progress}
+                  background
+                />
+              </div>
+            ) : null}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,#FAF9F6_0%,rgba(250,249,246,0.94)_35%,transparent_75%)] lg:bg-[linear-gradient(to_right,#FAF9F6_0%,rgba(250,249,246,0.94)_30%,rgba(250,249,246,0.4)_50%,transparent_70%)]"
+              className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(to_bottom,#FAF9F6_0%,rgba(250,249,246,0.94)_35%,transparent_75%)] lg:bg-[linear-gradient(to_right,#FAF9F6_0%,rgba(250,249,246,0.94)_30%,rgba(250,249,246,0.4)_50%,transparent_70%)]"
             />
           </>
-        ) : <CraftsmanshipBackground
-          desktopSrc={silkDesktopSrc}
-          mobileSrc={silkMobileSrc}
-          alt={silkAlt}
-        />}
-        <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 relative z-10 h-full">
+        ) : (
+          <CraftsmanshipBackground
+            desktopSrc={silkDesktopSrc}
+            mobileSrc={silkMobileSrc}
+            alt={silkAlt}
+          />
+        )}
+        <div className="relative z-10 mx-auto h-full max-w-1920 px-4 md:px-10 2xl:px-[60px]">
           <div className="flex h-full flex-col lg:grid lg:grid-cols-12 lg:gap-12">
             {/* Title + steps — top on mobile, left on desktop */}
             <div className="flex shrink-0 flex-col gap-8 md:max-lg:portrait:gap-6 lg:col-span-6 xl:col-span-5 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
@@ -291,32 +320,61 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                 })}
               </ol>
             </div>
-            {/* Diamond — bottom on mobile, right on desktop */}
-            {!hasVideoBackground && <div
-              className="relative mt-auto flex min-h-0 flex-1 items-end justify-center pb-2 pt-4 sm:pb-4 lg:col-span-6 lg:mt-0 lg:items-center lg:pb-0 lg:pt-0 xl:col-span-7"
-              style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
-            >
+            {/* Diamond — bottom on mobile, right on desktop (hidden when video is the background for that breakpoint) */}
+            {!hasMobileVideoBackground && hasDiamondImage && resolvedDesktopImage && resolvedMobileImage ? (
               <div
-                className="aspect-square h-auto w-[min(72vw,280px)] will-change-transform sm:w-[min(68vw,320px)] md:h-[400px] md:w-[400px] md:aspect-[400/400] md:max-lg:portrait:h-[320px] md:max-lg:portrait:w-[320px] md:max-lg:portrait:aspect-square lg:h-[550px] lg:w-[550px] lg:aspect-[550/550]"
-                style={{
-                  transformStyle: "preserve-3d",
-                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
-                  transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
-                  filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
-                }}
+                className="relative mt-auto flex min-h-0 flex-1 items-end justify-center pb-2 pt-4 sm:pb-4 lg:hidden lg:col-span-6 lg:mt-0 lg:items-center lg:pb-0 lg:pt-0 xl:col-span-7"
+                style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
               >
-                {hasDiamondImage && resolvedDesktopImage && resolvedMobileImage && (
+                <div
+                  className="aspect-square h-auto w-[min(72vw,280px)] will-change-transform sm:w-[min(68vw,320px)] md:h-[400px] md:w-[400px] md:aspect-[400/400] md:max-lg:portrait:h-[320px] md:max-lg:portrait:w-[320px] md:max-lg:portrait:aspect-square"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                    transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+                    filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
+                  }}
+                >
                   <CraftsmanshipMedia
+                    variant="mobile"
                     src={resolvedDesktopImage}
                     mobileSrc={resolvedMobileImage}
                     alt={imageDesktopAlt || imageAlt}
                     mobileAlt={imageMobileAlt || imageAlt}
                     isVideo={desktopIsVideo}
                     mobileIsVideo={mobileIsVideo}
+                    scrollProgress={progress}
                   />
-                )}
+                </div>
               </div>
-            </div>}
+            ) : null}
+            {!hasDesktopVideoBackground && hasDiamondImage && resolvedDesktopImage && resolvedMobileImage ? (
+              <div
+                className="relative mt-auto hidden min-h-0 flex-1 items-end justify-center pb-2 pt-4 sm:pb-4 lg:col-span-6 lg:mt-0 lg:flex lg:items-center lg:pb-0 lg:pt-0 xl:col-span-7"
+                style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
+              >
+                <div
+                  className="aspect-square h-auto w-[min(72vw,280px)] will-change-transform sm:w-[min(68vw,320px)] md:h-[400px] md:w-[400px] md:aspect-[400/400] md:max-lg:portrait:h-[320px] md:max-lg:portrait:w-[320px] md:max-lg:portrait:aspect-square lg:h-[550px] lg:w-[550px] lg:aspect-[550/550]"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                    transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+                    filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
+                  }}
+                >
+                  <CraftsmanshipMedia
+                    variant="desktop"
+                    src={resolvedDesktopImage}
+                    mobileSrc={resolvedMobileImage}
+                    alt={imageDesktopAlt || imageAlt}
+                    mobileAlt={imageMobileAlt || imageAlt}
+                    isVideo={desktopIsVideo}
+                    mobileIsVideo={mobileIsVideo}
+                    scrollProgress={progress}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

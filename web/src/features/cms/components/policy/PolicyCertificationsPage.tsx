@@ -53,7 +53,7 @@ function PolicyDesktopSidebar({
   return (
     <nav
       aria-label="Policy categories"
-      className="box-border hidden w-full shrink-0 border-r border-neutral300 lg:block lg:w-[435px] lg:min-w-[435px] lg:max-w-[435px]"
+      className="box-border hidden w-full shrink-0 border-r border-neutral300 lg:block lg:w-[calc(465px-40px-1.5rem)] lg:max-w-[29.5%] 2xl:w-[calc(465px-60px-1.5rem)]"
     >
       <div className="flex w-full flex-col gap-6">
         {navGroups.map((group) => (
@@ -78,7 +78,7 @@ function PolicyDesktopSidebar({
                       )}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      <span className="whitespace-nowrap">{policy.navLabel}</span>
+                      <span className="min-w-0 whitespace-normal">{policy.navLabel}</span>
                     </button>
                   </li>
                 );
@@ -193,7 +193,7 @@ function PolicyAccordionItem({
             ? isOpen
               ? "items-start"
               : "items-center"
-            : "h-14 shrink-0 items-center",
+            : "min-h-6 shrink-0 items-center",
         )}
       >
         <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack">
@@ -505,7 +505,7 @@ const PolicyCertificationsPage = ({
 
   return (
     <React.Fragment>
-      <section className="mx-auto 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-10 pt-8 md:pb-104 pb-16">
+      <section className="mx-auto 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 lg:pt-[65px] md:pt-10 pt-8 md:pb-104 pb-16">
         <div className="flex flex-col gap-[29px] lg:hidden">
           {mobileShowDetail ? (
             <PolicyMobileDetailPanel
@@ -530,7 +530,7 @@ const PolicyCertificationsPage = ({
 
         <div className="hidden lg:flex lg:flex-col">
           {page.pageTitle ? (
-            <div className="flex flex-col items-center gap-10 pb-16">
+            <div className="flex flex-col items-center pb-6">
               <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
                 {page.pageTitle}
               </h1>

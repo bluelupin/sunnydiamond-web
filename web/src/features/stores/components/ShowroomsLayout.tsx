@@ -380,7 +380,7 @@ function ShowroomsDesktopLayout({
 
   return (
     <div
-      className="mx-auto hidden w-full max-w-1920 items-stretch gap-6 lg:flex"
+      className="mx-auto hidden w-full max-w-1920 lg:grid lg:grid-cols-[minmax(0,593px)_minmax(0,1fr)] lg:items-stretch"
       style={{
         gap: figma.columnGap,
         paddingTop: figma.sectionPaddingTop,
@@ -389,7 +389,7 @@ function ShowroomsDesktopLayout({
     >
       <ScrollReveal
         delayMs={120}
-        className="flex w-full max-w-[593px] shrink-0 flex-col"
+        className="flex w-full min-w-0 flex-col"
         style={{ maxWidth: figma.listMaxWidth }}
       >
         {noAreaCopy ? (
@@ -463,20 +463,22 @@ function ShowroomsDesktopLayout({
 
       <ScrollReveal
         delayMs={200}
-        className="relative min-w-0 flex-1 basis-0 overflow-hidden"
-        style={{ height: figma.heroMinHeight, minHeight: figma.heroMinHeight }}
+        className="relative h-full min-w-0 overflow-hidden"
+        style={{ minHeight: figma.heroMinHeight }}
       >
         {activeLocation && desktopImage ? (
-          <ResponsiveImage
-            key={activeLocation.id}
-            fill
-            desktopSrc={desktopImage}
-            mobileSrc={mobileImage ?? desktopImage}
-            alt={imageAlt}
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            quality={90}
-            className="object-cover object-center"
-          />
+          <div className="absolute inset-0">
+            <ResponsiveImage
+              key={activeLocation.id}
+              fill
+              desktopSrc={desktopImage}
+              mobileSrc={mobileImage ?? desktopImage}
+              alt={imageAlt}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              quality={90}
+              className="object-cover object-center"
+            />
+          </div>
         ) : null}
       </ScrollReveal>
     </div>

@@ -1,23 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
+import { useScrollSyncedVideo } from "@/shared/hooks/useScrollSyncedVideo";
 
-const mobileQuery = "(max-width: 767px)";
 const motionQuery = "(prefers-reduced-motion: reduce)";
 
-function subscribe(callback: () => void) {
-  const queries = [window.matchMedia(mobileQuery), window.matchMedia(motionQuery)];
-  queries.forEach((query) => query.addEventListener("change", callback));
-  return () => queries.forEach((query) => query.removeEventListener("change", callback));
+function subscribeMotion(callback: () => void) {
+  const query = window.matchMedia(motionQuery);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
 }
 
-export function useCraftsmanshipMobile() {
-  return useSyncExternalStore(subscribe, () => window.matchMedia(mobileQuery).matches, () => false);
+function usePrefersReducedMotion() {
+  return useSyncExternalStore(
+    subscribeMotion,
+    () => window.matchMedia(motionQuery).matches,
+    () => true,
+  );
 }
 
-export default function CraftsmanshipMedia({ src, mobileSrc, alt, mobileAlt, isVideo, mobileIsVideo, background = false }: {
+type CraftsmanshipMediaVariant = "desktop" | "mobile";
+
+type CraftsmanshipMediaProps = {
   src: string;
   mobileSrc: string;
   alt: string;
@@ -25,29 +31,112 @@ export default function CraftsmanshipMedia({ src, mobileSrc, alt, mobileAlt, isV
   isVideo: boolean;
   mobileIsVideo: boolean;
   background?: boolean;
-}) {
-  const mobile = useCraftsmanshipMobile();
-  const reducedMotion = useSyncExternalStore(subscribe, () => window.matchMedia(motionQuery).matches, () => true);
-  const url = mobile ? mobileSrc : src;
-  const video = mobile ? mobileIsVideo : isVideo;
-  const label = mobile ? mobileAlt : alt;
-  const videoRef = useMutedVideoPlayback(video && !reducedMotion);
+  variant: CraftsmanshipMediaVariant;
+  /** When set, video scrubs with section scroll instead of autoplay looping. */
+  scrollProgress?: number;
+};
 
-  return video ? ( 
-    <video
-      key={url}
-      ref={videoRef}
+function CraftsmanshipMediaLayer({
+  url,
+  label,
+  isVideoMedia,
+  background,
+  scrollProgress,
+}: {
+  url: string;
+  label: string;
+  isVideoMedia: boolean;
+  background: boolean;
+  scrollProgress?: number;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  const isScrollScrubbed = isVideoMedia && scrollProgress !== undefined;
+  const shouldPlayVideo = isVideoMedia && !reducedMotion;
+  const videoRef = useMutedVideoPlayback(shouldPlayVideo);
+
+  useScrollSyncedVideo(videoRef, scrollProgress ?? 0, isScrollScrubbed);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldPlayVideo || isScrollScrubbed) {
+      return;
+    }
+
+    const tryPlay = () => {
+      void video.play().catch(() => {
+        /* Autoplay can be blocked until visible — poster/background remains. */
+      });
+    };
+
+    video.addEventListener("canplay", tryPlay);
+    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      tryPlay();
+    }
+
+    return () => {
+      video.removeEventListener("canplay", tryPlay);
+    };
+  }, [isScrollScrubbed, shouldPlayVideo, url, videoRef]);
+
+  if (isVideoMedia) {
+    return (
+      <video
+        key={url}
+        ref={videoRef}
+        src={url}
+        aria-label={label || "Craftsmanship process video"}
+        className={
+          background
+            ? "absolute inset-0 h-full w-full origin-right scale-110 object-cover object-right lg:scale-100 lg:object-center"
+            : "h-full w-full object-contain"
+        }
+        autoPlay={!reducedMotion && !isScrollScrubbed}
+        muted
+        loop={!isScrollScrubbed}
+        playsInline
+        preload={isScrollScrubbed ? "auto" : "metadata"}
+      />
+    );
+  }
+
+  return (
+    <Image
       src={url}
-      aria-label={label || "Diamond 4Cs video"}
-      className={background ? "absolute inset-0 h-full w-full origin-right scale-110 object-cover object-right lg:scale-100 lg:object-center" : "h-full w-full object-contain"}
-      autoPlay={!reducedMotion}
-      muted
-      loop
-      playsInline
-      controls={!background}
-      preload="metadata"
+      alt={label}
+      width={550}
+      height={400}
+      sizes="(min-width: 1024px) 550px, 72vw"
+      className="h-full w-full object-cover"
     />
-  ) : (
-    <Image src={url} alt={label} width={550} height={400} sizes="(min-width: 1024px) 550px, 72vw" className="h-full w-full object-cover" />
+  );
+}
+
+export default function CraftsmanshipMedia({
+  src,
+  mobileSrc,
+  alt,
+  mobileAlt,
+  isVideo,
+  mobileIsVideo,
+  background = false,
+  variant,
+  scrollProgress,
+}: CraftsmanshipMediaProps) {
+  const url = variant === "mobile" ? mobileSrc : src;
+  const label = variant === "mobile" ? mobileAlt : alt;
+  const isVideoMedia = variant === "mobile" ? mobileIsVideo : isVideo;
+
+  if (!url) {
+    return null;
+  }
+
+  return (
+    <CraftsmanshipMediaLayer
+      url={url}
+      label={label}
+      isVideoMedia={isVideoMedia}
+      background={background}
+      scrollProgress={scrollProgress}
+    />
   );
 }
