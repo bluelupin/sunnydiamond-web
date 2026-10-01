@@ -37,6 +37,23 @@ export const MAGENTO_REQUEST_PHONE_LINK_OTP_MUTATION = `
   }
 ` as const;
 
+export const MAGENTO_REQUEST_EMAIL_VERIFY_OTP_MUTATION = `
+  mutation MagentoRequestEmailVerifyOtp {
+    requestEmailVerifyOtp {
+      success
+      resend_after_seconds
+    }
+  }
+` as const;
+
+export const MAGENTO_VERIFY_EMAIL_MUTATION = `
+  mutation MagentoVerifyEmail($input: VerifyEmailInput!) {
+    verifyEmail(input: $input) {
+      success
+    }
+  }
+` as const;
+
 export const MAGENTO_VERIFY_PHONE_LINK_MUTATION = `
   mutation MagentoVerifyPhoneLink($input: VerifyPhoneLinkInput!) {
     verifyPhoneLink(input: $input) {

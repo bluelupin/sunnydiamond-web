@@ -132,6 +132,36 @@ export async function verifyPhoneLink(phone: string, code: string): Promise<Veri
   return { success: true, requiresAccountSetup: false };
 }
 
+/** Emails a code to the signed-in customer's own address, to verify it. */
+export async function requestEmailVerifyOtp(): Promise<RequestOtpResult> {
+  const { ok, data } = await postJson("/api/customer/email/verify", {});
+
+  if (!ok || !data?.ok) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "We could not send the code. Please try again.",
+    };
+  }
+
+  return {
+    success: true,
+    resendAfterSeconds: (data.resendAfterSeconds as number) ?? 60,
+    channel: "email",
+    maskedDestination: null,
+  };
+}
+
+/** Checks the emailed code and marks the signed-in customer's email verified. */
+export async function verifyEmailOtp(code: string): Promise<VerifyOtpResult> {
+  const { ok, data } = await postJson("/api/customer/email/verify", { otp: code });
+
+  if (!ok || !data?.ok) {
+    return { success: false, error: (data?.error as string) ?? "Incorrect code" };
+  }
+
+  return { success: true, requiresAccountSetup: false };
+}
+
 /** Verifies the OTP for passwordless sign in against Magento. */
 export async function verifyLoginOtp(
   target: OtpTarget,
