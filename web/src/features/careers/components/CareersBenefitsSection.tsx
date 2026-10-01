@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import {
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+  accordionCollapseEasingClassName,
+} from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedCareerBenefitsSection } from "@/services/careers/careers.types";
 
@@ -12,6 +17,26 @@ type CareersBenefitsSectionProps = {
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
 
+const benefitsMotionClassName = cn(
+  "transition-[background-color] duration-500",
+  accordionCollapseEasingClassName,
+  "motion-reduce:transition-none",
+);
+
+const benefitsImageMotionClassName = cn(
+  "transition-opacity duration-700",
+  accordionCollapseEasingClassName,
+  "motion-reduce:transition-none",
+);
+
+function resolveBenefitIndex(progress: number, itemCount: number): number {
+  if (itemCount <= 1) {
+    return 0;
+  }
+
+  return Math.min(itemCount - 1, Math.max(0, Math.round(progress * (itemCount - 1))));
+}
+
 const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -19,12 +44,58 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
   const items = benefits.items;
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
   const [reducedMotion, setReducedMotion] = useState(false);
+  const activeIndexRef = useRef(0);
+  const targetIndexRef = useRef(0);
+  const stepRafRef = useRef<number | null>(null);
+  const scrollRafRef = useRef<number | null>(null);
 
-  const activeItem = useMemo(
-    () => items.find((item) => item.id === activeId) ?? items[0],
-    [activeId, items],
-  );
-  const activeImage = activeItem?.image ?? null;
+  const stopSequentialStepping = useCallback(() => {
+    if (stepRafRef.current !== null) {
+      window.cancelAnimationFrame(stepRafRef.current);
+      stepRafRef.current = null;
+    }
+  }, []);
+
+  const stepTowardTarget = useCallback(() => {
+    stepRafRef.current = null;
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const current = activeIndexRef.current;
+    const target = targetIndexRef.current;
+
+    if (current === target) {
+      return;
+    }
+
+    const next = current + (target > current ? 1 : -1);
+    activeIndexRef.current = next;
+    const nextId = items[next]?.id;
+    if (nextId) {
+      setActiveId(nextId);
+    }
+
+    if (next !== target) {
+      stepRafRef.current = window.requestAnimationFrame(stepTowardTarget);
+    }
+  }, [items]);
+
+  const scheduleSequentialStep = useCallback(() => {
+    if (stepRafRef.current !== null) {
+      return;
+    }
+
+    stepRafRef.current = window.requestAnimationFrame(stepTowardTarget);
+  }, [stepTowardTarget]);
+
+  useEffect(() => {
+    activeIndexRef.current = Math.max(
+      0,
+      items.findIndex((item) => item.id === activeId),
+    );
+  }, [activeId, items]);
 
   useEffect(() => {
     const panel = panelRef.current;
@@ -62,6 +133,8 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
     }
 
     const syncFromScroll = () => {
+      scrollRafRef.current = null;
+
       const section = sectionRef.current;
       if (!section) return;
 
@@ -76,29 +149,41 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
             ? 1
             : 0
           : clamp((top - rect.top) / scrollTrack);
-      const nextIndex = Math.min(
-        items.length - 1,
-        Math.max(0, Math.floor(progress * items.length)),
-      );
-      const nextId = items[nextIndex]?.id;
-      if (nextId) {
-        setActiveId((current) => (current === nextId ? current : nextId));
+
+      const targetIndex = resolveBenefitIndex(progress, items.length);
+      targetIndexRef.current = targetIndex;
+
+      if (activeIndexRef.current !== targetIndex) {
+        scheduleSequentialStep();
       }
     };
 
-    syncFromScroll();
-    window.addEventListener("scroll", syncFromScroll, { passive: true });
-    window.addEventListener("resize", syncFromScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", syncFromScroll);
-      window.removeEventListener("resize", syncFromScroll);
+    const handleScroll = () => {
+      if (scrollRafRef.current !== null) {
+        return;
+      }
+      scrollRafRef.current = window.requestAnimationFrame(syncFromScroll);
     };
-  }, [items, reducedMotion, stickyTop]);
+
+    syncFromScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (scrollRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+      }
+      stopSequentialStepping();
+    };
+  }, [items, reducedMotion, scheduleSequentialStep, stickyTop, stopSequentialStepping]);
 
   const scrollTrackStyle =
     !reducedMotion && items.length > 1
       ? { height: `${items.length * 100}vh` }
       : undefined;
+
+  const itemsWithImages = items.filter((item) => item.image);
 
   return (
     <section
@@ -112,7 +197,7 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
         ref={panelRef}
         style={{ top: stickyTop }}
         className={cn(
-          "flex w-full flex-col gap-8 bg-white md:gap-10 md:py-16 md:py-104",
+          "flex w-full flex-col gap-8 bg-white md:gap-10 md:py-104",
           !reducedMotion &&
             items.length > 1 &&
             "sticky top-16 min-h-[calc(100vh-4rem)] md:top-[104px] md:min-h-[calc(100vh-104px)] md:justify-center",
@@ -135,42 +220,76 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
                 <div key={item.id} className="w-full">
                   <div
                     className={cn(
-                      "flex w-full text-left transition-colors",
+                      "flex w-full text-left",
+                      benefitsMotionClassName,
                       isActive
                         ? "flex-col gap-4 bg-gray300 px-4 py-6 md:px-8 lg:px-10 md:py-8"
-                        : "flex-row items-center px-4 md:py-6 py-4 md:pl-8 lg:pl-10 md:pr-6 md:py-8",
+                        : "flex-col px-4 py-4 md:pl-8 lg:pl-10 md:pr-6 md:py-8",
                     )}
                     aria-current={isActive ? "true" : undefined}
                   >
-                    <span className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl">
+                    <span className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl md:whitespace-nowrap">
                       {item.label}
                     </span>
-                    {isActive ? (
-                      <>
+                    <div
+                      className={cn(
+                        "w-full",
+                        reducedMotion
+                          ? isActive
+                            ? "flex flex-col gap-4"
+                            : "hidden"
+                          : accordionCollapsePanelClassName(isActive),
+                      )}
+                      aria-hidden={!isActive}
+                    >
+                      <div
+                        className={cn(
+                          reducedMotion ? undefined : accordionCollapseInnerClassName,
+                          "flex flex-col gap-4",
+                        )}
+                      >
                         <span className="h-px w-full bg-neutral300" aria-hidden />
                         <span className="w-full font-gill text-sm font-light leading-110 text-neutral500 md:max-w-[513px] md:text-xl md:text-darkblack">
                           {item.description}
                         </span>
-                      </>
-                    ) : null}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-          {activeImage ? (
-            <div
-              className="relative aspect-[1025/737] w-full overflow-hidden md:aspect-auto md:min-w-0 md:flex-1 md:self-stretch"
-            >
-              <ResponsiveImage
-                key={activeImage.desktopUrl}
-                desktopSrc={activeImage.desktopUrl}
-                mobileSrc={activeImage.mobileUrl}
-                alt={activeImage.alt}
-                fill
-                sizes="(min-width: 768px) 60vw, 100vw"
-                className="object-cover object-center md:object-top"
-              />
+          {itemsWithImages.length > 0 ? (
+            <div className="relative aspect-[1025/737] w-full overflow-hidden md:aspect-auto md:min-w-0 md:flex-1 md:self-stretch">
+              {itemsWithImages.map((item) => {
+                const image = item.image;
+                if (!image) {
+                  return null;
+                }
+
+                const isActive = item.id === activeId;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "absolute inset-0",
+                      benefitsImageMotionClassName,
+                      isActive ? "z-10 opacity-100" : "z-0 opacity-0",
+                    )}
+                    aria-hidden={!isActive}
+                  >
+                    <ResponsiveImage
+                      desktopSrc={image.desktopUrl}
+                      mobileSrc={image.mobileUrl}
+                      alt={isActive ? image.alt : ""}
+                      fill
+                      sizes="(min-width: 768px) 60vw, 100vw"
+                      className="object-cover object-center md:object-top"
+                    />
+                  </div>
+                );
+              })}
             </div>
           ) : null}
         </div>

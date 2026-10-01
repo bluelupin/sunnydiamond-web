@@ -11,6 +11,11 @@ import {
 } from "@/features/products/components/detail/shared";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import { useToast } from "@/shared/hooks/use-toast";
+import {
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+  accordionCollapseEasingClassName,
+} from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import { useOrderActionReasons } from "../hooks/useOrderActionReasons";
@@ -331,7 +336,8 @@ export function ProfileOrderDetailView({
             </span>
             <ChevronUp
               className={cn(
-                "size-6 shrink-0 text-darkblack transition-transform duration-500 ease-in-out",
+                "size-6 shrink-0 text-darkblack transition-transform duration-500",
+                accordionCollapseEasingClassName,
                 !totalsExpanded && "rotate-180",
               )}
               strokeWidth={1.5}
@@ -342,12 +348,9 @@ export function ProfileOrderDetailView({
         <div
           id="order-totals-breakdown"
           aria-hidden={!totalsExpanded}
-          className={cn(
-            "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out",
-            totalsExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-          )}
+          className={accordionCollapsePanelClassName(totalsExpanded)}
         >
-          <div className="flex flex-col gap-4 overflow-hidden">
+          <div className={cn(accordionCollapseInnerClassName, "flex flex-col gap-4")}>
             <div className="h-px w-full bg-neutral300" />
 
             <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">

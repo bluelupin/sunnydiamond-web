@@ -4,6 +4,11 @@ import { Fragment, type ReactNode } from "react";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 import { cn } from "@/shared/utils/cn";
+import {
+  accordionCollapseGridClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import OffersAndDealsExpandedContent, {
   OFFERS_EMPTY_MESSAGE,
 } from "./OffersAndDealsExpandedContent";
@@ -11,9 +16,6 @@ import OffersAndDealsExpandedContent, {
 export { OFFERS_EMPTY_MESSAGE };
 
 export type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
-
-const offersCollapseTransitionClassName =
-  "grid min-h-0 overflow-hidden transition-[grid-template-rows] duration-500 ease-in-out motion-reduce:transition-none";
 
 const collapsibleBackgroundByVariant: Record<OffersAndDealsVariant, string | null> = {
   "sticky-gray200": "bg-gray200",
@@ -46,13 +48,14 @@ export const OffersAndDealsCollapsible = ({
   <div
     aria-hidden={!open}
     className={cn(
-      offersCollapseTransitionClassName,
+      accordionCollapseGridClassName,
+      "overflow-hidden",
       collapsibleBackgroundByVariant[variant],
-      open ? "grid-rows-[1fr]" : "grid-rows-[0fr] pointer-events-none",
+      accordionCollapsePanelClassName(open),
       className,
     )}
   >
-    <div className={cn("min-h-0 overflow-hidden", contentClassName)}>{children}</div>
+    <div className={cn(accordionCollapseInnerClassName, contentClassName)}>{children}</div>
   </div>
 );
 

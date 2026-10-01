@@ -7,6 +7,10 @@ import { cn } from "@/shared/utils/cn";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import {
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ShowroomSectionLocation } from "@/types/homepage/editorialBlocks";
@@ -79,9 +83,6 @@ function ShowroomLocationDetails({
   );
 }
 
-const mobileAccordionCollapseTransitionClassName =
-  "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none";
-
 function ShowroomsMobileAccordion({
   locations,
   activeId,
@@ -130,14 +131,9 @@ function ShowroomsMobileAccordion({
 
               <div
                 aria-hidden={!isSelected}
-                className={cn(
-                  mobileAccordionCollapseTransitionClassName,
-                  isSelected
-                    ? "grid-rows-[1fr] opacity-100"
-                    : "pointer-events-none grid-rows-[0fr] opacity-0",
-                )}
+                className={accordionCollapsePanelClassName(isSelected)}
               >
-                <div className="min-h-0 overflow-hidden">
+                <div className={accordionCollapseInnerClassName}>
                   <div className="flex flex-col gap-4 px-4 pb-5">
                     <div
                       className="h-[0.5px] w-full bg-neutral300"

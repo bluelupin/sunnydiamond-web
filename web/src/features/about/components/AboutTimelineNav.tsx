@@ -3,10 +3,13 @@
 import { useEffect, useId, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import {
+  accordionCollapseGridClassName,
+  accordionCollapseInnerClassName,
+} from "@/shared/ui/accordionCollapse";
 import type { TimelineYear } from "../hooks/useAboutTimelineScroll";
 
-const mobileNavCollapseTransitionClassName =
-  "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none";
+const mobileNavCollapseTransitionClassName = accordionCollapseGridClassName;
 
 type AboutTimelineNavProps = {
   years: readonly string[];
@@ -81,12 +84,12 @@ const AboutTimelineNav = ({
           mobileNavCollapseTransitionClassName,
           "md:contents",
           isExpanded
-            ? "grid-rows-[1fr] opacity-100"
-            : "pointer-events-none grid-rows-[0fr] opacity-0",
-          "md:pointer-events-auto md:grid-rows-[1fr] md:opacity-100",
+            ? "grid-rows-[1fr]"
+            : "pointer-events-none grid-rows-[0fr]",
+          "md:pointer-events-auto md:grid-rows-[1fr]",
         )}
       >
-        <div className="min-h-0 overflow-hidden md:overflow-visible">
+        <div className={cn(accordionCollapseInnerClassName, "md:overflow-visible")}>
           <ol
             id={listId}
             className="mt-4 flex flex-col items-start gap-4 sm:gap-6 md:mt-0 md:gap-8 lg:items-start md:max-h-full max-h-[270px] md:overflow-y-hidden overflow-y-auto"

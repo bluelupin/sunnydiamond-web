@@ -2,14 +2,16 @@
 
 import { Fragment, useState } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import {
+  accordionCollapseIconClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import type { NormalizedEducationFaqSection } from "@/services/education/learn-about-diamonds-page.types";
 import { cn } from "@/shared/utils/cn";
 import { educationSectionTitleSpacingClassName } from "../data/content";
 
-const faqTransitionClassName =
-  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
-
-const faqIconTransitionClassName = "transition-opacity duration-500 ease-in-out";
+const faqIconTransitionClassName = accordionCollapseIconClassName;
 
 const FaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
@@ -108,14 +110,10 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
                     </button>
 
                     <div
-                      className={cn(
-                        "grid min-h-0",
-                        faqTransitionClassName,
-                        isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-                      )}
+                      className={accordionCollapsePanelClassName(isOpen)}
                       aria-hidden={!isOpen}
                     >
-                      <div className="overflow-hidden">
+                      <div className={accordionCollapseInnerClassName}>
                         {item.answer ? (
                           <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-xl">
                             {item.answer}

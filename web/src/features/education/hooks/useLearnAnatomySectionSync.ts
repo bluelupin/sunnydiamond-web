@@ -8,7 +8,9 @@ import {
   type RefObject,
 } from "react";
 
-const ACCORDION_TRANSITION_MS = 550;
+import { ACCORDION_COLLAPSE_DURATION_MS } from "@/shared/ui/accordionCollapse";
+
+const ACCORDION_TRANSITION_MS = ACCORDION_COLLAPSE_DURATION_MS;
 const INTERSECTION_THRESHOLDS = [0, 0.1, 0.25, 0.5, 0.75, 1] as const;
 const INTERSECTION_ROOT_MARGIN = "-35% 0px -35% 0px";
 const PINNED_SCROLL_MIN_WIDTH = "(min-width: 768px)";

@@ -8,6 +8,10 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
+import {
   POLICY_QUERY_PARAM,
   resolvePolicyIdFromParam,
 } from "@/features/cms/utils/policyCertificationsRoutes";
@@ -176,7 +180,7 @@ function PolicyAccordionItem({
   const triggerId = `policy-accordion-trigger-${section.id}`;
 
   return (
-    <div className={cn("flex flex-col", isOpen && "gap-4")}>
+    <div className="flex flex-col">
       <button
         type="button"
         id={triggerId}
@@ -203,15 +207,13 @@ function PolicyAccordionItem({
         role="region"
         aria-labelledby={triggerId}
         aria-hidden={!isOpen}
-        className={cn(
-          "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none",
-          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-        )}
+        className={accordionCollapsePanelClassName(isOpen)}
       >
-        <div className="overflow-hidden">
+        <div className={accordionCollapseInnerClassName}>
           <div
             className={cn(
               "flex flex-col font-gill leading-110 text-neutral500",
+              isOpen ? "pt-4" : "pt-0",
               isMobile
                 ? "gap-4 text-sm font-light"
                 : "gap-6 text-base font-normal",

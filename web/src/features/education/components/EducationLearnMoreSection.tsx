@@ -19,11 +19,13 @@ import {
   educationPageImages,
 } from "../data/content";
 
+import {
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
+
 const tabsSpec = educationLearnMoreSpec.tabs;
 const careSpec = educationLearnMoreSpec.careGrid;
-
-const accordionTransitionClassName =
-  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
 
 function mapSlidesToCarouselItems(
   tab: NormalizedEducationLearnTab,
@@ -222,18 +224,14 @@ const LearnAnatomyDetailContent = ({
                 </button>
 
                 <div
-                  className={cn(
-                    "grid min-h-0",
-                    accordionTransitionClassName,
-                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-                  )}
+                  className={accordionCollapsePanelClassName(isOpen)}
                   aria-hidden={!isOpen}
                 >
                   <div
                     id={`anatomy-section-${section.id}`}
                     role="region"
                     aria-labelledby={`anatomy-trigger-${section.id}`}
-                    className="overflow-hidden"
+                    className={accordionCollapseInnerClassName}
                   >
                     <ul className="flex flex-col gap-5 px-6 pb-6 md:gap-4">
                       {section.traits.map((trait) => (

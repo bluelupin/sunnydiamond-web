@@ -3,6 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import {
+  accordionCollapseIconClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import type { ProductDetailAccordion } from "@/features/products/types/productDetail";
 
 type ProductDetailAccordionsProps = {
@@ -38,17 +43,30 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
               <span className="font-gill text-xl font-normal leading-110 text-darkblack">
                 {accordion.title}
               </span>
-              <span className="inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
-                {isOpen ?
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  :
+              <span className="relative inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
+                <span
+                  className={cn(
+                    "absolute inset-0 flex items-center justify-center",
+                    accordionCollapseIconClassName,
+                    isOpen ? "pointer-events-none opacity-0" : "opacity-100",
+                  )}
+                >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                }
+                </span>
+                <span
+                  className={cn(
+                    "absolute inset-0 flex items-center justify-center",
+                    accordionCollapseIconClassName,
+                    isOpen ? "opacity-100" : "pointer-events-none opacity-0",
+                  )}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </span>
             </button>
             <div
@@ -56,12 +74,9 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
               role="region"
               aria-labelledby={`product-accordion-trigger-${accordion.id}`}
               aria-hidden={!isOpen}
-              className={cn(
-                "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out md:pb-3 pb-4",
-                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-              )}
+              className={cn(accordionCollapsePanelClassName(isOpen), "md:pb-3 pb-4")}
             >
-              <div className="overflow-hidden">
+              <div className={accordionCollapseInnerClassName}>
                 <p className="pb-3 pt-2 font-gill text-base font-light leading-110 text-neutral500 lg:pt-3">
                   {accordion.content}
                 </p>
