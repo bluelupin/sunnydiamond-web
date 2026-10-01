@@ -9,6 +9,31 @@ type GiftingOccasionSectionProps = {
   cards: NormalizedGiftingOccasionCard[];
 };
 
+function GiftingOccasionCardItem({
+  card,
+  index,
+  sectionTitle,
+}: {
+  card: NormalizedGiftingOccasionCard;
+  index: number;
+  sectionTitle: string;
+}) {
+  return (
+    <OccasionLedCard
+      variant="gifting"
+      title={card.title}
+      description={card.description ?? ""}
+      href={card.href}
+      ctaLabel={card.ctaLabel}
+      desktopImageUrl={card.image.desktopUrl}
+      mobileImageUrl={card.image.mobileUrl}
+      imageAlt={card.image.alt}
+      index={index}
+      sectionTitle={sectionTitle}
+    />
+  );
+}
+
 const GiftingOccasionSection = ({ cards }: GiftingOccasionSectionProps) => {
   const sectionTitle = "Timeless Pieces for Every Occasion";
 
@@ -66,14 +91,8 @@ const GiftingOccasionSection = ({ cards }: GiftingOccasionSectionProps) => {
             delayMs={80 + index * 80}
             className="contents"
           >
-            <OccasionLedCard
-              title={card.title}
-              description={card.description ?? ""}
-              href={card.href}
-              ctaLabel={card.ctaLabel}
-              desktopImageUrl={card.image.desktopUrl}
-              mobileImageUrl={card.image.mobileUrl}
-              imageAlt={card.image.alt}
+            <GiftingOccasionCardItem
+              card={card}
               index={index}
               sectionTitle={sectionTitle}
             />

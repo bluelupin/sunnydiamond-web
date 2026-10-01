@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
+
+export type OccasionLedCardVariant = "homepage" | "gifting";
 
 export type OccasionLedCardProps = {
   title: string;
@@ -17,6 +18,7 @@ export type OccasionLedCardProps = {
   mobileImageAlt?: string;
   index?: number;
   sectionTitle?: string;
+  variant?: OccasionLedCardVariant;
 };
 
 const desktopCtaRevealClassName =
@@ -42,8 +44,14 @@ export default function OccasionLedCard({
   imageAlt,
   desktopImageAlt,
   mobileImageAlt,
+  variant = "homepage",
 }: OccasionLedCardProps) {
-  const pathname = usePathname();
+  const isGifting = variant === "gifting";
+  const mobileOverlayClassName = isGifting ? "xl:hidden" : "md:hidden";
+  const desktopGradientClassName = isGifting
+    ? "pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%] xl:block"
+    : "pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%] md:block";
+  const desktopOverlayClassName = isGifting ? "hidden xl:flex" : "hidden md:flex";
 
   if (!desktopImageUrl && !mobileImageUrl) {
     return null;
@@ -62,9 +70,9 @@ export default function OccasionLedCard({
       href={href}
       className={cn(
         "group relative block shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2",
-        pathname === "/gifting" ?
-          "h-[400px] w-[328px] md:h-[500px] md:w-[351px] xl:h-[600px] xl:w-full xl:shrink" :
-          "h-[400px] w-[328px] lg:h-[700px] md:h-[500px] md:w-full md:min-w-0 md:shrink",
+        isGifting
+          ? "h-[400px] w-[328px] md:h-[500px] md:w-[351px] xl:h-[600px] xl:w-full xl:shrink"
+          : "h-[400px] w-[328px] md:h-[500px] md:w-full md:min-w-0 md:shrink lg:h-[700px]",
       )}
     >
       <ResponsiveImage
@@ -81,21 +89,27 @@ export default function OccasionLedCard({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent md:hidden"
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent",
+          mobileOverlayClassName,
+        )}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%] md:block"
-      />
+      <div aria-hidden className={desktopGradientClassName} />
 
-      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-8 md:hidden">
+      <div className={cn("absolute inset-x-0 bottom-0 z-10 px-4 pb-8", mobileOverlayClassName)}>
         <div className="flex max-w-[296px] flex-col gap-4">
-          <div className={cn("flex flex-col text-white",
-            pathname === "/gifting" ? "gap-2" : "md:gap-3 gap-2",
-          )}>
-            <h3 className={cn("font-larken font-light leading-110",
-              pathname === "/gifting" ? "text-2xl" : "lg:text-32 md:text-3xl text-2xl",
-            )}>
+          <div
+            className={cn(
+              "flex flex-col text-white",
+              isGifting ? "gap-2" : "gap-2 md:gap-3",
+            )}
+          >
+            <h3
+              className={cn(
+                "font-larken font-light leading-110",
+                isGifting ? "text-2xl" : "text-2xl md:text-3xl lg:text-32",
+              )}
+            >
               {title}
             </h3>
             {description ? (
@@ -114,23 +128,24 @@ export default function OccasionLedCard({
 
       <div
         className={cn(
-          "absolute bottom-0 z-10 hidden max-w-[418px] w-full flex-col-reverse items-start text-white md:flex pb-6",
-          pathname === "/gifting"
-            ? "left-4 md:left-8 md:max-w-[calc(100%-64px)]"
-            : "left-0 md:left-0 px-4 md:px-8 lg:px-10",
+          "absolute bottom-0 z-10 max-w-[418px] w-full flex-col-reverse items-start text-white",
+          desktopOverlayClassName,
+          isGifting
+            ? "left-4 md:left-8 md:max-w-[calc(100%-64px)] mb-4"
+            : "left-0 px-4 md:px-8 lg:px-10",
         )}
       >
         {ctaLabel ? <OccasionDesktopCtaReveal ctaLabel={ctaLabel} /> : null}
         <div
           className={cn(
             "mb-4 flex w-full max-w-[418px] flex-col items-start md:mb-6",
-            pathname === "/gifting" ? "gap-2" : "gap-2 lg:gap-3",
+            isGifting ? "mb-4 gap-2" : "gap-2 lg:gap-3",
           )}
         >
           <h3
             className={cn(
               "whitespace-nowrap font-larken font-light leading-none",
-              pathname === "/gifting" ? "text-2xl" : "text-32 md:text-2xl lg:text-32",
+              isGifting ? "text-2xl" : "text-32 md:text-2xl lg:text-32",
             )}
           >
             {title}
