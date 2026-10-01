@@ -67,8 +67,10 @@ const CareersJobFiltersDrawer = ({ open, onOpenChange }: CareersJobFiltersDrawer
   }
 
   const closeLabel = closeFiltersLabel ?? filtersTitle;
+  const hasSelectedFilters = Boolean(draft.location || draft.department || draft.experience);
 
   const applyDraft = () => {
+    if (!hasSelectedFilters) return;
     setLocationFilter(draft.location);
     setDepartmentFilter(draft.department);
     setExperienceFilter(draft.experience);
@@ -138,7 +140,11 @@ const CareersJobFiltersDrawer = ({ open, onOpenChange }: CareersJobFiltersDrawer
             <button
               type="button"
               onClick={applyDraft}
-              className={cn(careersDarkCtaClassName, "min-w-0 flex-1")}
+              disabled={!hasSelectedFilters}
+              className={cn(
+                careersDarkCtaClassName,
+                "min-w-0 flex-1 disabled:border-[#A2A1A1] disabled:opacity-100 disabled:[--btn-dark-slide-base:#A2A1A1]",
+              )}
             >
               <span className="relative z-10">{CAREERS_FILTER_APPLY_LABEL}</span>
             </button>
