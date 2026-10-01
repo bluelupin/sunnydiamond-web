@@ -25,7 +25,7 @@ export const diamondsForEveryonePageContent = {
     kyc: {
       title: "Complete Quick KYC",
       idTypeLabel: "ID Type*",
-      idTypeOptions: ["Aadhaar", "PAN", "Passport"],
+      idTypeOptions: ["Aadhaar", "PAN"],
       idNumberLabel: "ID Number*",
       idUploadLabel: "ID Card Copy*",
       uploadButtonLabel: "ATTACH IMAGE",

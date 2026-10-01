@@ -116,7 +116,13 @@ export function GiftCardFlowProvider({
   const [isPanelOpen, setIsPanelOpen] = useState(defaultPanelOpen);
   const [step, setStep] = useState<GiftCardFlowStep>(persisted?.step ?? "configure");
   const [cardType, setCardType] = useState<GiftCardType>(persisted?.cardType ?? "physical");
-  const [amount, setAmount] = useState(persisted?.amount ?? giftCardFlowContent.amount.default);
+  const [amount, setAmount] = useState(() => {
+    const saved = persisted?.amount;
+    const { min, max, default: defaultAmount } = giftCardFlowContent.amount;
+    return typeof saved === "number" && Number.isInteger(saved) && saved >= min && saved <= max
+      ? saved
+      : defaultAmount;
+  });
   const [occasion, setOccasion] = useState(persisted?.occasion ?? "");
   const [digitalDeliveryDate, setDigitalDeliveryDate] = useState(
     persisted?.digitalDeliveryDate ?? "",

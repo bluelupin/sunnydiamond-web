@@ -1,0 +1,8 @@
+.github
+.agents
+.codex
+docs
+output
+tmp
+web/output
+**/.env*

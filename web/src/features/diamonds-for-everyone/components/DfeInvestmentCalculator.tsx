@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { diamondsForEveryonePageContent } from "../data/content";
 import { formatInr } from "../utils/formatInr";
@@ -29,14 +29,23 @@ const DfeInvestmentCalculator = ({
 }: DfeInvestmentCalculatorProps) => {
   const labels = diamondsForEveryonePageContent.investment;
   const { contribution, bonus, totalValue } = computeDfeInvestmentSummary(monthlyAmount, investment);
+  const [amountDraft, setAmountDraft] = useState<string | null>(null);
 
   const sliderFillPercent = useMemo(() => {
     const range = investment.maxMonthly - investment.minMonthly;
     if (range <= 0) return 0;
-    return ((monthlyAmount - investment.minMonthly) / range) * 100;
+    return Math.min(100, ((monthlyAmount - investment.minMonthly) / range) * 100);
   }, [investment.maxMonthly, investment.minMonthly, monthlyAmount]);
 
   const clampAmount = (value: number) => clampDfeMonthlyAmount(value, investment);
+  const commitAmountDraft = () => {
+    if (amountDraft === null) return;
+    const value = Number(amountDraft);
+    if (amountDraft && Number.isSafeInteger(value)) {
+      onMonthlyAmountChange(clampAmount(value));
+    }
+    setAmountDraft(null);
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
@@ -61,13 +70,13 @@ const DfeInvestmentCalculator = ({
               type="range"
               min={investment.minMonthly}
               max={investment.maxMonthly}
-              step={investment.step}
-              value={monthlyAmount}
+              step={1}
+              value={Math.min(monthlyAmount, investment.maxMonthly)}
               onChange={(event) => onMonthlyAmountChange(Number(event.target.value))}
               aria-label="Monthly savings amount"
               aria-valuemin={investment.minMonthly}
               aria-valuemax={investment.maxMonthly}
-              aria-valuenow={monthlyAmount}
+              aria-valuenow={Math.min(monthlyAmount, investment.maxMonthly)}
               className="absolute inset-0 size-full cursor-pointer opacity-0"
             />
           </div>
@@ -76,15 +85,20 @@ const DfeInvestmentCalculator = ({
               ₹
             </span>
             <input
-              type="number"
-              min={investment.minMonthly}
-              max={investment.maxMonthly}
-              step={investment.step}
-              value={monthlyAmount}
+              type="text"
+              inputMode="numeric"
+              value={amountDraft ?? monthlyAmount}
               onChange={(event) => {
-                const next = Number(event.target.value);
-                if (Number.isNaN(next)) return;
-                onMonthlyAmountChange(clampAmount(next));
+                const next = event.target.value.replace(/\D/g, "").slice(0, 15);
+                setAmountDraft(next);
+                const value = Number(next);
+                if (next && Number.isSafeInteger(value) && value >= investment.minMonthly) {
+                  onMonthlyAmountChange(value);
+                }
+              }}
+              onBlur={commitAmountDraft}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") commitAmountDraft();
               }}
               className="min-w-0 flex-1 bg-transparent pl-1 font-gill text-base font-normal leading-110 text-darkblack outline-none"
               aria-label="Monthly amount in rupees"

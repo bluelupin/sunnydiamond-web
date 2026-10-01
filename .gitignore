@@ -1,2 +1,9 @@
 # Working QA notes kept locally, not shared
 docs/qa/passwordless-auth.md
+
+# Local Vercel project links and downloaded environment files
+/.vercel/
+
+.vercel
+.env*
+/.agents/skills
