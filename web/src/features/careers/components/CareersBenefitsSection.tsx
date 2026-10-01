@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import {
   accordionCollapseInnerClassName,
@@ -29,12 +29,14 @@ const benefitsImageMotionClassName = cn(
   "motion-reduce:transition-none",
 );
 
+/** One scroll segment per benefit — aligned with `items.length * 100vh` section height. */
 function resolveBenefitIndex(progress: number, itemCount: number): number {
   if (itemCount <= 1) {
     return 0;
   }
 
-  return Math.min(itemCount - 1, Math.max(0, Math.round(progress * (itemCount - 1))));
+  const clampedProgress = clamp(progress);
+  return Math.min(itemCount - 1, Math.floor(clampedProgress * itemCount));
 }
 
 const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
@@ -45,50 +47,7 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
   const [reducedMotion, setReducedMotion] = useState(false);
   const activeIndexRef = useRef(0);
-  const targetIndexRef = useRef(0);
-  const stepRafRef = useRef<number | null>(null);
   const scrollRafRef = useRef<number | null>(null);
-
-  const stopSequentialStepping = useCallback(() => {
-    if (stepRafRef.current !== null) {
-      window.cancelAnimationFrame(stepRafRef.current);
-      stepRafRef.current = null;
-    }
-  }, []);
-
-  const stepTowardTarget = useCallback(() => {
-    stepRafRef.current = null;
-
-    if (items.length === 0) {
-      return;
-    }
-
-    const current = activeIndexRef.current;
-    const target = targetIndexRef.current;
-
-    if (current === target) {
-      return;
-    }
-
-    const next = current + (target > current ? 1 : -1);
-    activeIndexRef.current = next;
-    const nextId = items[next]?.id;
-    if (nextId) {
-      setActiveId(nextId);
-    }
-
-    if (next !== target) {
-      stepRafRef.current = window.requestAnimationFrame(stepTowardTarget);
-    }
-  }, [items]);
-
-  const scheduleSequentialStep = useCallback(() => {
-    if (stepRafRef.current !== null) {
-      return;
-    }
-
-    stepRafRef.current = window.requestAnimationFrame(stepTowardTarget);
-  }, [stepTowardTarget]);
 
   useEffect(() => {
     activeIndexRef.current = Math.max(
@@ -151,10 +110,13 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
           : clamp((top - rect.top) / scrollTrack);
 
       const targetIndex = resolveBenefitIndex(progress, items.length);
-      targetIndexRef.current = targetIndex;
 
       if (activeIndexRef.current !== targetIndex) {
-        scheduleSequentialStep();
+        activeIndexRef.current = targetIndex;
+        const nextId = items[targetIndex]?.id;
+        if (nextId) {
+          setActiveId(nextId);
+        }
       }
     };
 
@@ -174,9 +136,8 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
       if (scrollRafRef.current !== null) {
         window.cancelAnimationFrame(scrollRafRef.current);
       }
-      stopSequentialStepping();
     };
-  }, [items, reducedMotion, scheduleSequentialStep, stickyTop, stopSequentialStepping]);
+  }, [items, reducedMotion, stickyTop]);
 
   const scrollTrackStyle =
     !reducedMotion && items.length > 1
@@ -224,7 +185,7 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
                       benefitsMotionClassName,
                       isActive
                         ? "flex-col gap-4 bg-gray300 px-4 py-6 md:px-8 lg:px-10 md:py-8"
-                        : "flex-col px-4 py-4 md:pl-8 lg:pl-10 md:pr-6 md:py-8",
+                        : "flex-col px-4 py-6 md:pl-8 lg:pl-10 md:pr-6 md:py-8",
                     )}
                     aria-current={isActive ? "true" : undefined}
                   >

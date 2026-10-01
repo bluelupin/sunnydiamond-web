@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import FormFieldError from "@/shared/ui/FormFieldError";
-import CareersSelectField from "@/features/careers/components/shared/CareersSelectField";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
@@ -301,27 +301,44 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
 
     const value = dropdownValues[field.id] ?? "";
     const showFieldError = submitted && field.isRequired && !value.trim();
+    const fieldLabel = field.isRequired
+      ? formatRequiredFieldLabel(field.label)
+      : field.label;
+    const inputId = `contact-dropdown-${field.id}`;
+    const errorId = `${inputId}-error`;
 
     return (
-      <CareersSelectField
-        key={field.id}
-        id={`contact-dropdown-${field.id}`}
-        label={
-          field.isRequired ? formatRequiredFieldLabel(field.label) : field.label
-        }
-        value={value}
-        options={field.options}
-        placeholder={field.placeholder}
-        onChange={(next) =>
-          setDropdownValues((current) => ({
-            ...current,
-            [field.id]: next,
-          }))
-        }
-        labelClassName={contactLabelClassName}
-        triggerClassName={!value ? "text-gray600" : undefined}
-        error={showFieldError ? "Please select an option" : undefined}
-      />
+      <div key={field.id} className="flex flex-col gap-2">
+        <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
+          <label htmlFor={inputId} className={contactLabelClassName}>
+            {fieldLabel}
+          </label>
+          <InlineCustomSelect
+            id={inputId}
+            hideLabel
+            label={fieldLabel}
+            value={value}
+            options={field.options}
+            placeholder={field.placeholder?.trim() || "Select"}
+            onChange={(next) =>
+              setDropdownValues((current) => ({
+                ...current,
+                [field.id]: next,
+              }))
+            }
+            invalid={showFieldError}
+            errorId={showFieldError ? errorId : undefined}
+            triggerClassName="text-base font-normal"
+            placeholderClassName="font-normal text-gray600"
+            listClassName="mt-2 shadow-none"
+            optionClassName="text-base font-normal text-neutral500"
+          />
+        </div>
+        <FormFieldError
+          id={errorId}
+          message={showFieldError ? "Please select an option" : undefined}
+        />
+      </div>
     );
   };
 

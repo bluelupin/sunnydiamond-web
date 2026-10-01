@@ -33,7 +33,7 @@ export default function CraftsmanshipMedia({ src, mobileSrc, alt, mobileAlt, isV
   const label = mobile ? mobileAlt : alt;
   const videoRef = useMutedVideoPlayback(video && !reducedMotion);
 
-  return video ? (
+  return video ? ( 
     <video
       key={url}
       ref={videoRef}

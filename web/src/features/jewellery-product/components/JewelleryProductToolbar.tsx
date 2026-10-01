@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
@@ -8,17 +8,9 @@ import { cn } from "@/shared/utils/cn";
 import { sortOptions } from "../data/filters";
 import {
   jewelleryListingMobileFooterSpec,
-  jewelleryListingToolbarAssets,
   jewelleryListingToolbarSpec,
 } from "../data/content";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 
 interface JewelleryProductToolbarProps {
   productCount: number;
@@ -31,37 +23,6 @@ interface JewelleryProductToolbarProps {
 
 const desktopSpec = jewelleryListingToolbarSpec;
 const mobileSpec = jewelleryListingMobileFooterSpec;
-
-const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => {
-  const { windows } = useUiPlatform();
-  const chevronWidth = mobile ? 13.33 : 13.5;
-  const chevronHeight = mobile ? 6.67 : 7.5;
-
-  return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-hidden",
-        mobile && "rotate-180",
-        !windows && "-translate-y-0.5",
-      )}
-      style={{ width: size, height: size }}
-    >
-      <Image
-        src={
-          mobile
-            ? jewelleryListingToolbarAssets.chevronDownMobileIcon
-            : jewelleryListingToolbarAssets.chevronDownIcon
-        }
-        alt=""
-        width={chevronWidth}
-        height={chevronHeight}
-        className="object-contain"
-        style={{ width: chevronWidth, height: chevronHeight }}
-        aria-hidden
-      />
-    </span>
-  );
-};
 
 type FilterControlProps = {
   iconSize: number;
@@ -127,19 +88,56 @@ const SortControl = ({
   onMobileOpen,
 }: SortControlProps) => {
   const { windows } = useUiPlatform();
+  const [isDesktopOpen, setIsDesktopOpen] = useState(false);
+  const desktopSortRef = useRef<HTMLDivElement>(null);
+  const listboxId = "plp-sort-listbox";
+
+  useEffect(() => {
+    if (!isDesktopOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (desktopSortRef.current?.contains(target)) {
+        return;
+      }
+
+      setIsDesktopOpen(false);
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      document.addEventListener("pointerdown", handlePointerDown);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isDesktopOpen]);
+
+  const handleDesktopSortSelect = (value: string) => {
+    onSortChange(value);
+    setIsDesktopOpen(false);
+  };
 
   return (
     <>
-      {/* Desktop — original Sort By control; Gemstone Type-style dropdown menu */}
+      {/* Desktop — Sort By trigger with contact-form-style inline dropdown */}
       <div
-        className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid px-3 h-10"
-        style={{
-          gap,
-          color,
-        }}
+        ref={desktopSortRef}
+        className="relative hidden h-10 md:block"
+        style={{ color }}
       >
-        <span
-          className="pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-2 whitespace-nowrap font-gill text-base font-normal uppercase leading-110 text-darkblack lg:text-xl"
+        <button
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={isDesktopOpen}
+          aria-controls={isDesktopOpen ? listboxId : undefined}
+          aria-label="Sort products"
+          onClick={() => setIsDesktopOpen((current) => !current)}
+          className="inline-flex h-10 items-center gap-2 whitespace-nowrap px-3 font-gill text-base font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 lg:text-xl"
+          style={{ gap }}
         >
           Sort By
           <svg
@@ -148,27 +146,55 @@ const SortControl = ({
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className={cn(!windows && "-translate-y-0.5", "md:size-6 size-5")}
+            className={cn(
+              !windows && "-translate-y-0.5",
+              "md:size-6 size-5 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out",
+              isDesktopOpen && "rotate-180",
+            )}
             aria-hidden
           >
-            <path d="M19 9L12.5 15.5L6 9" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M19 9L12.5 15.5L6 9"
+              stroke="#0A0A0A"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
-        </span>
-        <Select value={sortValue} onValueChange={onSortChange}>
-          <SelectTrigger
+        </button>
+        {isDesktopOpen ? (
+          <div
+            id={listboxId}
+            role="listbox"
             aria-label="Sort products"
-            className="col-start-1 row-start-1 z-10 size-full h-full min-h-0 cursor-pointer border-0 bg-transparent opacity-0 shadow-none focus:ring-0 [&>svg]:hidden"
+            className="absolute right-0 top-full z-[90] mt-2 flex min-w-[188px] flex-col bg-[#F2F2F2]"
           >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="z-30">
-            {sortOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            {sortOptions.map((option) => {
+              const selected = sortValue === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                  }}
+                  onClick={() => handleDesktopSortSelect(option.value)}
+                  className={cn(
+                    "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-base leading-110",
+                    "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
+                    selected
+                      ? "bg-gold300 font-normal text-darkblack"
+                      : "font-normal text-neutral500 hover:bg-gold300 hover:text-darkblack",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       {/* Mobile — opens sort drawer (Figma 1279:1020) */}

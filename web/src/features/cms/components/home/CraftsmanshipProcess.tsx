@@ -160,11 +160,11 @@ function CraftsmanshipStepIcon({
     <Image
       src={iconUrl}
       alt={iconAlt || ""}
-      width={28}
-      height={28}
+      width={40}
+      height={40}
       className={cn(
         "shrink-0 object-contain transition-all duration-500",
-        isActiveStep ? "md:h-7 md:w-7 h-5 w-5" : "h-6 w-6",
+        isActiveStep ? "md:h-10 md:w-10 h-7 w-7" : "h-7 w-7",
       )}
       aria-hidden={!iconAlt}
     />
@@ -215,9 +215,9 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       ref={containerRef}
       style={{ height: `calc(${stepCount + 1} * var(--craftsmanship-vh-unit, 100vh))` }}
       aria-label={sectionTitle}
-      className="min-h-[520px] craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
+      className="min-h-[750px] craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200"
     >
-      <div className="sticky lg:top-24 top-10 h-[calc(100svh-2.5rem)] lg:h-[calc(100svh-6rem)] overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
+      <div className="sticky top-0 h-[800px] lg:h-[750px)] overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh] pt-16 pb-16 md:pt-104 md:pb-[77px]">
         {hasVideoBackground && resolvedDesktopImage && resolvedMobileImage ? (
           <>
             <CraftsmanshipMedia
@@ -239,7 +239,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
           mobileSrc={silkMobileSrc}
           alt={silkAlt}
         />}
-        <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 px-4 relative z-10 h-full">
+        <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 relative z-10 h-full">
           <div className="flex h-full flex-col lg:grid lg:grid-cols-12 lg:gap-12">
             {/* Title + steps — top on mobile, left on desktop */}
             <div className="flex shrink-0 flex-col gap-8 md:max-lg:portrait:gap-6 lg:col-span-6 xl:col-span-5 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
