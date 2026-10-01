@@ -52,7 +52,7 @@ const EducationFourCsIntroPillars = ({ pillars }: EducationFourCsIntroPillarsPro
   let revealOrder = 0;
 
   return (
-    <div ref={ref} className="flex flex-wrap items-center justify-center gap-y-2 font-gill lg:text-2xl md:text-xl text-base leading-110 text-darkblack lg:flex-nowrap lg:gap-x-8 md:gap-x-6 gap-3">
+    <div ref={ref} className="flex flex-wrap items-center justify-center gap-y-2 font-gill lg:text-2xl md:text-xl text-base leading-110 text-darkblack lg:flex-nowrap gap-x-6 gap-3">
       {pillars.map((pillar, index) => {
         const labelOrder = revealOrder++;
         const isLast = index === pillars.length - 1;
@@ -62,21 +62,32 @@ const EducationFourCsIntroPillars = ({ pillars }: EducationFourCsIntroPillarsPro
             <span className={revealClassName(labelOrder)} style={revealStyle(labelOrder)}>
               {pillar}
             </span>
-
             {!isLast ? (
-              <Image
-                src="/images/education/scroll-arrow-black.svg"
-                alt="Scroll arrow"
-                width={24}
-                height={23}
-                className={cn(
-                  educationScrollArrowClassName,
-                  "shrink-0",
-                  revealClassName(revealOrder),
-                )}
-                style={revealStyle(revealOrder++)}
-                aria-hidden
-              />
+              <>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  className={cn(
+                    educationScrollArrowClassName,
+                    "shrink-0",
+                    revealClassName(revealOrder),
+                  )}
+                  style={revealStyle(revealOrder++)}
+                  aria-hidden>
+                  <path d="M8 0L8.47664 3.07107C8.83287 5.36635 10.6336 7.16713 12.9289 7.52336L16 8L12.9289 8.47664C10.6336 8.83287 8.83287 10.6336 8.47664 12.9289L8 16L7.52336 12.9289C7.16713 10.6336 5.36635 8.83287 3.07108 8.47664L0 8L3.07107 7.52336C5.36635 7.16713 7.16713 5.36635 7.52336 3.07108L8 0Z" fill="#0A0A0A" />
+                </svg>
+                {/* <Image
+                  src="/images/education/scroll-arrow-black.svg"
+                  alt="Scroll arrow"
+                  width={16}
+                  height={16}
+                  className={cn(
+                    educationScrollArrowClassName,
+                    "shrink-0",
+                    revealClassName(revealOrder),
+                  )}
+                  style={revealStyle(revealOrder++)}
+                  aria-hidden
+                /> */}
+              </>
             ) : null}
           </Fragment>
         );
