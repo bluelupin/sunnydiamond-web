@@ -9,9 +9,9 @@ export const giftCardFlowContent = {
   amount: {
     label: "Amount*",
     presetLabel: "or choose from",
-    // R-GC-3: fixed amounts plus any whole amount from ₹1,000 to ₹1,00,000.
-    presets: [1000, 5000, 10000] as const,
-    min: 1000,
+    // Fixed denominations plus custom whole-rupee amounts from ₹2,500.
+    presets: [5000, 10000, 25000, 50000, 100000] as const,
+    min: 2500,
     max: 100000,
     step: 500,
     default: 5000,

@@ -164,20 +164,10 @@ export function mapGiftingDiscoverOptions(
     occasionsFromFacets.push({ label, value });
   }
 
-  // Magento price aggregation buckets when available; otherwise static UI bands.
-  const priceRangesFromMagento = (facets?.priceBuckets ?? []).map((bucket) => ({
-    label: bucket.label,
-    min: bucket.min,
-    max: bucket.max,
-  }));
-
   return {
     categories: categoriesFromNav,
     occasions: occasionsFromFacets,
-    priceRanges:
-      priceRangesFromMagento.length > 0
-        ? priceRangesFromMagento
-        : [...discover.priceRanges],
+    priceRanges: [...discover.priceRanges],
   };
 }
 

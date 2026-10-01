@@ -602,7 +602,7 @@ const ProductDetailSidebar = ({
                 !windows && "-translate-y-0.5",
               )} />
               <p className="m-0 min-w-0 self-center font-gill text-base font-light leading-110 text-darkblack">
-                Estimated delivery May 12 2026
+                Delivery date to be confirmed
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">

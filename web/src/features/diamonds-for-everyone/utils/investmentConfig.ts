@@ -25,9 +25,10 @@ export type DfeInvestmentSummary = {
   totalValue: number;
 };
 
-/** Same ceilings as the Strapi field `max` values, so a typo can't publish an absurd plan. */
+/** CMS slider/config ceilings. Manual entry may exceed the slider maximum. */
 export const DFE_MAX_MONTHLY_AMOUNT = 1_000_000;
 export const DFE_MAX_PLAN_MONTHS = 36;
+export const DFE_MIN_MONTHLY_AMOUNT = 1_000;
 
 const positiveInteger = (
   value: number | null | undefined,
@@ -38,12 +39,14 @@ const positiveInteger = (
     ? value
     : fallback;
 
-/** Whole rupees inside the range. */
+/** Whole rupees from the business minimum; maxMonthly only bounds the slider. */
 export function clampDfeMonthlyAmount(
   value: number,
-  config: Pick<DfeInvestmentConfig, "minMonthly" | "maxMonthly">,
+  config: Pick<DfeInvestmentConfig, "minMonthly">,
 ): number {
-  return Math.min(config.maxMonthly, Math.max(config.minMonthly, Math.round(value)));
+  return Number.isFinite(value)
+    ? Math.max(config.minMonthly, Math.round(value))
+    : config.minMonthly;
 }
 
 /** A step must land exactly on the maximum, or the slider can't reach it. */
@@ -58,10 +61,10 @@ export function resolveDfeInvestmentConfig(
   input: DfeInvestmentConfigInput | null | undefined,
   defaults: DfeInvestmentConfig,
 ): DfeInvestmentConfig {
-  let minMonthly = positiveInteger(input?.minMonthly, defaults.minMonthly, DFE_MAX_MONTHLY_AMOUNT);
+  // The approved contribution floor is fixed even if an older CMS value differs.
+  const minMonthly = DFE_MIN_MONTHLY_AMOUNT;
   let maxMonthly = positiveInteger(input?.maxMonthly, defaults.maxMonthly, DFE_MAX_MONTHLY_AMOUNT);
   if (minMonthly >= maxMonthly) {
-    minMonthly = defaults.minMonthly;
     maxMonthly = defaults.maxMonthly;
   }
 
@@ -93,7 +96,7 @@ export function resolveDfeInvestmentConfig(
     minMonthly,
     maxMonthly,
     step,
-    defaultMonthly: clampDfeMonthlyAmount(snappedDefault, { minMonthly, maxMonthly }),
+    defaultMonthly: Math.min(maxMonthly, clampDfeMonthlyAmount(snappedDefault, { minMonthly })),
     monthsPaid,
     totalMonths,
   };
