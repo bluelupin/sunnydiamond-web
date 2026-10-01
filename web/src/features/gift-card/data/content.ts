@@ -35,7 +35,9 @@ export const giftCardFlowContent = {
     fullNameLabel: "Full Name*",
     phoneLabel: "Phone No.*",
     emailLabel: "Email ID*",
-    placeholder: "Enter",
+    namePlaceholder: "Enter Name",
+    phonePlaceholder: "Enter Phone",
+    emailPlaceholder: "Enter Email",
   },
   address: {
     useCurrentLocationLabel: "USE CURRENT LOCATION",
