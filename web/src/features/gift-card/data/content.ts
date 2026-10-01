@@ -48,6 +48,7 @@ export const giftCardFlowContent = {
     pincodeLabel: "Pin code",
     cityLabel: "City",
     stateLabel: "State",
+    statePlaceholder: "Select State",
     placeholder: "Enter",
     invalidPincodeError: "Invalid Pincode",
     estimatedDeliveryPrefix: "Estimated order delivery by",

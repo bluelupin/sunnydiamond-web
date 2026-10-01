@@ -30,6 +30,7 @@ import {
   giftCardFieldClassName,
   giftCardFieldLabelClass,
   giftCardSectionHeadingClass,
+  GiftCardSelectField,
 } from "./GiftCardFormUi";
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
@@ -46,6 +47,10 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
 
   const { address } = giftCardFlowContent;
   const stateOptions = INDIAN_STATES;
+  const stateSelectOptions = useMemo(
+    () => stateOptions.map((state) => ({ value: state, label: state })),
+    [stateOptions],
+  );
 
   const defaultShippingAddress = useMemo(() => {
     if (addresses.length === 0) {
@@ -259,18 +264,17 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className={giftCardFieldLabelClass} htmlFor="gift-card-state">
-                {address.stateLabel}
-              </label>
-              <input
+              <GiftCardSelectField
                 id="gift-card-state"
-                type="text"
+                label={address.stateLabel}
                 value={deliveryAddress.state}
-                onChange={(event) => setDeliveryAddress({ state: event.target.value })}
-                onBlur={() => markTouched("state")}
-                placeholder={address.placeholder}
-                autoComplete="address-level1"
-                className={cn(giftCardFieldClassName, showError("state") && invalidFieldClassName)}
+                onChange={(value) => {
+                  setDeliveryAddress({ state: value });
+                  markTouched("state");
+                }}
+                placeholder={address.statePlaceholder}
+                options={stateSelectOptions}
+                invalid={showError("state")}
               />
               <FormFieldError message={showError("state") ? errors.state : undefined} />
             </div>

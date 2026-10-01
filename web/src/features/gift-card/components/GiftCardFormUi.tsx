@@ -8,7 +8,7 @@ import {
 } from "@/features/careers/components/shared/CareersSelectField";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
-import { sanitizePhoneInput } from "@/shared/utils/formValidation";
+import { invalidFieldClassName, sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   Select,
   SelectContent,
@@ -112,6 +112,7 @@ type GiftCardSelectFieldProps = {
   onChange: (value: string) => void;
   placeholder: string;
   options: Array<{ label: string; value: string }>;
+  invalid?: boolean;
 };
 
 export const GiftCardSelectField = ({
@@ -121,6 +122,7 @@ export const GiftCardSelectField = ({
   onChange,
   placeholder,
   options,
+  invalid = false,
 }: GiftCardSelectFieldProps) => (
   <div className="flex flex-col gap-2">
     <label className={giftCardFieldLabelClass} htmlFor={id}>
@@ -134,7 +136,11 @@ export const GiftCardSelectField = ({
     >
       <SelectTrigger
         id={id}
-        className={cn(careersSelectTriggerClassName, !value && "!text-[#999999]")}
+        className={cn(
+          careersSelectTriggerClassName,
+          !value && "!text-[#999999]",
+          invalid && invalidFieldClassName,
+        )}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
