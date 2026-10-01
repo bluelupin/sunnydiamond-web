@@ -189,11 +189,7 @@ function PolicyAccordionItem({
         aria-controls={contentId}
         className={cn(
           "flex w-full gap-2 text-left",
-          isMobile
-            ? isOpen
-              ? "items-start"
-              : "items-center"
-            : "min-h-6 shrink-0 items-center",
+          isMobile ? "items-start" : "min-h-6 shrink-0 items-center",
         )}
       >
         <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack">
@@ -212,8 +208,7 @@ function PolicyAccordionItem({
         <div className={accordionCollapseInnerClassName}>
           <div
             className={cn(
-              "flex flex-col font-gill leading-110 text-neutral500",
-              isOpen ? "pt-4" : "pt-0",
+              "flex flex-col pt-4 font-gill leading-110 text-neutral500",
               isMobile
                 ? "gap-4 text-sm font-light"
                 : "gap-6 text-base font-normal",
