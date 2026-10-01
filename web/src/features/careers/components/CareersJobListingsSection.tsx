@@ -129,8 +129,12 @@ const CareersJobListingsSection = () => {
         </div>
       </div>
 
+      {(listing.openFiltersLabel ?? listing.filtersTitle) ? (
+        <div aria-hidden className="h-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:hidden" />
+      ) : null}
+
       {(listing.openFiltersLabel ?? listing.filtersTitle) && !filtersOpen ? (
-        <div className="sticky bottom-0 z-40 -mx-4 mt-6 border-t border-neutral300/60 bg-white pb-[env(safe-area-inset-bottom,0px)] md:-mx-10 lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral300/60 bg-white pb-[env(safe-area-inset-bottom,0px)] lg:hidden">
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
