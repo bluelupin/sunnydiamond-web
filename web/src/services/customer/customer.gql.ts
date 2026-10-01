@@ -207,13 +207,18 @@ const SUNNY_ORDER_ITEM_FIELDS = ORDER_FLOW_FIELDS_ENABLED
   gift_message {
     message
   }
+`
+  : "";
+
+// Product thumbnails are standard Magento fields and are needed by order cards regardless of
+// whether the optional Sunny order-flow module is enabled.
+const ORDER_ITEM_THUMBNAIL_FIELDS = `
   product {
     thumbnail {
       url
     }
   }
-`
-  : "";
+`;
 
 export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
   query MagentoCustomerOrders($pageSize: Int!, $currentPage: Int!) {
@@ -246,6 +251,7 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
               label
               value
             }
+            ${ORDER_ITEM_THUMBNAIL_FIELDS}
             ${SUNNY_ORDER_ITEM_FIELDS}
           }
           total {
@@ -375,6 +381,7 @@ const ORDER_DETAIL_FIELDS = `
       label
       value
     }
+    ${ORDER_ITEM_THUMBNAIL_FIELDS}
     ${SUNNY_ORDER_ITEM_FIELDS}
   }
   total {

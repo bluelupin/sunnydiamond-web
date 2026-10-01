@@ -13,6 +13,7 @@ import {
 import {
   buildOrderDeliveryTimelineFromStatus,
   formatOrderStatusLabel,
+  giftCardNameForSku,
   giftCardSubtitleForSku,
   isDigitalGiftCardProfileOrder,
 } from "./orderDeliveryTimeline.utils";
@@ -109,7 +110,7 @@ function mapDetailItems(
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
-      name: item.productName,
+      name: giftCardNameForSku(item.productName, sku),
       ...(imageUrl ? { imageSrc: imageUrl } : {}),
       ...(subtitle ? { subtitle } : {}),
       size: display.size,
@@ -205,13 +206,12 @@ export function mapTrackedOrderToProfileDetailUi(
   }
 
   if (isDigitalGiftCardProfileOrder(base)) {
-    // Digital gift cards are emailed: no delivery steps, tracking, cancel or return. Contact Us
-    // and the invoice stay (gift card success-to-profile flow, 30 Sep).
+    // Digital gift cards are emailed: no delivery steps, tracking, cancel or return. Only the
+    // invoice CTA stays on the detail page (Figma).
     return {
       ...base,
       showCancel: false,
       showReturn: false,
-      showContactUs: true,
       showCancelNote: false,
       footnote: undefined,
     };

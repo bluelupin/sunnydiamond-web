@@ -442,7 +442,11 @@ export function ProfileOrderDetailView({
               {order.showDownloadInvoice ? (
                 <DetailDarkButton
                   type="button"
-                  className="order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1"
+                  className={cn(
+                    "order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1",
+                    isActiveDigitalGiftCardOrder(order) &&
+                      "lg:ml-auto lg:w-[414px] lg:max-w-[414px] lg:flex-none",
+                  )}
                   onClick={handleDownloadInvoice}
                   disabled={invoiceDisabled}
                 >

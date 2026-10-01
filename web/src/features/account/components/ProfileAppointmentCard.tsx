@@ -8,6 +8,7 @@ import RightArrow from "@/assets/Icons/RightArrow";
 import {
   DetailDarkButton,
   DetailOutlineButton,
+  DetailOutlineLink,
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
 import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizontalCarouselSwipe";
@@ -412,20 +413,31 @@ export function ProfileAppointmentCard({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div
-            className={cn(
-              "grid gap-4 md:gap-6",
-              !appointment.rescheduleLimitReached && "md:grid-cols-2",
+          <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+            {appointment.rescheduleLimitReached ? (
+              <>
+                <DetailOutlineLink href={content.contactUsHref} className="w-full">
+                  {content.contactUsLabel}
+                </DetailOutlineLink>
+                <DetailDarkButton
+                  type="button"
+                  className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={onCancel}
+                  disabled={!appointment.canCancel}
+                >
+                  {content.cancelLabel}
+                </DetailDarkButton>
+              </>
+            ) : (
+              <DetailOutlineButton
+                type="button"
+                className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={onCancel}
+                disabled={!appointment.canCancel}
+              >
+                {content.cancelLabel}
+              </DetailOutlineButton>
             )}
-          >
-            <DetailOutlineButton
-              type="button"
-              className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={onCancel}
-              disabled={!appointment.canCancel}
-            >
-              {content.cancelLabel}
-            </DetailOutlineButton>
             {appointment.rescheduleLimitReached ? null : (
               <DetailDarkButton
                 type="button"
@@ -439,7 +451,7 @@ export function ProfileAppointmentCard({
           </div>
 
           {appointment.rescheduleLimitReached ? (
-            <ProfileInfoNote>{content.rescheduleLimitNote}</ProfileInfoNote>
+            <ProfileInfoNote>{content.rescheduleLimitExceededNote}</ProfileInfoNote>
           ) : appointment.canReschedule && appointment.rescheduleNote ? (
             <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
           ) : null}

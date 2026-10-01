@@ -7,6 +7,7 @@ import { CartMetaRow, CartPrimaryLink } from "@/features/cart/components/CartFlo
 import { formatOrderDate, formatOrderTotal, formatAddressLines } from "@/features/account/utils/formatAccountData";
 import {
   buildOrderDeliveryTimelineFromStatus,
+  giftCardNameForSku,
   giftCardSubtitleForSku,
 } from "@/features/account/utils/orderDeliveryTimeline.utils";
 import { ProfileOrderTimeline } from "@/features/account/components/ProfileOrderTimeline";
@@ -152,10 +153,10 @@ const OrderDetailView = ({
                 >
                   {item.productUrlKey ? (
                     <Link href={`/product/${item.productUrlKey}`} className="hover:underline">
-                      {item.productName}
+                      {giftCardNameForSku(item.productName, item.productSku)}
                     </Link>
                   ) : (
-                    item.productName
+                    giftCardNameForSku(item.productName, item.productSku)
                   )}
                   {item.quantity > 1 ? ` × ${item.quantity}` : ""}
                 </p>

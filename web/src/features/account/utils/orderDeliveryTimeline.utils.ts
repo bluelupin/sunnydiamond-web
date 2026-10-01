@@ -150,6 +150,15 @@ export function giftCardSubtitleForSku(sku?: string | null): string | undefined 
   return sku ? GIFT_CARD_SUBTITLE_BY_SKU[sku.trim().toLowerCase()] : undefined;
 }
 
+/** Keep the gift card variant in its subtitle instead of repeating it in the product title. */
+export function giftCardNameForSku(name: string, sku?: string | null): string {
+  if (!giftCardSubtitleForSku(sku)) {
+    return name;
+  }
+
+  return name.replace(/\s*\((?:digital|physical)\)\s*$/i, "").trim();
+}
+
 function isGiftCardSubtitle(subtitle?: string): boolean {
   const value = subtitle?.trim();
   return value === "Digital Card" || value === "Physical Card";

@@ -37,6 +37,7 @@ import {
 import {
   buildOrderDeliveryTimelineFromStatus,
   formatOrderStatusLabel,
+  giftCardNameForSku,
   giftCardSubtitleForSku,
   isDigitalGiftCardProfileOrder,
   normalizeOrderStatus,
@@ -445,7 +446,7 @@ function mapOrderItems(
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
-      name: item.productName,
+      name: giftCardNameForSku(item.productName, item.productSku),
       ...(imageUrl ? { imageSrc: imageUrl } : {}),
       ...(subtitle ? { subtitle } : {}),
       size: display.size,
@@ -657,10 +658,14 @@ export function mapCustomerAppointmentToProfileUi(
       ? { yourRequirement: appointment.customerMessage }
       : {}),
     rescheduleNote: rescheduleDeadline
-      ? profileTabsContent.appointments.rescheduleNoteTemplate.replace(
-          "{date}",
-          rescheduleDeadline,
-        )
+      ? appointment.reschedulesLeft != null && appointment.reschedulesLeft > 0
+        ? profileTabsContent.appointments.rescheduleCountNoteTemplate
+            .replace("{left}", String(appointment.reschedulesLeft))
+            .replace("{date}", rescheduleDeadline)
+        : profileTabsContent.appointments.rescheduleNoteTemplate.replace(
+            "{date}",
+            rescheduleDeadline,
+          )
       : undefined,
     canReschedule,
     rescheduleLimitReached,

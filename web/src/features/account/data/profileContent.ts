@@ -336,7 +336,10 @@ export const profileTabsContent = {
     yourRequirementLabel: "Your Requirement",
     rescheduleLabel: "RESCHEDULE",
     cancelLabel: "CANCEL APPOINTMENT",
+    // As per the Figma we show the "{left} of 2 reschedules allowed" note; this one is only the fallback when the CMS doesn't send reschedulesLeft.
     rescheduleNoteTemplate: "Appointment can be rescheduled before {date}",
+    rescheduleCountNoteTemplate: "{left} of 2 reschedules allowed before {date}.",
+    rescheduleLimitExceededNote: "Reschedule limit exceeded",
     cancelledNoteTemplate: "Appointment cancelled on {date}",
     contactUsLabel: "CONTACT US",
     contactUsHref: "/contact",
