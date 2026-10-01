@@ -5,12 +5,10 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import {
+  storeLocatorDefaultSearchPlaceholder,
   storeLocatorSearchFigmaSpec,
-  type StoreLocatorStateFilter,
 } from "../data/storeLocatorContent";
-import StoreLocatorStateIcon, {
-  StoreLocatorStateIconDesktop,
-} from "./StoreLocatorStateIcon";
+import { sanitizeStoreLocatorSearchInput } from "../utils/storeLocatorFilters";
 import type { NormalizedStoreLocatorLocationFilter } from "@/services/store-locator/store-locator-page.types";
 
 type StoreLocatorSearchSectionProps = {
@@ -24,111 +22,62 @@ type StoreLocatorSearchSectionProps = {
   pincodeError?: string | null;
 };
 
-function mapCmsFiltersToStateFilters(
-  filters: NormalizedStoreLocatorLocationFilter[],
-): StoreLocatorStateFilter[] {
-  return filters.map((filter) => ({
-    id: filter.id,
-    label: filter.label,
-    iconUrl: filter.iconUrl,
-    iconAlt: filter.iconAlt,
-    iconWidth: 64,
-    iconHeight: 64,
-    mobileIconWidth: 40,
-    mobileIconHeight: 40,
-  }));
-}
-
 const StoreLocatorSearchSection = ({
   searchQuery,
-  selectedState,
   onSearchQueryChange,
-  onSelectedStateChange,
   searchPlaceholder,
-  locationFilters,
   pincodeError,
 }: StoreLocatorSearchSectionProps) => {
-  const placeholder = searchPlaceholder?.trim() ?? "";
-  const stateFilters =
-    locationFilters && locationFilters.length > 0
-      ? mapCmsFiltersToStateFilters(locationFilters)
-      : [];
+  const placeholder =
+    searchPlaceholder?.trim() || storeLocatorDefaultSearchPlaceholder;
   const errorMessage = pincodeError?.trim() || undefined;
+  const { searchMaxWidth, searchHeight } = storeLocatorSearchFigmaSpec;
 
   return (
     <section
       aria-label="Find a showroom"
-      className="px-4 py-6 md:border-b md:border-neutral300 md:px-0 md:py-10"
+      className="flex flex-col items-center justify-center border-b border-neutral300 px-4 py-6 md:px-0 md:pb-10 md:pt-16"
     >
-      <div className="mx-auto flex w-full max-w-[676px] flex-col gap-6 md:items-center">
+      <div
+        className="flex w-full flex-col items-center"
+        style={{ maxWidth: searchMaxWidth }}
+      >
         <div className="flex w-full flex-col gap-2">
           <label className="relative block w-full">
-            {placeholder ? <span className="sr-only">{placeholder}</span> : null}
+            <span className="sr-only">{placeholder}</span>
             <div
               className={cn(
-                "flex h-14 w-full items-center gap-2 bg-aboutInactive p-3",
+                "flex w-full items-center gap-2 bg-[#F2F2F2] p-3",
                 errorMessage && invalidFieldContainerClassName,
               )}
+              style={{ minHeight: searchHeight }}
             >
               <SearchIcon className="size-6 shrink-0 text-darkblack" />
               <input
-                type="search"
+                type="text"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                pattern="[0-9]*"
+                maxLength={6}
                 value={searchQuery}
-                onChange={(event) => onSearchQueryChange(event.target.value)}
+                onChange={(event) =>
+                  onSearchQueryChange(sanitizeStoreLocatorSearchInput(event.target.value))
+                }
                 placeholder={placeholder}
-                aria-label={placeholder || undefined}
+                aria-label={placeholder}
                 aria-invalid={errorMessage ? true : undefined}
-                aria-describedby={errorMessage ? "store-locator-pincode-error" : undefined}
-                className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack placeholder:font-normal placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+                aria-describedby={
+                  errorMessage ? "store-locator-pincode-error" : undefined
+                }
+                className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack placeholder:font-normal placeholder:text-gray600 focus:outline-none"
               />
             </div>
           </label>
-          <FormFieldError id="store-locator-pincode-error" message={errorMessage} />
+          <FormFieldError
+            id="store-locator-pincode-error"
+            message={errorMessage}
+          />
         </div>
-
-        {stateFilters.length > 0 ? (
-          <div
-            className="flex h-14 items-center gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:h-auto md:gap-8 [&::-webkit-scrollbar]:hidden"
-            role="list"
-            aria-label="Filter by state"
-          >
-            {stateFilters.map((state) => {
-              // Prefer CMS label for filtering — showroom.state is a full name
-              // (e.g. "Kerala"), while CMS `value` is often a short code ("KL").
-              const cmsFilter = locationFilters?.find((item) => item.id === state.id);
-              const filterValue = (cmsFilter?.label ?? state.label).trim();
-              const selected = selectedState?.trim() ?? "";
-              const isSelected =
-                selected.toLowerCase() === filterValue.toLowerCase() ||
-                selected.toLowerCase() === (cmsFilter?.value?.trim() ?? "").toLowerCase() ||
-                selected.toLowerCase() === state.label.trim().toLowerCase();
-
-              return (
-                <button
-                  key={state.id}
-                  type="button"
-                  role="listitem"
-                  aria-pressed={isSelected}
-                  onClick={() => {
-                    if (isSelected) return;
-                    onSelectedStateChange(filterValue);
-                  }}
-                  className={cn(
-                    "flex h-14 shrink-0 flex-col items-center justify-between transition-opacity hover:opacity-80 md:h-auto md:justify-center md:gap-2 gap-1",
-                    isSelected && "opacity-100",
-                  )}
-                  style={{ width: storeLocatorSearchFigmaSpec.stateItemWidth }}
-                >
-                  <StoreLocatorStateIcon state={state} variant="mobile" />
-                  <StoreLocatorStateIconDesktop state={state} />
-                  <span className="whitespace-nowrap font-gill text-sm font-normal leading-110 text-neutral500 md:text-base">
-                    {state.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
       </div>
     </section>
   );

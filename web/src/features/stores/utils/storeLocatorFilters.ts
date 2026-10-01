@@ -4,6 +4,13 @@ import {
 } from "@/features/stores/data/storeLocatorContent";
 
 const INDIAN_PINCODE_PATTERN = /\b(\d{6})\b/;
+const INDIAN_PINCODE_INPUT_MAX_LENGTH = 6;
+
+/** Store locator search field — digits only (Indian pincode). */
+export function sanitizeStoreLocatorSearchInput(value: string): string {
+  return value.replace(/\D/g, "").slice(0, INDIAN_PINCODE_INPUT_MAX_LENGTH);
+}
+
 const INDIAN_STATES = [
   "Andhra Pradesh",
   "Arunachal Pradesh",
