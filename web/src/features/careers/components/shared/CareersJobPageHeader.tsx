@@ -13,6 +13,7 @@ type CareersJobPageHeaderProps = {
   shareLabel?: string;
   onShare?: () => void;
   showPosted?: boolean;
+  showMobilePosted?: boolean;
   className?: string;
 };
 
@@ -23,6 +24,7 @@ const CareersJobPageHeader = ({
   shareLabel = "Share",
   onShare,
   showPosted = true,
+  showMobilePosted = showPosted,
   className,
 }: CareersJobPageHeaderProps) => {
   return (
@@ -52,7 +54,7 @@ const CareersJobPageHeader = ({
 
         <div className="flex items-center justify-between gap-4">
           <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />
-          {showPosted && <CareersPostedLabel
+          {showMobilePosted && <CareersPostedLabel
             postedAt={job.postedAt}
             className="shrink-0 font-gill text-sm font-light leading-110 text-neutral500"
           />}
