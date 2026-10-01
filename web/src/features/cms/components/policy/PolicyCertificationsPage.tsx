@@ -525,7 +525,7 @@ const PolicyCertificationsPage = ({
 
         <div className="hidden lg:flex lg:flex-col">
           {page.pageTitle ? (
-            <div className="flex flex-col items-center pb-6">
+            <div className="flex flex-col items-center pb-10">
               <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
                 {page.pageTitle}
               </h1>
