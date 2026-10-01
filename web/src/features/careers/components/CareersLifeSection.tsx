@@ -13,14 +13,14 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
     <section
       id="life-at-sunny"
       aria-labelledby="careers-life-title"
-      className="md:bg-gray300"
+      className="bg-white md:bg-gray300"
     >
-      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-104 pt-10 md:pb-104 mt-0 pb-16 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1fr)] lg:items-stretch lg:gap-10">
-        <div className="flex w-full min-w-0 flex-col gap-6 max-w-[300px] lg:max-w-none lg:gap-10">
+      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-104 pt-16 md:pb-104 mt-0 pb-16 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1fr)] lg:items-stretch lg:gap-10">
+        <div className="flex w-full min-w-0 flex-col gap-6 md:max-w-[300px] lg:max-w-none lg:gap-10">
           <Reveal direction="up">
             <h2
               id="careers-life-title"
-              className="w-full whitespace-pre-wrap font-larken text-32 font-light leading-110 text-darkblack md:text-5xl max-w-[300px]"
+              className="w-full whitespace-pre-wrap font-larken text-32 font-light leading-110 text-darkblack md:text-5xl md:max-w-[300px]"
             >
               {lifeAt.title}
             </h2>
@@ -54,31 +54,33 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
                 className="h-9 w-px shrink-0 bg-darkMagenta md:h-[38px] md:w-[1.5px]"
                 aria-hidden
               />
-              <p className="min-w-0 max-w-full font-gill text-sm font-light leading-110 text-[#696969] lg:max-w-[292px] md:text-base md:text-darkblack">
+              <p className="min-w-0 max-w-[220px] font-gill text-sm font-light leading-110 text-[#696969] md:max-w-full lg:max-w-[292px] md:text-base md:text-darkblack">
                 &ldquo;{lifeAt.quote}&rdquo;
               </p>
             </div>
           ) : null}
         </Reveal>
 
-        <Reveal direction="up" className="grid grid-cols-2 w-full items-center gap-4 lg:hidden">
-          <div className="relative aspect-[474/496] w-full overflow-hidden">
+        <Reveal direction="up" className="grid grid-cols-[minmax(0,186fr)_minmax(0,160fr)] w-full items-center gap-3 md:grid-cols-2 md:gap-4 lg:hidden">
+          <div className="relative aspect-[186/238] w-full overflow-hidden md:aspect-[474/496]">
             <Image
               src={lifeAt.leftImage.mobileUrl || lifeAt.leftImage.desktopUrl}
               alt={lifeAt.leftImage.alt}
-              width={310}
-              height={226}
+              width={186}
+              height={238}
+              sizes="(min-width: 1024px) 474px, (min-width: 768px) 50vw, 48vw"
               className={!lifeAt.leftImage.mobileUrl || lifeAt.leftImage.mobileUrl === lifeAt.leftImage.desktopUrl
                 ? "absolute top-0 left-[-15.45%] h-full w-[143.63%] max-w-none object-cover"
                 : "h-full w-full object-cover"}
             />
           </div>
-          <div className="relative aspect-[474/496] w-full overflow-hidden">
+          <div className="relative aspect-[160/208] w-full overflow-hidden md:aspect-[474/496]">
             <Image
               src={lifeAt.rightImage.mobileUrl || lifeAt.rightImage.desktopUrl}
               alt={lifeAt.rightImage.alt}
-              width={344}
-              height={251}
+              width={160}
+              height={208}
+              sizes="(min-width: 1024px) 474px, (min-width: 768px) 50vw, 42vw"
               className={!lifeAt.rightImage.mobileUrl || lifeAt.rightImage.mobileUrl === lifeAt.rightImage.desktopUrl
                 ? "absolute top-[-29.32%] left-[-140.28%] h-[179.11%] w-[257.26%] max-w-none object-fill"
                 : "h-full w-full object-cover"}

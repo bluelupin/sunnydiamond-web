@@ -120,9 +120,9 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
       >
         <h2
           id="careers-benefits-title"
-          className="2xl:px-[60px] lg:px-10 px-8 w-full font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
+          className="2xl:px-[60px] lg:px-10 md:px-8 px-4 w-full font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
         >
-          <span className="whitespace-pre-line">
+          <span className="whitespace-normal md:whitespace-pre-line">
             {benefits.title.replace(/\s+(Your Best Work)\s*$/i, "\n$1")}
           </span>
         </h2>
