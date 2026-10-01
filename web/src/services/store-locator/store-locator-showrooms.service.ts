@@ -31,6 +31,14 @@ function unwrapStrapiCollection(payload: unknown): Record<string, unknown>[] {
   return [];
 }
 
+function readStrapiDocumentId(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
 function unwrapStrapiShowroomEntity(
   item: Record<string, unknown>,
 ): StrapiStoreLocatorShowroom | null {
@@ -40,7 +48,7 @@ function unwrapStrapiShowroomEntity(
     return {
       ...attrs,
       id: (item.id ?? attrs.id) as StrapiStoreLocatorShowroom["id"],
-      documentId: (item.documentId ?? attrs.documentId) ?? null,
+      documentId: readStrapiDocumentId(item.documentId ?? attrs.documentId),
     };
   }
 
