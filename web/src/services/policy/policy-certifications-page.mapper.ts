@@ -69,7 +69,7 @@ function parseAvailabilityHours(
         return { label: line, value: "" };
       }
       return {
-        label: line.slice(0, colon).trim(),
+        label: line.slice(0, colon + 1).trim(),
         value: line.slice(colon + 1).trim(),
       };
     });
