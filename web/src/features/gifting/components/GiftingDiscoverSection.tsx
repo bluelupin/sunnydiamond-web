@@ -149,7 +149,7 @@ const GiftingDiscoverSection = ({
             src={imageSrc}
             alt={imageAlt}
             fill
-            className="object-cover object-center"
+            className="object-cover object-center md:object-[82%_center] lg:object-center"
             sizes="(max-width: 768px) 100vw, 732px"
           />
         </Reveal>
