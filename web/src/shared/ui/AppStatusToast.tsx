@@ -15,6 +15,7 @@ type AppStatusToastProps = {
   action?: ReactNode;
   /** Renders a close button when provided. */
   onDismiss?: () => void;
+  hideIcon?: boolean;
 };
 
 type AppStatusToastActionProps = {
@@ -39,7 +40,7 @@ export const AppStatusToastAction = ({
 );
 
 /** Top-centered status toast — matches Add to Wishlist notification styling. */
-const AppStatusToast = ({ open, message, action, onDismiss }: AppStatusToastProps) => {
+const AppStatusToast = ({ open, message, action, onDismiss, hideIcon = false }: AppStatusToastProps) => {
   const [phase, setPhase] = useState<ToastPhase>("hidden");
   const [displayContent, setDisplayContent] = useState({ message, action });
 
@@ -119,7 +120,9 @@ const AppStatusToast = ({ open, message, action, onDismiss }: AppStatusToastProp
           )}
         >
           <div className="flex min-w-0 items-center gap-2">
-            <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
+            {hideIcon ? null : (
+              <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
+            )}
             <p className="min-w-0 text-center font-gill text-sm font-light leading-110 text-white">
               {displayContent.message}
             </p>
