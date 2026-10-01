@@ -207,8 +207,8 @@ function ShowroomsDesktopLayout({
           </ScrollReveal>
         ) : null}
       </div>
-      <div className="hidden lg:flex md:flex-row flex-col gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
-        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px] h-full xl:w-[593px] lg:w-[450px] flex-shrink-0">
+      <div className="hidden lg:grid lg:grid-cols-[450px_minmax(0,1fr)] xl:grid-cols-[593px_minmax(0,1fr)] lg:gap-6 lg:static relative">
+        <ScrollReveal delayMs={120} className="min-w-0">
           <div
             aria-label="Showroom locations"
             className="h-full flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-neutral300 overflow-x-auto"
@@ -274,19 +274,21 @@ function ShowroomsDesktopLayout({
         </ScrollReveal>
         <ScrollReveal
           delayMs={200}
-          className="relative aspect-[350/480] h-478 w-full overflow-hidden px-5 md:aspect-[850/600] md:h-[529px] md:px-0 lg:aspect-[850/600]"
+          className="relative h-full min-h-[559px] min-w-0 overflow-hidden"
         >
           {activeLocation && hasImage && desktopImage && mobileImage ? (
-            <ResponsiveImage
-              key={activeLocation.id}
-              desktopSrc={desktopImage}
-              mobileSrc={mobileImage}
-              alt={imageAlt}
-              width={850}
-              height={600}
-              quality={90}
-              className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
-            />
+            <div className="absolute inset-0">
+              <ResponsiveImage
+                key={activeLocation.id}
+                fill
+                desktopSrc={desktopImage}
+                mobileSrc={mobileImage}
+                alt={imageAlt}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                quality={90}
+                className="object-cover object-center animate-in fade-in zoom-in-105 duration-700 ease-out"
+              />
+            </div>
           ) : null}
         </ScrollReveal>
       </div>
