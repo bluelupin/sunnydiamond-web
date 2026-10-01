@@ -23,6 +23,8 @@ export type AuthCustomer = {
   phone?: string | null;
   /** Whether that number was proven with an SMS code (only then does it sign in). */
   phoneVerified?: boolean;
+  /** Whether the account email was proven to be theirs (phone sign-ups start unverified). */
+  emailVerified?: boolean;
 };
 
 type AuthStatus = "loading" | "guest" | "authenticated";

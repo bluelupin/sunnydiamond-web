@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import {
+  requestEmailVerifyOtp,
   requestLoginOtp,
   requestPhoneLinkOtp,
+  verifyEmailOtp,
   verifyLoginOtp,
   verifyPhoneLink,
   type OtpTarget,
@@ -16,7 +18,6 @@ import {
 } from "@/shared/ui/drawer";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
 import { validatePhone } from "@/shared/utils/formValidation";
@@ -37,14 +38,18 @@ type CheckoutOtpModalProps = {
   phone: string;
   /** Dial code of `phone` when it is a mobile number ("+91", "+1"). */
   countryCode?: string;
-  /** "login" (default) signs the guest in; "link" attaches the number to the signed-in account. */
-  purpose?: "login" | "link";
+  /**
+   * "login" (default) signs the guest in; "link" attaches the number to the signed-in
+   * account; "verifyEmail" proves the signed-in account's own email (`phone` is that email).
+   */
+  purpose?: "login" | "link" | "verifyEmail";
   onClose: () => void;
   onVerify: (result: CheckoutOtpVerifyResult) => void;
 };
 
 const OTP_LENGTH = 6;
-const RESEND_SECONDS = 30;
+/** Placeholder until the server returns its cooldown (resend_cooldown, 60 s). */
+const RESEND_SECONDS = 60;
 
 const maskPhone = (phone: string, countryCode: string) => {
   if (phone.includes("@")) {
@@ -87,7 +92,6 @@ const CheckoutOtpFields = ({
         <p className="font-gill text-base font-light leading-110 text-darkblack">
           Please enter the OTP sent to {maskPhone(phone, countryCode)}
         </p>
-        <DetailTextLink>EDIT</DetailTextLink>
       </div>
       <div className="flex w-full gap-1">
         {otp.map((digit, index) => (
@@ -125,7 +129,7 @@ const CheckoutOtpFields = ({
     </div>
     {secondsLeft > 0 ? (
       <p className="font-gill text-base font-light leading-110 text-darkblack">
-        {`Resend code in 00:${secondsLeft.toString().padStart(2, "0")}`}
+        {`Resend code in ${String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:${String(secondsLeft % 60).padStart(2, "0")}`}
       </p>
     ) : (
       <button
@@ -237,7 +241,9 @@ const CheckoutOtpModal = ({
     const result =
       purpose === "link"
         ? await requestPhoneLinkOtp(phoneE164)
-        : await requestLoginOtp(target);
+        : purpose === "verifyEmail"
+          ? await requestEmailVerifyOtp()
+          : await requestLoginOtp(target);
     if (!result.success) {
       setOtpError(result.error);
       return;
@@ -298,7 +304,9 @@ const CheckoutOtpModal = ({
     const result =
       purpose === "link"
         ? await verifyPhoneLink(phoneE164, otp.join(""))
-        : await verifyLoginOtp(target, otp.join(""));
+        : purpose === "verifyEmail"
+          ? await verifyEmailOtp(otp.join(""))
+          : await verifyLoginOtp(target, otp.join(""));
     setIsVerifying(false);
 
     if (!result.success) {

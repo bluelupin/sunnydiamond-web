@@ -27,10 +27,7 @@ import {
 } from "@/shared/constants/appointmentForm";
 import { profileDetailsContent } from "../data/profileContent";
 import { formatCustomerFullName } from "../utils/formatAccountData";
-import {
-  isProfileEmailVerified,
-  persistProfileEmailVerification,
-} from "../utils/profileEmailVerification";
+import { isRegisteredProfileEmail } from "../utils/profileEmailVerification";
 import { useDeleteAccount } from "../hooks/useDeleteAccount";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
 import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
@@ -88,9 +85,9 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const initialFullName = formatCustomerFullName(customer.firstname, customer.lastname);
   const initialEmail = customer.email ?? "";
-  const [isEmailVerified, setIsEmailVerified] = useState(() =>
-    isProfileEmailVerified(customer.id, initialEmail),
-  );
+  // Placeholder guest addresses get neither a badge nor a Verify link.
+  const isEmailVerifiable = isRegisteredProfileEmail(initialEmail);
+  const [emailOtpOpen, setEmailOtpOpen] = useState(false);
 
   const [fullName, setFullName] = useState(initialFullName);
   const [phone, setPhone] = useState("");
@@ -102,10 +99,6 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   useEffect(() => {
     setFullName(initialFullName);
   }, [initialFullName]);
-
-  useEffect(() => {
-    setIsEmailVerified(isProfileEmailVerified(customer.id, initialEmail));
-  }, [customer.id, initialEmail]);
 
   // Account mobile number first (refreshed after a save); address-book phone as fallback.
   const { countryCode: initialCountryCode, national: initialPhone } = useMemo(
@@ -207,10 +200,9 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
     }
   };
 
-  const handleVerifyEmail = () => {
-    showStatusToast(content.emailVerifiedToastMessage);
-    persistProfileEmailVerification(customer.id, initialEmail);
-    setIsEmailVerified(true);
+  const handleEmailVerified = () => {
+    setEmailOtpOpen(false);
+    void refresh().then(() => showStatusToast(content.emailVerifiedToastMessage));
   };
 
   const handleProceedToDelete = () => {
@@ -257,6 +249,17 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
         onClose={() => setPhoneOtpOpen(false)}
         onVerify={handlePhoneLinked}
       />
+      <CheckoutOtpModal
+        open={emailOtpOpen}
+        phone={initialEmail}
+        purpose="verifyEmail"
+        onClose={() => {
+          setEmailOtpOpen(false);
+          // Picks up a verification done elsewhere ("already verified" in the popup).
+          void refresh();
+        }}
+        onVerify={handleEmailVerified}
+      />
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-6">
@@ -291,10 +294,13 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   readOnly
                   className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
                 />
-                {isEmailVerified ? (
+                {!isEmailVerifiable ? null : customer.emailVerified ? (
                   <ProfileEmailVerifiedBadge label={content.verifiedLabel} />
                 ) : (
-                  <DetailTextLink onClick={handleVerifyEmail} className="shrink-0 text-sm uppercase">
+                  <DetailTextLink
+                    onClick={() => setEmailOtpOpen(true)}
+                    className="shrink-0 text-sm uppercase"
+                  >
                     {content.verifyLabel}
                   </DetailTextLink>
                 )}

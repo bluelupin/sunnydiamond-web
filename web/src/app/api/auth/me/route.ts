@@ -16,6 +16,8 @@ export type AuthMeResponse = {
     phone: string | null;
     /** Whether that number was proven with an SMS code (only then does it sign in). */
     phoneVerified: boolean;
+    /** Whether the account email was proven to be theirs (phone sign-ups start unverified). */
+    emailVerified: boolean;
   } | null;
   /** Present when customer is null — useful in Network tab while debugging auth. */
   reason?: string;
@@ -63,6 +65,7 @@ export async function GET() {
         email: string;
         custom_attributes?: Array<{ code: string; value?: string | null }> | null;
         sd_mobile_verified?: boolean | null;
+        sd_email_verified?: boolean | null;
       };
     }>({
       query: MAGENTO_CUSTOMER_ME_QUERY,
@@ -104,6 +107,7 @@ export async function GET() {
           customer.custom_attributes?.find((attribute) => attribute.code === "mobile_number")
             ?.value || null,
         phoneVerified: customer.sd_mobile_verified === true,
+        emailVerified: customer.sd_email_verified === true,
       },
     } satisfies AuthMeResponse);
   } catch (error) {

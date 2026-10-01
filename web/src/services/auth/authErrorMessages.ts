@@ -12,6 +12,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   PHONE_COUNTRY_NOT_SUPPORTED:
     "SMS codes aren't available for this country yet. Please use your email address instead.",
   OTP_SMS_UNAVAILABLE: "We could not send the SMS right now. Please try again later.",
+  EMAIL_ALREADY_VERIFIED: "Your email address is already verified.",
+  EMAIL_NOT_VERIFIABLE: "This account has no email address to verify.",
 };
 
 export function mapAuthErrorMessage(message: string, fallback: string): string {
