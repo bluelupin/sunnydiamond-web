@@ -10,6 +10,10 @@ import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import { buildJewelleryHref, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
 const IMAGE_QUALITY = 75;
+const hoverTransitionClassName =
+  "motion-safe:transition-[padding,opacity,color] motion-safe:duration-500 motion-safe:ease-in-out";
+const hoverImageTransitionClassName =
+  "motion-safe:transition-opacity motion-safe:duration-500 motion-safe:ease-in-out";
 
 function preloadImage(url: string): Promise<void> {
   return new Promise((resolve) => {
@@ -102,7 +106,12 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
       href={categoryLink}
       target={openInNewTab ? "_blank" : undefined}
       rel={openInNewTab ? "noopener noreferrer" : undefined}
-      className={cn("lg:px-6 hover:lg:px-0 px-4 hover:px-0 lg:pt-12 md:pt-8 pt-4", "group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300")}
+      className={cn(
+        "group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300",
+        "px-4 pt-4 md:pt-8 lg:px-6 lg:pt-12",
+        "hover:px-0 hover:lg:px-0",
+        hoverTransitionClassName,
+      )}
       onPointerEnter={hasDistinctHover ? prefetchHoverImage : undefined}
       onFocus={hasDistinctHover ? prefetchHoverImage : undefined}
     >
@@ -119,12 +128,21 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
           sizes="(max-width: 768px) 50vw, 25vw"
           className={cn(
             "absolute inset-0 z-0 h-full w-full object-cover opacity-0",
-            "motion-safe:transition-opacity motion-safe:ease-in-out",
+            hoverImageTransitionClassName,
             canCrossfade &&
-            "motion-safe:duration-[400ms] group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
+              "group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
           )}
         />
       ) : null}
+
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[38%] min-h-[88px] bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0",
+          hoverImageTransitionClassName,
+          "group-hover:opacity-100 group-focus-visible:opacity-100",
+        )}
+      />
 
       <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden lg:max-h-[303px] md:max-h-[250px] lg:max-w-[303px] md:max-w-[250px] max-h-[176px] max-w-[133px] h-full w-full">
         {hasProductImage && desktopImageUrl ? (
@@ -140,19 +158,20 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
             sizes="(max-width: 768px) 50vw, 25vw"
             className={cn(
               "max-h-full max-w-full object-contain",
-              "motion-safe:transition-opacity motion-safe:ease-out",
-              canCrossfade &&
-              "motion-safe:duration-[250ms] group-hover:opacity-0 group-focus-visible:opacity-0",
+              hoverImageTransitionClassName,
+              canCrossfade && "group-hover:opacity-0 group-focus-visible:opacity-0",
             )}
           />
         ) : null}
       </div>
       <div className="relative z-10 w-full shrink-0 pb-4 pt-2 lg:pb-12">
         <span
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 -top-3 bottom-0 -z-10 w-full bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0 motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out group-hover:opacity-100 group-focus-visible:opacity-100"
-        />
-        <span className="relative block text-center font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out group-hover:text-white group-focus-visible:text-white">
+          className={cn(
+            "relative block text-center font-gill text-base font-normal leading-110 text-darkblack md:text-lg lg:text-xl",
+            hoverTransitionClassName,
+            "group-hover:text-white group-focus-visible:text-white",
+          )}
+        >
           {title}
         </span>
       </div>
