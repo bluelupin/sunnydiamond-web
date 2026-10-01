@@ -26,7 +26,7 @@ export const profileDetailsContent = {
   deleteAccount: {
     title: "Delete Account",
     description:
-      "Your account is deleted 30 days after you ask. Signing in during those 30 days keeps it. After that, your profile, saved addresses, wishlist and plan details are removed; order records are kept for tax purposes without your contact details.",
+      "Deleting your Sunny Diamonds account will permanently remove your profile, saved addresses, orders, wishlist, and plan details. This action cannot be undone.",
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
