@@ -130,7 +130,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
             "absolute inset-0 z-0 h-full w-full object-cover opacity-0",
             hoverImageTransitionClassName,
             canCrossfade &&
-              "group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
+            "group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
           )}
         />
       ) : null}
@@ -164,7 +164,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
           />
         ) : null}
       </div>
-      <div className="relative z-10 w-full shrink-0 pb-4 pt-2 lg:pb-12">
+      <div className="relative z-10 w-full shrink-0 pb-4 md:pb-10 lg:pb-[51px]">
         <span
           className={cn(
             "relative block text-center font-gill text-base font-normal leading-110 text-darkblack md:text-lg lg:text-xl",
