@@ -30,7 +30,7 @@ const AboutHeroSection = ({ title, image, videoUrl }: AboutHeroSectionProps) => 
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative flex flex-col overflow-hidden bg-white md:h-[633px] h-[688px]"
+      className="relative flex flex-col overflow-hidden bg-white md:h-[633px] h-[688px] bg-gray200"
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div

@@ -1,11 +1,10 @@
 import HomePageRouteSkeleton from "@/features/cms/components/skeletons/HomePageRouteSkeleton";
-import PageLoadingMarker from "@/shared/ui/layout/PageLoadingMarker";
+import SiteRouteLoadingFallback from "@/shared/ui/layout/SiteRouteLoadingFallback";
 
 export default function HomeLoading() {
   return (
-    <>
-      <PageLoadingMarker />
+    <SiteRouteLoadingFallback>
       <HomePageRouteSkeleton />
-    </>
+    </SiteRouteLoadingFallback>
   );
 }

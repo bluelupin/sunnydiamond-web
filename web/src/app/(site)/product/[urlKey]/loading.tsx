@@ -1,11 +1,10 @@
 import ProductDetailPageSkeleton from "@/features/products/components/skeletons/ProductDetailPageSkeleton";
-import PageLoadingMarker from "@/shared/ui/layout/PageLoadingMarker";
+import SiteRouteLoadingFallback from "@/shared/ui/layout/SiteRouteLoadingFallback";
 
 export default function ProductLoading() {
   return (
-    <>
-      <PageLoadingMarker />
+    <SiteRouteLoadingFallback>
       <ProductDetailPageSkeleton />
-    </>
+    </SiteRouteLoadingFallback>
   );
 }

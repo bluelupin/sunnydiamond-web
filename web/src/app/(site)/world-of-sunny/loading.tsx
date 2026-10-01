@@ -1,11 +1,10 @@
 import AboutPageSkeleton from "@/features/about/components/skeletons/AboutPageSkeleton";
-import PageLoadingMarker from "@/shared/ui/layout/PageLoadingMarker";
+import SiteRouteLoadingFallback from "@/shared/ui/layout/SiteRouteLoadingFallback";
 
 export default function WorldOfSunnyLoading() {
   return (
-    <>
-      <PageLoadingMarker />
+    <SiteRouteLoadingFallback>
       <AboutPageSkeleton />
-    </>
+    </SiteRouteLoadingFallback>
   );
 }

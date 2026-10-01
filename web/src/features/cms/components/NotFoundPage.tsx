@@ -1,4 +1,4 @@
-import { PrimaryLink } from "@/shared/ui/PrimaryButton";
+import { DetailDarkLink } from "@/features/products/components/detail/shared";
 
 const NotFoundPage = () => {
   return (
@@ -8,7 +8,7 @@ const NotFoundPage = () => {
           <p className="font-body text-lg text-muted-foreground mb-6">
             The page you're looking for doesn't exist.
           </p>
-          <PrimaryLink href="/">Return to Home</PrimaryLink>
+          <DetailDarkLink href="/">Return to Home</DetailDarkLink>
         </div>
     </div>
   );
