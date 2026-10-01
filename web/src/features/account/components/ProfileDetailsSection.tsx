@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import InformationIcon from "@/assets/Icons/InformationIcon";
 import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext";
 import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
 import CheckoutOtpModal from "@/features/checkout/components/CheckoutOtpModal";
@@ -32,7 +31,12 @@ import { useDeleteAccount } from "../hooks/useDeleteAccount";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
 import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
 import { ProfileDeleteAccountSuccessDialog } from "./ProfileDeleteAccountSuccessDialog";
-import { ProfileEmailVerifiedBadge } from "./profileUi";
+import { ProfileEmailVerifiedBadge, ProfileFieldInfoTooltip } from "./profileUi";
+import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
+import { TooltipProvider } from "@/shared/ui/tooltip";
 
 type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
@@ -123,6 +127,10 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const phoneChanged = phone !== initialPhone || (Boolean(phone) && phoneCountryCode !== initialCountryCode);
   const hasChanges = nameChanged || phoneChanged;
   const phoneE164 = formatLoginPhoneForMagento(phoneCountryCode, phone);
+  const { phoneLocked } = getAppointmentContactLocks(getAuthLoginIdentifierKind());
+  const phoneInfoTooltip = phoneLocked
+    ? content.phoneRegisteredTooltip
+    : content.phoneInfo;
 
   const handleCancel = () => {
     setFullName(initialFullName);
@@ -236,7 +244,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   };
 
   return (
-    <>
+    <TooltipProvider delayDuration={200}>
+      <>
       <AppStatusToast
         open={Boolean(statusToastMessage)}
         message={statusToastMessage ?? ""}
@@ -312,14 +321,10 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                 <label htmlFor="profile-phone" className={appointmentLabelClassName}>
                   {content.fields.phone}
                 </label>
-                <button
-                  type="button"
-                  className="text-darkblack"
-                  aria-label={content.phoneInfo}
-                  title={content.phoneInfo}
-                >
-                  <InformationIcon className="w-[18px] h-[18px] shrink-0 text-darkblack" aria-hidden />
-                </button>
+                <ProfileFieldInfoTooltip
+                  message={phoneInfoTooltip}
+                  ariaLabel="Phone number information"
+                />
               </div>
               <div className={cn(appointmentFieldClassName, "flex items-center gap-2")}>
                 <PhoneCountryCodeSelect
@@ -429,7 +434,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           </DetailDarkButton>
         </div>
       </div>
-    </>
+      </>
+    </TooltipProvider>
   );
 };
 

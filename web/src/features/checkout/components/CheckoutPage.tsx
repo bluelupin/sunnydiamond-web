@@ -1021,6 +1021,12 @@ const CheckoutPage = () => {
                 savedAddresses={addresses}
                 onSelectSavedShippingAddress={handleSelectSavedShippingAddress}
                 fieldsDisabled={isSavingAddresses}
+                contactVerified={
+                  isAuthenticated &&
+                  (isCheckoutEmailContact(form.phoneOrEmail)
+                    ? customer?.emailVerified === true
+                    : customer?.phoneVerified === true)
+                }
               />
             ) : (
               <CheckoutPaymentStep

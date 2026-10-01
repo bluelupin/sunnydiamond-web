@@ -53,6 +53,8 @@ type CheckoutFormStepProps = {
   savedAddresses?: CustomerAddress[];
   onSelectSavedShippingAddress?: (addressUid: string) => void;
   fieldsDisabled?: boolean;
+  /** Signed-in contact on file is already verified (email or phone). */
+  contactVerified?: boolean;
 };
 
 type AddressFieldConfig = {
@@ -233,6 +235,7 @@ export const CheckoutFormStep = ({
   savedAddresses = [],
   onSelectSavedShippingAddress,
   fieldsDisabled = false,
+  contactVerified = false,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col md:gap-6 gap-4">
     <CheckoutSectionCard id="checkout-personal-information">
@@ -261,6 +264,8 @@ export const CheckoutFormStep = ({
             invalid={validation.showError("phoneOrEmail")}
             error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
             disabled={fieldsDisabled}
+            verified={contactVerified}
+            readOnly
           />
         ) : (
           <CheckoutPhoneField

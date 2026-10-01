@@ -11,6 +11,8 @@ export const profileDetailsContent = {
   saveLabel: "SAVE",
   cancelLabel: "CANCEL",
   phoneInfo: "Choose your country code and enter your mobile number. It can be used to sign in with an OTP.",
+  phoneRegisteredTooltip:
+    "This was used to register your profile and can't be changed",
   phonePlaceholder: "Mobile number",
   phoneInvalidMessage: "Enter a valid mobile number.",
   phoneSuccessToastMessage: "Your mobile number has been updated.",
