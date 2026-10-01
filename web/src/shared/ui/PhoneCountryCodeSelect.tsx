@@ -50,7 +50,11 @@ type PhoneCountryCodeSelectProps = {
   onBlur?: () => void;
   disabled?: boolean;
   className?: string;
+  /** Codes offered; defaults to the general form list. Sign-in passes only the SMS countries. */
+  codes?: readonly string[];
 };
+
+const DEFAULT_CODES = APPOINTMENT_COUNTRY_CODES.map((entry) => entry.code);
 
 /** Compact themed country-code picker for phone input rows. */
 const PhoneCountryCodeSelect = ({
@@ -60,6 +64,7 @@ const PhoneCountryCodeSelect = ({
   onBlur,
   disabled = false,
   className,
+  codes = DEFAULT_CODES,
 }: PhoneCountryCodeSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
@@ -172,12 +177,12 @@ const PhoneCountryCodeSelect = ({
             !isOpen && "pointer-events-none",
           )}
         >
-          {APPOINTMENT_COUNTRY_CODES.map((entry) => {
-            const selected = value === entry.code;
+          {codes.map((code) => {
+            const selected = value === code;
 
             return (
               <button
-                key={entry.code}
+                key={code}
                 type="button"
                 role="option"
                 aria-selected={selected}
@@ -188,7 +193,7 @@ const PhoneCountryCodeSelect = ({
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  selectCode(entry.code);
+                  selectCode(code);
                 }}
                 className={cn(
                   "flex h-14 w-full shrink-0 items-center px-3 text-left font-gill text-sm leading-110",
@@ -198,7 +203,7 @@ const PhoneCountryCodeSelect = ({
                     : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
                 )}
               >
-                {entry.code}
+                {code}
               </button>
             );
           })}

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
 import GoogleAnalytics from "@/infrastructure/analytics/GoogleAnalytics";
@@ -104,7 +105,11 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: UI_PLATFORM_BOOTSTRAP_SCRIPT }} />
+        <Script
+          id="ui-platform-bootstrap"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: UI_PLATFORM_BOOTSTRAP_SCRIPT }}
+        />
       </head>
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
         <GoogleAnalytics />

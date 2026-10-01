@@ -21,7 +21,14 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
+  TRY_AT_HOME_BOOKING_WINDOW,
 } from "@/shared/constants/appointmentForm";
+import { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
+import {
+  DUPLICATE_APPOINTMENT_TOAST,
+  DUPLICATE_APPOINTMENT_VIEW_LABEL,
+  hasDuplicateAppointmentBooking,
+} from "@/features/products/utils/appointmentDuplicateBooking";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
 import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
@@ -122,6 +129,7 @@ const TryAtHomeDetailsStep = ({
       selectedSlotRequired: hasTimeSlots,
       // Auth is email-based — Try at Home must collect a valid email.
       emailRequired: true,
+      bookingWindow: TRY_AT_HOME_BOOKING_WINDOW,
     }),
     [form?.notesRequired, hasTimeSlots],
   );
@@ -239,6 +247,7 @@ const TryAtHomeDetailsStep = ({
               }
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
+              bookingWindow={TRY_AT_HOME_BOOKING_WINDOW}
             />
           </div>
         </div>
@@ -675,6 +684,31 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         date: details.date,
         selectedSlot: details.selectedSlot,
       };
+
+      if (
+        customer?.id != null &&
+        (await hasDuplicateAppointmentBooking({
+          kind: "try_at_home",
+          productId: product.id,
+          date: booking.date,
+          selectedSlot: booking.selectedSlot,
+          address: {
+            addressLine1: address.addressLine1,
+            addressLine2: address.addressLine2,
+            pincode: address.pincode,
+            city: address.city,
+          },
+        }))
+      ) {
+        showStatusToast(DUPLICATE_APPOINTMENT_TOAST, {
+          action: (
+            <AppStatusToastAction onClick={handleViewBooking}>
+              {DUPLICATE_APPOINTMENT_VIEW_LABEL}
+            </AppStatusToastAction>
+          ),
+        });
+        return;
+      }
 
       const requestDetails = details.note.trim() || undefined;
 

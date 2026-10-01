@@ -1,3 +1,4 @@
+import { CHECKOUT_COD_MAX_ORDER_TOTAL } from "@/features/checkout/constants/cod";
 import type { CheckoutPaymentData } from "@/features/checkout/types/checkout.types";
 import type { MagentoPaymentMethodOption } from "./magentoCart.types";
 
@@ -69,6 +70,14 @@ export function resolveMagentoPaymentCode(
  */
 export function isCodOfferedByBackend(availableMethods: MagentoPaymentMethodOption[]): boolean {
   return availableMethods.some((method) => COD_PAYMENT_CODES.includes(method.code));
+}
+
+/** Backend offers COD and the cart total is within the storefront maximum. */
+export function isCodAvailableForCheckout(
+  codOfferedByBackend: boolean,
+  orderTotal: number,
+): boolean {
+  return codOfferedByBackend && orderTotal <= CHECKOUT_COD_MAX_ORDER_TOTAL;
 }
 
 export function isOfflineMagentoPaymentCode(paymentCode: string): boolean {

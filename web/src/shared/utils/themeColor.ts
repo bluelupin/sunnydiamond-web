@@ -1,4 +1,5 @@
 import type { HeaderVariant } from "@/shared/utils/navigation";
+import { isCheckoutRoute, isCheckoutSuccessRoute } from "@/shared/utils/navigation";
 
 /** Matches root viewport theme_color. */
 export const THEME_COLORS = {
@@ -11,6 +12,7 @@ export const THEME_COLORS = {
 
 type ResolveMobileThemeColorOptions = {
   isCartEmptyPageShell?: boolean;
+  isCheckoutSuccessScreen?: boolean;
 };
 
 export function resolveMobileThemeColor(
@@ -22,7 +24,11 @@ export function resolveMobileThemeColor(
     return THEME_COLORS.brand;
   }
 
-  if (pathname === "/cart" || pathname === "/checkout") {
+  if (pathname === "/cart" || isCheckoutRoute(pathname)) {
+    if (options.isCheckoutSuccessScreen || isCheckoutSuccessRoute(pathname)) {
+      return THEME_COLORS.white;
+    }
+
     if (pathname === "/cart" && options.isCartEmptyPageShell) {
       return THEME_COLORS.gray200;
     }

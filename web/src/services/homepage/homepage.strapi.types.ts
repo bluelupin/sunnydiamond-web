@@ -200,6 +200,8 @@ export type StrapiSavingsPlanStep = {
 };
 
 export type StrapiTextSection = {
+  url?: string | null;
+  mime?: string | null;
   id?: number;
   title?: string | null;
   sectionTitle?: string | null;

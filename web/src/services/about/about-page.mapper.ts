@@ -46,6 +46,21 @@ const isUsableDescription = (value?: string): boolean =>
 const isAboutSectionActive = (isActive?: boolean | null): boolean =>
   isActive === true;
 
+/** Legacy CMS entries may omit isActive; honor the toggle once it is set. */
+const isAboutSectionVisible = (isActive?: boolean | null): boolean => {
+  if (isActive == null) return true;
+  return isAboutSectionActive(isActive);
+};
+
+/**
+ * Timeline fills multiple viewport heights — treat explicit null/false from CMS as hidden.
+ * Only undefined (field never sent) keeps legacy always-on behavior.
+ */
+const isTimelineSectionVisible = (isActive?: boolean | null): boolean => {
+  if (isActive === undefined) return true;
+  return isAboutSectionActive(isActive);
+};
+
 const coerceComponentArray = <T>(value: unknown): T[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value as T[];
@@ -154,7 +169,7 @@ const mapBrillianceLegacySection = (
 const mapBrillianceSection = (
   section: StrapiAboutPageEntity["brillianceSection"],
 ): NormalizedBrillianceSection | null => {
-  if (!section || !isAboutSectionActive(section.isActive)) return null;
+  if (!section || !isAboutSectionVisible(section.isActive)) return null;
 
   const slides = coerceComponentArray<StrapiAboutFeatureSlide>(section.featureSlide);
   for (const slide of slides) {
@@ -186,7 +201,7 @@ const mapLegacyBlock = (
 const mapLegacy = (
   section: StrapiAboutPageEntity["legacySection"],
 ): NormalizedAboutLegacy | null => {
-  if (!section || !isAboutSectionActive(section.isActive)) return null;
+  if (!section || !isAboutSectionVisible(section.isActive)) return null;
 
   const title = cleanText(section.heading);
   if (!title) return null;
@@ -224,7 +239,7 @@ const mapTeamMember = (
 const mapTeam = (
   section: StrapiAboutPageEntity["teamSection"],
 ): NormalizedAboutTeam | null => {
-  if (!section || !isAboutSectionActive(section.isActive)) return null;
+  if (!section || !isAboutSectionVisible(section.isActive)) return null;
 
   const title = cleanText(section.heading);
   if (!title) return null;
@@ -298,26 +313,28 @@ const mapCraft = (
   craftSection?: StrapiAboutCraftSection | null,
   mosaicSection?: StrapiAboutCraftMosaicSection | null,
 ): NormalizedAboutCraft | null => {
-  if (!craftSection || !isAboutSectionActive(craftSection.isActive)) return null;
+  const heroVisible =
+    Boolean(craftSection) && isAboutSectionVisible(craftSection?.isActive);
+  const mosaicVisible =
+    Boolean(mosaicSection) && isAboutSectionVisible(mosaicSection?.isActive);
 
-  const title = cleanText(craftSection.heading);
-  if (!title) return null;
+  const title = heroVisible ? cleanText(craftSection?.heading) : undefined;
+  const showHero = heroVisible && Boolean(title);
+  const cards = mosaicVisible ? mapCraftCards(mosaicSection) : [];
+  const showMosaic = mosaicVisible && cards.length > 0;
 
-  const image = mapResponsiveImage(craftSection.backgroundImage);
-  const videoUrl = getCmsAssetUrl(
-    resolveCmsMediaUrl(craftSection.videoUrl?.heroVideo),
-  );
-
-  const cards = isAboutSectionActive(mosaicSection?.isActive)
-    ? mapCraftCards(mosaicSection)
-    : [];
+  if (!showHero && !showMosaic) return null;
 
   return {
-    title,
-    image,
-    videoUrl,
+    showHero,
+    showMosaic,
+    title: title ?? "",
+    image: showHero ? mapResponsiveImage(craftSection?.backgroundImage ?? null) : null,
+    videoUrl: showHero
+      ? getCmsAssetUrl(resolveCmsMediaUrl(craftSection?.videoUrl?.heroVideo))
+      : undefined,
     overlayOpacity:
-      typeof craftSection.overlayOpacity === "number"
+      typeof craftSection?.overlayOpacity === "number"
         ? craftSection.overlayOpacity
         : 0.3,
     cards,
@@ -327,7 +344,7 @@ const mapCraft = (
 const mapBrandTagline = (
   section: StrapiAboutPageEntity["brandTaglineSection"],
 ): NormalizedBrandTagline | null => {
-  if (!section || !isAboutSectionActive(section.isActive)) return null;
+  if (!section || !isAboutSectionVisible(section.isActive)) return null;
 
   const quote = cleanText(section.tagline);
   if (!quote) return null;
@@ -359,7 +376,7 @@ const mapTrustBadge = (
 const mapTrustBadges = (
   section: StrapiAboutPageEntity["trustBadgesSection"],
 ): NormalizedTrustBadge[] | null => {
-  if (!section) return null;
+  if (!section || !isAboutSectionVisible(section.isActive)) return null;
 
   const badges = (section.trustBadge ?? [])
     .map(mapTrustBadge)
@@ -391,7 +408,7 @@ const mapTimelineMilestone = (
 const mapTimeline = (
   section: StrapiAboutPageEntity["timelineSection"],
 ): NormalizedAboutTimeline | null => {
-  if (!section || !isAboutSectionActive(section.isActive)) return null;
+  if (!section || !isTimelineSectionVisible(section.isActive)) return null;
 
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
 

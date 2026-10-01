@@ -34,8 +34,9 @@ export async function POST(request: NextRequest) {
 
   const phone = normalizePhoneForMagento(body.phone?.trim() ?? "");
   const otp = body.otp?.trim();
-  if (!/^\+91\d{10}$/.test(phone)) {
-    return NextResponse.json({ error: "Enter a valid 10-digit mobile number" }, { status: 400 });
+  // Shape only: Magento decides whether the country is allowed and the number valid.
+  if (!/^\+\d{8,15}$/.test(phone)) {
+    return NextResponse.json({ error: "Enter a valid mobile number" }, { status: 400 });
   }
 
   try {

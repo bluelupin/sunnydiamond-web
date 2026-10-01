@@ -2,14 +2,15 @@
 
 import { Fragment, useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
+import {
+  accordionCollapseIconClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedDfeFaq } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
-const faqPanelTransitionClassName =
-  "transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
-
-const faqIconTransitionClassName =
-  "transition-opacity duration-300 ease-in-out motion-reduce:transition-none";
+const faqIconTransitionClassName = accordionCollapseIconClassName;
 
 const FaqToggleIcon = ({ isOpen, clipId }: { isOpen: boolean; clipId: string }) => (
   <span className="relative inline-flex size-6 shrink-0 items-center justify-center" aria-hidden>
@@ -111,13 +112,9 @@ const DfeFaqSection = ({ faq }: DfeFaqSectionProps) => {
                     role="region"
                     aria-labelledby={buttonId}
                     aria-hidden={!isOpen}
-                    className={cn(
-                      "grid min-h-0",
-                      faqPanelTransitionClassName,
-                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-                    )}
+                    className={accordionCollapsePanelClassName(isOpen)}
                   >
-                    <div className="min-h-0 overflow-hidden">
+                    <div className={accordionCollapseInnerClassName}>
                       <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 md:text-lg lg:text-xl">
                         {item.answer}
                       </p>

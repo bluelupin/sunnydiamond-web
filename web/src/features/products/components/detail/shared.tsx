@@ -81,6 +81,21 @@ export const DetailDarkButton = ({ children, className, ...props }: DetailDarkBu
   </button>
 );
 
+const darkLinkClassName =
+  "btn-dark-slide inline-flex h-14 items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white border border-black";
+
+type DetailDarkLinkProps = {
+  children: React.ReactNode;
+  href: string;
+  className?: string;
+};
+
+export const DetailDarkLink = ({ children, href, className }: DetailDarkLinkProps) => (
+  <Link href={href} className={cn(darkLinkClassName, className)}>
+    <span className="relative z-10">{children}</span>
+  </Link>
+);
+
 type DetailOutlineButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   className?: string;
 };

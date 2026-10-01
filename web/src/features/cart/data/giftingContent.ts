@@ -9,7 +9,7 @@ export const giftingContent = {
     offsetTop: -26,
   },
   copy: {
-    singleBag: "Your items will be gift wrapped in a single bag",
-    separateBags: "Each of your items will be delivered in separate bags",
+    singleBag: "Your order will arrive in a single signature gift bag.",
+    separateBags: "Your order will arrive in separate bags",
   },
 } as const;

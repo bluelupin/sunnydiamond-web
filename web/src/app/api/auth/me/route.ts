@@ -14,6 +14,8 @@ export type AuthMeResponse = {
     email: string;
     /** E.164 mobile number linked to the account (custom attribute), or null. */
     phone: string | null;
+    /** Whether that number was proven with an SMS code (only then does it sign in). */
+    phoneVerified: boolean;
   } | null;
   /** Present when customer is null — useful in Network tab while debugging auth. */
   reason?: string;
@@ -60,6 +62,7 @@ export async function GET() {
         lastname: string;
         email: string;
         custom_attributes?: Array<{ code: string; value?: string | null }> | null;
+        sd_mobile_verified?: boolean | null;
       };
     }>({
       query: MAGENTO_CUSTOMER_ME_QUERY,
@@ -100,6 +103,7 @@ export async function GET() {
         phone:
           customer.custom_attributes?.find((attribute) => attribute.code === "mobile_number")
             ?.value || null,
+        phoneVerified: customer.sd_mobile_verified === true,
       },
     } satisfies AuthMeResponse);
   } catch (error) {

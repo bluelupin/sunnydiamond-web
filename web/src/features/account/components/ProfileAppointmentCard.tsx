@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import RightArrow from "@/assets/Icons/RightArrow";
 import {
@@ -395,39 +396,55 @@ export function ProfileAppointmentCard({
         />
       ) : null}
 
-      <div className="flex flex-col gap-4">
-        <div
-          className={cn(
-            "grid gap-4 md:gap-6",
-            !appointment.rescheduleLimitReached && "md:grid-cols-2",
-          )}
-        >
-          <DetailOutlineButton
-            type="button"
-            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={onCancel}
-            disabled={!appointment.canCancel}
+      {appointment.isCancelled ? (
+        <div className="flex flex-col gap-4">
+          <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+            <Link
+              href={content.contactUsHref}
+              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white md:col-start-2"
+            >
+              <span className="relative z-10">{content.contactUsLabel}</span>
+            </Link>
+          </div>
+          {appointment.cancelledOnNote ? (
+            <ProfileInfoNote>{appointment.cancelledOnNote}</ProfileInfoNote>
+          ) : null}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <div
+            className={cn(
+              "grid gap-4 md:gap-6",
+              !appointment.rescheduleLimitReached && "md:grid-cols-2",
+            )}
           >
-            {content.cancelLabel}
-          </DetailOutlineButton>
-          {appointment.rescheduleLimitReached ? null : (
-            <DetailDarkButton
+            <DetailOutlineButton
               type="button"
               className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={onReschedule}
-              disabled={!appointment.canReschedule}
+              onClick={onCancel}
+              disabled={!appointment.canCancel}
             >
-              {content.rescheduleLabel}
-            </DetailDarkButton>
-          )}
-        </div>
+              {content.cancelLabel}
+            </DetailOutlineButton>
+            {appointment.rescheduleLimitReached ? null : (
+              <DetailDarkButton
+                type="button"
+                className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={onReschedule}
+                disabled={!appointment.canReschedule}
+              >
+                {content.rescheduleLabel}
+              </DetailDarkButton>
+            )}
+          </div>
 
-        {appointment.rescheduleLimitReached ? (
-          <ProfileInfoNote>{content.rescheduleLimitNote}</ProfileInfoNote>
-        ) : appointment.canReschedule && appointment.rescheduleNote ? (
-          <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
-        ) : null}
-      </div>
+          {appointment.rescheduleLimitReached ? (
+            <ProfileInfoNote>{content.rescheduleLimitNote}</ProfileInfoNote>
+          ) : appointment.canReschedule && appointment.rescheduleNote ? (
+            <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
+          ) : null}
+        </div>
+      )}
     </ProfileCard>
   );
 }

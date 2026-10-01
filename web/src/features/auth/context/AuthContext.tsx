@@ -21,6 +21,8 @@ export type AuthCustomer = {
   email: string;
   /** E.164 mobile number linked to the account, or null when none is set. */
   phone?: string | null;
+  /** Whether that number was proven with an SMS code (only then does it sign in). */
+  phoneVerified?: boolean;
 };
 
 type AuthStatus = "loading" | "guest" | "authenticated";

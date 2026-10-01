@@ -10,9 +10,9 @@ export const profileDetailsContent = {
   verifiedLabel: "Verified",
   saveLabel: "SAVE",
   cancelLabel: "CANCEL",
-  phoneInfo: "Enter a 10-digit Indian mobile number. It can be used to sign in with an OTP.",
-  phonePlaceholder: "10-digit mobile number",
-  phoneInvalidMessage: "Enter a valid 10-digit mobile number.",
+  phoneInfo: "Choose your country code and enter your mobile number. It can be used to sign in with an OTP.",
+  phonePlaceholder: "Mobile number",
+  phoneInvalidMessage: "Enter a valid mobile number.",
   phoneSuccessToastMessage: "Your mobile number has been updated.",
   phoneErrorToastMessage: "We could not update your mobile number. Please try again.",
   saveUnavailableTitle: "Profile updates",
@@ -337,6 +337,9 @@ export const profileTabsContent = {
     rescheduleLabel: "RESCHEDULE",
     cancelLabel: "CANCEL APPOINTMENT",
     rescheduleNoteTemplate: "Appointment can be rescheduled before {date}",
+    cancelledNoteTemplate: "Appointment cancelled on {date}",
+    contactUsLabel: "CONTACT US",
+    contactUsHref: "/contact",
     rescheduleLimitNote:
       "You have already rescheduled this appointment twice. Please contact us to change it.",
     addPieceLabel: "ADD A PIECE",
@@ -351,7 +354,7 @@ export const profileTabsContent = {
     },
     getDirectionsLabel: "GET DIRECTIONS",
     cancelDialog: {
-      title: "Cancel Appointment?",
+      title: "Cancel Appointment",
       description:
         "Something came up? Cancel or reschedule the appointment at your convenience.",
       rescheduleLabel: "RESCHEDULE",
@@ -360,7 +363,8 @@ export const profileTabsContent = {
       unavailableDescription:
         "Rescheduling and cancellation will be available soon. Please contact support for assistance.",
       unavailableToastMessage: "Appointment cancelled",
-      cancelSuccessToast: "Appointment cancelled",
+      cancelSuccessToast: "Appointment Cancelled Successfully",
+      cancelSuccessToastViewLabel: "VIEW",
       cancelErrorToast: "Could not cancel appointment",
     },
     emptyTitle: "No Appointments Yet",

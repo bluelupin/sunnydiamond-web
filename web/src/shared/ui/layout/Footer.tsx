@@ -12,6 +12,7 @@ import { FooterTrustBadgeSection } from "@/features/cms/components/common/TrustB
 import Reveal from "@/shared/Animation/Reveal";
 import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { cn } from "@/shared/utils/cn";
+import { isCheckoutRoute } from "@/shared/utils/navigation";
 import ResponsiveImage from "../ResponsiveImage";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
@@ -98,7 +99,7 @@ function resolveShellSocialLinks(
 }
 
 const Footer = ({ className }: { className?: string }) => {
-  const pathName = usePathname();
+  const pathName = usePathname() ?? "";
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const { data: shellData } = useHomepageShell();
   const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
@@ -134,18 +135,15 @@ const Footer = ({ className }: { className?: string }) => {
   return (
     <footer
       className={cn(
-        pathName === "/checkout" || (pathName === "/cart" && !isCartEmptyPageShell)
-          ? "bg-gray200"
+        isCheckoutRoute(pathName) || (pathName === "/cart" && !isCartEmptyPageShell)
+          ? "bg-gray300"
           : "bg-gray300",
         className,
         pathName === "/jewellery" && "md:pb-0 pb-16",
       )}
     >
       <FooterTrustBadgeSection
-        className={cn(
-          "md:flex hidden",
-          pathName === "/cart" && isCartEmptyPageShell && "bg-gray300",
-        )}
+        className={cn("md:flex hidden", pathName === "/cart" && isCartEmptyPageShell && "bg-gray300",)}
       />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:pt-104 lg:pb-104 md:pt-16 md:pb-16 pt-8 pb-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">

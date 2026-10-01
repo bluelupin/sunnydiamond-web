@@ -13,6 +13,7 @@ import { mapStaticBlogsPage } from "@/services/blogs/blogs.mapper";
 const page = footerPages.blogs;
 
 /** Refresh CMS-driven blog listing without a full redeploy. */
+// TEMP (content verification): revert to 300 before release.
 export const revalidate = 300;
 
 type PageProps = {

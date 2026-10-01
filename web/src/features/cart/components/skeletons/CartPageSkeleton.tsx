@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
+import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
 import { cn } from "@/shared/utils/cn";
 
 const pulse = "animate-pulse bg-gray200";
@@ -127,7 +128,7 @@ const CartPageSkeleton = () => {
 
           <div
             className={cn(
-              "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6",
+              cartCheckoutAsideLayout.gridClassName,
             )}
           >
             <div className="flex min-w-0 flex-col gap-6">
@@ -141,7 +142,12 @@ const CartPageSkeleton = () => {
               <div className="h-[220px] md:hidden" aria-hidden />
             </div>
 
-            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex">
+            <aside
+              className={cn(
+                cartCheckoutAsideLayout.asideClassName,
+                "hidden h-fit min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex",
+              )}
+            >
               <SkeletonCartPriceDetails />
               <SkeletonBenefitsSection />
             </aside>

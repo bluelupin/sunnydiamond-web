@@ -965,3 +965,50 @@
 .slick-arrow.slick-next {
   display: none !important;
 }
+
+/* Equal-width react-slick center mode — https://react-slick.neostack.com/docs/example/center-mode */
+.featured-gallery-slider-stage,
+.featured-gallery-slider-stage .slick-slider,
+.featured-gallery-slider .slick-list,
+.featured-gallery-slider .slick-track {
+  height: var(--fg-stage-h, 360px);
+}
+
+.featured-gallery-slider .slick-slide {
+  height: var(--fg-stage-h, 360px);
+}
+
+.featured-gallery-slider .slick-slide>div {
+  box-sizing: border-box;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 calc(var(--fg-gap, 16px) / 2);
+}
+
+.featured-gallery-slider .featured-gallery-slide {
+  position: relative;
+  width: 100%;
+  height: calc(var(--fg-stage-h, 360px) * var(--fg-side-height-ratio, 0.8333333333));
+  flex-shrink: 0;
+  transform: scale(1, 1);
+  transform-origin: center center;
+  transition: transform 500ms ease-in-out;
+  will-change: transform;
+}
+
+.featured-gallery-slider .slick-slide.slick-center .featured-gallery-slide,
+.featured-gallery-slider .slick-slide.slick-current .featured-gallery-slide,
+.featured-gallery-slider[data-slide-count="1"] .featured-gallery-slide {
+  transform: scale(1, var(--fg-center-scale-y, 1.2));
+  /* transform: scale(var(--fg-center-scale-x, 1.2),
+      var(--fg-center-scale-y, 1.2)); */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-gallery-slider .featured-gallery-slide {
+    transition: none;
+  }
+}

@@ -206,9 +206,9 @@ const mapHero = (hero?: StrapiCareerHero | null): NormalizedCareerHero | null =>
   const image =
     mapResponsiveImage(hero.backgroundImage) ?? mapResponsiveImage(hero.image);
 
-  if (!title || !ctaLabel) return null;
+  if (!title) return null;
 
-  return { title, ctaLabel, image };
+  return { title, ctaLabel: ctaLabel ?? "", image };
 };
 
 const resolveOpeningId = (opening: StrapiCareerOpeningEntity): string | null => {
@@ -243,8 +243,9 @@ const normalizeEmploymentType = (value?: string | null): CareerJobType | null =>
 
 const resolvePostedAt = (opening: StrapiCareerOpeningEntity): string | null => {
   const candidate =
-    cleanText(opening.postedAt) ??
+    cleanText(opening.postedDate) ??
     cleanText(opening.publishedAt) ??
+    cleanText(opening.postedAt) ??
     cleanText(opening.createdAt) ??
     cleanText(opening.updatedAt);
 

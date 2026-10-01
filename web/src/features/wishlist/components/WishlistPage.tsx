@@ -77,17 +77,24 @@ const WishlistPage = () => {
   }
 
   return (
-    <section className="min-h-screen pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
+    <section
+      className={cn(
+        "min-h-screen pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0",
+        showEmptyState && "lg:min-h-0",
+      )}
+    >
       <WishlistHeading
         productCount={wishlistProducts.length}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        hideTitle={showEmptyState}
       />
 
       <div
         className={cn(
           "bg-gray200",
           (showEmptyState || showLoadError || needsFooterMargin) && "md:mb-24 mb-6",
+          showEmptyState && "lg:mb-0 lg:bg-white",
         )}
       >
         {showLoadError ? (
@@ -97,7 +104,7 @@ const WishlistPage = () => {
             </p>
           </div>
         ) : showEmptyState ? (
-          <div className="mx-auto w-full max-w-1440 px-4 py-6 md:px-8 md:py-10 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+          <div className="mx-auto w-full max-w-1440 px-4 py-6 md:px-8 md:py-10 lg:px-10 lg:py-0 2xl:max-w-1920 2xl:px-[60px]">
             <WishlistEmptyState />
           </div>
         ) : wishlistProducts.length > 0 ? (

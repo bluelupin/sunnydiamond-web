@@ -130,7 +130,26 @@ export const cartFlowSpec = {
     cardBackground: "#FFFFFF",
     borderRadius: 2,
   },
-  /** Figma 2083:8814 / intro panel 2083:8951 */
+  /** Figma desktop 4903:81077 / mobile 4903:74070 */
+  guestCheckout: {
+    desktopWidth: 560,
+    desktopPadding: 24,
+    sectionGap: 40,
+    innerGap: 24,
+    actionGap: 24,
+    mobileHeight: 310,
+    headerTop: 24,
+    dividerTop: 74,
+    bodyTop: 116,
+    contentInsetX: 16,
+    footerGradientHeight: 71,
+    footerPaddingX: 16,
+    footerPaddingY: 24,
+    footerGap: 16,
+    mobileOverlayColor: "rgba(0, 0, 0, 0.7)",
+    mobileOverlayBlur: 10,
+  },
+  /** Figma 2083:8814 / intro panel 2083:8951; mobile intro 4903:73825 */
   gifting: {
     panelWidth: 560,
     panelPadding: 24,
@@ -139,6 +158,19 @@ export const cartFlowSpec = {
     footerCtaGap: 16,
     overlayColor: "rgba(30, 30, 30, 0.75)",
     overlayBlur: 4.5,
+    intro: {
+      mobileHeight: 324,
+      headerTop: 24,
+      dividerTop: 74,
+      bodyTop: 107,
+      contentInsetX: 16,
+      footerGradientHeight: 71,
+      footerPaddingX: 16,
+      footerPaddingY: 24,
+      footerGap: 16,
+      mobileOverlayColor: "rgba(0, 0, 0, 0.7)",
+      mobileOverlayBlur: 10,
+    },
     personalise: {
       panelWidth: 472,
       contentWidth: 424,
@@ -171,4 +203,11 @@ export const cartFlowSpec = {
       scrollbarThumbHeight: 246,
     },
   },
+} as const;
+
+/** Shared cart/checkout two-column page layout — Figma sidebar 553px */
+export const cartCheckoutAsideLayout = {
+  gridClassName:
+    "grid grid-cols-1 lg:gap-6 gap-5 md:max-lg:items-start xl:grid-cols-[minmax(0,1fr)_553px] lg:grid-cols-[minmax(0,1fr)_400px] md:grid-cols-[minmax(0,1fr)_360px]",
+  asideClassName: "w-full xl:max-w-[553px] lg:max-w-[400px] md:max-w-[360px]",
 } as const;

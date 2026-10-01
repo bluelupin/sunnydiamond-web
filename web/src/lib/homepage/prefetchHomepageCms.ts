@@ -34,6 +34,7 @@ export async function prefetchHomepageCms(): Promise<HomepagePrefetchedCms> {
   };
 }
 
+/** Includes Magento Alankara prefetch — use on routes that need SSR for the collection (e.g. PDP). */
 export async function prefetchHomepageBundle(): Promise<HomepagePrefetchedBundle> {
   const cms = await prefetchHomepageCms();
   const belowFold = await prefetchHomepageBelowFold(cms);

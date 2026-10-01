@@ -5,6 +5,11 @@ import { useProfileSectionEmptyState } from "../context/ProfileSectionEmptyState
 import InformationIcon from "@/assets/Icons/InformationIcon";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import {
+  accordionCollapseIconClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
@@ -404,10 +409,7 @@ type ProfileAccordionItem = {
   answer: string;
 };
 
-const profileAccordionTransitionClassName =
-  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
-
-const profileAccordionIconTransitionClassName = "transition-opacity duration-500 ease-in-out";
+const profileAccordionIconTransitionClassName = accordionCollapseIconClassName;
 
 const ProfileFaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
@@ -482,15 +484,11 @@ export function ProfileAccordion({
               </button>
 
               <div
-                className={cn(
-                  "grid min-h-0",
-                  profileAccordionTransitionClassName,
-                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-                )}
+                className={accordionCollapsePanelClassName(isOpen)}
                 aria-hidden={!isOpen}
               >
-                <div className="overflow-hidden">
-                  <p className="md:pb-4 md:pt-0 pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
+                <div className={accordionCollapseInnerClassName}>
+                  <p className="md:pb-4 md:pt-4 pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
                     {item.answer}
                   </p>
                 </div>

@@ -42,7 +42,7 @@ const BlogsCardGrid = ({ posts }: BlogsCardGridProps) => {
               );
             }
 
-            return <BlogCard key={post.id} post={post} />;
+            return <BlogCard key={post.id} post={post} variant="listing" />;
           })}
         </div>
       ))}

@@ -10,7 +10,8 @@ import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import GiftCardFlowPanel from "./GiftCardFlowPanel";
 
 const GIFT_CARD_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
-const GIFT_CARD_MOBILE_QUERY = "(max-width: 1023px)";
+/** Bottom drawer on phone only; tablet and desktop use the right-side sheet. */
+const GIFT_CARD_MOBILE_QUERY = "(max-width: 767px)";
 const RAZORPAY_CONTAINER_SELECTOR = ".razorpay-container";
 // The open panel sets `pointer-events: none` on <body>, which Razorpay's popup would inherit.
 const RAZORPAY_CLICKABLE_CSS = `${RAZORPAY_CONTAINER_SELECTOR} { pointer-events: auto !important; }`;

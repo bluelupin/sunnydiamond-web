@@ -1,11 +1,10 @@
 import JewelleryListingPageSkeleton from "@/features/jewellery-product/components/skeletons/JewelleryListingPageSkeleton";
-import PageLoadingMarker from "@/shared/ui/layout/PageLoadingMarker";
+import SiteRouteLoadingFallback from "@/shared/ui/layout/SiteRouteLoadingFallback";
 
 export default function Loading() {
   return (
-    <>
-      <PageLoadingMarker />
+    <SiteRouteLoadingFallback>
       <JewelleryListingPageSkeleton />
-    </>
+    </SiteRouteLoadingFallback>
   );
 }

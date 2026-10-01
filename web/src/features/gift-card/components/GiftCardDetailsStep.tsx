@@ -88,6 +88,13 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     setSender,
   ]);
 
+  const handleReceiverSameAsSenderChange = (checked: boolean) => {
+    setReceiverSameAsSender(checked);
+    if (!checked) {
+      setReceiver({ fullName: "", phone: "", countryCode: "+91", email: "" });
+    }
+  };
+
   const canContinue =
     isGiftCardPartyComplete(sender) &&
     (receiverSameAsSender || isGiftCardPartyComplete(receiver));
@@ -130,7 +137,7 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
               label={details.fullNameLabel}
               value={sender.fullName}
               onChange={(value) => setSender({ fullName: value })}
-              placeholder={details.placeholder}
+              placeholder={details.namePlaceholder}
             />
             <GiftCardPhoneField
               id="gift-card-sender-phone"
@@ -139,13 +146,14 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
               countryCode={sender.countryCode}
               onChange={(value) => setSender({ phone: value })}
               onCountryCodeChange={(value) => setSender({ countryCode: value })}
+              placeholder={details.phonePlaceholder}
             />
             <GiftCardTextField
               id="gift-card-sender-email"
               label={details.emailLabel}
               value={sender.email}
               onChange={(value) => setSender({ email: value })}
-              placeholder={details.placeholder}
+              placeholder={details.emailPlaceholder}
               type="email"
             />
           </div>
@@ -154,7 +162,7 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
             <p className={cn("mb-2", giftCardSectionHeadingClass)}>{details.receiverHeading}</p>
             <GiftCardCheckbox
               checked={receiverSameAsSender}
-              onChange={setReceiverSameAsSender}
+              onChange={handleReceiverSameAsSenderChange}
               label={details.sameAsSenderLabel}
             />
             {!receiverSameAsSender ? (
@@ -164,7 +172,7 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
                   label={details.fullNameLabel}
                   value={receiver.fullName}
                   onChange={(value) => setReceiver({ fullName: value })}
-                  placeholder={details.placeholder}
+                  placeholder={details.namePlaceholder}
                 />
                 <GiftCardPhoneField
                   id="gift-card-receiver-phone"
@@ -173,13 +181,14 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
                   countryCode={receiver.countryCode}
                   onChange={(value) => setReceiver({ phone: value })}
                   onCountryCodeChange={(value) => setReceiver({ countryCode: value })}
+                  placeholder={details.phonePlaceholder}
                 />
                 <GiftCardTextField
                   id="gift-card-receiver-email"
                   label={details.emailLabel}
                   value={receiver.email}
                   onChange={(value) => setReceiver({ email: value })}
-                  placeholder={details.placeholder}
+                  placeholder={details.emailPlaceholder}
                   type="email"
                 />
               </div>

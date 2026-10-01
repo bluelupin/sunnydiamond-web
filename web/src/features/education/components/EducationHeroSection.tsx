@@ -30,7 +30,7 @@ const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionPr
     <section
       id="education-hero"
       aria-labelledby="education-hero-title"
-      className="relative flex flex-col overflow-hidden bg-white h-640 2xl:h-[85vh]"
+      className="relative flex flex-col overflow-hidden bg-gray200 md:h-[678px] h-640"
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div
@@ -50,12 +50,11 @@ const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionPr
             }
           />
           <div
-            className={cn(heroScrollCollapseTitleBaseClass, "pb-16")}
-            // style={titleStyle}
+            className={cn(heroScrollCollapseTitleBaseClass, "md:pb-16 pb-[43px]")}
           >
             <h1
               id="education-hero-title"
-              className="w-full text-center font-larken font-light leading-none text-white md:text-5xl sm:text-4xl text-32"
+              className="w-full text-center font-larken font-light leading-none text-white lg:text-6xl md:text-5xl sm:text-4xl text-32"
             >
               {title}
             </h1>

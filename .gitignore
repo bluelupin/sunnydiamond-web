@@ -7,3 +7,5 @@ docs/qa/passwordless-auth.md
 .vercel
 .env*
 /.agents/skills
+# Browser-tool session output (playwright-cli)
+.playwright-cli/

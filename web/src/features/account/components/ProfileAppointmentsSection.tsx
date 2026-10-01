@@ -5,14 +5,20 @@ import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
-import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import AppStatusToast, {
+  AppStatusToastAction,
+  appStatusToastDurationMs,
+} from "@/shared/ui/AppStatusToast";
 import { cancelCustomerAppointment } from "@/services/customer/customer-appointments.client";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
 import type { AppointmentFilterKey, ProfileAppointmentUi } from "../types/profileUi.types";
 import { clubProfileAppointments } from "../utils/clubCustomerAppointments";
 import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
-import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
+import {
+  formatAppointmentCancelledOnNote,
+  mapCustomerAppointmentToProfileUi,
+} from "../utils/profileDisplayMappers";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
 import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
 import { ProfileAppointmentReschedulePanel } from "./ProfileAppointmentReschedulePanel";
@@ -46,6 +52,9 @@ const ProfileAppointmentsSection = () => {
     () => new Set(),
   );
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const [cancelledToastAppointmentId, setCancelledToastAppointmentId] = useState<string | null>(
+    null,
+  );
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dismissStatusToast = useCallback(() => {
@@ -57,8 +66,9 @@ const ProfileAppointmentsSection = () => {
   }, []);
 
   const showStatusToast = useCallback(
-    (message: string) => {
+    (message: string, cancelledAppointmentId: string | null = null) => {
       dismissStatusToast();
+      setCancelledToastAppointmentId(cancelledAppointmentId);
       setStatusToastMessage(message);
       statusToastTimeoutRef.current = setTimeout(() => {
         setStatusToastMessage(null);
@@ -114,12 +124,15 @@ const ProfileAppointmentsSection = () => {
           return appointment;
         }
 
-        // Immediately after cancel (before list refresh settles), both actions stay off.
+        // Immediately after cancel (before list refresh settles), show the cancelled state.
         return {
           ...appointment,
           canCancel: false,
           canReschedule: false,
           rescheduleLimitReached: false,
+          isCancelled: true,
+          cancelledOnNote:
+            appointment.cancelledOnNote ?? formatAppointmentCancelledOnNote(new Date()),
         };
       });
 
@@ -172,7 +185,7 @@ const ProfileAppointmentsSection = () => {
         setCancelDialogOpen(false);
         setSelectedAppointment(null);
         refresh();
-        showStatusToast(content.cancelDialog.cancelSuccessToast);
+        showStatusToast(content.cancelDialog.cancelSuccessToast, selectedAppointment.id);
       } catch {
         showStatusToast(content.cancelDialog.cancelErrorToast);
       } finally {
@@ -182,7 +195,25 @@ const ProfileAppointmentsSection = () => {
   };
 
   const statusToast = (
-    <AppStatusToast open={Boolean(statusToastMessage)} message={statusToastMessage ?? ""} />
+    <AppStatusToast
+      open={Boolean(statusToastMessage)}
+      message={statusToastMessage ?? ""}
+      action={
+        cancelledToastAppointmentId ? (
+          <AppStatusToastAction
+            onClick={() => {
+              dismissStatusToast();
+              document
+                .getElementById(`profile-appointment-${cancelledToastAppointmentId}`)
+                ?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          >
+            {content.cancelDialog.cancelSuccessToastViewLabel}
+          </AppStatusToastAction>
+        ) : undefined
+      }
+      onDismiss={cancelledToastAppointmentId ? dismissStatusToast : undefined}
+    />
   );
 
   if (isLoading || (appointmentSkus.length > 0 && isProductImagesLoading)) {
@@ -235,7 +266,7 @@ const ProfileAppointmentsSection = () => {
         ) : (
           <ul className="flex flex-col gap-6">
             {filteredAppointments.map((appointment) => (
-              <li key={appointment.id}>
+              <li key={appointment.id} id={`profile-appointment-${appointment.id}`}>
                 <ProfileAppointmentCard
                   appointment={appointment}
                   onReschedule={() => openReschedulePanel(appointment)}

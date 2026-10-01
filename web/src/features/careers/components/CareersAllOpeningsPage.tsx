@@ -8,7 +8,7 @@ import CareersJobListingsSection from "./CareersJobListingsSection";
 
 function CareersAllOpeningsContent() {
   const { cms } = useCareersJobs();
-  const hero = cms.landing.hero ?? cms.listing.hero;
+  const hero = cms.listing.hero;
 
   return (
     <>

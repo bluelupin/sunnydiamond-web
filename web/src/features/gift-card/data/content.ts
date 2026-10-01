@@ -22,7 +22,7 @@ export const giftCardFlowContent = {
   },
   date: {
     label: "Date*",
-    placeholder: "DD / MM / YYYY",
+    placeholder: "Select Date",
   },
   message: {
     label: "Add a Message",
@@ -35,7 +35,9 @@ export const giftCardFlowContent = {
     fullNameLabel: "Full Name*",
     phoneLabel: "Phone No.*",
     emailLabel: "Email ID*",
-    placeholder: "Enter",
+    namePlaceholder: "Enter Name",
+    phonePlaceholder: "Enter Phone",
+    emailPlaceholder: "Enter Email",
   },
   address: {
     useCurrentLocationLabel: "USE CURRENT LOCATION",
@@ -46,6 +48,7 @@ export const giftCardFlowContent = {
     pincodeLabel: "Pin code",
     cityLabel: "City",
     stateLabel: "State",
+    statePlaceholder: "Select State",
     placeholder: "Enter",
     invalidPincodeError: "Invalid Pincode",
     estimatedDeliveryPrefix: "Estimated order delivery by",
@@ -61,6 +64,7 @@ export const giftCardFlowContent = {
       alt: "Sunny Diamonds gift card",
     },
     trackOrderLabel: "TRACK ORDER",
+    viewDetailsLabel: "SEE ORDER DETAILS",
     backToShoppingLabel: "GO BACK TO SHOPPING",
     backToShoppingHref: "/jewellery",
   },

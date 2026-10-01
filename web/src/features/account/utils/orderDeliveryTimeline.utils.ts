@@ -140,6 +140,16 @@ export function getProfileTimelineStepDescription(label: string): string | undef
   ];
 }
 
+/** Magento gift card products (SunnyDiamonds_GiftCard::SKU_*) and the label shown under their name. */
+const GIFT_CARD_SUBTITLE_BY_SKU: Record<string, string> = {
+  "sd-gift-card-digital": "Digital Card",
+  "sd-gift-card-physical": "Physical Card",
+};
+
+export function giftCardSubtitleForSku(sku?: string | null): string | undefined {
+  return sku ? GIFT_CARD_SUBTITLE_BY_SKU[sku.trim().toLowerCase()] : undefined;
+}
+
 function isGiftCardSubtitle(subtitle?: string): boolean {
   const value = subtitle?.trim();
   return value === "Digital Card" || value === "Physical Card";
@@ -162,12 +172,28 @@ export function isDigitalGiftCardProfileOrder(order: {
   return order.items.every((item) => item.subtitle?.trim() === "Digital Card");
 }
 
+/**
+ * A digital card that is not cancelled or returned: no delivery steps, Contact Us layout.
+ * A cancelled or returned one is shown like any other order, with its refund steps.
+ */
+export function isActiveDigitalGiftCardOrder(order: {
+  items: Array<{ subtitle?: string }>;
+  category?: string;
+}): boolean {
+  return (
+    order.category !== "cancelled" &&
+    order.category !== "returned" &&
+    isDigitalGiftCardProfileOrder(order)
+  );
+}
+
 /** Figma UI-Production 4858:124270 — right-aligned contact CTA width on desktop. */
 export const DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS =
   "h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:w-[414px] lg:max-w-[414px]";
 
 type DigitalGiftCardContactUsOrder = {
   items: Array<{ subtitle?: string }>;
+  category?: string;
   showContactUs?: boolean;
   showCancel: boolean;
   showReturn: boolean;
@@ -181,7 +207,7 @@ export function isDigitalGiftCardContactUsOnlyOrder(
 ): boolean {
   return (
     Boolean(order.showContactUs) &&
-    isDigitalGiftCardProfileOrder(order) &&
+    isActiveDigitalGiftCardOrder(order) &&
     !order.showCancel &&
     !order.showReturn &&
     !order.showTrack &&

@@ -25,7 +25,10 @@ function stripLeadingRequiredMarker(text: string): string {
 
 function resolveResumeHint(value: string, fallback: string): string {
   const hint = stripLeadingRequiredMarker(withFallback(value, fallback));
-  return /\b(?:zip|jpe?g|png)\b/i.test(hint) ? fallback : hint;
+  return /\b(?:zip|jpe?g|png)\b/i.test(hint) ||
+    /^Files up to 5 MB\. PDF, DOC, or DOCX only\./i.test(hint)
+    ? fallback
+    : hint;
 }
 
 function normalizeApplicationFieldLabel(
@@ -74,7 +77,7 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
   applicationForm: {
     title: "Application Form",
     resumeHeading: "Resume",
-    resumeHint: "Files up to 5 MB. PDF, DOC, or DOCX only.",
+    resumeHint: "File up to 5mb and (PDF, DOC, DOCX) format supported",
     resumeUploadLabel: "Upload Resume",
     resumeRemoveLabel: "Remove",
     uploadResumeModal: {

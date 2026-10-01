@@ -149,7 +149,7 @@ const mapLocationFilter = (
   };
 };
 
-const mapShowroom = (
+export const mapStoreLocatorShowroom = (
   showroom?: StrapiStoreLocatorShowroom | null,
 ): NormalizedStoreLocatorShowroom | null => {
   if (!showroom || !resolveSectionActive(showroom.isActive, showroom.showField)) {
@@ -218,7 +218,7 @@ export function mapStoreLocatorPage(
     .filter((item): item is NormalizedStoreLocatorLocationFilter => item != null);
 
   const showrooms = sortByOrder(raw.showrooms ?? [])
-    .map(mapShowroom)
+    .map(mapStoreLocatorShowroom)
     .filter((item): item is NormalizedStoreLocatorShowroom => item != null);
 
   return {

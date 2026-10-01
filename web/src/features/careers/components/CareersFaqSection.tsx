@@ -2,13 +2,15 @@
 
 import { Fragment, useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
+import {
+  accordionCollapseIconClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedCareerFaqSection } from "@/services/careers/careers.types";
 
-const faqTransitionClassName =
-  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
-
-const faqIconTransitionClassName = "transition-opacity duration-500 ease-in-out";
+const faqIconTransitionClassName = accordionCollapseIconClassName;
 
 const FaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
@@ -79,12 +81,7 @@ const CareersFaqSection = ({ faq }: CareersFaqSectionProps) => {
             return (
               <Fragment key={item.id}>
                 <Reveal direction="up" delay={index * 0.05}>
-                  <div
-                    className={cn(
-                      "flex flex-col overflow-hidden rounded",
-                      isOpen && "gap-4",
-                    )}
-                  >
+                  <div className="flex flex-col overflow-hidden rounded">
                     <button
                       type="button"
                       aria-expanded={isOpen}
@@ -98,15 +95,11 @@ const CareersFaqSection = ({ faq }: CareersFaqSectionProps) => {
                     </button>
 
                     <div
-                      className={cn(
-                        "grid min-h-0",
-                        faqTransitionClassName,
-                        isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-                      )}
+                      className={accordionCollapsePanelClassName(isOpen)}
                       aria-hidden={!isOpen}
                     >
-                      <div className="overflow-hidden">
-                        <p className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base md:text-xl">
+                      <div className={accordionCollapseInnerClassName}>
+                        <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 md:text-base md:text-xl">
                           {item.answer}
                         </p>
                       </div>

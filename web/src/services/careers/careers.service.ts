@@ -38,10 +38,10 @@ const CAREER_LANDING_POPULATE_QUERY =
 
 const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
 
-/** `populate=*` only — deep populate on this type returns CMS 500 (incl. when `heroSection` is null). */
+// This CMS type rejects combining wildcard population with nested hero media.
 const CAREER_LISTING_POPULATE_QUERY = "populate=*";
-
-const CAREER_LISTING_FALLBACK_QUERY = "populate=*";
+const CAREER_LISTING_HERO_QUERY =
+  "populate[heroSection][populate][backgroundImage][populate]=*";
 
 /** Uppercase `SEO` is omitted by `populate=*` and must be requested on its own. */
 const CAREER_SEO_QUERY = "populate[SEO][populate][ogImage]=true";
@@ -49,17 +49,20 @@ const CAREER_SEO_QUERY = "populate[SEO][populate][ogImage]=true";
 async function fetchCareerListingPage(
   signal?: AbortSignal,
 ): Promise<StrapiCareerListingPageEntity> {
-  try {
-    return await apiFetch<StrapiCareerListingPageEntity>(
+  const [page, heroResult] = await Promise.all([
+    apiFetch<StrapiCareerListingPageEntity>(
       `${STRAPI_ENDPOINTS.careerListingPage}?${CAREER_LISTING_POPULATE_QUERY}`,
       { signal },
-    );
-  } catch {
-    return apiFetch<StrapiCareerListingPageEntity>(
-      `${STRAPI_ENDPOINTS.careerListingPage}?${CAREER_LISTING_FALLBACK_QUERY}`,
+    ),
+    apiFetch<StrapiCareerListingPageEntity>(
+      `${STRAPI_ENDPOINTS.careerListingPage}?${CAREER_LISTING_HERO_QUERY}`,
       { signal },
-    );
-  }
+    ).catch(() => null),
+  ]);
+
+  return heroResult && "heroSection" in heroResult
+    ? { ...page, heroSection: heroResult.heroSection }
+    : page;
 }
 
 /** Job openings use populate=* — `qualifications` is not a valid populate key on this type yet. */

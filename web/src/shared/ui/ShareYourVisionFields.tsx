@@ -54,6 +54,8 @@ type ShareYourVisionFieldsProps = {
     noteTextareaClassName?: string;
 };
 
+const SHARE_VISION_FIELD_PLACEHOLDER = "Enter";
+
 const ShareYourVisionFields = ({
     idPrefix,
     name,
@@ -85,7 +87,7 @@ const ShareYourVisionFields = ({
     showPurpose = false,
     purposeOptions = [],
     noteLabel = "Describe more about your visit",
-    notePlaceholder = "Enter",
+    notePlaceholder = SHARE_VISION_FIELD_PLACEHOLDER,
     noteLabelClassName,
     noteTextareaClassName = "font-gill text-base leading-110",
 }: ShareYourVisionFieldsProps) => {
@@ -103,6 +105,7 @@ const ShareYourVisionFields = ({
                     value={name}
                     onChange={(event) => onNameChange(event.target.value)}
                     onBlur={() => markTouched("name")}
+                    placeholder={SHARE_VISION_FIELD_PLACEHOLDER}
                     autoComplete="name"
                     aria-invalid={showError("name") || undefined}
                     aria-describedby={showError("name") ? `${idPrefix}-name-error` : undefined}
@@ -143,10 +146,11 @@ const ShareYourVisionFields = ({
                         value={phone}
                         onChange={(event) => onPhoneChange(sanitizePhoneInput(event.target.value, countryCode))}
                         onBlur={() => markTouched("phone")}
+                        placeholder={SHARE_VISION_FIELD_PLACEHOLDER}
                         autoComplete="tel-national"
                         aria-invalid={showError("phone") || undefined}
                         aria-describedby={showError("phone") ? `${idPrefix}-phone-error` : undefined}
-                        className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
+                        className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none"
                     />
                 </div>
                 <FormFieldError id={`${idPrefix}-phone-error`} message={showError("phone") ? errors.phone : undefined} />
@@ -162,7 +166,7 @@ const ShareYourVisionFields = ({
                     value={email}
                     onChange={(event) => onEmailChange(event.target.value)}
                     onBlur={() => markTouched("email")}
-                    placeholder="Enter"
+                    placeholder={SHARE_VISION_FIELD_PLACEHOLDER}
                     autoComplete="email"
                     aria-invalid={showError("email") || undefined}
                     aria-describedby={showError("email") ? `${idPrefix}-email-error` : undefined}
@@ -230,7 +234,7 @@ const ShareYourVisionFields = ({
                         label="Purpose of Visit"
                         value={purpose}
                         options={purposeOptions}
-                        placeholder="-select-"
+                        placeholder={SHARE_VISION_FIELD_PLACEHOLDER}
                         onChange={onPurposeChange}
                         onBlur={() => markTouched("purpose")}
                         invalid={showError("purpose")}

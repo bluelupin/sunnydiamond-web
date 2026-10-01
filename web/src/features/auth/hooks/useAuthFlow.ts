@@ -21,7 +21,6 @@ import {
 import { useAuthFeatures } from "../context/AuthFeaturesContext";
 import {
   isEmailIdentifier,
-  isIndianCountryCode,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
   normalizeLoginPhoneDigits,
@@ -57,6 +56,8 @@ export type AuthFlowContentProps = {
     identifierError?: string;
     emailOnly: boolean;
     otpBlockedForCountry: boolean;
+    otpCountryCodes: readonly string[];
+    offerEmailFallback: boolean;
     /** No code channel and no social provider is available — nothing here can work. */
     noSignInMethod: boolean;
     showGoogle: boolean;
@@ -126,6 +127,8 @@ export function useAuthFlow({
   const [countryCode, setCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   /** Sticky "Use email instead" choice; survives switching country back to +91, cleared on reset. */
   const [emailModeForced, setEmailModeForced] = useState(false);
+  /** The last SMS request failed; cleared when the number or country changes. */
+  const [smsSendFailed, setSmsSendFailed] = useState(false);
   /**
    * The destination a code was actually sent to. Set only on a successful request,
    * and the single source of truth for verify, resend, and registration — so those
@@ -173,7 +176,10 @@ export function useAuthFlow({
   // With SMS off, the field accepts email only — there is no other code to send.
   const emailOnly = !flags.otpLoginEnabled || emailModeForced;
   const otpBlockedForCountry =
-    !emailOnly && !isEmailIdentifier(identifier) && !isIndianCountryCode(countryCode);
+    !emailOnly
+    && !isEmailIdentifier(identifier)
+    && !flags.otpCountryCodes.includes(countryCode);
+  const offerEmailFallback = smsSendFailed && !emailOnly && flags.emailOtpLoginEnabled;
   /** Registering by email: the address was already proven, so it is not editable. */
   const emailIsVerifiedIdentifier = otpTarget?.kind === "email";
   /**
@@ -212,6 +218,7 @@ export function useAuthFlow({
     setIdentifier("");
     setCountryCode(DEFAULT_COUNTRY_CODE);
     setEmailModeForced(false);
+    setSmsSendFailed(false);
     setOtpTarget(null);
     setOtpChannel("sms");
     setMaskedDestination(null);
@@ -309,6 +316,7 @@ export function useAuthFlow({
         emailOnly || /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, countryCode);
       setIdentifier(nextValue);
       setIdentifierError(undefined);
+      setSmsSendFailed(false);
     },
     [countryCode, emailOnly],
   );
@@ -320,12 +328,14 @@ export function useAuthFlow({
         setIdentifier(sanitizePhoneInput(identifier, value));
       }
       setIdentifierError(undefined);
+      setSmsSendFailed(false);
     },
     [identifier],
   );
 
   const handleUseEmailInstead = useCallback(() => {
     setEmailModeForced(true);
+    setSmsSendFailed(false);
     setIdentifier("");
     setIdentifierError(undefined);
   }, []);
@@ -352,6 +362,7 @@ export function useAuthFlow({
       }
 
       cooldownRef.current = result.resendAfterSeconds;
+      setSmsSendFailed(false);
       setOtpTarget(target);
       setOtpChannel(result.channel);
       setMaskedDestination(result.maskedDestination);
@@ -382,6 +393,8 @@ export function useAuthFlow({
     const result = await sendOtp(target);
     if (!result.ok) {
       setIdentifierError(result.error);
+      // Offered for numbers abroad (IN-6), where the email code is the realistic way in.
+      setSmsSendFailed(target.kind === "phone" && countryCode !== "+91");
       return;
     }
 
@@ -583,6 +596,8 @@ export function useAuthFlow({
       identifierError,
       emailOnly,
       otpBlockedForCountry,
+      otpCountryCodes: flags.otpCountryCodes,
+      offerEmailFallback,
       noSignInMethod,
       showGoogle,
       showApple,

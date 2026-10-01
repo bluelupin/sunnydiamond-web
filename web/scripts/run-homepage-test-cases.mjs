@@ -48,6 +48,12 @@ function assertSource(tcId, label, source, pattern, actualOnPass) {
   return ok;
 }
 
+function assertNotSource(tcId, label, source, pattern, actualOnPass) {
+  const ok = typeof pattern === "string" ? !source.includes(pattern) : !pattern.test(source);
+  record(tcId, ok ? "Pass" : "Fail", ok ? actualOnPass : `Still present: ${label}`);
+  return ok;
+}
+
 async function fetchText(baseUrl, path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     headers: { Accept: "text/html,application/xml,*/*" },
@@ -80,7 +86,6 @@ function runStaticChecks() {
   const heroSection = readSrc("src/features/cms/components/home/HeroSection.tsx");
   const craftingRarity = readSrc("src/features/cms/components/home/CraftingRaritySection.tsx");
   const belowFold = readSrc("src/features/cms/components/home/HomeBelowFoldSections.tsx");
-  const sectionNav = readSrc("src/features/cms/components/home/SectionNav.tsx");
   const homepageSeo = readSrc("src/shared/lib/seo/homepageSeo.ts");
   const prefetchCms = readSrc("src/lib/homepage/prefetchHomepageCms.ts");
   const resolveAboveFold = readSrc("src/lib/homepage/resolveHomepageAboveFold.ts");
@@ -99,9 +104,9 @@ function runStaticChecks() {
   assertSource("HOME-002", "loading skeleton", homeLoading, "HomePageRouteSkeleton", "Route loading.tsx skeleton");
   assertSource("HOME-003", "revalidate 300", homePage, "export const revalidate = 300", "ISR revalidate = 300");
   assertSource("HOME-004", "CMS provider", homePage, "HomepageCmsProvider", "HomepageCmsProvider wraps page");
-  assertSource("HOME-005", "prefetch bundle", homePage, "prefetchHomepageBundle", "prefetchHomepageBundle on server");
+  assertSource("HOME-005", "prefetch CMS", homePage, "prefetchHomepageCms", "prefetchHomepageCms on server (Magento deferred)");
   assertSource("HOME-006", "hero LCP preload", homePage, "preloadHeroLcpImages", "preloadHeroLcpImages called");
-  assertSource("HOME-007", "error boundary", homeView, "FeatureErrorBoundary", "FeatureErrorBoundary on SectionNav");
+  assertSource("HOME-007", "error boundary", belowFold, "FeatureErrorBoundary", "FeatureErrorBoundary on below-fold sections");
   assertSource("HOME-008", "perf reporter", homeView, "HomepagePerformanceReporter", "HomepagePerformanceReporter wired");
 
   // B. SEO
@@ -127,13 +132,13 @@ function runStaticChecks() {
   assertSource("HOME-026", "section active", craftingRarity, "isSectionActive", "isSectionActive guard");
   assertSource("HOME-027", "responsive image", craftingRarity, "ResponsiveImage", "ResponsiveImage in crafting rarity");
 
-  // E. Section Nav
-  assertSource("HOME-028", "section nav", homeView, "SectionNav", "SectionNav dynamic import");
-  assertSource("HOME-029", "scroll spy", sectionNav, "useScrollSpy", "useScrollSpy wired");
-  assertSource("HOME-030", "scroll to section", sectionNav, "scrollToHomeSection", "scrollToHomeSection on click");
-  assertSource("HOME-031", "hide at footer", sectionNav, "isFooterIntersecting", "Nav hides at footer");
-  assertSource("HOME-032", "progress indicator", sectionNav, "SectionNavProgressIndicator", "Progress indicator");
-  assertSource("HOME-033", "empty nav", sectionNav, "navSections.length === 0", "Empty nav guard");
+  // E. Section Nav (removed from homepage)
+  assertNotSource("HOME-028", "section nav removed", homeView, "SectionNav", "SectionNav not mounted on homepage");
+  record("HOME-029", "Pass", "Section nav removed — scroll spy retired");
+  record("HOME-030", "Pass", "Section nav removed — scroll-to-section retired");
+  record("HOME-031", "Pass", "Section nav removed — footer hide retired");
+  record("HOME-032", "Pass", "Section nav removed — progress indicator retired");
+  record("HOME-033", "Pass", "Section nav removed — empty nav guard retired");
 
   // F. Below-fold
   assertSource("HOME-034", "diamond sourcing", belowFold, "DiamondSourcingSection", "DiamondSourcingSection lazy");

@@ -15,6 +15,7 @@ import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName, invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
+import FormRadioButtonIcon from "@/assets/Icons/FormRadioButtonIcon";
 
 function formatRequiredFieldLabel(label: string): string {
   return label.endsWith("*") ? label : `${label}*`;
@@ -149,7 +150,10 @@ type CheckoutPhoneFieldProps = {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  placeholder?: string;
   countryCode?: string;
+  /** Codes the picker offers; defaults to the general form list. */
+  countryCodes?: readonly string[];
   onCountryCodeChange?: (code: string) => void;
   verified?: boolean;
   onVerify?: () => void;
@@ -168,7 +172,9 @@ export const CheckoutPhoneField = ({
   value,
   onChange,
   onBlur,
+  placeholder = "Enter",
   countryCode = DEFAULT_COUNTRY_CODE,
+  countryCodes,
   onCountryCodeChange,
   verified,
   onVerify,
@@ -182,57 +188,58 @@ export const CheckoutPhoneField = ({
   const shouldShowVerify = showVerify;
 
   return (
-  <div className="flex flex-col gap-2">
-    <CheckoutFieldLabel id={id} label={label} optional={optional} />
-    <div
-      className={cn(
-        "relative flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
-        disabled && "cursor-not-allowed opacity-60",
-        invalid && invalidFieldContainerClassName,
-      )}
-    >
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        {!isEmailInput ? (
-          <PhoneCountryCodeSelect
-            id={`${id}-country-code`}
-            value={countryCode}
-            onChange={(code) => onCountryCodeChange?.(code)}
-            disabled={disabled || !onCountryCodeChange}
+    <div className="flex flex-col gap-2">
+      <CheckoutFieldLabel id={id} label={label} optional={optional} />
+      <div
+        className={cn(
+          "relative flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
+          disabled && "cursor-not-allowed opacity-60",
+          invalid && invalidFieldContainerClassName,
+        )}
+      >
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {!isEmailInput ? (
+            <PhoneCountryCodeSelect
+              id={`${id}-country-code`}
+              value={countryCode}
+              codes={countryCodes}
+              onChange={(code) => onCountryCodeChange?.(code)}
+              disabled={disabled || !onCountryCodeChange}
+            />
+          ) : null}
+          <input
+            id={id}
+            type={isEmailInput ? "email" : "tel"}
+            inputMode={isEmailInput ? "email" : "numeric"}
+            value={value}
+            disabled={disabled}
+            onChange={(event) => onChange(event.target.value)}
+            onBlur={onBlur}
+            placeholder={placeholder}
+            autoComplete={isEmailInput ? "email" : "tel"}
+            aria-invalid={invalid || undefined}
+            aria-describedby={error ? `${id}-error` : undefined}
+            className={cn(
+              "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+              disabled && "cursor-not-allowed",
+            )}
           />
+        </div>
+        {shouldShowVerify ? (
+          verified ? (
+            <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 10.75L6.25 16L18.25 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Verified
+            </span>
+          ) : (
+            <DetailTextLink onClick={onVerify} disabled={disabled}>VERIFY</DetailTextLink>
+          )
         ) : null}
-        <input
-          id={id}
-          type={isEmailInput ? "email" : "tel"}
-          inputMode={isEmailInput ? "email" : "numeric"}
-          value={value}
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
-          placeholder="Enter"
-          autoComplete={isEmailInput ? "email" : "tel"}
-          aria-invalid={invalid || undefined}
-          aria-describedby={error ? `${id}-error` : undefined}
-          className={cn(
-            "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-            disabled && "cursor-not-allowed",
-          )}
-        />
       </div>
-      {shouldShowVerify ? (
-        verified ? (
-          <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 10.75L6.25 16L18.25 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Verified
-          </span>
-        ) : (
-          <DetailTextLink onClick={onVerify} disabled={disabled}>VERIFY</DetailTextLink>
-        )
-      ) : null}
+      <FormFieldError id={`${id}-error`} message={error} />
     </div>
-    <FormFieldError id={`${id}-error`} message={error} />
-  </div>
   );
 };
 
@@ -240,14 +247,16 @@ type CheckoutSectionCardProps = {
   children: React.ReactNode;
   className?: string;
   gapClassName?: string;
+  id?: string;
 };
 
 export const CheckoutSectionCard = ({
   children,
   className,
   gapClassName = "gap-6",
+  id,
 }: CheckoutSectionCardProps) => (
-  <section className={cn("flex flex-col bg-white px-4 py-6 lg:px-6", gapClassName, className)}>
+  <section id={id} className={cn("flex flex-col bg-white py-6 px-4", gapClassName, className)}>
     {children}
   </section>
 );
@@ -263,17 +272,17 @@ export const CheckoutSectionHeading = ({
   onEdit,
   editDisabled = false,
 }: CheckoutSectionHeadingProps) => (
-  <div className="flex items-center justify-between gap-4">
-    <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">{children}</h2>
-    {/* {onEdit ? (
+  <div className="flex items-start justify-between gap-4">
+    <h2 className="font-gill md:text-2xl text-xl font-normal leading-110 text-darkblack">{children}</h2>
+    {onEdit ? (
       <DetailTextLink
         onClick={onEdit}
         disabled={editDisabled}
-        className={editDisabled ? "opacity-40" : undefined}
+        className={cn("shrink-0", editDisabled && "opacity-40")}
       >
         EDIT
       </DetailTextLink>
-    ) : null} */}
+    ) : null}
   </div>
 );
 
@@ -307,27 +316,27 @@ export const CheckoutCheckbox = ({
   const isLocked = Boolean(readOnly || disabled);
 
   return (
-  <label className={cn("flex items-center gap-2", isLocked ? "cursor-default" : "cursor-pointer")}>
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      onClick={() => !isLocked && onChange(!checked)}
-      disabled={isLocked}
-      className={cn(
-        "flex size-4 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
-        checked && "border-transparent bg-linkGold",
-        isLocked && "cursor-not-allowed",
-        disabled && "opacity-60",
-      )}
-    >
-      <Check
-        className={cn("size-3 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
-        strokeWidth={2.5}
-      />
-    </button>
-    <span className="flex h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
-  </label>
+    <label className={cn("flex items-center gap-2", isLocked ? "cursor-default" : "cursor-pointer")}>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={checked}
+        onClick={() => !isLocked && onChange(!checked)}
+        disabled={isLocked}
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
+          checked && "border-transparent bg-linkGold",
+          isLocked && "cursor-not-allowed",
+          disabled && "opacity-60",
+        )}
+      >
+        <Check
+          className={cn("size-3 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
+          strokeWidth={2.5}
+        />
+      </button>
+      <span className="flex min-h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
+    </label>
   );
 };
 
@@ -349,7 +358,7 @@ export const CheckoutRadioRow = ({
 }: Omit<CheckoutRadioOptionProps, "children">) => (
   <label
     className={cn(
-      "flex gap-2",
+      "flex min-w-0 gap-2",
       disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
       align === "start" ? "items-start" : "items-center",
     )}
@@ -364,19 +373,11 @@ export const CheckoutRadioRow = ({
           onChange();
         }
       }}
-      className={cn(
-        "flex size-6 shrink-0 items-center justify-center rounded-full border-[0.8px] border-darkblack bg-white",
-        align === "start" && "mt-1",
-      )}
+      className="flex size-6 shrink-0 items-center justify-center"
     >
-      <span
-        className={cn(
-          "size-2.5 rounded-full bg-darkblack transition-opacity",
-          checked ? "opacity-100" : "opacity-0",
-        )}
-      />
+      <FormRadioButtonIcon checked={checked} className="size-6" />
     </button>
-    <div className="font-gill text-base font-normal leading-110 text-darkblack">{label}</div>
+    <div className="min-w-0 font-gill text-base font-normal leading-110 text-darkblack">{label}</div>
   </label>
 );
 

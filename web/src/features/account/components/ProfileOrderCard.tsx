@@ -22,7 +22,7 @@ import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
 import {
   DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
   isDigitalGiftCardContactUsOnlyOrder,
-  isDigitalGiftCardProfileOrder,
+  isActiveDigitalGiftCardOrder,
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
@@ -115,7 +115,7 @@ export function ProfileOrderCard({
   }, [order.id, order.status]);
 
   const timelineSteps = useMemo(() => {
-    if (isDigitalGiftCardProfileOrder(order)) {
+    if (isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
 
@@ -382,7 +382,10 @@ export function ProfileOrderCard({
             </div>
           ) : null}
 
-          {order.showDownloadInvoice && order.category !== "in_progress" ? (
+          {/* A paid digital card stays "in progress" (Magento has no delivered step for it) but has an invoice. */}
+          {order.showDownloadInvoice &&
+          (order.category !== "in_progress" ||
+            (isActiveDigitalGiftCardOrder(order) && order.invoiceDisabled === false)) ? (
             <div className="flex justify-end">
               <DetailTextLink
                 onClick={invoiceDisabled ? undefined : handleDownloadInvoice}

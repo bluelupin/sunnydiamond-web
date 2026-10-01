@@ -1,21 +1,32 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import Link from "next/link";
-import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
 import { ShowroomsLayoutSkeleton } from "./ShowroomsLayoutSkeleton";
+import {
+  StoreLocatorAddressIcon,
+  StoreLocatorPhoneIcon,
+} from "./StoreLocatorShowroomIcons";
+import {
+  storeLocatorExpandedPanelFigmaSpec,
+  storeLocatorExploreNearbyStoresLabelClassName,
+  storeLocatorExploreNearbyStoresLabelMarginTop,
+  storeLocatorNoAreaFigmaSpec,
+  storeLocatorNoAreaSubtitleClassName,
+  storeLocatorNoAreaTitleClassName,
+  storeLocatorShowroomCityClassName,
+  storeLocatorShowroomDetailTextClassName,
+  storeLocatorSearchMobileFigmaSpec,
+  storeLocatorShowroomsFigmaSpec,
+} from "../data/storeLocatorContent";
 import { formatAddressWithPincode } from "../utils/storeLocatorFilters";
 
-const ADDRESS_ICON = "/icons/address-icon.svg";
-const PHONE_ICON = "/icons/phone-icon.svg";
-
-const showroomPhoneLinkClassName =
-  "border-0 pb-0 font-gill text-lg font-light leading-110 text-darkblack lg:text-xl";
+const figma = storeLocatorShowroomsFigmaSpec;
+const expandedPanelFigma = storeLocatorExpandedPanelFigmaSpec;
 
 function toShowroomTelHref(phone: string): string | undefined {
   const digits = phone.replace(/[^\d+]/g, "");
@@ -40,9 +51,9 @@ export type ShowroomsLayoutProps = {
   description?: string | null;
   getDirectionsLabel?: string;
   listHeader?: ReactNode;
-  /** Desktop-only: ids of search-matched stores (shown above nearby label). */
+  /** Figma 4903:141556 — pin / location miss with full showroom list */
+  noAreaCopy?: { title: string; subtitle: string } | null;
   matchedStoreIds?: string[];
-  /** Desktop-only: Figma “Explore nearby stores” label. */
   nearbyStoresLabel?: string;
   emptyMessage?: string;
   className?: string;
@@ -53,70 +64,185 @@ function ShowroomPhoneRow({ phone }: { phone: string }) {
   const href = toShowroomTelHref(phone);
   if (!phone.trim()) return null;
 
+  const textClassName = storeLocatorShowroomDetailTextClassName;
+
   return (
-    <div className="flex items-center gap-3">
-      <Image
-        src={PHONE_ICON}
-        alt=""
-        width={24}
-        height={24}
-        aria-hidden
-        className="size-6 shrink-0"
-      />
-      <ContactPhoneLink
-        href={href}
-        label={phone}
-        className={showroomPhoneLinkClassName}
-      />
+    <div
+      className="flex w-full items-center text-darkblack"
+      style={{ gap: expandedPanelFigma.iconTextGap }}
+    >
+      <StoreLocatorPhoneIcon />
+      {href ? (
+        <a href={href} className={cn(textClassName, "shrink-0 no-underline")}>
+          {phone}
+        </a>
+      ) : (
+        <p className={cn(textClassName, "shrink-0")}>{phone}</p>
+      )}
     </div>
   );
 }
 
-function ShowroomLocationDetails({
+function ShowroomLocationDetailsFigma({
   location,
   getDirectionsLabel,
-  className,
 }: {
   location: ShowroomLayoutItem;
   getDirectionsLabel?: string;
-  className?: string;
 }) {
-  const directionsText = getDirectionsLabel?.trim();
+  const directionsText = getDirectionsLabel?.trim() || "GET DIRECTIONS";
 
   return (
-    <div className={cn("flex flex-col gap-6", className)}>
-      {location.address ? (
-        <div className="flex items-start gap-3">
-          <Image
-            src={ADDRESS_ICON}
-            alt=""
-            width={24}
-            height={24}
-            aria-hidden
-            className="lg:size-6 size-5 shrink-0 sm:mt-0 mt-1.5"
-          />
-          <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
-            {location.address}
-          </p>
-        </div>
-      ) : null}
-      {location.phone ? <ShowroomPhoneRow phone={location.phone} /> : null}
-      {directionsText && location.directionsUrl ? (
-        <Link
+    <div
+      className="flex w-full flex-col items-start"
+      style={{ gap: expandedPanelFigma.detailsToCtaGap }}
+    >
+      <div
+        className="flex w-full flex-col items-start"
+        style={{ gap: expandedPanelFigma.contactStackGap }}
+      >
+        {location.address ? (
+          <div
+            className="flex w-full items-start text-darkblack"
+            style={{ gap: expandedPanelFigma.iconTextGap }}
+          >
+            <StoreLocatorAddressIcon />
+            <p className={cn("min-w-0 flex-1", storeLocatorShowroomDetailTextClassName)}>
+              {location.address}
+            </p>
+          </div>
+        ) : null}
+        {location.phone ? <ShowroomPhoneRow phone={location.phone} /> : null}
+      </div>
+      {location.directionsUrl ? (
+        <DetailTextLink
           href={location.directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
         >
           {directionsText}
-        </Link>
+        </DetailTextLink>
       ) : null}
     </div>
   );
 }
 
-const mobileAccordionCollapseTransitionClassName =
-  "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none";
+function ShowroomExpandedPanel({
+  location,
+  getDirectionsLabel,
+  includeMobileImage = false,
+  horizontalPadding = figma.listHorizontalPadding,
+}: {
+  location: ShowroomLayoutItem;
+  getDirectionsLabel?: string;
+  includeMobileImage?: boolean;
+  horizontalPadding?: number;
+}) {
+  return (
+    <div
+      className="flex w-full flex-col"
+      style={{
+        gap: expandedPanelFigma.sectionGap,
+        backgroundColor: figma.expandedPanelBackground,
+        paddingLeft: horizontalPadding,
+        paddingRight: horizontalPadding,
+        paddingTop: figma.expandedPanelPaddingY,
+        paddingBottom: figma.expandedPanelPaddingY,
+      }}
+    >
+      <p className={storeLocatorShowroomCityClassName}>{location.name}</p>
+      <div className="h-[0.5px] w-full bg-neutral300" aria-hidden />
+      {includeMobileImage && location.desktopImage ? (
+        <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+          <ResponsiveImage
+            desktopSrc={location.desktopImage}
+            mobileSrc={location.mobileImage ?? location.desktopImage}
+            alt={location.imageAlt}
+            width={2500}
+            height={1797}
+            quality={90}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ) : null}
+      <ShowroomLocationDetailsFigma location={location} getDirectionsLabel={getDirectionsLabel} />
+    </div>
+  );
+}
+
+function ShowroomCollapsedRow({
+  location,
+  onSelect,
+  horizontalPadding = figma.listHorizontalPadding,
+}: {
+  location: ShowroomLayoutItem;
+  onSelect: (id: string) => void;
+  horizontalPadding?: number;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={false}
+      onClick={() => onSelect(location.id)}
+      className={cn("flex w-full items-center text-left", storeLocatorShowroomCityClassName)}
+      style={{
+        paddingLeft: horizontalPadding,
+        paddingRight: horizontalPadding,
+        paddingTop: figma.collapsedRowPaddingY,
+        paddingBottom: figma.collapsedRowPaddingY,
+      }}
+    >
+      {location.name}
+    </button>
+  );
+}
+
+function ShowroomNoAreaListLead({
+  copy,
+  featuredLocation,
+  getDirectionsLabel,
+  horizontalPadding = figma.listHorizontalPadding,
+  includeMobileImage = false,
+}: {
+  copy: { title: string; subtitle: string };
+  featuredLocation?: ShowroomLayoutItem;
+  getDirectionsLabel?: string;
+  horizontalPadding?: number;
+  includeMobileImage?: boolean;
+}) {
+  const pad = {
+    paddingLeft: horizontalPadding,
+    paddingRight: horizontalPadding,
+  };
+
+  return (
+    <div
+      className="flex w-full flex-col"
+      style={{ gap: storeLocatorNoAreaFigmaSpec.titleToSubtitleGap }}
+    >
+      <p className={storeLocatorNoAreaTitleClassName} style={pad}>
+        {copy.title}
+      </p>
+      <div
+        className="flex w-full flex-col"
+        style={{ gap: storeLocatorNoAreaFigmaSpec.subtitleToFeaturedGap }}
+      >
+        <p className={storeLocatorNoAreaSubtitleClassName} style={pad}>
+          {copy.subtitle}
+        </p>
+        {featuredLocation ? (
+          <ShowroomExpandedPanel
+            location={featuredLocation}
+            getDirectionsLabel={getDirectionsLabel}
+            includeMobileImage={includeMobileImage}
+            horizontalPadding={horizontalPadding}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 
 function ShowroomsMobileAccordion({
   locations,
@@ -124,6 +250,7 @@ function ShowroomsMobileAccordion({
   onSelect,
   getDirectionsLabel,
   listHeader,
+  noAreaCopy,
   emptyMessage,
 }: Pick<
   ShowroomsLayoutProps,
@@ -132,74 +259,70 @@ function ShowroomsMobileAccordion({
   | "onSelect"
   | "getDirectionsLabel"
   | "listHeader"
+  | "noAreaCopy"
   | "emptyMessage"
 >) {
-  return (
-    <div className="flex flex-col items-left lg:gap-8 gap-4 bg-white lg:hidden">
-      {listHeader ? <div className="w-full px-4">{listHeader}</div> : null}
+  const mobilePadding = storeLocatorSearchMobileFigmaSpec.paddingX;
+  const featuredLocation =
+    locations.find((location) => location.id === activeId) ?? locations[0];
+  const remainingLocations = noAreaCopy
+    ? locations.filter((location) => location.id !== featuredLocation?.id)
+    : locations;
 
-      <ScrollReveal
-        delayMs={80}
-        className="w-full"
-        aria-label="Showroom locations"
-      >
+  return (
+    <div className="flex flex-col items-left gap-4 bg-white lg:hidden">
+      {listHeader || noAreaCopy ? (
+        <div className="w-full pt-6">
+          {noAreaCopy ? (
+            <ShowroomNoAreaListLead
+              copy={noAreaCopy}
+              featuredLocation={featuredLocation}
+              getDirectionsLabel={getDirectionsLabel}
+              horizontalPadding={mobilePadding}
+              includeMobileImage
+            />
+          ) : (
+            <div className="w-full px-4">{listHeader}</div>
+          )}
+        </div>
+      ) : null}
+
+      <ScrollReveal delayMs={80} className="w-full" aria-label="Showroom locations">
         {locations.length === 0 ? (
           emptyMessage ? (
             <p className="px-4 py-6 font-gill text-center text-base font-light leading-110 text-neutral500">
               {emptyMessage}
             </p>
           ) : null
+        ) : noAreaCopy ? (
+          remainingLocations.map((location) => (
+            <ShowroomCollapsedRow
+              key={location.id}
+              location={location}
+              onSelect={onSelect}
+              horizontalPadding={mobilePadding}
+            />
+          ))
         ) : (
           locations.map((location) => {
             const isSelected = location.id === activeId;
 
             return (
-              <div
-                key={location.id}
-                className={cn("w-full", isSelected && "bg-gray300")}
-              >
-                <button
-                  type="button"
-                  aria-expanded={isSelected}
-                  aria-pressed={isSelected}
-                  onClick={() => onSelect(location.id)}
-                  className="flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack"
-                >
-                  {location.name}
-                </button>
-
-                <div
-                  aria-hidden={!isSelected}
-                  className={cn(
-                    mobileAccordionCollapseTransitionClassName,
-                    isSelected
-                      ? "grid-rows-[1fr] opacity-100"
-                      : "pointer-events-none grid-rows-[0fr] opacity-0",
-                  )}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <div className="flex flex-col gap-4 px-4 pb-6">
-                      <div className="h-[0.5px] w-full bg-neutral300" aria-hidden />
-                      {location.desktopImage ? (
-                        <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                          <ResponsiveImage
-                            desktopSrc={location.desktopImage}
-                            mobileSrc={location.mobileImage ?? location.desktopImage}
-                            alt={location.imageAlt}
-                            width={2500}
-                            height={1797}
-                            quality={90}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : null}
-                      <ShowroomLocationDetails
-                        location={location}
-                        getDirectionsLabel={getDirectionsLabel}
-                      />
-                    </div>
-                  </div>
-                </div>
+              <div key={location.id} className="w-full">
+                {isSelected ? (
+                  <ShowroomExpandedPanel
+                    location={location}
+                    getDirectionsLabel={getDirectionsLabel}
+                    includeMobileImage
+                    horizontalPadding={mobilePadding}
+                  />
+                ) : (
+                  <ShowroomCollapsedRow
+                    location={location}
+                    onSelect={onSelect}
+                    horizontalPadding={mobilePadding}
+                  />
+                )}
               </div>
             );
           })
@@ -213,9 +336,9 @@ function ShowroomsDesktopLayout({
   locations,
   activeId,
   onSelect,
-  description,
   getDirectionsLabel,
   listHeader,
+  noAreaCopy,
   emptyMessage,
   matchedStoreIds,
   nearbyStoresLabel,
@@ -228,9 +351,9 @@ function ShowroomsDesktopLayout({
   | "locations"
   | "activeId"
   | "onSelect"
-  | "description"
   | "getDirectionsLabel"
   | "listHeader"
+  | "noAreaCopy"
   | "emptyMessage"
   | "matchedStoreIds"
   | "nearbyStoresLabel"
@@ -240,8 +363,6 @@ function ShowroomsDesktopLayout({
   mobileImage?: string | StaticImageData;
   imageAlt: string;
 }) {
-  const directionsText = getDirectionsLabel?.trim();
-  const hasHeaderContent = Boolean(description || listHeader);
   const matchedIdSet = new Set(matchedStoreIds ?? []);
   const matchedLocations = locations.filter((location) => matchedIdSet.has(location.id));
   const matchedCount = matchedLocations.length;
@@ -251,128 +372,114 @@ function ShowroomsDesktopLayout({
   const orderedLocations = showNearbyLabel
     ? [...matchedLocations, ...locations.filter((location) => !matchedIdSet.has(location.id))]
     : locations;
+  const featuredLocation =
+    orderedLocations.find((location) => location.id === activeId) ?? orderedLocations[0];
+  const listLocations = noAreaCopy
+    ? orderedLocations.filter((location) => location.id !== featuredLocation?.id)
+    : orderedLocations;
 
   return (
-    <>
-      {hasHeaderContent ? (
-        <div className="hidden lg:block 2xl:pl-24 lg:pl-10 pl-5 lg:pr-0 pr-5">
-          {description ? (
-            <ScrollReveal
-              delayMs={80}
-              className="md:hidden font-body text-base text-muted-foreground leading-relaxed max-w-350 mx-auto lg:text-left text-center mb-4"
-            >
-              {description}
-            </ScrollReveal>
-          ) : null}
-          {listHeader ? (
-            <div className="lg:mb-6 mb-4 text-base text-darkblack font-gill font-normal">{listHeader}</div>
-          ) : null}
-        </div>
-      ) : null}
-      <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
-        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px] h-full">
+    <div
+      className="mx-auto hidden w-full max-w-1920 items-stretch gap-6 lg:flex"
+      style={{
+        gap: figma.columnGap,
+        paddingTop: figma.sectionPaddingTop,
+        paddingBottom: figma.sectionPaddingBottom,
+      }}
+    >
+      <ScrollReveal
+        delayMs={120}
+        className="flex w-full max-w-[593px] shrink-0 flex-col"
+        style={{ maxWidth: figma.listMaxWidth }}
+      >
+        {noAreaCopy ? (
+          <ShowroomNoAreaListLead
+            copy={noAreaCopy}
+            featuredLocation={featuredLocation}
+            getDirectionsLabel={getDirectionsLabel}
+          />
+        ) : listHeader ? (
           <div
-            aria-label="Showroom locations"
-            className="h-full flex lg:flex-col flex-row overflow-x-auto"
+            className="w-full"
+            style={{
+              paddingLeft: figma.listHorizontalPadding,
+              paddingRight: figma.listHorizontalPadding,
+              marginBottom: figma.listTitleToListGap,
+            }}
           >
-            {locations.length === 0 ? (
-              emptyMessage ? (
-                <p className="px-4 py-8 font-gill text-center text-base font-light leading-110 text-neutral500 lg:px-10">
-                  {emptyMessage}
-                </p>
-              ) : null
-            ) : (
-              orderedLocations.map((location, index) => {
-                const isSelected = location.id === activeId;
-                const insertNearbyLabel = showNearbyLabel && index === matchedCount;
+            {listHeader}
+          </div>
+        ) : null}
 
-                return (
-                  <div key={location.id} className="contents">
-                    {insertNearbyLabel ? (
-                      <p className="2xl:pl-24 lg:pl-10 hidden w-full px-4 py-4 font-gill text-base font-normal leading-110 text-neutral500 lg:block">
+        <div aria-label="Showroom locations" className="flex w-full flex-col">
+          {locations.length === 0 ? (
+            emptyMessage ? (
+              <p
+                className="py-8 font-gill text-base font-light leading-110 text-neutral500"
+                style={{
+                  paddingLeft: figma.listHorizontalPadding,
+                  paddingRight: figma.listHorizontalPadding,
+                }}
+              >
+                {emptyMessage}
+              </p>
+            ) : null
+          ) : (
+            listLocations.map((location, index) => {
+              const isSelected = !noAreaCopy && location.id === activeId;
+              const insertNearbyLabel = showNearbyLabel && index === matchedCount;
+
+              return (
+                <div key={location.id} className="w-full">
+                  {insertNearbyLabel ? (
+                    <div
+                      className="flex w-full items-center"
+                      style={{
+                        marginTop: storeLocatorExploreNearbyStoresLabelMarginTop,
+                        paddingLeft: figma.listHorizontalPadding,
+                        paddingRight: figma.listHorizontalPadding,
+                      }}
+                    >
+                      <p className={storeLocatorExploreNearbyStoresLabelClassName}>
                         {nearbyStoresLabel}
                       </p>
-                    ) : null}
-                    <div
-                      className={cn(
-                        "2xl:pl-24 lg:pl-10 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
-                        isSelected ? "border-black bg-gray300" : "border-transparent",
-                      )}
-                    >
-                      <button
-                        type="button"
-                        aria-pressed={isSelected}
-                        onClick={() => onSelect(location.id)}
-                        className={cn(
-                          "font-light w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
-                          isSelected && "border-b border-gray50",
-                        )}
-                      >
-                        {location.name}
-                      </button>
-
-                      {isSelected ? (
-                        <div className="lg:pt-4 lg:pb-8 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
-                          {location.address ? (
-                            <div className="flex gap-3 items-start">
-                              <Image
-                                src={ADDRESS_ICON}
-                                alt=""
-                                width={24}
-                                height={24}
-                                aria-hidden
-                                className="sm:size-5 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
-                              />
-                              <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
-                                {location.address}
-                              </p>
-                            </div>
-                          ) : null}
-
-                          {location.phone ? (
-                            <div className="mt-4 lg:mb-6 mb-8">
-                              <ShowroomPhoneRow phone={location.phone} />
-                            </div>
-                          ) : null}
-                          {directionsText && location.directionsUrl ? (
-                            <Link
-                              href={location.directionsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%]"
-                            >
-                              {directionsText}
-                            </Link>
-                          ) : null}
-                        </div>
-                      ) : null}
                     </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </ScrollReveal>
+                  ) : null}
 
-        <ScrollReveal
-          delayMs={200}
-          className="relative aspect-[350/480] h-478 w-full overflow-hidden px-5 md:aspect-[850/600] md:h-595 md:px-0 lg:aspect-[850/600]"
-        >
-          {activeLocation && desktopImage ? (
-            <ResponsiveImage
-              key={activeLocation.id}
-              desktopSrc={desktopImage}
-              mobileSrc={mobileImage ?? desktopImage}
-              alt={imageAlt}
-              width={850}
-              height={600}
-              quality={90}
-              className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
-            />
-          ) : null}
-        </ScrollReveal>
-      </div>
-    </>
+                  {isSelected ? (
+                    <ShowroomExpandedPanel
+                      location={location}
+                      getDirectionsLabel={getDirectionsLabel}
+                    />
+                  ) : (
+                    <ShowroomCollapsedRow location={location} onSelect={onSelect} />
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal
+        delayMs={200}
+        className="relative min-w-0 flex-1 basis-0 overflow-hidden"
+        style={{ height: figma.heroMinHeight, minHeight: figma.heroMinHeight }}
+      >
+        {activeLocation && desktopImage ? (
+          <ResponsiveImage
+            key={activeLocation.id}
+            fill
+            desktopSrc={desktopImage}
+            mobileSrc={mobileImage ?? desktopImage}
+            alt={imageAlt}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            quality={90}
+            className="object-cover object-center"
+          />
+        ) : null}
+      </ScrollReveal>
+    </div>
   );
 }
 
@@ -380,9 +487,9 @@ export function ShowroomsLayout({
   locations,
   activeId,
   onSelect,
-  description,
   getDirectionsLabel,
   listHeader,
+  noAreaCopy,
   matchedStoreIds,
   nearbyStoresLabel,
   emptyMessage,
@@ -393,7 +500,7 @@ export function ShowroomsLayout({
     return (
       <ShowroomsLayoutSkeleton
         className={className}
-        showListHeader={Boolean(listHeader)}
+        showListHeader={Boolean(listHeader || noAreaCopy)}
       />
     );
   }
@@ -406,24 +513,23 @@ export function ShowroomsLayout({
   const imageAlt = activeLocation?.imageAlt ?? "";
 
   return (
-    <section
-      className={cn("bg-white lg:pt-16 lg:pb-104 pb-16", className)}
-    >
+    <section className={cn("bg-white pb-16 lg:pb-0", className)}>
       <ShowroomsMobileAccordion
         locations={locations}
         activeId={activeId}
         onSelect={onSelect}
         getDirectionsLabel={getDirectionsLabel}
         listHeader={listHeader}
+        noAreaCopy={noAreaCopy}
         emptyMessage={emptyMessage}
       />
       <ShowroomsDesktopLayout
         locations={locations}
         activeId={activeId}
         onSelect={onSelect}
-        description={description}
         getDirectionsLabel={getDirectionsLabel}
         listHeader={listHeader}
+        noAreaCopy={noAreaCopy}
         emptyMessage={emptyMessage}
         matchedStoreIds={matchedStoreIds}
         nearbyStoresLabel={nearbyStoresLabel}

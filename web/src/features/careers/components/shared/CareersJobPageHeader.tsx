@@ -12,6 +12,8 @@ type CareersJobPageHeaderProps = {
   titleId: string;
   shareLabel?: string;
   onShare?: () => void;
+  showPosted?: boolean;
+  showMobilePosted?: boolean;
   className?: string;
 };
 
@@ -21,6 +23,8 @@ const CareersJobPageHeader = ({
   titleId,
   shareLabel = "Share",
   onShare,
+  showPosted = true,
+  showMobilePosted = showPosted,
   className,
 }: CareersJobPageHeaderProps) => {
   return (
@@ -50,26 +54,26 @@ const CareersJobPageHeader = ({
 
         <div className="flex items-center justify-between gap-4">
           <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />
-          <CareersPostedLabel
+          {showMobilePosted && <CareersPostedLabel
             postedAt={job.postedAt}
             className="shrink-0 font-gill text-sm font-light leading-110 text-neutral500"
-          />
+          />}
         </div>
       </div>
 
       {/* Desktop — title + chip + share, meta, posted aside */}
       <div className="hidden md:flex md:w-full md:items-start md:justify-between md:gap-6">
-        <div className="flex min-w-0 flex-col gap-6">
-          <div className="flex w-full max-w-[571px] flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <div className="flex w-full items-center gap-4">
             <p
               role="heading"
               aria-level={1}
-              className="font-larken text-32 font-light leading-110 text-darkblack"
+              className="min-w-0 font-larken text-32 font-light leading-110 text-darkblack"
             >
               {job.title}
             </p>
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
               <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />
               {onShare ? (
                 <button
@@ -87,10 +91,10 @@ const CareersJobPageHeader = ({
           <CareersJobMetaRow job={job} />
         </div>
 
-        <CareersPostedLabel
+        {showPosted && <CareersPostedLabel
           postedAt={job.postedAt}
           className="shrink-0 font-gill text-base font-light leading-110 text-neutral500"
-        />
+        />}
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import {
   getHeaderVariant,
   isAuthRoute,
   isCartOrCheckoutRoute,
+  isCheckoutSuccessRoute,
   isHeaderNavLinkActive,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
@@ -37,6 +38,7 @@ import { useHeaderScrollReveal } from "@/shared/hooks/use-header-scroll-reveal";
 import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { useMounted } from "@/shared/hooks/use-mounted";
 import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
+import { useCheckoutSuccessHeaderActive } from "@/features/checkout/context/checkoutHeaderBridge";
 import {
   CAREERS_ALL_OPENINGS_ROUTE,
   CAREERS_ROUTE,
@@ -78,9 +80,19 @@ const Header = () => {
   const mounted = useMounted();
   const displayCartCount = mounted ? cartCount : 0;
   const pathname = usePathname() ?? "/";
-  const cartCheckoutHeaderSurfaceClass = pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
+  const isCheckoutSuccessHeader = useCheckoutSuccessHeaderActive(pathname);
+  const cartCheckoutHeaderSurfaceClass =
+    pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
   const canHoverNav = useCanHover();
   const isMobileHeader = useMobileHeaderLayout();
+  const isCheckoutSuccessScreen =
+    isMobileHeader &&
+    (isCheckoutSuccessRoute(pathname) ||
+      (pathname === "/checkout" && isCheckoutSuccessHeader));
+  const responsiveCheckoutHeaderSurfaceClass =
+    isCartOrCheckoutRoute(pathname) && isCheckoutSuccessScreen
+      ? "bg-white"
+      : cartCheckoutHeaderSurfaceClass;
 
   const openProfileNav = useCallback(() => {
     setProfileNavOpen(true);
@@ -109,10 +121,10 @@ const Header = () => {
   const headerSurfaceClass = isScrollReturnSurface
     ? cn(
         "motion-safe:transition-colors motion-safe:duration-300",
-        isCartOrCheckoutRoute(pathname) ? cartCheckoutHeaderSurfaceClass : "bg-white",
+        isCartOrCheckoutRoute(pathname) ? responsiveCheckoutHeaderSurfaceClass : "bg-white",
       )
     : isCartOrCheckoutRoute(pathname)
-      ? cartCheckoutHeaderSurfaceClass
+      ? responsiveCheckoutHeaderSurfaceClass
       : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
   const isLightOverlay = isOverlay && !isAuthPage && !isScrollReturnSurface;
@@ -224,6 +236,7 @@ const Header = () => {
         pathname={pathname}
         headerVariant={themeHeaderVariant}
         isCartEmptyPageShell={isCartEmptyPageShell}
+        isCheckoutSuccessScreen={isCheckoutSuccessScreen}
       />
       <header
         className={cn(

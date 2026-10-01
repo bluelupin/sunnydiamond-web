@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyRazorpayPayment } from "@/features/checkout/services/razorpayCheckout";
+import { buildCheckoutSuccessPath } from "@/features/checkout/utils/checkoutRoutes";
 
 async function readRazorpayCallbackFields(request: NextRequest): Promise<{
   paymentId: string;
@@ -79,10 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return redirectToCheckout(
-      origin,
-      `/checkout?payment=success&order=${encodeURIComponent(orderNumber)}`,
-    );
+    return redirectToCheckout(origin, buildCheckoutSuccessPath(orderNumber));
   } catch {
     const failedPath = orderNumber
       ? `/checkout?payment=failed&order=${encodeURIComponent(orderNumber)}`
@@ -104,10 +102,7 @@ export async function GET(request: NextRequest) {
   if (orderNumber && paymentId && signature) {
     try {
       await verifyRazorpayPayment({ orderNumber, paymentId, signature });
-      return redirectToCheckout(
-        origin,
-        `/checkout?payment=success&order=${encodeURIComponent(orderNumber)}`,
-      );
+      return redirectToCheckout(origin, buildCheckoutSuccessPath(orderNumber));
     } catch {
       return redirectToCheckout(
         origin,

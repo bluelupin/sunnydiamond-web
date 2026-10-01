@@ -37,7 +37,7 @@ const CareersJobListingsSection = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const listingHeading = listing.featuredTitle ?? listing.title;
-  const searchPlaceholder = "Search Roles";
+  const searchPlaceholder = "Search roles";
   const hasActiveFilters = hasActiveListingFilters(
     searchQuery,
     locationFilter,
@@ -51,7 +51,7 @@ const CareersJobListingsSection = () => {
       <section
         id="job-listing"
         aria-labelledby="careers-openings-empty-title"
-        className="bg-white px-4 py-10 md:px-10 md:py-104"
+        className="bg-white px-4 pt-10 pb-10 md:px-10 md:pb-104"
       >
         <CareersOpeningsEmptyState />
       </section>
@@ -66,7 +66,7 @@ const CareersJobListingsSection = () => {
     <section
       id="job-listing"
       aria-labelledby="careers-job-listing-title"
-      className="bg-white px-4 py-10 md:px-10 md:py-104"
+      className="bg-white px-4 pt-10 pb-10 md:px-10 md:pb-104"
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-6">
         <CareersJobFiltersSidebar />
@@ -95,7 +95,7 @@ const CareersJobListingsSection = () => {
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className="min-w-0 flex-1 bg-transparent font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack outline-none"
+                  className="min-w-0 flex-1 bg-transparent font-gill text-sm font-light leading-110 text-darkblack placeholder:text-gray600 outline-none"
                   aria-label={searchPlaceholder}
                 />
               </div>
@@ -128,6 +128,10 @@ const CareersJobListingsSection = () => {
           </div>
         </div>
       </div>
+
+      {(listing.openFiltersLabel ?? listing.filtersTitle) ? (
+        <div aria-hidden className="h-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:hidden" />
+      ) : null}
 
       {(listing.openFiltersLabel ?? listing.filtersTitle) && !filtersOpen ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral300/60 bg-white pb-[env(safe-area-inset-bottom,0px)] lg:hidden">

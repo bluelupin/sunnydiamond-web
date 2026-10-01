@@ -7,14 +7,19 @@ import AboutHeroSkeleton from "./AboutHeroSkeleton";
 import AboutSince1997Skeleton from "./AboutSince1997Skeleton";
 import AboutTimelineSkeleton from "./AboutTimelineSkeleton";
 
-const AboutPageSkeleton = () => (
+type AboutPageSkeletonProps = {
+  /** Timeline is below the fold and CMS-controlled — omit unless known active. */
+  includeTimeline?: boolean;
+};
+
+const AboutPageSkeleton = ({ includeTimeline = false }: AboutPageSkeletonProps) => (
   <div aria-busy="true" aria-label="Loading about page">
     <AboutHeroSkeleton />
     <AboutBrillianceSkeleton />
     <AboutSince1997Skeleton />
     <AboutFacesSkeleton />
     <AboutHandcraftedSkeleton />
-    <AboutTimelineSkeleton />
+    {includeTimeline ? <AboutTimelineSkeleton /> : null}
     <AboutGuaranteesSkeleton />
     <AboutHeirloomSkeleton />
   </div>

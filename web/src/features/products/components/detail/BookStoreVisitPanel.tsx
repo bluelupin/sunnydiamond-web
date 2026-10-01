@@ -15,12 +15,13 @@ import {
   resolveBookStoreVisitStoresForPanel,
 } from "@/features/products/utils/bookStoreVisitStores";
 import {
+  storeLocatorExploreListTitleClassName,
   storeLocatorExploreNearbyStoresLabel,
   storeLocatorExploreShowroomsTitle,
-  storeLocatorListHeadingClassName,
   storeLocatorNoAreaSubtitle,
   storeLocatorNoAreaTitle,
   storeLocatorSearchMatchMessage,
+  storeLocatorSearchMatchTitleClassName,
 } from "@/features/stores/data/storeLocatorContent";
 import {
   filterBookStoreVisitStores,
@@ -34,9 +35,7 @@ import {
   mapBookStoreVisitStoreToLayoutItem,
   ShowroomsLayout,
 } from "@/features/stores/components/ShowroomsLayout";
-import NearbyStoresList, {
-  NearbyStoresSkeleton,
-} from "@/features/stores/components/NearbyStoresList";
+import { NearbyStoresSkeleton } from "@/features/stores/components/NearbyStoresList";
 import type { StoreWithDistance } from "@/features/stores/utils/geo";
 import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
@@ -49,7 +48,13 @@ import {
   appointmentFieldClassName,
   appointmentLabelClassName,
   APPOINTMENT_TIME_SLOTS,
+  STORE_VISIT_BOOKING_WINDOW,
 } from "@/shared/constants/appointmentForm";
+import {
+  DUPLICATE_APPOINTMENT_TOAST,
+  DUPLICATE_APPOINTMENT_VIEW_LABEL,
+  hasDuplicateAppointmentBooking,
+} from "@/features/products/utils/appointmentDuplicateBooking";
 import {
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
@@ -272,6 +277,17 @@ const BookStoreVisitPanel = ({
       };
     }, [stores, storeSearchQuery, storeStateFilter, variant, invalidPincodeMessage]);
 
+  const pincodeGeoMatchedStores = useMemo((): BookStoreVisitStore[] => {
+    const nearest = nearbyStores?.results[0]?.store;
+    return nearest ? [nearest] : [];
+  }, [nearbyStores]);
+
+  const resolvedListStatus: StoreLocatorListStatus =
+    pincodeGeoMatchedStores.length > 0 ? "search-match" : listStatus;
+
+  const resolvedMatchedStores =
+    pincodeGeoMatchedStores.length > 0 ? pincodeGeoMatchedStores : matchedStores;
+
   // Honor any in-list selection so nearby / non-matched rows stay clickable.
   // Fall back to the first match (or first listed store) only when the current id is gone.
   const activeStoreId = useMemo(() => {
@@ -279,12 +295,12 @@ const BookStoreVisitPanel = ({
       return selectedStoreId;
     }
 
-    if (matchedStores.length > 0) {
-      return matchedStores[0]?.id ?? "";
+    if (resolvedMatchedStores.length > 0) {
+      return resolvedMatchedStores[0]?.id ?? "";
     }
 
     return displayStores[0]?.id ?? (variant === "page" ? "" : selectedStoreId);
-  }, [displayStores, matchedStores, selectedStoreId, variant]);
+  }, [displayStores, resolvedMatchedStores, selectedStoreId, variant]);
 
   const selectedStore =
     displayStores.find((store) => store.id === activeStoreId) ??
@@ -298,11 +314,11 @@ const BookStoreVisitPanel = ({
       return;
     }
 
-    if (matchedStores.length > 0) {
+    if (resolvedMatchedStores.length > 0) {
       setSelectedStoreId((current) =>
-        matchedStores.some((store) => store.id === current)
+        resolvedMatchedStores.some((store) => store.id === current)
           ? current
-          : (matchedStores[0]?.id ?? current),
+          : (resolvedMatchedStores[0]?.id ?? current),
       );
       return;
     }
@@ -311,7 +327,7 @@ const BookStoreVisitPanel = ({
     if (storeStateFilter?.trim()) {
       setSelectedStoreId(displayStores[0]?.id ?? "");
     }
-  }, [variant, storeSearchQuery, storeStateFilter, matchedStores, displayStores]);
+  }, [variant, storeSearchQuery, storeStateFilter, resolvedMatchedStores, displayStores]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
   useEffect(() => {
@@ -507,6 +523,34 @@ const BookStoreVisitPanel = ({
       const preferredShowroom =
         selectedStore.documentId ?? selectedStore.id;
 
+      const bookedProductId = productId?.trim() ?? "";
+      if (
+        customer?.id != null &&
+        bookedProductId &&
+        bookedProductId !== STORE_VISIT_PRODUCT_ID &&
+        (await hasDuplicateAppointmentBooking({
+          kind: "store_visit",
+          productId: bookedProductId,
+          date,
+          selectedSlot,
+          showroomId: preferredShowroom,
+        }))
+      ) {
+        showStatusToast(DUPLICATE_APPOINTMENT_TOAST, {
+          action: (
+            <AppStatusToastAction
+              onClick={() => {
+                handleClose();
+                router.push(buildProfileSectionHref("appointments"));
+              }}
+            >
+              {DUPLICATE_APPOINTMENT_VIEW_LABEL}
+            </AppStatusToastAction>
+          ),
+        });
+        return;
+      }
+
       await createProductSubmission({
         formTag: formTag || PRODUCT_STORE_VISIT_FORM_TAG,
         productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,
@@ -566,14 +610,10 @@ const BookStoreVisitPanel = ({
         getDirectionsLabel={getDirectionsLabel}
         noResultsMessage={noResultsMessage}
         listCopy={listCopy}
-        listStatus={listStatus}
-        matchedStoreIds={matchedStores.map((store) => store.id)}
+        listStatus={resolvedListStatus}
+        matchedStoreIds={resolvedMatchedStores.map((store) => store.id)}
         isShowroomsLoading={isShowroomsLoading || isResolvingStores}
         nearbyStores={nearbyStores}
-        onBookNearbyStore={(storeId) => {
-          setSelectedStoreId(storeId);
-          setStep("form");
-        }}
       />
     ) : (
       <BookingFormStep
@@ -690,21 +730,17 @@ type StoreSelectionStepProps = {
   matchedStoreIds?: string[];
   isShowroomsLoading?: boolean;
   nearbyStores?: BookStoreVisitPanelProps["nearbyStores"];
-  onBookNearbyStore?: (storeId: string) => void;
 };
 
 function StoreLocatorListStatusHeader({
   status,
   listCopy,
   nearbyStores,
-  onBookNearbyStore,
 }: {
   status: StoreLocatorListStatus;
   listCopy?: NormalizedStoreLocatorListCopy | null;
   nearbyStores?: BookStoreVisitPanelProps["nearbyStores"];
-  onBookNearbyStore?: (storeId: string) => void;
 }) {
-  // State 4 with a resolved PIN: real distances instead of the generic no-area copy.
   if (status === "no-area" && nearbyStores?.loading) {
     return (
       <div className="pt-6 lg:pt-0">
@@ -713,29 +749,8 @@ function StoreLocatorListStatusHeader({
     );
   }
 
-  if (status === "no-area" && nearbyStores && nearbyStores.results.length > 0 && onBookNearbyStore) {
-    return (
-      <div className="flex flex-col gap-6 pt-6 lg:pt-0">
-        <p className={storeLocatorListHeadingClassName}>{nearbyStores.heading}</p>
-        <NearbyStoresList results={nearbyStores.results} onBook={onBookNearbyStore} />
-      </div>
-    );
-  }
-
   if (status === "no-area") {
-    const title = listCopy?.noAreaTitle?.trim() || storeLocatorNoAreaTitle;
-    const subtitle = listCopy?.noAreaSubtitle?.trim() || storeLocatorNoAreaSubtitle;
-
-    return (
-      <div className="flex flex-col gap-2 pt-6 lg:pt-0">
-        <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
-          {title}
-        </p>
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">
-          {subtitle}
-        </p>
-      </div>
-    );
+    return null;
   }
 
   if (status === "search-match") {
@@ -743,16 +758,15 @@ function StoreLocatorListStatusHeader({
       listCopy?.storeFoundMessage?.trim() || storeLocatorSearchMatchMessage;
 
     return (
-      <div className="flex flex-col gap-4 pt-6 lg:pt-0">
-        <p className={storeLocatorListHeadingClassName}>{storeFoundMessage}</p>
+      <div className="flex flex-col gap-4 pt-6 lg:gap-0 lg:pt-0">
+        <p className={storeLocatorSearchMatchTitleClassName}>{storeFoundMessage}</p>
       </div>
     );
   }
 
-  // Default + invalid pincode fallback listing (Figma).
   return (
-    <div className="flex flex-col gap-4 pt-6 lg:pt-0">
-      <p className={storeLocatorListHeadingClassName}>
+    <div className="flex flex-col gap-4 pt-6 lg:gap-0 lg:pt-0">
+      <p className={storeLocatorExploreListTitleClassName}>
         {storeLocatorExploreShowroomsTitle}
       </p>
     </div>
@@ -776,7 +790,6 @@ const StoreSelectionStep = ({
   matchedStoreIds,
   isShowroomsLoading = false,
   nearbyStores,
-  onBookNearbyStore,
 }: StoreSelectionStepProps) => {
   if (layout === "page") {
     const listHeader = (
@@ -784,10 +797,18 @@ const StoreSelectionStep = ({
         status={listStatus}
         listCopy={listCopy}
         nearbyStores={nearbyStores}
-        onBookNearbyStore={onBookNearbyStore}
       />
     );
     const isSearchMatch = listStatus === "search-match";
+    const isPincodeLookupPending =
+      listStatus === "no-area" && Boolean(nearbyStores?.loading);
+    const noAreaCopy =
+      listStatus === "no-area" && !isPincodeLookupPending
+        ? {
+            title: listCopy?.noAreaTitle?.trim() || storeLocatorNoAreaTitle,
+            subtitle: listCopy?.noAreaSubtitle?.trim() || storeLocatorNoAreaSubtitle,
+          }
+        : null;
 
     return (
       <ShowroomsLayout
@@ -796,6 +817,7 @@ const StoreSelectionStep = ({
         onSelect={onSelectStore}
         getDirectionsLabel={getDirectionsLabel ?? undefined}
         listHeader={listHeader}
+        noAreaCopy={noAreaCopy}
         matchedStoreIds={isSearchMatch ? matchedStoreIds : undefined}
         nearbyStoresLabel={isSearchMatch ? storeLocatorExploreNearbyStoresLabel : undefined}
         isLoading={isShowroomsLoading}
@@ -1013,8 +1035,10 @@ const BookingFormStep = ({
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
       validatePurpose: purposeOptions.length > 0,
+      emailRequired: true,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
+      bookingWindow: STORE_VISIT_BOOKING_WINDOW,
     });
 
   return (
@@ -1084,6 +1108,7 @@ const BookingFormStep = ({
                 namePlaceholder={namePlaceholder}
                 phoneLabel={phoneLabel}
                 phonePlaceholder={phonePlaceholder}
+                emailRequired
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}
@@ -1095,6 +1120,7 @@ const BookingFormStep = ({
                 notePlaceholder={notesPlaceholder}
                 phoneLocked={phoneLocked}
                 emailLocked={emailLocked}
+                bookingWindow={STORE_VISIT_BOOKING_WINDOW}
               />
             </div>
           </div>

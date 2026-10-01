@@ -1,7 +1,9 @@
 "use client";
 
 import { forwardRef } from "react";
-import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
+import OffersAndDealsSection, {
+  OffersAndDealsCollapsible,
+} from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import { GiftCardProblemRow } from "./PriceDetailsBreakdown";
@@ -43,7 +45,8 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
     estimatedShippingMethods,
   } = useCart();
   const displayOfferDiscount = offerDiscount + localOfferDiscount;
-  const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
+  const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout, giftingOptionsCtaLabel } =
+    useCartCheckout();
   const shippingLabel = getCartShippingLabel(
     shipping,
     selectedShippingMethod,
@@ -80,36 +83,38 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
           onToggle={onOffersToggle}
         />
 
-        <div className="min-h-[214px] flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
-          {breakupOpen ? (
-            <div className="flex flex-col gap-3">
-              <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
-              {displayOfferDiscount > 0 ? (
-                <CartPriceRow
-                  label="Offer Discount"
-                  value={formatCartDiscountPrice(displayOfferDiscount)}
-                />
-              ) : null}
-              {giftCardDiscount > 0 ? (
-                <CartPriceRow
-                  label="Gift Card Applied"
-                  value={formatCartDiscountPrice(giftCardDiscount)}
-                />
-              ) : null}
-              <GiftCardProblemRow />
-              <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-              <CartPriceRow label="Shipping" value={shippingLabel} />
-              <CartDivider weight={1} />
-            </div>
-          ) : null}
+        <div className="!pb-6 flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
+          <div className="flex flex-col">
+            <OffersAndDealsCollapsible open={breakupOpen} variant="panel-gray300" className="bg-white">
+              <div className="flex flex-col gap-3 pb-4">
+                <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
+                {displayOfferDiscount > 0 ? (
+                  <CartPriceRow
+                    label="Offer Discount"
+                    value={formatCartDiscountPrice(displayOfferDiscount)}
+                  />
+                ) : null}
+                {giftCardDiscount > 0 ? (
+                  <CartPriceRow
+                    label="Gift Card Applied"
+                    value={formatCartDiscountPrice(giftCardDiscount)}
+                  />
+                ) : null}
+                <GiftCardProblemRow />
+                <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
+                <CartPriceRow label="Shipping" value={shippingLabel} />
+                <CartDivider weight={1} />
+              </div>
+            </OffersAndDealsCollapsible>
 
-          <div className="flex items-end justify-between gap-4">
-            <p className="font-gill text-xl font-normal leading-110 text-darkblack">
-              {formatCartPrice(displayTotal)}
-            </p>
-            <CartTextLink onClick={onBreakupToggle} aria-expanded={breakupOpen} className="uppercase">
-              VIEW ORDER SUMMARY
-            </CartTextLink>
+            <div className="flex items-end justify-between gap-4">
+              <p className="font-gill text-xl font-normal leading-110 text-darkblack">
+                {formatCartPrice(displayTotal)}
+              </p>
+              <CartTextLink onClick={onBreakupToggle} aria-expanded={breakupOpen} className="uppercase">
+                VIEW ORDER SUMMARY
+              </CartTextLink>
+            </div>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -119,7 +124,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
               onClick={proceedToCheckout}
               disabled={isNavigatingToCheckout}
             >
-              {isNavigatingToCheckout ? "Continuing..." : "Checkout"}
+              {isNavigatingToCheckout ? "Continuing..." : "CHECKOUT"}
             </CartPrimaryButton>
             <CartOutlineButton
               type="button"
@@ -127,7 +132,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
               onClick={openGiftingOptions}
               disabled={isNavigatingToCheckout}
             >
-              PERSONALISE YOUR GIFT
+              {giftingOptionsCtaLabel.toUpperCase()}
             </CartOutlineButton>
           </div>
         </div>

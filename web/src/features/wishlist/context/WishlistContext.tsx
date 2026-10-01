@@ -386,10 +386,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
             {wishlistPageContent.movedToWishlistViewLabel}
           </AppStatusToastAction>
         }
+        onDismiss={dismissMovedToast}
       />
       <AppStatusToast
         open={isRemovedToastOpen}
         message={wishlistPageContent.removedFromWishlistMessage}
+        onDismiss={dismissRemovedToast}
+        hideIcon
         action={
           removedSkuForUndo ? (
             <AppStatusToastAction onClick={undoRemovedFromWishlist}>

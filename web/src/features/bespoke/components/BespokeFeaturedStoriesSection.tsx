@@ -1,9 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
 import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
@@ -16,7 +23,7 @@ import {
 } from "@/features/bespoke/data/content";
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
 import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { unlockBodyScroll, useBodyScrollLock } from "@/shared/hooks/use-body-scroll-lock";
 import type {
   NormalizedBespokeFeaturedSlide,
@@ -42,30 +49,144 @@ const normalizeIndex = (index: number, total: number) => {
   return ((index % total) + total) % total;
 };
 
-type RenderFeaturedSlide = FeaturedSlide & { renderKey?: string };
+type SliderSlide = FeaturedSlide & { renderKey?: string };
 
-/** Duplicate 3-slide sets so Slick infinite center mode can loop. */
-const buildRenderSlides = (slides: readonly FeaturedSlide[]) => {
-  if (slides.length !== 3) {
-    return { renderSlides: slides as RenderFeaturedSlide[], sourceCount: slides.length };
+type SliderWithInner = Slider & {
+  innerSlider?: {
+    onWindowResized?: () => void;
+  };
+};
+
+/** Stage height for equal-width center-mode slides. */
+const getGalleryStageHeight = (isMobile: boolean) => (isMobile ? 400 : spec.centerHeight);
+
+type GalleryLayoutStyle = CSSProperties & {
+  "--fg-stage-h"?: string;
+  "--fg-gap"?: string;
+  "--fg-side-height-ratio"?: string;
+  "--fg-center-scale-y"?: string;
+};
+
+/**
+ * Center slide scales up on Y only; side slides use a shorter base height.
+ * 0.833 × 1.2 ≈ 1.0 — center fills stage height without widening (Figma 300→360).
+ */
+const getGalleryCenterScale = (isMobile: boolean) => {
+  if (isMobile) {
+    const sideHeightRatio = 343 / 400;
+    return {
+      sideHeightRatio,
+      centerScaleY: 1 / sideHeightRatio,
+    };
+  }
+
+  const sideHeightRatio = spec.sideHeight / spec.centerHeight;
+  return {
+    sideHeightRatio,
+    centerScaleY: spec.centerHeight / spec.sideHeight,
+  };
+};
+
+const getGalleryLayoutStyle = (isMobile: boolean): GalleryLayoutStyle => {
+  const centerScale = getGalleryCenterScale(isMobile);
+
+  return {
+    "--fg-stage-h": `${getGalleryStageHeight(isMobile)}px`,
+    "--fg-gap": `${spec.galleryGap}px`,
+    "--fg-side-height-ratio": String(centerScale.sideHeightRatio),
+    "--fg-center-scale-y": String(centerScale.centerScaleY),
+  };
+};
+
+/**
+ * react-slick center mode + infinite requires slideCount > slidesToShow.
+ * Expand small CMS sets (2–3 slides) so layout matches the reference demo.
+ */
+const buildCenterModeSlides = (slides: readonly FeaturedSlide[]) => {
+  const sourceCount = slides.length;
+
+  if (sourceCount <= 1) {
+    return {
+      sliderSlides: slides.map((slide, index) => ({
+        ...slide,
+        renderKey: `${slide.documentId ?? slide.src}-${index}`,
+      })),
+      sourceCount,
+      repeatCount: 1,
+      usesExpansion: false,
+    };
+  }
+
+  if (sourceCount > spec.gallerySlidesToShow) {
+    return {
+      sliderSlides: slides.map((slide, index) => ({
+        ...slide,
+        renderKey: `${slide.documentId ?? slide.src}-${index}`,
+      })),
+      sourceCount,
+      repeatCount: 1,
+      usesExpansion: false,
+    };
+  }
+
+  const minExpandedCount = spec.gallerySlidesToShow + 1;
+  const repeatCount = Math.ceil(minExpandedCount / sourceCount);
+  const sliderSlides: SliderSlide[] = [];
+
+  for (let copy = 0; copy < repeatCount; copy += 1) {
+    sliderSlides.push(
+      ...slides.map((slide, index) => ({
+        ...slide,
+        renderKey: `${slide.documentId ?? slide.src}-c${copy}-${index}`,
+      })),
+    );
   }
 
   return {
-    sourceCount: 3,
-    renderSlides: [
-      ...slides.map((slide, index) => ({ ...slide, renderKey: `${slide.src}-a-${index}` })),
-      ...slides.map((slide, index) => ({ ...slide, renderKey: `${slide.src}-b-${index}` })),
-    ] satisfies RenderFeaturedSlide[],
+    sliderSlides,
+    sourceCount,
+    repeatCount,
+    usesExpansion: true,
   };
+};
+
+const mapSliderIndexToSource = (index: number, sourceCount: number) =>
+  normalizeIndex(index, sourceCount);
+
+const getInitialSliderIndex = (
+  sourceIndex: number,
+  sourceCount: number,
+  sliderSlides: readonly SliderSlide[],
+  usesExpansion: boolean,
+  repeatCount: number,
+) => {
+  if (!usesExpansion || sliderSlides.length <= sourceCount) {
+    return normalizeIndex(sourceIndex, sliderSlides.length);
+  }
+
+  const middleCopy = Math.floor(repeatCount / 2);
+  return middleCopy * sourceCount + normalizeIndex(sourceIndex, sourceCount);
+};
+
+/** Reference: centerPadding "60px" — https://react-slick.neostack.com/docs/example/center-mode */
+const getGalleryCenterPadding = (isMobile: boolean) =>
+  `${isMobile ? spec.galleryCenterPaddingMobile : spec.galleryCenterPaddingDesktop}px`;
+
+const getGalleryVisibleSlides = (isMobile: boolean) =>
+  isMobile ? spec.galleryVisibleSlidesMobile : spec.galleryVisibleSlides;
+
+/** Center-band slots; outer peeks come from centerPadding (3 visible = 1 slot + 2 peeks). */
+const getGalleryActiveSlidesToShow = (isMobile: boolean, sliderLength: number) => {
+  if (sliderLength <= 1) return 1;
+
+  const slotsInCenterBand = Math.max(1, getGalleryVisibleSlides(isMobile) - 2);
+  return Math.min(slotsInCenterBand, sliderLength);
 };
 
 type FeaturedGallerySlideProps = {
   slide: FeaturedSlide;
   onClick?: () => void;
 };
-
-const featuredGallerySlideTransitionClassName =
-  "transition-[height] duration-500 ease-in-out motion-reduce:transition-none";
 
 const CLICK_DRAG_TOLERANCE_PX = 8;
 
@@ -98,10 +219,7 @@ const FeaturedGallerySlide = ({ slide, onClick }: FeaturedGallerySlideProps) => 
 
   return (
     <div
-      className={cn(
-        "featured-gallery-slide relative h-[300px] overflow-hidden bg-white",
-        featuredGallerySlideTransitionClassName,
-      )}
+      className="featured-gallery-slide relative h-full w-full overflow-hidden bg-transparent"
       onPointerDown={onClick ? handlePointerDown : undefined}
       onClick={onClick ? handleClick : undefined}
     >
@@ -193,13 +311,15 @@ type FeaturedGallerySliderProps = {
 const MOBILE_BREAKPOINT_PX = 768;
 const SLIDER_SPEED_MS = 500;
 const MANUAL_SCROLL_COOLDOWN_MS = 500;
-const AUTOPLAY_RESUME_MS = 2000;
 const HORIZONTAL_WHEEL_THRESHOLD_PX = 24;
 const HORIZONTAL_WHEEL_RESET_MS = 120;
 
 /** react-slick responsive only updates on resize; detect viewport on mount. */
 const useIsMobileViewport = (breakpoint: number) => {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(`(max-width: ${breakpoint}px)`).matches;
+  });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
@@ -250,80 +370,102 @@ const FeaturedGallerySlider = ({
   const sliderRef = useRef<Slider | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const manualScrollCooldownRef = useRef(false);
-  const autoplayResumeTimeoutRef = useRef<number | null>(null);
   const isHoveringRef = useRef(false);
+  const lastEmittedSourceIndexRef = useRef(currentIndex);
   const horizontalWheelDeltaRef = useRef(0);
   const horizontalWheelResetTimeoutRef = useRef<number | null>(null);
-  const { renderSlides, sourceCount } = useMemo(() => buildRenderSlides(slides), [slides]);
+
+  const { sliderSlides, sourceCount, repeatCount, usesExpansion } = useMemo(
+    () => buildCenterModeSlides(slides),
+    [slides],
+  );
   const slidesKey = useMemo(
-    () => renderSlides.map((slide) => slide.renderKey ?? slide.src).join("|"),
-    [renderSlides],
+    () => sliderSlides.map((slide) => slide.renderKey ?? slide.src).join("|"),
+    [sliderSlides],
   );
 
   const canSlide = slides.length > 1;
-  const showInfinite = canSlide && (renderSlides.length > 3 || slides.length !== 3);
-  const desktopSlidesToShow = Math.min(3, renderSlides.length);
-  const mobileSlidesToShow = Math.min(1, renderSlides.length);
-  const activeSlidesToShow = isMobile ? mobileSlidesToShow : desktopSlidesToShow;
+  const isMobileLayout = isMobile === true;
+  const galleryLayoutStyle = getGalleryLayoutStyle(isMobileLayout);
+  const galleryStageHeight = getGalleryStageHeight(isMobileLayout);
+  const galleryCenterPadding = getGalleryCenterPadding(isMobileLayout);
+  const slidesToShow = canSlide
+    ? getGalleryActiveSlidesToShow(isMobileLayout, sliderSlides.length)
+    : 1;
+  const useInfinite = canSlide && sliderSlides.length > slidesToShow;
 
-  const mapToSourceIndex = useCallback(
-    (index: number) => normalizeIndex(index, sourceCount),
-    [sourceCount],
-  );
-
-  const handleBeforeChange = useCallback(
-    (_current: number, next: number) => {
-      onIndexChange(mapToSourceIndex(next));
+  const emitSourceIndex = useCallback(
+    (sliderIndex: number) => {
+      const sourceIndex = usesExpansion
+        ? mapSliderIndexToSource(sliderIndex, sourceCount)
+        : normalizeIndex(sliderIndex, sourceCount);
+      lastEmittedSourceIndexRef.current = sourceIndex;
+      onIndexChange(sourceIndex);
     },
-    [mapToSourceIndex, onIndexChange],
+    [onIndexChange, sourceCount, usesExpansion],
   );
 
   const handleAfterChange = useCallback(
     (index: number) => {
-      onIndexChange(mapToSourceIndex(index));
+      emitSourceIndex(index);
     },
-    [mapToSourceIndex, onIndexChange],
+    [emitSourceIndex],
   );
 
   const initialSlide = useMemo(
-    () => normalizeIndex(currentIndex, renderSlides.length),
-    [currentIndex, slidesKey, renderSlides.length],
+    () =>
+      getInitialSliderIndex(
+        currentIndex,
+        sourceCount,
+        sliderSlides,
+        usesExpansion,
+        repeatCount,
+      ),
+    [currentIndex, repeatCount, sliderSlides, slidesKey, sourceCount, usesExpansion],
   );
 
-  const resumeAutoplay = useCallback(() => {
-    if (autoplayResumeTimeoutRef.current !== null) {
-      window.clearTimeout(autoplayResumeTimeoutRef.current);
-    }
-
-    autoplayResumeTimeoutRef.current = window.setTimeout(() => {
-      sliderRef.current?.slickPlay();
-      autoplayResumeTimeoutRef.current = null;
-    }, AUTOPLAY_RESUME_MS);
+  const refreshSlider = useCallback(() => {
+    const slider = sliderRef.current as SliderWithInner | null;
+    slider?.innerSlider?.onWindowResized?.();
   }, []);
+
+  useEffect(() => {
+    refreshSlider();
+  }, [galleryCenterPadding, isMobile, refreshSlider, slidesKey, slidesToShow, useInfinite]);
 
   const goPrev = useCallback(() => {
     if (!canSlide || manualScrollCooldownRef.current) return;
 
     manualScrollCooldownRef.current = true;
-    sliderRef.current?.slickPause();
     sliderRef.current?.slickPrev();
-    resumeAutoplay();
     window.setTimeout(() => {
       manualScrollCooldownRef.current = false;
     }, MANUAL_SCROLL_COOLDOWN_MS);
-  }, [canSlide, resumeAutoplay]);
+  }, [canSlide]);
 
   const goNext = useCallback(() => {
     if (!canSlide || manualScrollCooldownRef.current) return;
 
     manualScrollCooldownRef.current = true;
-    sliderRef.current?.slickPause();
     sliderRef.current?.slickNext();
-    resumeAutoplay();
     window.setTimeout(() => {
       manualScrollCooldownRef.current = false;
     }, MANUAL_SCROLL_COOLDOWN_MS);
-  }, [canSlide, resumeAutoplay]);
+  }, [canSlide]);
+
+  useEffect(() => {
+    if (currentIndex === lastEmittedSourceIndexRef.current) return;
+
+    lastEmittedSourceIndexRef.current = currentIndex;
+    const target = getInitialSliderIndex(
+      currentIndex,
+      sourceCount,
+      sliderSlides,
+      usesExpansion,
+      repeatCount,
+    );
+    sliderRef.current?.slickGoTo(target, false);
+  }, [currentIndex, repeatCount, sliderSlides, sourceCount, slidesKey, usesExpansion]);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -424,9 +566,6 @@ const FeaturedGallerySlider = ({
 
   useEffect(
     () => () => {
-      if (autoplayResumeTimeoutRef.current !== null) {
-        window.clearTimeout(autoplayResumeTimeoutRef.current);
-      }
       if (horizontalWheelResetTimeoutRef.current !== null) {
         window.clearTimeout(horizontalWheelResetTimeoutRef.current);
       }
@@ -453,20 +592,11 @@ const FeaturedGallerySlider = ({
 
   const sliderSettings = useMemo<Settings>(
     () => ({
-      className: cn(
-        "center w-full min-h-[360px]",
-        /* Figma galleryGap: 16px — 8px padding each side of slide wrapper */
-        "[&_.slick-slide>div]:px-2",
-        "[&_.slick-list]:min-h-[360px] [&_.slick-list]:transition-[height,min-height] [&_.slick-list]:duration-500 [&_.slick-list]:ease-in-out",
-        "[&_.slick-track]:flex [&_.slick-track]:min-h-[360px] [&_.slick-track]:items-center",
-        "[&_.slick-slide.slick-center_.featured-gallery-slide]:h-[360px]",
-        "[&_.slick-slide:not(.slick-center)_.featured-gallery-slide]:h-[300px]",
-        "[&_.featured-gallery-slide]:transition-[height] [&_.featured-gallery-slide]:duration-500 [&_.featured-gallery-slide]:ease-in-out",
-      ),
+      className: "center",
       centerMode: canSlide,
-      infinite: showInfinite,
-      centerPadding: "20px",
-      slidesToShow: activeSlidesToShow,
+      infinite: useInfinite,
+      centerPadding: canSlide ? galleryCenterPadding : "0px",
+      slidesToShow,
       slidesToScroll: 1,
       speed: SLIDER_SPEED_MS,
       initialSlide,
@@ -474,23 +604,21 @@ const FeaturedGallerySlider = ({
       dots: false,
       swipe: canSlide,
       draggable: canSlide,
-      waitForAnimate: true,
       autoplay: canSlide,
-      autoplaySpeed: 2000,
-      pauseOnHover: true,
-      pauseOnFocus: true,
-      beforeChange: handleBeforeChange,
       afterChange: handleAfterChange,
     }),
-    [activeSlidesToShow, canSlide, handleAfterChange, handleBeforeChange, initialSlide, showInfinite],
+    [
+      canSlide,
+      galleryCenterPadding,
+      handleAfterChange,
+      initialSlide,
+      slidesToShow,
+      useInfinite,
+    ],
   );
 
   if (slides.length === 0) {
     return null;
-  }
-
-  if (isMobile === null) {
-    return <div className="relative h-[360px] w-full" aria-hidden />;
   }
 
   return (
@@ -498,7 +626,9 @@ const FeaturedGallerySlider = ({
       ref={containerRef}
       tabIndex={canSlide ? 0 : undefined}
       onKeyDown={onKeyDown}
-      className="relative h-[360px] w-full overscroll-x-contain touch-pan-y outline-none transition-[min-height] duration-500 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+      data-slide-count={String(slides.length)}
+      style={galleryLayoutStyle}
+      className="featured-gallery-slider slider-container relative w-full overscroll-x-contain touch-pan-y outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
       role="region"
       aria-roledescription="carousel"
       aria-label="Featured story gallery"
@@ -510,24 +640,19 @@ const FeaturedGallerySlider = ({
         </div>
       ) : null}
 
-      <Slider
-        key={`${slidesKey}-${isMobile ? "mobile" : "desktop"}`}
-        ref={sliderRef}
-        {...sliderSettings}
-      >
-        {renderSlides.map((slide, index) => (
-          <div key={slide.renderKey ?? `${slide.src}-${index}`}>
-            <FeaturedGallerySlide slide={slide} onClick={canSlide ? goNext : undefined} />
-          </div>
-        ))}
-      </Slider>
-
-      {canSlide && isMobile ? (
-        <div className="mt-4 flex items-center justify-center gap-6">
-          <CarouselNavButton direction="prev" onClick={goPrev} compact />
-          <CarouselNavButton direction="next" onClick={goNext} compact />
-        </div>
-      ) : null}
+      <div className="featured-gallery-slider-stage" style={{ height: galleryStageHeight }}>
+        <Slider
+          key={`${slidesKey}-${isMobile ? "mobile" : "desktop"}-${slidesToShow}-${galleryCenterPadding}`}
+          ref={sliderRef}
+          {...sliderSettings}
+        >
+          {sliderSlides.map((slide, index) => (
+            <div key={slide.renderKey ?? `${slide.src}-${index}`}>
+              <FeaturedGallerySlide slide={slide} onClick={canSlide ? goNext : undefined} />
+            </div>
+          ))}
+        </Slider>
+      </div>
     </div>
   );
 };
@@ -546,23 +671,33 @@ type FeaturedStoriesLayoutProps = {
   showHero: boolean;
 };
 
+type FeaturedStoriesPrimaryCtaProps = {
+  label: string;
+  onClick: () => void;
+};
+
+const FeaturedStoriesPrimaryCta = ({ label, onClick }: FeaturedStoriesPrimaryCtaProps) => (
+  <div className="mx-auto flex w-full justify-center md:w-[284px]">
+    <DetailDarkButton type="button" onClick={onClick} className="w-full uppercase">
+      {label}
+    </DetailDarkButton>
+  </div>
+);
+
 const FeaturedStoriesLayout = ({
   slides,
   currentIndex,
   onIndexChange,
   onPrimaryCtaClick,
   title,
-  primaryCtaHref,
   primaryCtaLabel,
   secondaryCtaLabel,
   onSecondaryCtaClick,
   backgroundImage,
   showHero,
 }: FeaturedStoriesLayoutProps) => {
-  const activePrimaryCtaHref = slides[currentIndex]?.href ?? primaryCtaHref ?? "#";
-
   return (
-    <section aria-labelledby="bespoke-featured-stories-title" className="overflow-hidden bg-gray200 w-full max-w-full">
+    <section aria-labelledby="bespoke-featured-stories-title" className="bespokeFeaturedStories overflow-hidden bg-gray200 w-full max-w-full">
       {showHero ? (
         <div className="relative w-full">
           <FeaturedGalleryBackground
@@ -581,7 +716,7 @@ const FeaturedStoriesLayout = ({
           ) : null}
 
           {slides.length > 0 ? (
-            <div className="relative z-10 -bottom-4">
+            <div className="relative z-10">
               <FeaturedGallerySlider
                 slides={slides}
                 currentIndex={currentIndex}
@@ -590,18 +725,9 @@ const FeaturedStoriesLayout = ({
             </div>
           ) : null}
 
-          <div className="relative z-10 flex flex-col items-center gap-8 px-4 pb-10 pt-8 md:gap-8 md:pb-10 md:pt-10">
+          <div className="relative z-10 flex flex-col items-center gap-8 px-4 pb-16 pt-6 md:gap-8 md:pb-10 md:pt-10">
             {primaryCtaLabel ? (
-              <Link
-                href={activePrimaryCtaHref}
-                onClick={(event) => {
-                  event.preventDefault();
-                  onPrimaryCtaClick();
-                }}
-                className="btn-border-slide inline-flex h-14 w-[284px] items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-              >
-                <span className="relative z-10">{primaryCtaLabel}</span>
-              </Link>
+              <FeaturedStoriesPrimaryCta label={primaryCtaLabel} onClick={onPrimaryCtaClick} />
             ) : null}
             {secondaryCtaLabel ? (
               <DetailTextLink
@@ -625,16 +751,7 @@ const FeaturedStoriesLayout = ({
           </div>
           <div className="flex flex-col items-center gap-8 px-4 pb-10">
             {primaryCtaLabel ? (
-              <Link
-                href={activePrimaryCtaHref}
-                onClick={(event) => {
-                  event.preventDefault();
-                  onPrimaryCtaClick();
-                }}
-                className="btn-border-slide inline-flex h-14 w-[284px] items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-              >
-                <span className="relative z-10">{primaryCtaLabel}</span>
-              </Link>
+              <FeaturedStoriesPrimaryCta label={primaryCtaLabel} onClick={onPrimaryCtaClick} />
             ) : null}
             {secondaryCtaLabel ? (
               <DetailTextLink

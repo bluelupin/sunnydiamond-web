@@ -503,6 +503,8 @@ function mapCraftsmanshipSection(
 
   return {
     id: raw.id,
+    url: cleanText(raw.url),
+    mime: cleanText(raw.mime),
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     isActive,
     showField: raw.showField ?? undefined,

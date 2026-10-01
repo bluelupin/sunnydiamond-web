@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { DetailDarkButton } from "@/features/products/components/detail/shared";
@@ -28,7 +29,18 @@ import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
-import { validateRequiredDate } from "@/shared/utils/formValidation";
+import {
+  invalidFieldClassName,
+  invalidFieldContainerClassName,
+  sanitizePincodeInput,
+  validateAddressLine1,
+  validateCity,
+  validateIndianPincode,
+  validateIndianState,
+  validateOptionalAddressLine2,
+  validateRequiredDate,
+} from "@/shared/utils/formValidation";
+import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 
@@ -73,6 +85,8 @@ function splitStoredPhone(rawPhone: string): { countryCode: string; phone: strin
   };
 }
 
+type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
+
 type ProfileAppointmentReschedulePanelProps = {
   open: boolean;
   appointment: ProfileAppointmentUi | null;
@@ -94,6 +108,14 @@ export function ProfileAppointmentReschedulePanel({
   const [note, setNote] = useState("");
   const [date, setDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [city, setCity] = useState("");
+  const [addressState, setAddressState] = useState("");
+  const [touchedAddressFields, setTouchedAddressFields] = useState<Set<AddressField>>(
+    () => new Set(),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -130,12 +152,55 @@ export function ProfileAppointmentReschedulePanel({
   const { errors, markTouched, showError, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
+  const cmsStateOptions = cmsForm?.stateOptions;
+  const savedState = address?.state?.trim() ?? "";
+  const stateOptions = useMemo(() => {
+    const options: readonly string[] = cmsStateOptions?.length
+      ? cmsStateOptions
+      : TRY_AT_HOME_INDIAN_STATES;
+    // Keep a saved state that is missing from the list selectable, so it still displays.
+    return savedState && !options.includes(savedState) ? [savedState, ...options] : options;
+  }, [cmsStateOptions, savedState]);
+
+  const isAddressChanged =
+    isTryAtHome &&
+    Boolean(address) &&
+    (addressLine1.trim() !== (address?.addressLine1 ?? "").trim() ||
+      addressLine2.trim() !== (address?.addressLine2 ?? "").trim() ||
+      pincode.trim() !== (address?.pincode ?? "").trim() ||
+      city.trim() !== (address?.city ?? "").trim() ||
+      addressState.trim() !== (address?.state ?? "").trim());
+
+  // Saved addresses are trusted as-is; only validate once the customer edits them.
+  const addressErrors = useMemo<Partial<Record<AddressField, string | undefined>>>(
+    () =>
+      isAddressChanged
+        ? {
+            addressLine1: validateAddressLine1(addressLine1).error,
+            addressLine2: validateOptionalAddressLine2(addressLine2).error,
+            pincode: validateIndianPincode(pincode).error,
+            city: validateCity(city).error,
+            state: validateIndianState(addressState, stateOptions).error,
+          }
+        : {},
+    [addressLine1, addressLine2, addressState, city, isAddressChanged, pincode, stateOptions],
+  );
+
+  const hasAddressErrors = Object.values(addressErrors).some(Boolean);
+  const markAddressTouched = (field: AddressField) =>
+    setTouchedAddressFields((current) =>
+      current.has(field) ? current : new Set(current).add(field),
+    );
+  const showAddressError = (field: AddressField) =>
+    touchedAddressFields.has(field) && Boolean(addressErrors[field]);
+
   const canSave = useMemo(() => {
     if (isSubmitting) return false;
     if (validateRequiredDate(date).error) return false;
     if (hasTimeSlots && !selectedSlot?.trim()) return false;
+    if (hasAddressErrors) return false;
     return true;
-  }, [date, hasTimeSlots, isSubmitting, selectedSlot]);
+  }, [date, hasAddressErrors, hasTimeSlots, isSubmitting, selectedSlot]);
 
   useEffect(() => {
     if (!open || !appointment) {
@@ -150,6 +215,12 @@ export function ProfileAppointmentReschedulePanel({
     setNote(appointment.notes ?? "");
     setDate(normalizeAppointmentDateInput(appointment.requestedDate));
     setSelectedSlot(appointment.bookingTime?.trim() || null);
+    setAddressLine1(appointment.appointmentAddress?.addressLine1 ?? "");
+    setAddressLine2(appointment.appointmentAddress?.addressLine2 ?? "");
+    setPincode(appointment.appointmentAddress?.pincode ?? "");
+    setCity(appointment.appointmentAddress?.city ?? "");
+    setAddressState(appointment.appointmentAddress?.state ?? "");
+    setTouchedAddressFields(new Set());
     setFormError(null);
     setIsSubmitting(false);
     resetValidation();
@@ -203,6 +274,17 @@ export function ProfileAppointmentReschedulePanel({
           ...(customerPhone ? { customerPhone } : {}),
           ...(customerEmail ? { customerEmail } : {}),
           ...(requestDetails ? { requestDetails } : {}),
+          ...(isAddressChanged
+            ? {
+                address: {
+                  addressLine1: addressLine1.trim(),
+                  pincode: pincode.trim(),
+                  city: city.trim(),
+                  ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
+                  ...(addressState.trim() ? { state: addressState.trim() } : {}),
+                },
+              }
+            : {}),
         });
         onRescheduled();
         onClose();
@@ -305,6 +387,7 @@ export function ProfileAppointmentReschedulePanel({
                 showError={showError}
                 markTouched={markTouched}
                 showContactDetails
+                detailsReadOnly
                 showDate
                 showTimeSlots
                 phoneLocked={phoneLocked}
@@ -339,37 +422,49 @@ export function ProfileAppointmentReschedulePanel({
                     <input
                       id="reschedule-appointment-address-line-1"
                       type="text"
-                      value={address.addressLine1}
-                      readOnly
-                      aria-readonly
+                      value={addressLine1}
+                      onChange={(event) => setAddressLine1(event.target.value)}
+                      onBlur={() => markAddressTouched("addressLine1")}
+                      placeholder={cmsForm?.addressLine1Placeholder ?? "Enter"}
+                      aria-invalid={showAddressError("addressLine1") || undefined}
                       className={cn(
                         appointmentFieldClassName,
-                        "cursor-not-allowed opacity-70",
+                        showAddressError("addressLine1") && invalidFieldClassName,
                       )}
+                    />
+                    <FormFieldError
+                      message={
+                        showAddressError("addressLine1") ? addressErrors.addressLine1 : undefined
+                      }
                     />
                   </div>
 
-                  {address.addressLine2 ? (
-                    <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="reschedule-appointment-address-line-2"
-                        className={appointmentLabelClassName}
-                      >
-                        {cmsForm?.addressLine2Label ?? "Address Line 2 (Optional)"}
-                      </label>
-                      <input
-                        id="reschedule-appointment-address-line-2"
-                        type="text"
-                        value={address.addressLine2}
-                        readOnly
-                        aria-readonly
-                        className={cn(
-                          appointmentFieldClassName,
-                          "cursor-not-allowed opacity-70",
-                        )}
-                      />
-                    </div>
-                  ) : null}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="reschedule-appointment-address-line-2"
+                      className={appointmentLabelClassName}
+                    >
+                      {cmsForm?.addressLine2Label ?? "Address Line 2 (Optional)"}
+                    </label>
+                    <input
+                      id="reschedule-appointment-address-line-2"
+                      type="text"
+                      value={addressLine2}
+                      onChange={(event) => setAddressLine2(event.target.value)}
+                      onBlur={() => markAddressTouched("addressLine2")}
+                      placeholder={cmsForm?.addressLine2Placeholder ?? "Enter"}
+                      aria-invalid={showAddressError("addressLine2") || undefined}
+                      className={cn(
+                        appointmentFieldClassName,
+                        showAddressError("addressLine2") && invalidFieldClassName,
+                      )}
+                    />
+                    <FormFieldError
+                      message={
+                        showAddressError("addressLine2") ? addressErrors.addressLine2 : undefined
+                      }
+                    />
+                  </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-2">
@@ -382,13 +477,19 @@ export function ProfileAppointmentReschedulePanel({
                       <input
                         id="reschedule-appointment-pincode"
                         type="text"
-                        value={address.pincode ?? ""}
-                        readOnly
-                        aria-readonly
+                        inputMode="numeric"
+                        value={pincode}
+                        onChange={(event) => setPincode(sanitizePincodeInput(event.target.value))}
+                        onBlur={() => markAddressTouched("pincode")}
+                        placeholder={cmsForm?.pincodePlaceholder ?? "Enter"}
+                        aria-invalid={showAddressError("pincode") || undefined}
                         className={cn(
                           appointmentFieldClassName,
-                          "cursor-not-allowed opacity-70",
+                          showAddressError("pincode") && invalidFieldClassName,
                         )}
+                      />
+                      <FormFieldError
+                        message={showAddressError("pincode") ? addressErrors.pincode : undefined}
                       />
                     </div>
                     <div className="flex flex-col gap-2">
@@ -401,38 +502,63 @@ export function ProfileAppointmentReschedulePanel({
                       <input
                         id="reschedule-appointment-city"
                         type="text"
-                        value={address.city ?? ""}
-                        readOnly
-                        aria-readonly
+                        value={city}
+                        onChange={(event) => setCity(event.target.value)}
+                        onBlur={() => markAddressTouched("city")}
+                        placeholder={cmsForm?.cityPlaceholder ?? "Enter"}
+                        aria-invalid={showAddressError("city") || undefined}
                         className={cn(
                           appointmentFieldClassName,
-                          "cursor-not-allowed opacity-70",
+                          showAddressError("city") && invalidFieldClassName,
                         )}
+                      />
+                      <FormFieldError
+                        message={showAddressError("city") ? addressErrors.city : undefined}
                       />
                     </div>
                   </div>
 
-                  {address.state ? (
-                    <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="reschedule-appointment-state"
-                        className={appointmentLabelClassName}
-                      >
-                        {cmsForm?.stateLabel ?? "State"}
-                      </label>
-                      <input
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="reschedule-appointment-state"
+                      className={appointmentLabelClassName}
+                    >
+                      {cmsForm?.stateLabel ?? "State"}
+                    </label>
+                    <div
+                      className={cn(
+                        "flex h-14 w-full items-center border border-transparent bg-[#F2F2F2] px-3",
+                        showAddressError("state") && invalidFieldContainerClassName,
+                      )}
+                    >
+                      <select
                         id="reschedule-appointment-state"
-                        type="text"
-                        value={address.state}
-                        readOnly
-                        aria-readonly
+                        value={addressState}
+                        onChange={(event) => setAddressState(event.target.value)}
+                        onBlur={() => markAddressTouched("state")}
+                        aria-invalid={showAddressError("state") || undefined}
                         className={cn(
-                          appointmentFieldClassName,
-                          "cursor-not-allowed opacity-70",
+                          "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
+                          addressState ? "text-darkblack" : "text-neutral400",
                         )}
+                      >
+                        <option value="">{cmsForm?.statePlaceholder ?? "-select-"}</option>
+                        {stateOptions.map((entry) => (
+                          <option key={entry} value={entry}>
+                            {entry}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        className="pointer-events-none size-6 shrink-0 text-darkblack"
+                        strokeWidth={1}
+                        aria-hidden
                       />
                     </div>
-                  ) : null}
+                    <FormFieldError
+                      message={showAddressError("state") ? addressErrors.state : undefined}
+                    />
+                  </div>
                 </>
               ) : null}
 

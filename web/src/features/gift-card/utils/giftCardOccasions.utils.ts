@@ -6,6 +6,22 @@ export type GiftCardOccasionOption = {
   value: string;
 };
 
+/** Display labels in title case (e.g. `evening & parties` → `Evening & Parties`). */
+export function formatGiftCardOccasionLabel(label: string): string {
+  return label
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      if (word.length <= 1) {
+        return word;
+      }
+
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
 export function mapMagentoOccasionsToGiftCardOptions(
   options: JewelleryFilterFacetOption[],
 ): GiftCardOccasionOption[] {
@@ -16,7 +32,7 @@ export function mapMagentoOccasionsToGiftCardOptions(
       const label = option.label?.trim();
       if (!label || !value) return null;
 
-      return { label, value };
+      return { label: formatGiftCardOccasionLabel(label), value };
     })
     .filter((option): option is GiftCardOccasionOption => option !== null);
 }

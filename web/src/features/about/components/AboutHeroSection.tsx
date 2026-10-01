@@ -30,7 +30,7 @@ const AboutHeroSection = ({ title, image, videoUrl }: AboutHeroSectionProps) => 
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative flex flex-col overflow-hidden bg-white h-640 2xl:h-[85vh]"
+      className="relative flex flex-col overflow-hidden md:h-[633px] h-[640px] bg-gray200"
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div
@@ -48,12 +48,12 @@ const AboutHeroSection = ({ title, image, videoUrl }: AboutHeroSectionProps) => 
             gradient={hasMedia ? aboutHeroFigmaSpec.overlay.gradient : "bottom-strong"}
           />
           <div
-            className={cn(heroScrollCollapseTitleBaseClass, "pb-16 lg:pb-75")}
-            // style={titleStyle}
+            className={cn(heroScrollCollapseTitleBaseClass, "pb-10 lg:pb-16")}
+          // style={titleStyle}
           >
             <h1
               id="about-hero-title"
-              className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white lg:text-6xl md:text-5xl text-4xl"
+              className="w-full max-w-886 text-center font-larken font-light leading-110 text-white lg:text-6xl md:text-5xl text-4xl"
             >
               {title}
             </h1>

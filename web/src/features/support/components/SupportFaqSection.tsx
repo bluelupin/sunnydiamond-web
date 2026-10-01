@@ -2,11 +2,15 @@
 
 import { Fragment, useState } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import {
+  accordionCollapseIconClassName,
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedSupportFaqSection } from "@/services/support/support-page.types";
 
-const faqTransitionClassName =
-  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
+const faqIconTransitionClassName = accordionCollapseIconClassName;
 
 const FaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
@@ -82,7 +86,8 @@ const SupportFaqSection = ({ faq }: SupportFaqSectionProps) => {
                   <span className="relative mt-0.5 flex size-6 shrink-0 items-center justify-center" aria-hidden>
                     <span
                       className={cn(
-                        "absolute inset-0 flex items-center justify-center transition-opacity duration-500",
+                        "absolute inset-0 flex items-center justify-center",
+                        faqIconTransitionClassName,
                         isOpen ? "pointer-events-none opacity-0" : "opacity-100",
                       )}
                     >
@@ -90,7 +95,8 @@ const SupportFaqSection = ({ faq }: SupportFaqSectionProps) => {
                     </span>
                     <span
                       className={cn(
-                        "absolute inset-0 flex items-center justify-center transition-opacity duration-500",
+                        "absolute inset-0 flex items-center justify-center",
+                        faqIconTransitionClassName,
                         isOpen ? "opacity-100" : "pointer-events-none opacity-0",
                       )}
                     >
@@ -102,10 +108,11 @@ const SupportFaqSection = ({ faq }: SupportFaqSectionProps) => {
                   id={panelId}
                   role="region"
                   aria-labelledby={buttonId}
-                  className={cn("grid", faqTransitionClassName, isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}
+                  aria-hidden={!isOpen}
+                  className={accordionCollapsePanelClassName(isOpen)}
                 >
-                  <div className="overflow-hidden">
-                    <p className="pb-5 font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
+                  <div className={accordionCollapseInnerClassName}>
+                    <p className="pb-5 pt-1 font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
                       {item.answer}
                     </p>
                   </div>

@@ -22,6 +22,16 @@ export type RescheduleCustomerAppointmentInput = {
   customerEmail?: string;
   /** Optional — updates booking note / description. */
   requestDetails?: string;
+  /** Optional — try-at-home address; sent only when the customer edits it. */
+  address?: RescheduleCustomerAppointmentAddress;
+};
+
+export type RescheduleCustomerAppointmentAddress = {
+  addressLine1: string;
+  addressLine2?: string;
+  pincode: string;
+  city: string;
+  state?: string;
 };
 
 export class CustomerAppointmentsApiError extends Error {
@@ -196,10 +206,11 @@ function enrichAppointmentsWithShowrooms(
 
 /**
  * Strapi customer appointments — CMS API token as Bearer + magentoCustomerId.
- * Call only from server (BFF). Customer id must come from the Magento session.
+ * Call only from server (BFF). Customer ID and verified email must come from the Magento session.
  */
 export async function fetchCustomerAppointments(
   magentoCustomerId: number,
+  magentoCustomerEmail: string,
   page = 1,
   pageSize = 20,
   signal?: AbortSignal,
@@ -208,6 +219,7 @@ export async function fetchCustomerAppointments(
   const safePageSize = Math.min(100, Math.max(1, pageSize));
   const params = new URLSearchParams({
     magentoCustomerId: String(magentoCustomerId),
+    ...(magentoCustomerEmail ? { magentoCustomerEmail } : {}),
     page: String(safePage),
     pageSize: String(safePageSize),
   });
@@ -277,6 +289,15 @@ export async function rescheduleCustomerAppointment(
           : {}),
         ...(input.requestDetails?.trim()
           ? { requestDetails: input.requestDetails.trim() }
+          : {}),
+        ...(input.address
+          ? {
+              addressLine1: input.address.addressLine1,
+              addressLine2: input.address.addressLine2 ?? "",
+              pincode: input.address.pincode,
+              city: input.address.city,
+              ...(input.address.state ? { state: input.address.state } : {}),
+            }
           : {}),
       },
     }),
@@ -352,9 +373,13 @@ export async function cancelCustomerAppointment(
 /** Upcoming store visits / video calls that can still take a piece (CMS caps at 5). */
 export async function getOpenCustomerAppointments(
   magentoCustomerId: number,
+  magentoCustomerEmail: string,
   signal?: AbortSignal,
 ): Promise<CustomerOpenAppointment[]> {
-  const params = new URLSearchParams({ magentoCustomerId: String(magentoCustomerId) });
+  const params = new URLSearchParams({
+    magentoCustomerId: String(magentoCustomerId),
+    ...(magentoCustomerEmail ? { magentoCustomerEmail } : {}),
+  });
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/open?${params.toString()}`;
   const response = await fetch(url, {
     method: "GET",

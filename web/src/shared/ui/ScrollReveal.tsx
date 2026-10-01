@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ElementType,
   type ReactNode,
 } from "react";
@@ -19,6 +20,7 @@ type ScrollRevealProps = {
   as?: ElementType;
   threshold?: number;
   rootMargin?: string;
+  style?: CSSProperties;
 };
 
 const ScrollReveal = ({
@@ -28,6 +30,7 @@ const ScrollReveal = ({
   as: Tag = "div",
   threshold = 0.12,
   rootMargin = "0px 0px -6% 0px",
+  style,
 }: ScrollRevealProps) => {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -69,9 +72,10 @@ const ScrollReveal = ({
           "motion-safe:transition-[opacity,transform] motion-safe:duration-700 motion-safe:ease-reveal",
         className,
       )}
-      style={
-        !reducedMotion && delayMs > 0 ? { transitionDelay: `${delayMs}ms` } : undefined
-      }
+      style={{
+        ...style,
+        ...(!reducedMotion && delayMs > 0 ? { transitionDelay: `${delayMs}ms` } : {}),
+      }}
     >
       {children}
     </Tag>

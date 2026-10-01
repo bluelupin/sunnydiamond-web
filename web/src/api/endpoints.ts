@@ -50,6 +50,7 @@ export const STRAPI_ENDPOINTS = {
   jobOpeningSubmissionsSubmit: "api/submissions-job-openings/submit",
   /** Resume autofill — multipart `resume`, returns suggestions without submitting. */
   careerResumeParse: "api/careers/parse-resume",
+  skillsAndLanguages: "api/skills-and-languages",
   blogLandingPage: "api/blog-landing-page",
   blogCategories: "api/blog-categories",
   blogPosts: "api/blog-posts",

@@ -13,6 +13,8 @@ type LoginIdentifierFieldProps = {
   countryCode: string;
   error?: string;
   emailOnly?: boolean;
+  /** Dial codes that can get an SMS code — the picker offers only these. */
+  countryCodes: readonly string[];
   inputRef?: RefObject<HTMLInputElement | null>;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
@@ -23,6 +25,7 @@ const LoginIdentifierField = ({
   countryCode,
   error,
   emailOnly = false,
+  countryCodes,
   inputRef,
   onIdentifierChange,
   onCountryCodeChange,
@@ -63,6 +66,7 @@ const LoginIdentifierField = ({
           <PhoneCountryCodeSelect
             id="login-country-code"
             value={countryCode || DEFAULT_COUNTRY_CODE}
+            codes={countryCodes}
             onChange={(nextCode) => {
               onCountryCodeChange(nextCode);
               onIdentifierChange(sanitizePhoneInput(identifier, nextCode));

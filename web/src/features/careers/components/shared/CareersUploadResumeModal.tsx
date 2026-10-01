@@ -28,12 +28,13 @@ const CareersUploadResumeModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideCloseButton
-        className="max-w-[512px] gap-0 border-neutral300 bg-white p-6 sm:rounded-none"
+        overlayClassName="max-md:bg-black/25 max-md:backdrop-blur-md"
+        className="max-md:left-0 max-md:top-auto max-md:bottom-0 max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0 max-md:data-[state=open]:animate-none max-md:data-[state=closed]:animate-none max-h-[90dvh] overflow-y-auto gap-0 rounded-none border-0 bg-white p-0 md:max-w-[512px] md:border md:border-neutral300 md:p-6 sm:rounded-none"
       >
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 px-4 pt-6 md:p-0">
             <div className="flex items-center justify-between gap-4">
-              <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+              <DialogTitle className="font-larken text-2xl font-light leading-110 text-darkblack md:text-32">
                 {uploadResumeModal.title}
               </DialogTitle>
               <button
@@ -48,24 +49,24 @@ const CareersUploadResumeModal = ({
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>
 
-          <DialogDescription className="max-w-[464px] font-gill text-base font-light leading-110 text-neutral500">
+          <DialogDescription className="px-4 pb-2 font-gill text-base font-light leading-110 text-neutral500 md:max-w-[464px] md:p-0">
             {uploadResumeModal.description}
           </DialogDescription>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={onOnlyUpload}
-              className={cn(careersOutlineCtaClassName, "flex-1")}
-            >
-              <span className="relative z-10">{uploadResumeModal.onlyUploadLabel}</span>
-            </button>
+          <div className="flex flex-col gap-4 border-t border-neutral300/60 px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:flex-row md:border-0 md:p-0">
             <button
               type="button"
               onClick={onAutofillResume}
-              className={cn(careersDarkCtaClassName, "flex-1")}
+              className={cn(careersDarkCtaClassName, "w-full shrink-0 md:order-2 md:w-auto md:flex-1")}
             >
               <span className="relative z-10">{uploadResumeModal.autofillResumeLabel}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOnlyUpload}
+              className={cn(careersOutlineCtaClassName, "w-full shrink-0 md:order-1 md:w-auto md:flex-1")}
+            >
+              <span className="relative z-10">{uploadResumeModal.onlyUploadLabel}</span>
             </button>
           </div>
         </div>

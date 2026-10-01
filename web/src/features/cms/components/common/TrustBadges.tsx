@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { cn } from "@/shared/utils/cn";
+import { isCheckoutRoute } from "@/shared/utils/navigation";
 import { usePathname } from "next/navigation";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
 import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.service";
@@ -76,7 +77,7 @@ function TrustBadgeMarquee({
   items,
   isLoading,
 }: TrustBadgeMarqueeProps) {
-  const pathName = usePathname();
+  const pathName = usePathname() ?? "";
 
   const isSingleItem = items.length === 1;
   const marqueeItems = useMemo(
@@ -93,7 +94,7 @@ function TrustBadgeMarquee({
     <section
       id={id}
       className={cn(
-        pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300",
+        pathName === "/cart" || isCheckoutRoute(pathName) ? "bg-gray300" : "bg-gray300",
         "shrink-0 overflow-hidden border-t border-ivory/10 text-ivory", className
       )}
     >

@@ -1,10 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  formatPostedAbsolute,
-  formatPostedRelative,
-} from "@/features/careers/utils/careersFormatting";
+import { formatPostedRelative } from "@/features/careers/utils/careersFormatting";
 
 type CareersPostedLabelProps = {
   postedAt: string;
@@ -12,11 +8,7 @@ type CareersPostedLabelProps = {
 };
 
 const CareersPostedLabel = ({ postedAt, className }: CareersPostedLabelProps) => {
-  const [label, setLabel] = useState(() => `Posted ${formatPostedAbsolute(postedAt)}`);
-
-  useEffect(() => {
-    setLabel(formatPostedRelative(postedAt));
-  }, [postedAt]);
+  const label = formatPostedRelative(postedAt);
 
   return (
     <p className={className} suppressHydrationWarning>

@@ -30,6 +30,7 @@ import {
 } from "@/services/careers/career-resume-parser.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import {
+  CAREERS_APPLICATION_FIELD_LABELS,
   CAREERS_NUMERIC_ONLY_ERROR,
   CAREERS_AUTOFILL_RESUME_ACCEPT,
   CAREERS_RESUME_ACCEPT,
@@ -58,7 +59,7 @@ import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
 import CareersSelectField from "./CareersSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
 import CareersResumeFileChip from "./CareersResumeFileChip";
-import CareersSearchIcon from "./CareersSearchIcon";
+import CareersSkillsSearch from "./CareersSkillsSearch";
 import CareersSubmitConfirmationModal from "./CareersSubmitConfirmationModal";
 
 type ApplicationField =
@@ -77,11 +78,13 @@ type ApplicationField =
   | "resume";
 
 function FormField({
+  htmlFor,
   label,
   error,
   children,
   className,
 }: {
+  htmlFor?: string;
   label: string;
   error?: string;
   children: React.ReactNode;
@@ -89,7 +92,7 @@ function FormField({
 }) {
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label className={careersFormLabelClassName}>{label}</label>
+      {label ? <label htmlFor={htmlFor} className={careersFormLabelClassName}>{label}</label> : null}
       {children}
       {error ? <FormFieldError message={error} /> : null}
     </div>
@@ -112,8 +115,6 @@ const TagChip = ({ label, onRemove }: { label: string; onRemove: () => void }) =
   );
 }
 
-const careersBirthDateBounds = getCareersBirthDateBounds();
-
 const CareersApplicationForm = () => {
   const { cms, selectedJob, goToSuccess, applicationEntry, pendingResumeFile, clearPendingResume } =
     useCareersJobs();
@@ -121,6 +122,7 @@ const CareersApplicationForm = () => {
     () => resolveCareerApplicationFlow(cms.landing.applicationFlow),
     [cms.landing.applicationFlow],
   );
+  const careersBirthDateBounds = useMemo(() => getCareersBirthDateBounds(), []);
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
   const { contact: profileContact } = useCustomerProfileContact(isAuthenticated);
@@ -152,7 +154,6 @@ const CareersApplicationForm = () => {
   const [currentCtc, setCurrentCtc] = useState("");
   const [expectedCtc, setExpectedCtc] = useState("");
   const [noticePeriod, setNoticePeriod] = useState("");
-  const [skillSearch, setSkillSearch] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [hasCompanyRelation, setHasCompanyRelation] = useState<boolean | null>(null);
@@ -192,6 +193,8 @@ const CareersApplicationForm = () => {
       setEmail(data.emailId ?? "");
       setPhone(phoneValue?.phone ?? "");
       setCountryCode(phoneValue?.countryCode ?? "+91");
+      // Show the shared phone validation immediately for resume-populated values.
+      setTouched((current) => ({ ...current, phone: true }));
       setHighestDegree(education?.degree ?? "");
       setAreaOfStudy(education?.areaOfStudy ?? "");
       setYearOfCompletion(education?.completionYear ? String(education.completionYear) : "");
@@ -461,32 +464,6 @@ const CareersApplicationForm = () => {
     }
   };
 
-  const addSkill = () => {
-    const value = skillSearch.trim();
-    if (!value || skills.includes(value)) {
-      return;
-    }
-    setSkills((current) => [...current, value]);
-    setSkillSearch("");
-  };
-
-  const addLanguage = () => {
-    const value = skillSearch.trim();
-    if (!value || languages.includes(value)) {
-      return;
-    }
-    setLanguages((current) => [...current, value]);
-    setSkillSearch("");
-  };
-
-  const handleSkillSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") {
-      return;
-    }
-    event.preventDefault();
-    addSkill();
-  };
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
@@ -560,7 +537,7 @@ const CareersApplicationForm = () => {
         },
         addInfo: {
           hasCompanyRelation,
-          employeeName,
+          employeeName: employeeName.trim(),
           employeeJobTitle: employeeJobTitle.trim(),
         },
         resumeFile,
@@ -587,13 +564,8 @@ const CareersApplicationForm = () => {
     );
   }
 
-  const fields = applicationForm.fields;
-  const textPlaceholder = fields.fieldPlaceholder;
-  const selectPlaceholder = fields.selectPlaceholder;
-  const skillSearchTerm = skillSearch.trim();
-  const showSkillSearchDropdown = skillSearchTerm.length > 0;
-  const skillsLabelText = fields.skillsLabel.replace(/\*+$/, "").trim();
-  const languagesLabelText = fields.languagesLabel.replace(/\*+$/, "").trim();
+  const fields = { ...applicationForm.fields, ...CAREERS_APPLICATION_FIELD_LABELS };
+
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
@@ -605,7 +577,7 @@ const CareersApplicationForm = () => {
           <div className="flex flex-col gap-4">
             <h2 className={careersFormSectionTitleClassName}>{applicationForm.resumeHeading}</h2>
             <p className="font-gill text-base font-light leading-110 text-darkblack">
-              {applicationForm.resumeHint}
+              *{applicationForm.resumeHint}
             </p>
           </div>
 
@@ -664,11 +636,11 @@ const CareersApplicationForm = () => {
           </h2>
           <div className={careersFormFieldsStackClassName}>
             <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
-              <FormField label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
-                <input
+              <FormField htmlFor="careers-name" label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
+                <input id="careers-name"
                   type="text"
                   autoComplete="name"
-                  placeholder={fields.fieldPlaceholder}
+                  placeholder="Enter Name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   onBlur={() => markTouched("name")}
@@ -678,7 +650,7 @@ const CareersApplicationForm = () => {
                   )}
                 />
               </FormField>
-              <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
+              <FormField htmlFor="careers-phone" label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
                 <div
                   className={cn(
                     "flex h-14 w-full items-center gap-2 border border-transparent bg-[#F2F2F2] p-3",
@@ -694,10 +666,10 @@ const CareersApplicationForm = () => {
                     }}
                     onBlur={() => markTouched("phone")}
                   />
-                  <input
+                  <input id="careers-phone"
                     type="tel"
                     autoComplete="tel"
-                    placeholder={fields.fieldPlaceholder}
+                    placeholder="Enter"
                     value={phone}
                     onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, countryCode))}
                     onBlur={() => markTouched("phone")}
@@ -706,11 +678,11 @@ const CareersApplicationForm = () => {
                   />
                 </div>
               </FormField>
-              <FormField label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
-                <input
+              <FormField htmlFor="careers-email" label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
+                <input id="careers-email"
                   type="email"
                   autoComplete="email"
-                  placeholder={fields.fieldPlaceholder}
+                  placeholder="Enter Email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   onBlur={() => markTouched("email")}
@@ -720,7 +692,7 @@ const CareersApplicationForm = () => {
                   )}
                 />
               </FormField>
-              <FormField
+              <FormField htmlFor="careers-date-of-birth"
                 label={fields.dateOfBirthLabel}
                 error={showError("dateOfBirth") ? errors.dateOfBirth : undefined}
               >
@@ -733,7 +705,7 @@ const CareersApplicationForm = () => {
                   onBlur={() => markTouched("dateOfBirth")}
                   hasError={showError("dateOfBirth")}
                   aria-invalid={showError("dateOfBirth") || undefined}
-                  placeholder={fields.dateOfBirthPlaceholder}
+                  placeholder={fields.dateOfBirthPlaceholder || "Select Date"}
                   displayFormat="dd/mm/yyyy"
                 />
               </FormField>
@@ -744,7 +716,7 @@ const CareersApplicationForm = () => {
                 onChange={setGender}
                 onBlur={() => markTouched("gender")}
                 options={applicationForm.genderOptions}
-                placeholder={selectPlaceholder}
+                placeholder="Select Gender"
                 error={showError("gender") ? errors.gender : undefined}
               />
             </div>
@@ -754,13 +726,13 @@ const CareersApplicationForm = () => {
         <section className={careersFormSectionClassName}>
           <h2 className={careersFormSectionTitleClassName}>Education Details</h2>
           <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
-            <FormField
+            <FormField htmlFor="careers-highest-degree"
               label={fields.highestDegreeLabel}
               error={showError("highestDegree") ? errors.highestDegree : undefined}
             >
-              <input
+              <input id="careers-highest-degree"
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Degree"
                 value={highestDegree}
                 onChange={(event) => setHighestDegree(event.target.value)}
                 onBlur={() => markTouched("highestDegree")}
@@ -770,13 +742,13 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-area-of-study"
               label={fields.areaOfStudyLabel}
               error={showError("areaOfStudy") ? errors.areaOfStudy : undefined}
             >
-              <input
+              <input id="careers-area-of-study"
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Area of Study"
                 value={areaOfStudy}
                 onChange={(event) => setAreaOfStudy(event.target.value)}
                 onBlur={() => markTouched("areaOfStudy")}
@@ -786,15 +758,15 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-year-of-completion"
               label={fields.yearOfCompletionLabel}
               error={showError("yearOfCompletion") ? errors.yearOfCompletion : undefined}
             >
-              <input
+              <input id="careers-year-of-completion"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={textPlaceholder}
+                placeholder="Enter Year of Completion"
                 value={yearOfCompletion}
                 onChange={(event) =>
                   setYearOfCompletion(
@@ -825,36 +797,36 @@ const CareersApplicationForm = () => {
               onChange={setRelevantExperience}
               onBlur={() => markTouched("relevantExperience")}
               options={applicationForm.workExperienceOptions}
-              placeholder={selectPlaceholder}
+              placeholder="Select Relevant Experience"
               error={showError("relevantExperience") ? errors.relevantExperience : undefined}
             />
-            <FormField label={fields.currentCompanyLabel}>
-              <input
+            <FormField htmlFor="careers-current-company" label={fields.currentCompanyLabel}>
+              <input id="careers-current-company"
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Current Company's Name"
                 value={currentCompany}
                 onChange={(event) => setCurrentCompany(event.target.value)}
                 className={careersFormFieldClassName}
               />
             </FormField>
-            <FormField label={fields.currentJobTitleLabel}>
-              <input
+            <FormField htmlFor="careers-current-job-title" label={fields.currentJobTitleLabel}>
+              <input id="careers-current-job-title"
                 type="text"
-                placeholder={textPlaceholder}
+                placeholder="Enter Current Job Title"
                 value={currentJobTitle}
                 onChange={(event) => setCurrentJobTitle(event.target.value)}
                 className={careersFormFieldClassName}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-current-ctc"
               label={fields.currentCtcLabel}
               error={showError("currentCtc") ? errors.currentCtc : undefined}
             >
-              <input
+              <input id="careers-current-ctc"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={textPlaceholder}
+                placeholder="Enter Current CTC (In LPA)"
                 value={currentCtc}
                 onChange={(event) =>
                   setCurrentCtc(sanitizeCareersNumericInput(event.target.value))
@@ -866,15 +838,15 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <FormField
+            <FormField htmlFor="careers-expected-ctc"
               label={fields.expectedCtcLabel}
               error={showError("expectedCtc") ? errors.expectedCtc : undefined}
             >
-              <input
+              <input id="careers-expected-ctc"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={textPlaceholder}
+                placeholder="Enter Expected CTC (In LPA)"
                 value={expectedCtc}
                 onChange={(event) =>
                   setExpectedCtc(sanitizeCareersNumericInput(event.target.value))
@@ -892,7 +864,7 @@ const CareersApplicationForm = () => {
               value={noticePeriod}
               onChange={setNoticePeriod}
               options={applicationForm.noticePeriodOptions}
-              placeholder={selectPlaceholder}
+              placeholder="Select Notice Period"
             />
           </div>
         </section>
@@ -905,52 +877,15 @@ const CareersApplicationForm = () => {
             <p className="md:text-base text-sm font-gill font-normal text-darkblack">
               Add skills and known languages to your application
             </p>
-            <div className="relative">
-              <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
-                <input
-                  type="text"
-                  role="combobox"
-                  aria-autocomplete="list"
-                  value={skillSearch}
-                  placeholder={fields.skillsSearchPlaceholder}
-                  onChange={(event) => setSkillSearch(event.target.value)}
-                  onKeyDown={handleSkillSearchKeyDown}
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
-                  aria-expanded={showSkillSearchDropdown}
-                  aria-controls="careers-skills-languages-search-options"
-                />
-                <CareersSearchIcon />
-              </div>
-              {showSkillSearchDropdown ? (
-                <div
-                  id="careers-skills-languages-search-options"
-                  role="listbox"
-                  aria-label="Add search result"
-                  className="absolute left-0 right-0 top-full z-[90] mt-1 flex flex-col bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-                >
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={false}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={addSkill}
-                    className="flex h-14 w-full items-center p-3 text-left font-gill text-sm font-normal leading-110 text-darkblack transition-colors hover:bg-[#DECAA0]"
-                  >
-                    Add &quot;{skillSearchTerm}&quot; as {skillsLabelText}
-                  </button>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={false}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={addLanguage}
-                    className="flex h-14 w-full items-center p-3 text-left font-gill text-sm font-normal leading-110 text-darkblack transition-colors hover:bg-[#DECAA0]"
-                  >
-                    Add &quot;{skillSearchTerm}&quot; as {languagesLabelText}
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <CareersSkillsSearch
+              placeholder="Search"
+              skills={skills}
+              languages={languages}
+              onSelect={(option) => {
+                const update = option.type === "Skill" ? setSkills : setLanguages;
+                update((current) => current.includes(option.label) ? current : [...current, option.label]);
+              }}
+            />
           </FormField>
           {skills.length > 0 ? (
             <div className="flex flex-col gap-4 items-start">
@@ -1011,7 +946,7 @@ const CareersApplicationForm = () => {
                     setHasCompanyRelation(true);
                     markTouched("companyRelation");
                   }}
-                  className="size-6 accent-darkblack"
+                  className="size-6 shrink-0 cursor-pointer appearance-none rounded-full border border-gray600 bg-transparent checked:bg-[radial-gradient(circle,#C5A156_0_6px,transparent_6px)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C5A156]"
                 />
                 <span className="font-gill text-base leading-110 text-darkblack">
                   {fields.companyRelationYes}
@@ -1028,7 +963,7 @@ const CareersApplicationForm = () => {
                     setEmployeeJobTitle("");
                     markTouched("companyRelation");
                   }}
-                  className="size-6 accent-darkblack"
+                  className="size-6 shrink-0 cursor-pointer appearance-none rounded-full border border-gray600 bg-transparent checked:bg-[radial-gradient(circle,#C5A156_0_6px,transparent_6px)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C5A156]"
                 />
                 <span className="font-gill text-base leading-110 text-darkblack">
                   {fields.companyRelationNo}
@@ -1042,19 +977,22 @@ const CareersApplicationForm = () => {
 
           {hasCompanyRelation ? (
             <div className="grid gap-6 md:grid-cols-2">
-              <CareersSelectField
-                id="careers-employee-name"
-                label={fields.employeeNameLabel}
-                value={employeeName}
-                onChange={setEmployeeName}
-                options={applicationForm.employeeRelationOptions}
-                placeholder={selectPlaceholder}
-              />
-
-              <FormField label={fields.employeeJobTitleLabel}>
+              <FormField htmlFor="careers-employee-name" label={fields.employeeNameLabel}>
                 <input
+                  id="careers-employee-name"
                   type="text"
-                  placeholder={textPlaceholder}
+                  placeholder="Enter Employee Name"
+                  value={employeeName}
+                  onChange={(event) => setEmployeeName(event.target.value)}
+                  className={careersFormFieldClassName}
+                />
+              </FormField>
+
+              <FormField htmlFor="careers-employee-job-title" label={fields.employeeJobTitleLabel}>
+                <input
+                  id="careers-employee-job-title"
+                  type="text"
+                  placeholder="Enter Employee Job Title"
                   value={employeeJobTitle}
                   onChange={(event) => setEmployeeJobTitle(event.target.value)}
                   className={careersFormFieldClassName}
@@ -1068,7 +1006,7 @@ const CareersApplicationForm = () => {
       <button
         type="submit"
         disabled={!isFormComplete || isSubmitting || isParsingResume}
-        className={cn(careersDarkCtaClassName, "w-full md:w-[193px]")}
+        className={cn(careersDarkCtaClassName, "w-full whitespace-nowrap md:w-auto md:min-w-[193px] md:self-start")}
       >
         <span className="relative z-10">
           {isSubmitting ? CAREERS_SUBMITTING_APPLICATION_LABEL : applicationForm.submitLabel}

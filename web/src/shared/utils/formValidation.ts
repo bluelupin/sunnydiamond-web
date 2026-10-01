@@ -1,3 +1,9 @@
+import { CHECKOUT_COD_MAX_ORDER_TOTAL } from "@/features/checkout/constants/cod";
+import {
+  getAppointmentBookingDateBounds,
+  type AppointmentBookingWindow,
+} from "@/shared/utils/appointmentTimeSlots";
+
 export type FieldValidation = {
   valid: boolean;
   error?: string;
@@ -146,6 +152,43 @@ export const validateRequiredDate = (value: string): FieldValidation => {
   return validateOptionalDate(value);
 };
 
+export const validateBookingWindowDate = (
+  value: string,
+  window: AppointmentBookingWindow,
+  required: boolean,
+): FieldValidation => {
+  if (!value.trim()) {
+    return required ? { valid: false, error: "Select a date" } : { valid: true };
+  }
+
+  const selected = parseDateOnly(value);
+  if (!selected) {
+    return { valid: false, error: "Enter a valid date" };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (selected < today) {
+    return { valid: false, error: "Date cannot be in the past" };
+  }
+
+  const { minDate, maxDate } = getAppointmentBookingDateBounds(window);
+  const min = parseDateOnly(minDate);
+  if (min && selected < min) {
+    return {
+      valid: false,
+      error: `Book at least ${Math.round(window.minNoticeMinutes / 60)} hours in advance`,
+    };
+  }
+
+  const max = parseDateOnly(maxDate);
+  if (max && selected > max) {
+    return { valid: false, error: `Date must be within ${window.maxDaysAhead} days from today` };
+  }
+
+  return { valid: true };
+};
+
 export const validateIndianPincode = (value: string): FieldValidation => {
   const trimmed = value.trim();
 
@@ -283,6 +326,8 @@ export type AppointmentContactValidationOptions = {
   validatePurpose?: boolean;
   dateRequired?: boolean;
   selectedSlotRequired?: boolean;
+  /** Replaces the default today → +3 months date range. */
+  bookingWindow?: AppointmentBookingWindow;
 };
 
 export type AppointmentContactField =
@@ -302,9 +347,11 @@ export const getAppointmentContactErrors = (
     ? validateRequiredNote(values.note)
     : validateOptionalNote(values.note);
 
-  const dateValidation = options.dateRequired
-    ? validateRequiredDate(values.date)
-    : validateOptionalDate(values.date);
+  const dateValidation = options.bookingWindow
+    ? validateBookingWindowDate(values.date, options.bookingWindow, Boolean(options.dateRequired))
+    : options.dateRequired
+      ? validateRequiredDate(values.date)
+      : validateOptionalDate(values.date);
 
   return {
     name: validateRequiredName(values.name).error,
@@ -422,18 +469,26 @@ export const validateOptionalPhone = (value: string, countryCode = "+91"): Field
 };
 
 /**
- * The storefront no longer carries its own COD ceiling. Magento holds both the
- * order minimum and the maximum, and a second copy here could only drift from
- * them — it did: the client capped COD at ₹40,000 while the backend also
- * required ₹20,000, so an order below the floor was accepted by the UI and then
- * silently placed as "Check / Money order". Availability now comes from the
- * cart's own available_payment_methods (isCodOfferedByBackend).
+ * Magento decides whether COD is offered (minimum, engraved items, etc.). The
+ * storefront additionally caps selectable COD at ₹40,000 so the UI matches the
+ * helper copy on the payment step.
  */
-export const validateCodOffered = (codOffered: boolean): FieldValidation => {
+export const validateCodOffered = (
+  codOffered: boolean,
+  orderTotal = Number.POSITIVE_INFINITY,
+): FieldValidation => {
   if (!codOffered) {
     return {
       valid: false,
       error: "Cash on Delivery is not available for this order. Please use online payment.",
+    };
+  }
+
+  if (orderTotal > CHECKOUT_COD_MAX_ORDER_TOTAL) {
+    return {
+      valid: false,
+      error:
+        "Cash on Delivery is only available for orders up to ₹40,000. Please use online payment.",
     };
   }
 
@@ -562,6 +617,7 @@ export const getCheckoutPaymentErrors = (
   values: CheckoutPaymentValues,
   codOffered: boolean,
   hasEngravedItems = false,
+  orderTotal = Number.POSITIVE_INFINITY,
 ): Partial<Record<CheckoutPaymentField, string | undefined>> => {
   if (values.method === "cod") {
     return {
@@ -569,7 +625,7 @@ export const getCheckoutPaymentErrors = (
       // actual cause, where the generic message only says "not available".
       cod:
         validateCodEngravedCart(hasEngravedItems).error ??
-        validateCodOffered(codOffered).error,
+        validateCodOffered(codOffered, orderTotal).error,
     };
   }
 
@@ -580,8 +636,9 @@ export const isCheckoutPaymentValid = (
   values: CheckoutPaymentValues,
   codOffered: boolean,
   hasEngravedItems = false,
+  orderTotal = Number.POSITIVE_INFINITY,
 ): boolean =>
-  Object.values(getCheckoutPaymentErrors(values, codOffered, hasEngravedItems)).every(
+  Object.values(getCheckoutPaymentErrors(values, codOffered, hasEngravedItems, orderTotal)).every(
     (error) => !error,
   );
 
@@ -593,9 +650,11 @@ export type ProfileAddressFormValues = {
   city: string;
   state: string;
   phone: string;
+  /** Dial code for `phone`; India when absent. */
+  phoneCountryCode?: string;
 };
 
-export type ProfileAddressFormField = keyof ProfileAddressFormValues;
+export type ProfileAddressFormField = Exclude<keyof ProfileAddressFormValues, "phoneCountryCode">;
 
 export const getProfileAddressFormErrors = (
   values: ProfileAddressFormValues,
@@ -607,7 +666,7 @@ export const getProfileAddressFormErrors = (
   pincode: validateIndianPincode(values.pincode).error,
   city: validateCity(values.city).error,
   state: validateIndianState(values.state, states).error,
-  phone: validatePhone(values.phone, "+91").error,
+  phone: validatePhone(values.phone, values.phoneCountryCode ?? "+91").error,
 });
 
 export const isProfileAddressFormValid = (

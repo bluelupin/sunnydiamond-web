@@ -16,7 +16,14 @@ import {
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
+  VIDEO_CALL_BOOKING_WINDOW,
 } from "@/shared/constants/appointmentForm";
+import { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
+import {
+  DUPLICATE_APPOINTMENT_TOAST,
+  DUPLICATE_APPOINTMENT_VIEW_LABEL,
+  hasDuplicateAppointmentBooking,
+} from "@/features/products/utils/appointmentDuplicateBooking";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
 import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
@@ -62,6 +69,7 @@ type ProductAppointmentFormProps = {
   onSubmitSuccess: (message: string) => void;
   onSubmitError: (message: string) => void;
   onVideoCallBooked?: (booking: TryAtHomeBookingSummary) => void;
+  onDuplicateBooking?: () => void;
 };
 
 const ProductAppointmentForm = ({
@@ -74,6 +82,7 @@ const ProductAppointmentForm = ({
   onSubmitSuccess,
   onSubmitError,
   onVideoCallBooked,
+  onDuplicateBooking,
 }: ProductAppointmentFormProps) => {
   const isPersonalise = variant === "personalise";
   const isScheduleVideoCall = variant === "schedule-video-call";
@@ -126,8 +135,9 @@ const ProductAppointmentForm = ({
       noteRequired: notesRequired,
       dateRequired: config.showTimeSlots,
       selectedSlotRequired: config.showTimeSlots,
+      ...(isScheduleVideoCall ? { bookingWindow: VIDEO_CALL_BOOKING_WINDOW } : {}),
     }),
-    [notesRequired, config.showTimeSlots],
+    [notesRequired, config.showTimeSlots, isScheduleVideoCall],
   );
 
   const { isValid, errors, markTouched, showError, validateSubmit, resetValidation } =
@@ -270,6 +280,20 @@ const ProductAppointmentForm = ({
 
         setIsSubmitting(true);
         try {
+          if (
+            isScheduleVideoCall &&
+            customer?.id != null &&
+            (await hasDuplicateAppointmentBooking({
+              kind: "video_call",
+              productId: product.id,
+              date,
+              selectedSlot,
+            }))
+          ) {
+            onDuplicateBooking?.();
+            return;
+          }
+
           await createProductSubmission({
             formTag,
             productName: product.name,
@@ -383,6 +407,7 @@ const ProductAppointmentForm = ({
               fieldClassName={appointmentFieldClassName}
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
+              bookingWindow={isScheduleVideoCall ? VIDEO_CALL_BOOKING_WINDOW : undefined}
             />
 
             {allowImageUpload ? (
@@ -508,6 +533,21 @@ const ProductAppointmentPanel = ({
     toast(config.successToast);
   };
 
+  const handleDuplicateBooking = () => {
+    showStatusToast(DUPLICATE_APPOINTMENT_TOAST, {
+      action: (
+        <AppStatusToastAction
+          onClick={() => {
+            handleClose();
+            router.push(buildProfileSectionHref("appointments"));
+          }}
+        >
+          {DUPLICATE_APPOINTMENT_VIEW_LABEL}
+        </AppStatusToastAction>
+      ),
+    });
+  };
+
   if (!open) {
     return statusToast;
   }
@@ -548,6 +588,7 @@ const ProductAppointmentPanel = ({
             onSubmitSuccess={handleLegacySuccess}
             onSubmitError={showStatusToast}
             onVideoCallBooked={setVideoBooking}
+            onDuplicateBooking={handleDuplicateBooking}
           />
         )}
       </ProductDetailSidePanelShell>

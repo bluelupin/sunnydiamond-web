@@ -19,7 +19,7 @@ const BlogMoreToReadSection = ({ posts }: BlogMoreToReadSectionProps) => {
     >
       <h2
         id="blog-more-to-read-title"
-        className="font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl mb-6"
+        className="font-larken text-2xl md:text-32 font-light leading-110 text-darkblack lg:text-5xl lg:leading-110 mb-6"
       >
         More to read
       </h2>
@@ -29,7 +29,7 @@ const BlogMoreToReadSection = ({ posts }: BlogMoreToReadSectionProps) => {
             key={post.id}
             className="w-[min(328px,calc(100vw-32px))] shrink-0 md:w-auto md:shrink"
           >
-            <BlogCard post={post} />
+            <BlogCard post={post} variant="listing" />
           </div>
         ))}
       </div>

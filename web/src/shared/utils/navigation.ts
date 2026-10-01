@@ -114,7 +114,7 @@ export function getHeaderSurfaceClass(
     return "bg-transparent";
   }
 
-  if (pathname === "/cart" || pathname === "/checkout") {
+  if (pathname === "/cart" || isCheckoutRoute(pathname)) {
     return getCartCheckoutHeaderSurfaceClass(pathname, options);
   }
 
@@ -146,8 +146,16 @@ export function shouldOffsetMainForHeader(pathname: string): boolean {
   return !isHeroOverlayRoute(pathname);
 }
 
+export function isCheckoutSuccessRoute(pathname: string): boolean {
+  return pathname.startsWith("/checkout/success/");
+}
+
+export function isCheckoutRoute(pathname: string): boolean {
+  return pathname === "/checkout" || isCheckoutSuccessRoute(pathname);
+}
+
 export function isCartOrCheckoutRoute(pathname: string): boolean {
-  return pathname === "/cart" || pathname === "/checkout";
+  return pathname === "/cart" || isCheckoutRoute(pathname);
 }
 
 export function isDfeInvestRoute(pathname: string): boolean {

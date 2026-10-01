@@ -5,7 +5,7 @@ import HomePageView from "@/features/cms/components/HomePage";
 import { HomepageCmsProvider } from "@/shared/lib/providers/HomepageCmsProvider";
 import {
   getCachedHomepageShell,
-  prefetchHomepageBundle,
+  prefetchHomepageCms,
 } from "@/lib/homepage/prefetchHomepageCms";
 import { getHomepageSeo } from "@/services/homepage/seo.service";
 import {
@@ -59,7 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const prefetched = await prefetchHomepageBundle();
+  // Above-the-fold only: Alankara/Magento loads when the lazy FeaturedCollectionSection mounts.
+  const prefetched = await prefetchHomepageCms();
   const hero = resolveHeroContent(prefetched.shell);
   const craftingRarity = resolveCraftingRarityContent(
     prefetched.shell,
@@ -78,7 +79,6 @@ export default async function Page() {
       shell={prefetched.shell}
       editorial={prefetched.editorial}
       shopping={prefetched.shopping}
-      alankara={prefetched.alankara}
     >
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
       <HomePageView hero={hero} craftingRarity={craftingRarity} />

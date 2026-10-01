@@ -2,6 +2,7 @@ import type { AuthCustomer } from "@/features/auth/context/AuthContext";
 import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
 import type { CustomerAddress } from "@/services/customer/customer-account.types";
 import { formatCustomerFullName } from "@/shared/utils/customerName";
+import { splitPhoneNumber } from "@/lib/auth/magentoPhone";
 import type { CheckoutFormData } from "../types/checkout.types";
 
 export function buildCheckoutContactPrefill(customer: AuthCustomer): Pick<
@@ -31,6 +32,7 @@ export function applyCustomerAddressToCheckoutForm(
   address: CustomerAddress,
 ): CheckoutFormData {
   const mapped = mapCustomerAddressToFormInput(address);
+  const phone = splitPhoneNumber(mapped.phone);
 
   return sanitizeCheckoutFormNames({
     ...form,
@@ -40,7 +42,8 @@ export function applyCustomerAddressToCheckoutForm(
     pincode: mapped.pincode,
     city: mapped.city,
     state: mapped.state,
-    shippingPhone: mapped.phone,
+    shippingPhone: phone.national,
+    shippingCountryCode: phone.countryCode,
     selectedShippingAddressUid: address.uid,
   });
 }

@@ -15,7 +15,7 @@ const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps)
     <section
       id={interested.id}
       aria-labelledby="bespoke-interested-title"
-      className="relative w-full overflow-hidden md:h-[432px] h-[219px]"
+      className="relative w-full overflow-hidden md:h-[400px] h-[219px]"
     >
       {hasImage && interested.image ? (
         <>
@@ -36,7 +36,7 @@ const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps)
           className="absolute inset-0 bg-gradient-to-b from-neutral500 via-darkblack to-black"
         />
       )}
-      <div className="relative flex md:h-[432px] h-[219px] flex-col items-center justify-center px-4 md:px-10">
+      <div className="relative flex md:h-[400px] h-[219px] flex-col items-center justify-center px-4 md:px-10">
         <Reveal direction="up" className="flex w-full max-w-[720px] mx-auto flex-col items-center gap-6 text-center md:gap-10">
           <div className="flex flex-col items-center justify-center gap-3 lg:gap-4">
             <h2
@@ -47,7 +47,7 @@ const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps)
             </h2>
             {interested.description ? (
               <p
-                className="font-gill text-base font-light leading-110 text-white lg:text-xl md:text-lg"
+                className="font-gill text-sm font-light leading-110 text-white lg:text-xl md:text-lg sm:text-base"
               >
                 {interested.description}
               </p>

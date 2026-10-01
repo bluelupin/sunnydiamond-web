@@ -5,7 +5,14 @@ import InformationIcon from "@/assets/Icons/InformationIcon";
 import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext";
 import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
 import CheckoutOtpModal from "@/features/checkout/components/CheckoutOtpModal";
-import { validateRequiredName } from "@/shared/utils/formValidation";
+import {
+  sanitizePhoneInput,
+  validatePhone,
+  validateRequiredName,
+} from "@/shared/utils/formValidation";
+import { formatLoginPhoneForMagento, splitPhoneNumber } from "@/lib/auth/magentoPhone";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
+import { cn } from "@/shared/utils/cn";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -14,6 +21,7 @@ import {
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import {
+  APPOINTMENT_COUNTRY_CODES,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
@@ -36,7 +44,11 @@ type ProfileDetailsSectionProps = {
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { logout, refresh } = useAuth();
-  const { otpLoginEnabled } = useAuthFeatures();
+  const { otpLoginEnabled, otpCountryCodes } = useAuthFeatures();
+  // With SMS OTP on, a new number is verified by SMS, so only SMS countries are offered.
+  const phoneCountryCodes = otpLoginEnabled
+    ? otpCountryCodes
+    : APPOINTMENT_COUNTRY_CODES.map((entry) => entry.code);
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -82,6 +94,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const [fullName, setFullName] = useState(initialFullName);
   const [phone, setPhone] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+91");
   const [phoneOtpOpen, setPhoneOtpOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -95,25 +108,33 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   }, [customer.id, initialEmail]);
 
   // Account mobile number first (refreshed after a save); address-book phone as fallback.
-  const initialPhone = useMemo(
-    () => customer.phone?.replace(/\D/g, "").slice(-10) || contact?.phone?.slice(-10) || "",
-    [customer.phone, contact?.phone],
+  const { countryCode: initialCountryCode, national: initialPhone } = useMemo(
+    () =>
+      customer.phone
+        ? splitPhoneNumber(customer.phone)
+        : { countryCode: contact?.countryCode || "+91", national: contact?.phone ?? "" },
+    [customer.phone, contact?.countryCode, contact?.phone],
   );
 
   // Re-sync the field when the stored number changes (initial load, post-save refresh).
-  const [syncedPhone, setSyncedPhone] = useState(initialPhone);
-  if (syncedPhone !== initialPhone) {
-    setSyncedPhone(initialPhone);
+  // Starts unsynced so a number already known on the first render fills the field too.
+  const initialPhoneKey = `${initialCountryCode} ${initialPhone}`;
+  const [syncedPhone, setSyncedPhone] = useState<string | null>(null);
+  if (syncedPhone !== initialPhoneKey) {
+    setSyncedPhone(initialPhoneKey);
     setPhone(initialPhone);
+    setPhoneCountryCode(initialCountryCode);
   }
 
   const nameChanged = fullName.trim() !== initialFullName.trim();
-  const phoneChanged = phone !== initialPhone;
+  const phoneChanged = phone !== initialPhone || (Boolean(phone) && phoneCountryCode !== initialCountryCode);
   const hasChanges = nameChanged || phoneChanged;
+  const phoneE164 = formatLoginPhoneForMagento(phoneCountryCode, phone);
 
   const handleCancel = () => {
     setFullName(initialFullName);
     setPhone(initialPhone);
+    setPhoneCountryCode(initialCountryCode);
   };
 
   const handleLogout = () => {
@@ -132,7 +153,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
       return;
     }
 
-    if (phoneChanged && phone && phone.length !== 10) {
+    if (phoneChanged && phone && !validatePhone(phone, phoneCountryCode).valid) {
       showStatusToast(content.phoneInvalidMessage);
       return;
     }
@@ -154,7 +175,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
             setPhoneOtpOpen(true);
             return;
           }
-          await patchProfile({ phone }, content.phoneErrorToastMessage);
+          await patchProfile({ phone: phoneE164 }, content.phoneErrorToastMessage);
         }
 
         await refresh();
@@ -231,6 +252,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
       <CheckoutOtpModal
         open={phoneOtpOpen}
         phone={phone}
+        countryCode={phoneCountryCode}
         purpose="link"
         onClose={() => setPhoneOtpOpen(false)}
         onVerify={handlePhoneLinked}
@@ -293,16 +315,40 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   <InformationIcon className="w-[18px] h-[18px] shrink-0 text-darkblack" aria-hidden />
                 </button>
               </div>
-              <input
-                id="profile-phone"
-                type="tel"
-                inputMode="numeric"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))}
-                placeholder={content.phonePlaceholder}
-                autoComplete="tel-national"
-                className={appointmentFieldClassName}
-              />
+              <div className={cn(appointmentFieldClassName, "flex items-center gap-2")}>
+                <PhoneCountryCodeSelect
+                  id="profile-phone-country-code"
+                  value={phoneCountryCode}
+                  codes={phoneCountryCodes}
+                  onChange={(code) => {
+                    setPhoneCountryCode(code);
+                    setPhone((current) => sanitizePhoneInput(current, code));
+                  }}
+                />
+                <input
+                  id="profile-phone"
+                  type="tel"
+                  inputMode="numeric"
+                  value={phone}
+                  onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, phoneCountryCode))}
+                  placeholder={content.phonePlaceholder}
+                  autoComplete="tel-national"
+                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
+                />
+                {/* Only a number proven with a code signs in; offer the code for one typed in without it. */}
+                {otpLoginEnabled && phone && !phoneChanged ? (
+                  customer.phoneVerified ? (
+                    <ProfileEmailVerifiedBadge label={content.verifiedLabel} />
+                  ) : (
+                    <DetailTextLink
+                      onClick={() => setPhoneOtpOpen(true)}
+                      className="shrink-0 text-sm uppercase"
+                    >
+                      {content.verifyLabel}
+                    </DetailTextLink>
+                  )
+                ) : null}
+              </div>
             </div>
           </div>
 

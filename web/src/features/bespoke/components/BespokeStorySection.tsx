@@ -38,6 +38,10 @@ const BespokeStoryStepMedia = ({
   const videoRef = useMutedVideoPlayback(Boolean(videoSrc) && !useImageFallback);
 
   useEffect(() => {
+    setUseImageFallback(!videoSrc);
+  }, [videoSrc]);
+
+  useEffect(() => {
     if (!videoSrc || useImageFallback) return;
 
     const figure = figureRef.current;
@@ -69,7 +73,7 @@ const BespokeStoryStepMedia = ({
     <figure
       ref={figureRef}
       className={cn(
-        "relative shrink-0 overflow-hidden bg-gray200 h-[400px] w-full lg:h-[496px] lg:w-[658px]",
+        "relative shrink-0 overflow-hidden bg-gray200 h-[250px] md:h-[300px] lg:h-[400px]  w-full lg:w-[658px]",
       )}
     >
       {!videoSrc || useImageFallback ? (
@@ -83,6 +87,7 @@ const BespokeStoryStepMedia = ({
         />
       ) : (
         <video
+          key={videoSrc}
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover object-center"
           autoPlay
@@ -113,7 +118,7 @@ const BespokeStoryStepPanel = ({
     <article
       className={cn(
         "flex shrink-0",
-        isDesktop ? "items-center gap-4 w-[970px]" : "w-full flex-col bg-gray300",
+        isDesktop ? "items-center gap-4 w-[970px]" : "w-full flex-col bg-gray300 max-w-[343px]",
       )}
       style={!isDesktop ? { gap: "0px" } : undefined}
       {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}
@@ -139,6 +144,11 @@ type BespokeStorySectionProps = {
   customDesignForm: NormalizedBespokeCustomDesignForm | null;
 };
 
+const resolveStoryStepVideoSrc = (
+  step: NormalizedBespokeStoryStep,
+  story: NormalizedBespokeStory,
+): string | undefined => step.videoSrc ?? story.videoSrc;
+
 const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const hasHorizontalGallery = story.steps.length > 1;
@@ -162,9 +172,9 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
     <section
       ref={sectionRef}
       aria-labelledby="bespoke-story-title"
-      className="relative bg-white lg:py-104 py-16 mx-auto w-full pl-4 lg:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] lg:pr-0 pr-4"
+      className="relative bg-white lg:py-104 py-16 mx-auto w-full pl-4 lg:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] lg:pr-0"
     >
-      <div className="lg:mb-12 mb-6 mx-auto max-w-[720px] lg:hidden flex w-full flex-col gap-4">
+      <div className="lg:mb-12 mb-6 mx-auto max-w-[720px] lg:hidden flex w-full flex-col gap-4 lg:pr-0 pr-4">
         <Reveal
           as="h2"
           id="bespoke-story-title"
@@ -182,9 +192,9 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
         </Reveal>
       </div>
       {/* Desktop / tablet — sticky viewport + scroll-driven horizontal slide */}
-      <div data-since1997-mode="desktop" className="hidden lg:block">
-        <div className="sticky lg:top-2 top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
-          <div className="md:mb-12 mb-6 mx-auto max-w-[720px] hidden md:flex w-full flex-col gap-4">
+      <div data-since1997-mode="desktop" className="hidden lg:block lg:pr-0 pr-4">
+        <div className="sticky lg:top-[72px] top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white">
+          <div className="md:mb-10 mb-6 mx-auto max-w-[720px] hidden md:flex w-full flex-col gap-4">
             <Reveal
               as="h2"
               id="bespoke-story-title"
@@ -201,14 +211,14 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
               {story.subtitle}
             </Reveal>
           </div>
-          <Reveal direction="up" className="flex min-h-[496px] flex-1 flex-col">
+          <Reveal direction="up" className="flex min-h-[400px] flex-1 flex-col">
             <div
               data-since1997-viewport
-              className="relative left-1/2 min-h-[496px] w-screen max-w-none -translate-x-1/2 overflow-x-hidden overflow-y-visible"
+              className="relative left-1/2 min-h-[400px] w-screen max-w-none -translate-x-1/2 overflow-x-hidden overflow-y-visible"
             >
               <div
                 data-since1997-track
-                className="flex min-h-[496px] items-center gap-10 will-change-transform motion-reduce:transform-none"
+                className="flex min-h-[400px] items-center gap-10 will-change-transform motion-reduce:transform-none"
               >
                 {story.steps.map((step, index) => {
                   const isLastSlide = index === story.steps.length - 1;
@@ -223,7 +233,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
                         <BespokeStoryStepPanel
                           step={step}
                           layout="desktop"
-                          videoSrc={story.videoSrc}
+                          videoSrc={resolveStoryStepVideoSrc(step, story)}
                           isFirstSlide={index === 0}
                         />
                       </div>
@@ -235,7 +245,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
                       key={step.number}
                       step={step}
                       layout="desktop"
-                      videoSrc={story.videoSrc}
+                      videoSrc={resolveStoryStepVideoSrc(step, story)}
                       isFirstSlide={index === 0}
                     />
                   );
@@ -243,7 +253,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+              <div className="lg:mt-10 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
                 {ctaLabel && customDesignForm ? (
                   <DetailDarkButton
                     type="button"
@@ -262,13 +272,18 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
         ) : null}
       </div>
       {/* Mobile — static vertical stack, no scroll animation (Figma 2083:18264) */}
-      <div className="lg:hidden flex flex-col lg:gap-12 md:gap-8 gap-4">
+      <div className="lg:hidden flex flex-row gap-3 horizontalScrollbar overflow-auto lg:pr-0 pr-4">
         {story.steps.map((step) => (
-          <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" videoSrc={story.videoSrc} />
+          <BespokeStoryStepPanel
+            key={step.number}
+            step={step}
+            layout="mobile"
+            videoSrc={resolveStoryStepVideoSrc(step, story)}
+          />
         ))}
       </div>
-      <Reveal direction="up" className="lg:hidden flex justify-center">
-        <div className="lg:mt-12 md:mt-8 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+      <Reveal direction="up" className="lg:hidden flex justify-center lg:pr-0 pr-4">
+        <div className="mt-6 flex justify-center md:w-[284px] mx-auto w-full">
           {ctaLabel && customDesignForm ? (
             <DetailDarkButton
               type="button"

@@ -25,24 +25,24 @@ const AboutBrillianceSection = ({
     <section
       ref={sectionRef}
       aria-labelledby="about-crafting-rarity-title"
-      className="bg-white py-10 sm:py-16 lg:py-104"
+      className="bg-white py-16 md:py-104"
     >
       <PageContainer className="flex w-full justify-center">
-        <div className="flex w-full lg:max-w-[950px] max-w-[700px] flex-col items-center text-center">
+        <div className="flex w-full lg:max-w-[950px] max-w-[700px] flex-col items-center text-center md:gap-6 gap-5">
           <div
             data-reveal-mask="heading"
-            className="w-full overflow-hidden pt-0 mb-8"
+            className="w-full overflow-hidden"
           >
             <Reveal as="h2" direction="up"
               id="about-crafting-rarity-title"
-              className="whitespace-pre-line font-larken text-32 font-light leading-110 text-darkblack sm:text-56 md:text-7xl lg:text-90">
+              className="whitespace-pre-line font-larken font-light leading-110 text-darkblack text-32 md:text-4xl lg:text-5xl">
               {heading}
             </Reveal>
           </div>
           {image ? (
             <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
               <Reveal direction="up"
-                className="mx-auto w-[230px] h-[270px] md:h-[300px] md:w-[300px] lg:h-354 lg:w-354">
+                className="mx-auto w-[156px] h-[156px] md:h-[265px] md:w-[265px]">
                 <ResponsiveImage
                   desktopSrc={image.desktopUrl}
                   mobileSrc={image.mobileUrl}
@@ -55,8 +55,8 @@ const AboutBrillianceSection = ({
               </Reveal>
             </div>
           ) : null}
-          <VerticalScrollLine className="lg:mt-[23px] mt-5" />
-          <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-xl 2xl:text-22 mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px]">
+          <VerticalScrollLine />
+          <Reveal as="p" direction="up" className="font-gill font-light leading-110 text-darkblack lg:text-xl text-base mx-auto max-w-[770px]">
             {body}
           </Reveal>
         </div>

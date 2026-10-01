@@ -4,10 +4,14 @@
  * message and passes through untouched.
  */
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  EMAIL_ALREADY_IN_USE: "An account already exists with this email address.",
+  EMAIL_ALREADY_IN_USE:
+    "An account already exists with this email address. Sign in with your email instead; you can then verify your mobile number in Profile.",
   PHONE_ALREADY_IN_USE: "This mobile number is already linked to another account.",
   OTP_MAX_ATTEMPTS: "Too many incorrect attempts. Please request a new code.",
   OTP_ALREADY_USED: "This code has already been used. Please request a new one.",
+  PHONE_COUNTRY_NOT_SUPPORTED:
+    "SMS codes aren't available for this country yet. Please use your email address instead.",
+  OTP_SMS_UNAVAILABLE: "We could not send the SMS right now. Please try again later.",
 };
 
 export function mapAuthErrorMessage(message: string, fallback: string): string {

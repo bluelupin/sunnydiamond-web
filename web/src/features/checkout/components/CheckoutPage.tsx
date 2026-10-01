@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -20,6 +20,10 @@ import CheckoutOtpModal, { type CheckoutOtpVerifyResult } from "./CheckoutOtpMod
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import CheckoutPageSkeleton from "./skeletons/CheckoutPageSkeleton";
+import {
+  resetCheckoutSuccessHeaderActive,
+  setCheckoutSuccessHeaderActive,
+} from "../context/checkoutHeaderBridge";
 import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
 import { persistGuestCheckoutAddresses } from "../services/persistGuestCheckoutAddresses";
 import {
@@ -28,7 +32,11 @@ import {
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
 import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, validateRequiredEmail } from "@/shared/utils/formValidation";
-import { isCodOfferedByBackend } from "@/services/magento/cart/checkoutPayment.mapper";
+import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
+import {
+  isCodAvailableForCheckout,
+  isCodOfferedByBackend,
+} from "@/services/magento/cart/checkoutPayment.mapper";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -61,6 +69,10 @@ import {
   readPendingCheckoutPayment,
   savePendingCheckoutPayment,
 } from "../services/checkoutPendingPayment";
+import {
+  parseCheckoutSuccessOrderNumber,
+  replaceCheckoutSuccessUrl,
+} from "../utils/checkoutRoutes";
 import { isCustomerEmailAvailable } from "@/services/magento/customer/customerEmailAvailability.service";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
@@ -79,23 +91,30 @@ const CheckoutPage = () => {
   // Magento is the only authority on whether this cart can be paid in cash: it
   // holds the order minimum and maximum and the engraved-item rule.
   const codOffered = isCodOfferedByBackend(paymentMethods);
+  const codAvailable = isCodAvailableForCheckout(codOffered, totalPrice);
   // A gift card covering the whole order: Magento's grand total is 0 and the order is
   // placed with its `free` method whatever option is selected (resolveMagentoPaymentCode).
   const noPaymentNeeded = items.length > 0 && totalPrice === 0;
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
-  const { otpLoginEnabled, emailOtpLoginEnabled } = useAuthFeatures();
+  const { otpLoginEnabled, emailOtpLoginEnabled, otpCountryCodes } = useAuthFeatures();
   /**
    * With SMS sign-in off there is no mobile identity to take, so the contact field is an
    * email address and nothing else — offering "PhoneNo / Email ID" would accept a number
    * we can neither verify nor mail an order to.
    */
   const contactEmailOnly = !otpLoginEnabled;
+  const pathname = usePathname() ?? "";
   const searchParams = useSearchParams();
   const paymentStatus = searchParams?.get("payment");
   const paymentOrderNumber = searchParams?.get("order");
+  const successOrderFromPath = parseCheckoutSuccessOrderNumber(pathname);
+  const isSuccessRoute = Boolean(successOrderFromPath);
   const isPaymentReturn = paymentStatus === "success" && Boolean(paymentOrderNumber);
+  const shouldShowSuccess = isSuccessRoute || isPaymentReturn;
+  const resolvedSuccessOrderNumber =
+    successOrderFromPath ?? (isPaymentReturn ? paymentOrderNumber ?? null : null);
   const paymentReturnHandledRef = useRef(false);
   const {
     isAuthenticated,
@@ -112,8 +131,16 @@ const CheckoutPage = () => {
   const verifiedCheckoutOtpRef = useRef<string | null>(null);
   const lastCheckedGuestEmailRef = useRef("");
   const checkoutStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCheckoutScrollSectionRef = useRef<string | null>(null);
 
-  const [step, setStep] = useState<CheckoutStep>(isPaymentReturn ? "success" : "form");
+  const [step, setStep] = useState<CheckoutStep>(shouldShowSuccess ? "success" : "form");
+  useLayoutEffect(() => {
+    setCheckoutSuccessHeaderActive(step === "success" || isSuccessRoute);
+
+    return () => {
+      resetCheckoutSuccessHeaderActive();
+    };
+  }, [isSuccessRoute, step]);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [orderSuccessAuthenticated, setOrderSuccessAuthenticated] = useState(false);
@@ -122,29 +149,27 @@ const CheckoutPage = () => {
   const checkoutLockedRef = useRef(false);
   const [isSavingAddresses, setIsSavingAddresses] = useState(false);
   const [placedItems, setPlacedItems] = useState<CartLineItem[]>(() => {
-    if (!isPaymentReturn || !paymentOrderNumber) {
+    if (!resolvedSuccessOrderNumber) {
       return [];
     }
     const pending = readPendingCheckoutPayment();
-    return pending?.orderNumber === paymentOrderNumber ? pending.placedItems : [];
+    return pending?.orderNumber === resolvedSuccessOrderNumber ? pending.placedItems : [];
   });
   const [placedTotal, setPlacedTotal] = useState(() => {
-    if (!isPaymentReturn || !paymentOrderNumber) {
+    if (!resolvedSuccessOrderNumber) {
       return 0;
     }
     const pending = readPendingCheckoutPayment();
-    return pending?.orderNumber === paymentOrderNumber ? pending.totalPrice : 0;
+    return pending?.orderNumber === resolvedSuccessOrderNumber ? pending.totalPrice : 0;
   });
-  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(
-    isPaymentReturn ? paymentOrderNumber ?? null : null,
-  );
+  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(resolvedSuccessOrderNumber);
 
   const [form, setForm] = useState<CheckoutFormData>(() => {
-    if (!isPaymentReturn || !paymentOrderNumber) {
+    if (!resolvedSuccessOrderNumber) {
       return createEmptyCheckoutForm();
     }
     const pending = readPendingCheckoutPayment();
-    if (pending?.orderNumber !== paymentOrderNumber) {
+    if (!pending || pending.orderNumber !== resolvedSuccessOrderNumber) {
       return createEmptyCheckoutForm();
     }
     const defaults = createEmptyCheckoutForm();
@@ -170,15 +195,36 @@ const CheckoutPage = () => {
     emailOnly: contactEmailOnly,
     requireDeliveryPhone: contactEmailOnly && !isAuthenticated,
   });
-  const paymentValidation = useCheckoutPaymentValidation(payment, codOffered, hasEngravedItems);
+  const paymentValidation = useCheckoutPaymentValidation(
+    payment,
+    codOffered,
+    hasEngravedItems,
+    totalPrice,
+  );
 
   // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
 
+  const scrollToCheckoutSection = useCallback((sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const requestCheckoutSectionScroll = useCallback((sectionId: string) => {
+    pendingCheckoutScrollSectionRef.current = sectionId;
+  }, []);
+
+  useEffect(() => {
+    const sectionId = pendingCheckoutScrollSectionRef.current;
+    if (!sectionId) {
+      return;
+    }
+
+    pendingCheckoutScrollSectionRef.current = null;
+    scrollToCheckoutSection(sectionId);
+  }, [step, scrollToCheckoutSection]);
+
   const showDeliveryAddressRequiredFeedback = () => {
-    document
-      .getElementById("checkout-delivery-address-required")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    scrollToCheckoutSection("checkout-delivery-address-required");
     toast({
       title: "Delivery address required",
       description:
@@ -247,7 +293,7 @@ const CheckoutPage = () => {
   ) => {
     if (checkoutLockedRef.current) return;
 
-    if (field === "method" && value === "cod" && !codOffered) {
+    if (field === "method" && value === "cod" && !codAvailable) {
       return;
     }
 
@@ -258,10 +304,10 @@ const CheckoutPage = () => {
     // Only act on a definite answer. An empty payment-method list means the cart
     // has not loaded yet, and switching the customer away from COD on that would
     // undo a choice they already made.
-    if (!noPaymentNeeded && paymentMethods.length > 0 && payment.method === "cod" && !codOffered) {
+    if (!noPaymentNeeded && paymentMethods.length > 0 && payment.method === "cod" && !codAvailable) {
       setPayment((prev) => ({ ...prev, method: "card" }));
     }
-  }, [codOffered, noPaymentNeeded, payment.method, paymentMethods.length]);
+  }, [codAvailable, noPaymentNeeded, payment.method, paymentMethods.length]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -281,7 +327,7 @@ const CheckoutPage = () => {
       clearPendingCheckoutPayment();
       setStep("success");
       showOrderPlacedToast(input.orderNumber);
-      window.history.replaceState({}, "", "/checkout");
+      replaceCheckoutSuccessUrl(input.orderNumber);
       clearCart();
 
       try {
@@ -356,20 +402,25 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (!isPaymentReturn || !paymentOrderNumber) {
+    const successOrderNumber = paymentOrderNumber ?? successOrderFromPath;
+    const isSuccessLanding =
+      (paymentStatus === "success" && Boolean(paymentOrderNumber)) ||
+      (isSuccessRoute && Boolean(successOrderFromPath));
+
+    if (!isSuccessLanding || !successOrderNumber) {
       return;
     }
 
     const pending = readPendingCheckoutPayment();
-    if (!pending || pending.orderNumber !== paymentOrderNumber) {
+    if (!pending || pending.orderNumber !== successOrderNumber) {
       paymentReturnHandledRef.current = true;
-      setPlacedOrderNumber(paymentOrderNumber);
+      setPlacedOrderNumber(successOrderNumber);
       setPlacedTotal(totalPrice);
       setPlacedItems([...items]);
       setStep("success");
       clearPendingCheckoutPayment();
-      window.history.replaceState({}, "", "/checkout");
-      showOrderPlacedToast(paymentOrderNumber);
+      replaceCheckoutSuccessUrl(successOrderNumber);
+      showOrderPlacedToast(successOrderNumber);
       return;
     }
 
@@ -383,7 +434,18 @@ const CheckoutPage = () => {
       wasAuthenticated: pending.isAuthenticated,
       guestOtp: pending.guestOtp,
     });
-  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, refreshCart, showPaymentFailedToast, showOrderPlacedToast, items, totalPrice]);
+  }, [
+    finalizeOrderSuccess,
+    isSuccessRoute,
+    paymentOrderNumber,
+    paymentStatus,
+    refreshCart,
+    showPaymentFailedToast,
+    showOrderPlacedToast,
+    successOrderFromPath,
+    items,
+    totalPrice,
+  ]);
 
   useEffect(() => {
     const handlePageShow = () => {
@@ -463,11 +525,11 @@ const CheckoutPage = () => {
     [addresses],
   );
 
-  if ((isHydrating || isAuthPrefillLoading) && step !== "success" && !isPaymentReturn) {
+  if ((isHydrating || isAuthPrefillLoading) && step !== "success" && !shouldShowSuccess) {
     return <CheckoutPageSkeleton />;
   }
 
-  if (items.length === 0 && step !== "success" && !isPaymentReturn) {
+  if (items.length === 0 && step !== "success" && !shouldShowSuccess) {
     return (
       <>
         <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
@@ -663,7 +725,7 @@ const CheckoutPage = () => {
 
       checkoutLockedRef.current = true;
       paymentInFlightRef.current = true;
-    setSubmitting(true);
+      setSubmitting(true);
 
       void (async () => {
         try {
@@ -797,7 +859,7 @@ const CheckoutPage = () => {
         } finally {
           checkoutLockedRef.current = false;
           paymentInFlightRef.current = false;
-      setSubmitting(false);
+          setSubmitting(false);
         }
       })();
     });
@@ -922,25 +984,23 @@ const CheckoutPage = () => {
   return (
     <section
       className={cn(
-        "bg-gray300 lg:pb-16",
+        "bg-gray300 lg:pb-104",
         "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
-        "md:max-lg:pb-16",
+        "pb-16",
       )}
     >
-      <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+      <div className="mx-auto w-full px-4 pt-6 md:pt-10 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
         <CheckoutPaymentFailedToast
           open={paymentFailedToastOpen}
           onDismiss={dismissPaymentFailedToast}
           className="mb-6"
         />
-        <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
+        <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl md:text-4xl">
           Complete Checkout
         </h1>
 
         <div
-          className={cn(
-            "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6",
-          )}
+          className={cn(cartCheckoutAsideLayout.gridClassName)}
         >
           <div className={cn("flex min-w-0 flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
             {step === "form" ? (
@@ -953,6 +1013,7 @@ const CheckoutPage = () => {
                   isCheckoutEmailContact(form.phoneOrEmail) ? emailOtpLoginEnabled : otpLoginEnabled
                 }
                 emailOnly={contactEmailOnly}
+                contactCountryCodes={otpCountryCodes}
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
@@ -966,22 +1027,18 @@ const CheckoutPage = () => {
                 form={form}
                 payment={payment}
                 hasEngravedItems={hasEngravedItems}
-                codOffered={codOffered}
+                codOffered={codAvailable}
                 noPaymentNeeded={noPaymentNeeded}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;
+                  requestCheckoutSectionScroll("checkout-personal-information");
                   setStep("form");
                 }}
                 onEditDelivery={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;
+                  requestCheckoutSectionScroll("checkout-delivery-address");
                   setStep("form");
-                }}
-                onEditPayment={() => {
-                  if (checkoutLockedRef.current || paymentInFlightRef.current) return;
-                  document
-                    .getElementById("checkout-payment-methods")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 validation={paymentValidation}
                 isAuthenticated={isAuthenticated}
@@ -1023,6 +1080,7 @@ const CheckoutPage = () => {
         <CheckoutOtpModal
           open={showOtpModal}
           phone={form.phoneOrEmail}
+          countryCode={form.contactCountryCode || "+91"}
           onClose={() => setShowOtpModal(false)}
           onVerify={handleOtpVerified}
         />

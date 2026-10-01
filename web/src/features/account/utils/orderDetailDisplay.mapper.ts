@@ -13,6 +13,8 @@ import {
 import {
   buildOrderDeliveryTimelineFromStatus,
   formatOrderStatusLabel,
+  giftCardSubtitleForSku,
+  isDigitalGiftCardProfileOrder,
 } from "./orderDeliveryTimeline.utils";
 import { mapSunnyTrackingToTimeline } from "./orderFlowSteps.mapper";
 import {
@@ -100,6 +102,7 @@ function mapDetailItems(
     const display = mapCustomerOrderItemToDisplayFields(mapperInput, giftMetadata);
     const sku = item.productSku?.trim();
     const imageUrl = resolveOrderItemImageUrl(item.thumbnailUrl, sku, imageBySku);
+    const subtitle = giftCardSubtitleForSku(sku);
     // GraphQL gift fields win; the REST comment chain still carries engraving notes.
     const giftNote =
       item.giftMessage ?? getOrderItemGiftNote(giftMetadata, item.productName, item.productSku);
@@ -108,6 +111,7 @@ function mapDetailItems(
       id: `${order.id}-${item.productSku ?? index}`,
       name: item.productName,
       ...(imageUrl ? { imageSrc: imageUrl } : {}),
+      ...(subtitle ? { subtitle } : {}),
       size: display.size,
       metal: display.metal,
       engraving: display.engraving,
@@ -130,7 +134,11 @@ export function mapTrackedOrderToProfileDetailUi(
 ): ProfileOrderDetailUi {
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
-  const deliveryBy = resolveOrderDeliveryBy(order.sunnyDelivery);
+  const items = mapDetailItems(order, imageBySku);
+  // Digital gift cards are emailed, so they have no delivery date.
+  const deliveryBy = isDigitalGiftCardProfileOrder({ items })
+    ? undefined
+    : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
   const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
   const deliveryTimeline =
@@ -148,7 +156,7 @@ export function mapTrackedOrderToProfileDetailUi(
     category,
     ...(subState ? { subState } : {}),
     ...(deliveryBy ? { deliveryBy } : {}),
-    items: mapDetailItems(order, imageBySku),
+    items,
     priceBreakdown,
     paymentMethod: order.paymentMethods[0]?.name,
     shippingAddress: order.shippingAddress
@@ -193,6 +201,19 @@ export function mapTrackedOrderToProfileDetailUi(
       ),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
+    };
+  }
+
+  if (isDigitalGiftCardProfileOrder(base)) {
+    // Digital gift cards are emailed: no delivery steps, tracking, cancel or return. Contact Us
+    // and the invoice stay (gift card success-to-profile flow, 30 Sep).
+    return {
+      ...base,
+      showCancel: false,
+      showReturn: false,
+      showContactUs: true,
+      showCancelNote: false,
+      footnote: undefined,
     };
   }
 

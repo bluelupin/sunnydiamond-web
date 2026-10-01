@@ -15,7 +15,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
 
   return (
     <section aria-labelledby="about-heirloom-quote" className="bg-white">
-      <PageContainer className="py-16 md:py-20 desktop:py-104">
+      <PageContainer className="py-16 md:py-20 md:py-104 !px-4 md:!px-[26px] 2xl:!px-[60px]">
         <Reveal direction="up" className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
             src="/icons/flourishIcon.svg"
@@ -24,12 +24,12 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
             height={flourishSpec.height}
             aria-hidden
             unoptimized={Boolean(iconUrl)}
-            className="h-4 w-4 shrink-0 sm:h-19 sm:w-5"
+            className="size-4 shrink-0 sm:size-5"
           />
 
           <h2
             id="about-heirloom-quote"
-            className="text-center font-larken text-32 font-light leading-110 text-darkblack sm:text-4xl md:text-42 desktop:text-5xl"
+            className="text-center font-larken font-light leading-110 tracking-[0%] text-darkblack text-32 md:text-4xl lg:text-5xl"
           >
             {quote}
           </h2>
@@ -41,7 +41,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
             height={flourishSpec.height}
             aria-hidden
             unoptimized={Boolean(iconUrl)}
-            className="h-19 w-5 shrink-0 -scale-x-100"
+            className="size-4 shrink-0 sm:size-5"
           />
         </Reveal>
       </PageContainer>

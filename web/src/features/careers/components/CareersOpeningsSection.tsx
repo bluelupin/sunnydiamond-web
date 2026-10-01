@@ -13,7 +13,7 @@ type CareersOpeningsSectionProps = {
 
 const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
   const { jobs, goToDetail, goToListings } = useCareersJobs();
-  const recentJobs = getRelatedCareerJobs(jobs, openings.relatedJobIds, 3);
+  const recentJobs = getRelatedCareerJobs(jobs, openings.relatedJobIds);
 
   if (recentJobs.length === 0) {
     return null;
@@ -23,7 +23,7 @@ const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
     <section
       id="open-roles"
       aria-labelledby="careers-openings-title"
-      className="bg-white max-w-[1240px] mx-auto px-4 md:pb-[104px] pb-16 md:pt-16 pt-10"
+      className="bg-white max-w-[1240px] mx-auto px-4 md:pb-[104px] pb-0 md:pt-16 pt-10"
     >
       <div className="flex w-full flex-col gap-6 md:gap-10 md:items-center">
         <div className="flex flex-col gap-3 text-left md:w-full md:items-center md:gap-4 md:text-center">

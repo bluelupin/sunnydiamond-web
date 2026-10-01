@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
+import { getSessionMagentoCustomerIdentity } from "@/services/auth/getSessionMagentoCustomerId";
 import {
   CustomerAppointmentsApiError,
   getOpenCustomerAppointments,
@@ -26,9 +26,9 @@ function mapApiStatus(status: number): number {
  * Upcoming store visits / video calls the signed-in customer can add a piece to.
  */
 export async function GET(request: Request) {
-  const magentoCustomerId = await getSessionMagentoCustomerId(request);
+  const customer = await getSessionMagentoCustomerIdentity(request);
 
-  if (magentoCustomerId == null) {
+  if (customer == null) {
     return NextResponse.json(
       { error: "Unauthorized", reason: "no_session" },
       { status: 401 },
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await getOpenCustomerAppointments(magentoCustomerId);
+    const data = await getOpenCustomerAppointments(customer.id, customer.email);
     return NextResponse.json({ data });
   } catch (error) {
     if (error instanceof CustomerAppointmentsApiError) {

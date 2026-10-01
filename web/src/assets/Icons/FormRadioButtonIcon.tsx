@@ -16,7 +16,7 @@ const FormRadioButtonIcon = ({ checked, className }: FormRadioButtonIconProps) =
         className={cn("shrink-0", className)}
         aria-hidden
       >
-        <circle cx="12" cy="12" r="9.25" stroke="#C5A156" strokeWidth="1.5" />
+        <circle cx="12" cy="12" r="9.25" stroke="#999999" strokeWidth="1.5" />
         <circle cx="12" cy="12" r="5" fill="#C5A156" />
       </svg>
     );
