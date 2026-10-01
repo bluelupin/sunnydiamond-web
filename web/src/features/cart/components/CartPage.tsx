@@ -33,19 +33,35 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
   const { isNavigatingToCheckout } = useCartCheckout();
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
+  const [hasCompletedMountRefresh, setHasCompletedMountRefresh] = useState(false);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   useEffect(() => {
-    if (!isHydrating) {
-      void refreshCart();
+    if (isHydrating) {
+      return;
     }
+
+    let cancelled = false;
+
+    void refreshCart().finally(() => {
+      if (!cancelled) {
+        setHasCompletedMountRefresh(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isHydrating, refreshCart]);
 
   const handleRetryCartRefresh = () => {
     void refreshCart();
   };
 
-  if (isHydrating) {
+  const isAwaitingInitialCartData =
+    !hasCompletedMountRefresh && items.length === 0 && !cartRefreshError;
+
+  if (isHydrating || isAwaitingInitialCartData) {
     return <CartPageSkeleton />;
   }
 
