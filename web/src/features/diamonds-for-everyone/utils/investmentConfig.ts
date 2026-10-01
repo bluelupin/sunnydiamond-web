@@ -28,7 +28,7 @@ export type DfeInvestmentSummary = {
 /** CMS slider/config ceilings. Manual entry may exceed the slider maximum. */
 export const DFE_MAX_MONTHLY_AMOUNT = 1_000_000;
 export const DFE_MAX_PLAN_MONTHS = 36;
-export const DFE_MIN_MONTHLY_AMOUNT = 1_000;
+export const DFE_MIN_MONTHLY_AMOUNT = 2_500;
 
 const positiveInteger = (
   value: number | null | undefined,
