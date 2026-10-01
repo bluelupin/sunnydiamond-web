@@ -27,12 +27,12 @@ export function hasSavedGiftingNotes(items: readonly CartLineItem[]): boolean {
 export function getGiftingOptionsCtaLabel(
   items: readonly CartLineItem[],
   hasConsumedGiftingEdit: boolean,
-): "View Gifting Option" | "Edit Gifting Option" {
+): "Personalise Your Gift" | "Edit Your Gift" {
   if (hasSavedGiftingNotes(items) && !hasConsumedGiftingEdit) {
-    return "Edit Gifting Option";
+    return "Edit Your Gift";
   }
 
-  return "View Gifting Option";
+  return "Personalise Your Gift";
 }
 
 /** Pre-check only lines already marked as gifts on the cart. */

@@ -6,6 +6,8 @@ import type { CartLineItem } from "../types/cart.types";
 
 export const formatCartPrice = (price: number) => `₹${formatJewelleryPrice(price)}`;
 
+const complimentaryShippingLabel = "Complimentary";
+
 export const formatCartDiscountPrice = (price: number) =>
   `-${formatCartPrice(price)}`;
 
@@ -49,7 +51,7 @@ export const getCartShippingDisplay = (
 
     return {
       amount,
-      label: amount === 0 ? "Free" : formatCartPrice(amount),
+      label: amount === 0 ? complimentaryShippingLabel : formatCartPrice(amount),
       isEstimated: false,
     };
   }
@@ -60,7 +62,7 @@ export const getCartShippingDisplay = (
   if (methods.length === 0) {
     return {
       amount: 0,
-      label: "Free",
+      label: complimentaryShippingLabel,
       isEstimated: false,
     };
   }
@@ -69,14 +71,17 @@ export const getCartShippingDisplay = (
   if (!defaultMethod) {
     return {
       amount: 0,
-      label: "Free",
+      label: complimentaryShippingLabel,
       isEstimated: false,
     };
   }
 
   return {
     amount: defaultMethod.amount,
-    label: defaultMethod.amount === 0 ? "Free" : formatCartPrice(defaultMethod.amount),
+    label:
+      defaultMethod.amount === 0
+        ? complimentaryShippingLabel
+        : formatCartPrice(defaultMethod.amount),
     isEstimated: true,
   };
 };
@@ -124,7 +129,7 @@ export const getCheckoutShippingDisplay = (
 
     return {
       amount,
-      label: amount === 0 ? "Free" : formatCartPrice(amount),
+      label: amount === 0 ? complimentaryShippingLabel : formatCartPrice(amount),
       isConfirmed: true,
     };
   }
@@ -137,7 +142,10 @@ export const getCheckoutShippingDisplay = (
     if (defaultMethod) {
       return {
         amount: defaultMethod.amount,
-        label: defaultMethod.amount === 0 ? "Free" : formatCartPrice(defaultMethod.amount),
+        label:
+          defaultMethod.amount === 0
+            ? complimentaryShippingLabel
+            : formatCartPrice(defaultMethod.amount),
         isConfirmed: shippingMethods.length > 0,
       };
     }
@@ -145,7 +153,7 @@ export const getCheckoutShippingDisplay = (
 
   return {
     amount: null,
-    label: "Free",
+    label: complimentaryShippingLabel,
     isConfirmed: false,
   };
 };
