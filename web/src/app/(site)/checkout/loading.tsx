@@ -1,11 +1,10 @@
 import CheckoutPageSkeleton from "@/features/checkout/components/skeletons/CheckoutPageSkeleton";
-import PageLoadingMarker from "@/shared/ui/layout/PageLoadingMarker";
+import SiteRouteLoadingFallback from "@/shared/ui/layout/SiteRouteLoadingFallback";
 
 export default function Loading() {
   return (
-    <>
-      <PageLoadingMarker />
+    <SiteRouteLoadingFallback>
       <CheckoutPageSkeleton />
-    </>
+    </SiteRouteLoadingFallback>
   );
 }
