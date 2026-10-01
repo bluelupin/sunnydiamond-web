@@ -34,6 +34,20 @@ const CheckoutFieldLabel = ({ id, label, optional }: CheckoutFieldLabelProps) =>
   </label>
 );
 
+export const CheckoutVerifiedBadge = () => (
+  <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path
+        d="M1 10.75L6.25 16L18.25 4"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+    Verified
+  </span>
+);
+
 export type CheckoutFieldProps = {
   id: string;
   label: string;
@@ -46,6 +60,8 @@ export type CheckoutFieldProps = {
   error?: string;
   invalid?: boolean;
   disabled?: boolean;
+  verified?: boolean;
+  readOnly?: boolean;
 };
 
 export const CheckoutField = ({
@@ -60,25 +76,56 @@ export const CheckoutField = ({
   error,
   invalid,
   disabled = false,
+  verified = false,
+  readOnly = false,
 }: CheckoutFieldProps) => (
   <div className="flex flex-col gap-2">
     <CheckoutFieldLabel id={id} label={label} optional={optional} />
-    <input
-      id={id}
-      type={type}
-      value={value}
-      disabled={disabled}
-      onChange={(event) => onChange(event.target.value)}
-      onBlur={onBlur}
-      placeholder={placeholder}
-      aria-invalid={invalid || undefined}
-      aria-describedby={error ? `${id}-error` : undefined}
-      className={cn(
-        "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack",
-        disabled && "cursor-not-allowed opacity-60",
-        invalid && invalidFieldClassName,
-      )}
-    />
+    {verified ? (
+      <div
+        className={cn(
+          "flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3",
+          disabled && "cursor-not-allowed opacity-60",
+          invalid && invalidFieldContainerClassName,
+        )}
+      >
+        <input
+          id={id}
+          type={type}
+          value={value}
+          disabled={disabled}
+          readOnly={readOnly}
+          onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          aria-invalid={invalid || undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className={cn(
+            "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+            disabled && "cursor-not-allowed",
+          )}
+        />
+        <CheckoutVerifiedBadge />
+      </div>
+    ) : (
+      <input
+        id={id}
+        type={type}
+        value={value}
+        disabled={disabled}
+        readOnly={readOnly}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        aria-invalid={invalid || undefined}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className={cn(
+          "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack",
+          disabled && "cursor-not-allowed opacity-60",
+          invalid && invalidFieldClassName,
+        )}
+      />
+    )}
     <FormFieldError id={`${id}-error`} message={error} />
   </div>
 );
@@ -227,12 +274,7 @@ export const CheckoutPhoneField = ({
         </div>
         {shouldShowVerify ? (
           verified ? (
-            <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 10.75L6.25 16L18.25 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Verified
-            </span>
+            <CheckoutVerifiedBadge />
           ) : (
             <DetailTextLink onClick={onVerify} disabled={disabled}>VERIFY</DetailTextLink>
           )
