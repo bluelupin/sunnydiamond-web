@@ -19,6 +19,19 @@ export type OccasionLedCardProps = {
   sectionTitle?: string;
 };
 
+const desktopCtaRevealClassName =
+  "inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100";
+
+function OccasionDesktopCtaReveal({ ctaLabel }: { ctaLabel: string }) {
+  return (
+    <div aria-hidden className={desktopCtaRevealClassName}>
+      <div className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-white sm:pb-1">
+        {ctaLabel}
+      </div>
+    </div>
+  );
+}
+
 export default function OccasionLedCard({
   title,
   description,
@@ -99,22 +112,27 @@ export default function OccasionLedCard({
         </div>
       </div>
 
-      <div className={cn("absolute bottom-0 z-10 hidden max-w-[418px] w-full flex-col-reverse items-start text-white md:flex",
-        pathname === "/gifting" ? "md:left-8 left-4 md:max-w-[calc(100%-64px)]" : "md:left-0 left-0 lg:px-10 md:px-8 px-4",
-      )}>
-        {ctaLabel ? (
-          <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
-            <div className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-white sm:pb-1">
-              {ctaLabel}
-            </div>
-          </div>
-        ) : null}
-        <div className={cn("mb-16 flex w-full max-w-[418px] flex-col items-start group-hover:mb-6",
-          pathname === "/gifting" ? "gap-2" : "lg:gap-3 gap-2",
-        )}>
-          <h3 className={cn("whitespace-nowrap font-larken font-light leading-none ",
-            pathname === "/gifting" ? "text-2xl" : "lg:text-32 md:text-2xl text-32",
-          )}>
+      <div
+        className={cn(
+          "absolute bottom-0 z-10 hidden max-w-[418px] w-full flex-col-reverse items-start text-white md:flex pb-6",
+          pathname === "/gifting"
+            ? "left-4 md:left-8 md:max-w-[calc(100%-64px)]"
+            : "left-0 md:left-0 px-4 md:px-8 lg:px-10",
+        )}
+      >
+        {ctaLabel ? <OccasionDesktopCtaReveal ctaLabel={ctaLabel} /> : null}
+        <div
+          className={cn(
+            "mb-4 flex w-full max-w-[418px] flex-col items-start md:mb-6",
+            pathname === "/gifting" ? "gap-2" : "gap-2 lg:gap-3",
+          )}
+        >
+          <h3
+            className={cn(
+              "whitespace-nowrap font-larken font-light leading-none",
+              pathname === "/gifting" ? "text-2xl" : "text-32 md:text-2xl lg:text-32",
+            )}
+          >
             {title}
           </h3>
           {description ? (
