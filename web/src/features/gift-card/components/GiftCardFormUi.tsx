@@ -44,7 +44,7 @@ export const GiftCardTextField = ({
   label,
   value,
   onChange,
-  placeholder = "Enter",
+  placeholder = "Enter Name",
   type = "text",
   inputMode,
 }: GiftCardTextFieldProps) => (
@@ -69,6 +69,7 @@ type GiftCardPhoneFieldProps = {
   countryCode: string;
   onChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
+  placeholder?: string;
 };
 
 export const GiftCardPhoneField = ({
@@ -78,6 +79,7 @@ export const GiftCardPhoneField = ({
   countryCode,
   onChange,
   onCountryCodeChange,
+  placeholder = "Enter Phone",
 }: GiftCardPhoneFieldProps) => (
   <div className="flex flex-col gap-2">
     <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
@@ -96,7 +98,7 @@ export const GiftCardPhoneField = ({
         inputMode="numeric"
         value={value}
         onChange={(event) => onChange(sanitizePhoneInput(event.target.value, countryCode))}
-        placeholder="Enter"
+        placeholder={placeholder}
         className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]"
       />
     </div>
