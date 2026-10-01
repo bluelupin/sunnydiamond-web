@@ -16,6 +16,7 @@ import {
   giftCardNameForSku,
   giftCardSubtitleForSku,
   isDigitalGiftCardProfileOrder,
+  isGiftCardProfileOrder,
 } from "./orderDeliveryTimeline.utils";
 import { mapSunnyTrackingToTimeline } from "./orderFlowSteps.mapper";
 import {
@@ -136,8 +137,8 @@ export function mapTrackedOrderToProfileDetailUi(
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
   const items = mapDetailItems(order, imageBySku);
-  // Digital gift cards are emailed, so they have no delivery date.
-  const deliveryBy = isDigitalGiftCardProfileOrder({ items })
+  // Digital gift cards have no estimated delivery date, but can show a delivered date.
+  const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
     ? undefined
     : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
@@ -215,6 +216,10 @@ export function mapTrackedOrderToProfileDetailUi(
       showCancelNote: false,
       footnote: undefined,
     };
+  }
+
+  if (category === "delivered" && isGiftCardProfileOrder(base)) {
+    return base;
   }
 
   if (deliveryTimeline.length > 0) {

@@ -27,15 +27,8 @@ export function isGiftCardFlowCtaLabel(label: string | null | undefined): boolea
   return normalized.includes("gift card");
 }
 
-/**
- * Success screen primary button. Digital cards are emailed, so there is nothing to track:
- * View Details opens the order in My Orders (every gift card buyer is signed in). Physical
- * cards keep the Track Order page.
- */
-export function giftCardSuccessHref(cardType: "digital" | "physical", orderNumber: string): string {
+/** Both Gift Card success CTAs open the placed order in My Orders. */
+export function giftCardSuccessHref(orderNumber: string): string {
   const number = orderNumber.trim();
-  if (cardType === "digital") {
-    return number ? buildProfileOrderDetailHref(number) : "/profile?section=orders";
-  }
-  return number ? `/order-tracking?order=${encodeURIComponent(number)}` : "/order-tracking";
+  return number ? buildProfileOrderDetailHref(number) : "/profile?section=orders";
 }

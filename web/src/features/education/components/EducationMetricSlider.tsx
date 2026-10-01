@@ -141,7 +141,7 @@ const SliderLabel = ({
     return (
       <span
         className={cn(
-          "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-sm text-sm font-normal leading-110 transition-colors",
+          "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill lg:text-xl md:text-lg text-sm font-light leading-110 transition-colors",
           colorClass,
         )}
         style={dotPositionStyle(dotCenter, specWidth, labelTop)}
@@ -154,7 +154,7 @@ const SliderLabel = ({
   return (
     <span
       className={cn(
-        "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-sm text-sm font-normal leading-110 transition-colors",
+        "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill lg:text-xl md:text-lg text-sm font-light leading-110 transition-colors",
         colorClass,
       )}
       style={dotPositionStyle(dotCenter, specWidth, labelTop)}
@@ -300,7 +300,7 @@ const EducationMetricSlider = ({
   return (
     <div
       ref={sliderRef}
-      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none max-w-[304px] md:max-w-400", className)}
+      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none min-w-[322px] lg:min-w-[528px] max-w-fit", className)}
       style={{ width: "100%", height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
