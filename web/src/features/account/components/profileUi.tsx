@@ -11,9 +11,46 @@ import {
   accordionCollapsePanelClassName,
 } from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/ui/tooltip";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+
+/** Figma 5849:55203 — dark tooltip below the info icon. */
+export function ProfileFieldInfoTooltip({
+  message,
+  ariaLabel,
+}: {
+  message: string;
+  ariaLabel: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button type="button" className="text-darkblack" aria-label={ariaLabel}>
+          <InformationIcon
+            className="h-[18px] w-[18px] shrink-0 text-darkblack"
+            aria-hidden
+          />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        align="start"
+        sideOffset={12}
+        className="z-50 max-w-none rounded-none border-0 bg-darkblack px-4 py-3 font-gill text-sm font-normal leading-110 text-gray200 shadow-none"
+      >
+        {message}
+        <TooltipArrow className="fill-darkblack" width={21} height={8} />
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function ProfileEmailVerifiedBadge({ label }: { label: string }) {
   return (
