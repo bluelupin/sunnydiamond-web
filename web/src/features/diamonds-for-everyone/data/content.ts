@@ -31,6 +31,9 @@ export const diamondsForEveryonePageContent = {
       uploadButtonLabel: "ATTACH IMAGE",
       removeFileLabel: "REMOVE",
       aadhaarError: "Enter Valid Aadhar Number",
+      aadhaarDigitsOnlyError: "Aadhaar must contain only numbers",
+      aadhaarLengthError: "Enter a 12-digit Aadhaar number",
+      panError: "Enter a valid PAN",
     },
     nominee: {
       /** Figma 4453:33830 desktop, 4453:38279 mobile */

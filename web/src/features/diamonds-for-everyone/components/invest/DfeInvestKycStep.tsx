@@ -8,16 +8,18 @@ import CareersSelectField from "@/features/careers/components/shared/CareersSele
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
+import {
+  getKycIdNumberValidationError,
+  isValidAadhaar,
+  isValidPan,
+  sanitizeKycIdNumberInput,
+} from "../../utils/kycIdValidation";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const fieldLabelClass = "font-gill text-base font-normal leading-110 text-darkblack";
 const fieldInputClass =
   "h-14 w-full bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none";
 const fieldErrorClass = "border border-[#F91616] bg-[#FEDCDC]";
-
-function isValidAadhaar(value: string): boolean {
-  return /^\d{12}$/.test(value.replace(/\s/g, ""));
-}
 
 const DfeInvestKycStep = () => {
   const { kyc, nextLabel } = diamondsForEveryonePageContent.investFlow;
@@ -29,17 +31,19 @@ const DfeInvestKycStep = () => {
 
   const idNumberError = useMemo(() => {
     if (!touched) return undefined;
-    if (!idNumber.trim()) return "ID number is required";
-    if (idType === "Aadhaar" && !isValidAadhaar(idNumber)) {
-      return kyc.aadhaarError;
-    }
-    return undefined;
-  }, [idNumber, idType, kyc.aadhaarError, touched]);
+    return getKycIdNumberValidationError(idType, idNumber, kyc);
+  }, [idNumber, idType, kyc, touched]);
+
+  const idNumberIsValid =
+    idType === "Aadhaar"
+      ? isValidAadhaar(idNumber)
+      : idType === "PAN"
+        ? isValidPan(idNumber)
+        : idNumber.trim().length > 0;
 
   const canProceed =
-    idNumber.trim().length > 0 &&
+    idNumberIsValid &&
     idFile !== null &&
-    (idType !== "Aadhaar" || isValidAadhaar(idNumber)) &&
     !idNumberError;
 
   const handleNext = () => {
@@ -72,8 +76,11 @@ const DfeInvestKycStep = () => {
             <input
               id="dfe-id-number"
               type="text"
+              inputMode={idType === "Aadhaar" ? "numeric" : "text"}
+              autoComplete="off"
+              maxLength={idType === "Aadhaar" ? 12 : 10}
               value={idNumber}
-              onChange={(event) => setIdNumber(event.target.value)}
+              onChange={(event) => setIdNumber(sanitizeKycIdNumberInput(idType, event.target.value))}
               onBlur={() => setTouched(true)}
               className={cn(fieldInputClass, idNumberError && fieldErrorClass)}
             />

@@ -22,6 +22,7 @@
     "test:careers": "node scripts/run-careers-test-cases.mjs",
     "test:careers-dob": "node scripts/check-careers-dob-bounds.mjs",
     "test:dfe-config": "node --experimental-strip-types --no-warnings scripts/check-dfe-investment-config.mjs",
+    "test:dfe-kyc": "node --experimental-strip-types --no-warnings scripts/check-dfe-kyc-validation.mjs",
     "test:nearest-store": "node --experimental-strip-types --no-warnings scripts/run-nearest-store-test-cases.mjs",
     "test:gift-card": "node scripts/run-gift-card-test-cases.mjs",
     "test:gift-card-orders": "node --experimental-strip-types --no-warnings scripts/check-gift-card-order-display.mjs",
