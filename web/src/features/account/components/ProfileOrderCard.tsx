@@ -109,13 +109,15 @@ export function ProfileOrderCard({
   const { download, downloadingNumber } = useOrderInvoiceDownload();
   const isDownloadingInvoice = downloadingNumber === order.number;
   const invoiceDisabled = Boolean(order.invoiceDisabled) || isDownloadingInvoice;
+  const giftCardDeliveredBadge =
+    order.category === "delivered" && isGiftCardProfileOrder(order);
 
   useEffect(() => {
     setLocalResolvedStatus(null);
   }, [order.id, order.status]);
 
   const timelineSteps = useMemo(() => {
-    if (isActiveDigitalGiftCardOrder(order)) {
+    if (giftCardDeliveredBadge || isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
 
@@ -125,6 +127,7 @@ export function ProfileOrderCard({
       order.timelineFromServer ? order.timeline : null,
     );
   }, [
+    giftCardDeliveredBadge,
     order,
     resolvedStatus,
     localResolvedStatus,
@@ -133,8 +136,6 @@ export function ProfileOrderCard({
   const mobileDeliveryMeta = getMobileDeliveryMeta(order);
   const mobileStatusLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
-  const giftCardDeliveredBadge =
-    order.category === "delivered" && isGiftCardProfileOrder(order);
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
 
   const handleCopyOrderId = async () => {
@@ -427,14 +428,14 @@ export function ProfileOrderCard({
               </DetailDarkButton>
             </div>
           ) : (
-            <div className="flex gap-6">
+            <div className={cn("flex gap-6", giftCardDeliveredBadge && "justify-end")}>
               {order.showCancel ? (
                 <DetailOutlineButton type="button" className="flex-1" onClick={handleCancelOrder}>
                   {content.cancelOrderLabel}
                 </DetailOutlineButton>
               ) : null}
 
-              {order.showTrack ? (
+              {order.showTrack && !giftCardDeliveredBadge ? (
                 <DetailDarkButton type="button" className="flex-1" onClick={handleTrackOrder}>
                   {content.trackOrderLabel}
                 </DetailDarkButton>
@@ -447,7 +448,13 @@ export function ProfileOrderCard({
               ) : null}
 
               {order.showContactUs ? (
-                <DetailDarkButton type="button" className="flex-1" onClick={handleContactSupport}>
+                <DetailDarkButton
+                  type="button"
+                  className={
+                    giftCardDeliveredBadge ? DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS : "flex-1"
+                  }
+                  onClick={handleContactSupport}
+                >
                   {content.contactUsLabel}
                 </DetailDarkButton>
               ) : null}

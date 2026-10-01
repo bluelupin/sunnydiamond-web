@@ -27,6 +27,7 @@ import {
   DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
   isDigitalGiftCardContactUsOnlyOrder,
   isActiveDigitalGiftCardOrder,
+  isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
 import { formatRefundNote } from "../utils/profileDisplayMappers";
@@ -181,8 +182,10 @@ export function ProfileOrderDetailView({
   const hasDiscount = priceBreakdown.orderDiscount > 0;
   const hasShipping = typeof priceBreakdown.shipping === "number";
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
+  const deliveredGiftCard =
+    order.category === "delivered" && isGiftCardProfileOrder(order);
   const timelineSteps = useMemo(() => {
-    if (isActiveDigitalGiftCardOrder(order)) {
+    if (deliveredGiftCard || isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
 
@@ -191,7 +194,7 @@ export function ProfileOrderDetailView({
       order.timeline,
       order.timelineFromServer ? order.timeline : null,
     );
-  }, [order]);
+  }, [deliveredGiftCard, order]);
 
   return (
     <div className="flex flex-col gap-6">

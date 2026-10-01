@@ -35,7 +35,7 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   const { success } = giftCardFlowContent;
 
   const isDigital = cardType === "digital";
-  const primaryHref = giftCardSuccessHref(cardType, orderNumber ?? "");
+  const primaryHref = giftCardSuccessHref(orderNumber ?? "");
 
   const message =
     cardType === "physical"

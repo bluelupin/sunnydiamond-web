@@ -40,6 +40,7 @@ import {
   giftCardNameForSku,
   giftCardSubtitleForSku,
   isDigitalGiftCardProfileOrder,
+  isGiftCardProfileOrder,
   normalizeOrderStatus,
 } from "./orderDeliveryTimeline.utils";
 import { resolveOrderItemImageUrl } from "./orderItemImage.utils";
@@ -469,8 +470,8 @@ export function mapCustomerOrderToProfileUi(
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
   const items = mapOrderItems(order, imageBySku);
-  // Digital gift cards are emailed, so they have no delivery date.
-  const deliveryBy = isDigitalGiftCardProfileOrder({ items })
+  // Digital gift cards have no estimated delivery date, but can show a delivered date.
+  const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
     ? undefined
     : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
@@ -525,6 +526,19 @@ export function mapCustomerOrderToProfileUi(
       ),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
+    };
+  }
+
+  if (category === "delivered" && isGiftCardProfileOrder(base)) {
+    return {
+      ...base,
+      showTrack: false,
+      showCancel: false,
+      showReturn: false,
+      showDownloadInvoice: false,
+      showContactUs: true,
+      showCancelNote: false,
+      footnote: undefined,
     };
   }
 
