@@ -4,11 +4,10 @@ import {
 } from "@/features/stores/data/storeLocatorContent";
 
 const INDIAN_PINCODE_PATTERN = /\b(\d{6})\b/;
-const INDIAN_PINCODE_INPUT_MAX_LENGTH = 6;
 
-/** Store locator search field — digits only (Indian pincode). */
+/** Preserve location text and pincode characters while removing pasted control characters. */
 export function sanitizeStoreLocatorSearchInput(value: string): string {
-  return value.replace(/\D/g, "").slice(0, INDIAN_PINCODE_INPUT_MAX_LENGTH);
+  return value.replace(/[\u0000-\u001F\u007F]/g, "");
 }
 
 const INDIAN_STATES = [
