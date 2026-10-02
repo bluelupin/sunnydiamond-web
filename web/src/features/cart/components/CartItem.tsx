@@ -48,7 +48,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const { buyNow, getLineItemMetadata, removeItem, showCartStatusToast } = useCart();
   const { isWishlisted, addToWishlist } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
-  const { navigateToCheckout, isNavigatingToCheckout } = useCartCheckout();
+  const { proceedToCheckout, isNavigatingToCheckout } = useCartCheckout();
   const { product, quantity, options } = item;
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
@@ -153,7 +153,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       setIsBuyingNow(true);
       try {
         await buyNow(item.id);
-        navigateToCheckout();
+        proceedToCheckout();
       } finally {
         setIsBuyingNow(false);
       }

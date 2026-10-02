@@ -15,6 +15,10 @@ export function isCartLineMarkedGift(item: CartLineItem): boolean {
   return Boolean(item.options.isGift || item.gifting);
 }
 
+export function hasGiftMarkedCartItems(items: readonly CartLineItem[]): boolean {
+  return items.some(isCartLineMarkedGift);
+}
+
 /** True when gifting was saved from the panel with at least one gift note. */
 export function hasSavedGiftingNotes(items: readonly CartLineItem[]): boolean {
   return items.some(
@@ -27,9 +31,9 @@ export function hasSavedGiftingNotes(items: readonly CartLineItem[]): boolean {
 export function getGiftingOptionsCtaLabel(
   items: readonly CartLineItem[],
   hasConsumedGiftingEdit: boolean,
-): "Personalise Your Gift" | "Edit Your Gift" {
+): "Personalise Your Gift" | "Edit Gifting Options" {
   if (hasSavedGiftingNotes(items) && !hasConsumedGiftingEdit) {
-    return "Edit Your Gift";
+    return "Edit Gifting Options";
   }
 
   return "Personalise Your Gift";
