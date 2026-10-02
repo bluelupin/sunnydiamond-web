@@ -186,19 +186,18 @@ const LearnAnatomyDetailContent = ({
   registerSectionRef: (sectionId: string, element: HTMLElement | null) => void;
 }) => (
   <div className="w-full max-w-1920 2xl:px[60px] lg:px-10 md:px-8 px-4">
-    <div className="grid w-full items-start gap-6 md:grid-cols-5 lg:gap-12">
+    <div className="grid w-full gap-12 md:grid-cols-5 lg:gap-12 items-center">
       <div className="md:col-span-2">
-        <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[300px] md:w-[300px]">
+        <div className="relative mx-auto h-[156px] w-[200px] shrink-0 mix-blend-darken md:h-[272px] md:w-[350px]">
           <ResponsiveImage
             desktopSrc={detail.imageDesktopUrl}
             mobileSrc={detail.imageMobileUrl}
             alt={detail.imageAlt}
             fill
-            className="object-cover"
+            className="object-cover h-auto w-full md:object-contain"
           />
         </div>
       </div>
-
       <div className="md:col-span-3 flex w-full max-w-full flex-col gap-3">
         <div className="space-y-3 lg:space-y-4">
           {detail.sections.map((section) => {
@@ -418,7 +417,7 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
             <div
               className={cn(
                 "flex w-full flex-col items-center max-md:gap-6 md:gap-10",
-                usePinnedScroll && "md:sticky md:top-24 md:z-10 md:bg-white",
+                usePinnedScroll && "md:sticky md:top-16 md:z-10 md:bg-white",
               )}
             >
               {headerAndTabs}
