@@ -75,6 +75,37 @@ export const isLoginIdentifierReadyForOtp = (
 export const isOtpComplete = (otp: string[]): boolean =>
   otp.length === LOGIN_OTP_LENGTH && otp.every((digit) => /^\d$/.test(digit));
 
+/** Maps a single keypress, paste, or SMS autofill string into OTP digit boxes. */
+export function applyOtpInput(
+  current: string[],
+  startIndex: number,
+  rawValue: string,
+  length: number = LOGIN_OTP_LENGTH,
+): { next: string[]; focusIndex: number } {
+  const digits = rawValue.replace(/\D/g, "");
+  const next = [...current];
+
+  if (digits.length === 0) {
+    next[startIndex] = "";
+    return { next, focusIndex: startIndex };
+  }
+
+  if (digits.length === 1) {
+    next[startIndex] = digits;
+    return {
+      next,
+      focusIndex: Math.min(startIndex + 1, length - 1),
+    };
+  }
+
+  for (let offset = 0; offset < digits.length && startIndex + offset < length; offset += 1) {
+    next[startIndex + offset] = digits[offset]!;
+  }
+
+  const lastFilled = Math.min(startIndex + digits.length - 1, length - 1);
+  return { next, focusIndex: lastFilled };
+}
+
 export type CreateAccountFormValues = {
   fullName: string;
   email: string;

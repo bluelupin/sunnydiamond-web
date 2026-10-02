@@ -155,9 +155,14 @@ const LoginOtpContent = ({
                   }}
                   type="text"
                   inputMode="numeric"
-                  maxLength={1}
+                  autoComplete={index === 0 ? "one-time-code" : "off"}
+                  maxLength={index === 0 ? OTP_LENGTH : 1}
                   value={digit}
                   onChange={(event) => onDigitChange(index, event.target.value)}
+                  onPaste={(event) => {
+                    event.preventDefault();
+                    onDigitChange(index, event.clipboardData.getData("text"));
+                  }}
                   onKeyDown={(event) => onKeyDown(index, event)}
                   className="absolute inset-0 bg-transparent text-center font-gill text-base leading-110 text-darkblack outline-none"
                   aria-label={`OTP digit ${index + 1}`}

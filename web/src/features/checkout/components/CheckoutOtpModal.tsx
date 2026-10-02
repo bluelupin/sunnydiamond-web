@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
+import { applyOtpInput } from "@/features/auth/utils/authValidation";
 import { validatePhone } from "@/shared/utils/formValidation";
 
 const CHECKOUT_OTP_MOBILE_QUERY = "(max-width: 1023px)";
@@ -109,9 +110,14 @@ const CheckoutOtpFields = ({
               }}
               type="text"
               inputMode="numeric"
-              maxLength={1}
+              autoComplete={index === 0 ? "one-time-code" : "off"}
+              maxLength={index === 0 ? OTP_LENGTH : 1}
               value={digit}
               onChange={(event) => onDigitChange(index, event.target.value)}
+              onPaste={(event) => {
+                event.preventDefault();
+                onDigitChange(index, event.clipboardData.getData("text"));
+              }}
               onKeyDown={(event) => onKeyDown(index, event)}
               className={
                 variant === "mobile"
@@ -273,16 +279,13 @@ const CheckoutOtpModal = ({
   }, [open, sendOtp]);
 
   const updateDigit = (index: number, value: string) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
     setOtp((prev) => {
-      const next = [...prev];
-      next[index] = digit;
+      const { next, focusIndex } = applyOtpInput(prev, index, value, OTP_LENGTH);
+      queueMicrotask(() => {
+        inputRefs.current[focusIndex]?.focus();
+      });
       return next;
     });
-
-    if (digit && index < OTP_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
   };
 
   const handleKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {

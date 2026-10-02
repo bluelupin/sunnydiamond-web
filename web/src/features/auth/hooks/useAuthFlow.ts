@@ -21,6 +21,7 @@ import {
 import { useAuthFeatures } from "../context/AuthFeaturesContext";
 import {
   isEmailIdentifier,
+  applyOtpInput,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
   normalizeLoginPhoneDigits,
@@ -432,17 +433,14 @@ export function useAuthFlow({
   }, []);
 
   const updateDigit = useCallback((index: number, value: string) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
     setOtpError(undefined);
     setOtp((prev) => {
-      const next = [...prev];
-      next[index] = digit;
+      const { next, focusIndex } = applyOtpInput(prev, index, value, LOGIN_OTP_LENGTH);
+      queueMicrotask(() => {
+        inputRefs.current[focusIndex]?.focus();
+      });
       return next;
     });
-
-    if (digit && index < LOGIN_OTP_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
   }, []);
 
   const handleKeyDown = useCallback(
