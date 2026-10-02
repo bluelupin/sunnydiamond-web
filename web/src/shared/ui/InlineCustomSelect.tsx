@@ -1,10 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName } from "@/shared/utils/formValidation";
 
 const LIST_ANIMATION_MS = 200;
+const LIST_GAP_PX = 4;
+const VIEWPORT_PADDING_PX = 8;
+const LIST_MAX_HEIGHT_PX = 256;
+
+type ListPosition = {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight: number;
+};
 
 type InlineCustomSelectProps = {
   id: string;
@@ -80,18 +91,49 @@ const InlineCustomSelect = ({
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
   const [isListVisible, setIsListVisible] = useState(false);
+  const [listPosition, setListPosition] = useState<ListPosition | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const labelId = `${id}-label`;
   const listboxId = `${id}-listbox`;
   const valueId = `${id}-value`;
 
+  const updateListPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) {
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING_PX;
+    const spaceAbove = rect.top - VIEWPORT_PADDING_PX;
+    const openUpward = spaceBelow < LIST_MAX_HEIGHT_PX && spaceAbove > spaceBelow;
+    const availableSpace = openUpward ? spaceAbove : spaceBelow;
+    const maxHeight = Math.min(
+      LIST_MAX_HEIGHT_PX,
+      Math.max(availableSpace - LIST_GAP_PX, 112),
+    );
+    const top = openUpward
+      ? rect.top - LIST_GAP_PX - maxHeight
+      : rect.bottom + LIST_GAP_PX;
+
+    setListPosition({
+      top,
+      left: rect.left,
+      width: rect.width,
+      maxHeight,
+    });
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       setShouldRenderList(true);
+      updateListPosition();
 
       const frame = window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
+          updateListPosition();
           setIsListVisible(true);
         });
       });
@@ -105,32 +147,33 @@ const InlineCustomSelect = ({
 
     const timeoutId = window.setTimeout(() => {
       setShouldRenderList(false);
+      setListPosition(null);
     }, LIST_ANIMATION_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isOpen]);
+  }, [isOpen, updateListPosition]);
 
   useEffect(() => {
-    if (!isOpen || !isListVisible) {
+    if (!isOpen) {
       return;
     }
 
-    let frame2 = 0;
-    const frame1 = window.requestAnimationFrame(() => {
-      frame2 = window.requestAnimationFrame(() => {
-        listRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      });
-    });
+    updateListPosition();
+
+    const handleLayoutChange = () => {
+      updateListPosition();
+    };
+
+    window.addEventListener("resize", handleLayoutChange);
+    window.addEventListener("scroll", handleLayoutChange, true);
 
     return () => {
-      window.cancelAnimationFrame(frame1);
-      if (frame2) {
-        window.cancelAnimationFrame(frame2);
-      }
+      window.removeEventListener("resize", handleLayoutChange);
+      window.removeEventListener("scroll", handleLayoutChange, true);
     };
-  }, [isOpen, isListVisible]);
+  }, [isOpen, updateListPosition]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -139,7 +182,7 @@ const InlineCustomSelect = ({
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (rootRef.current?.contains(target)) {
+      if (rootRef.current?.contains(target) || listRef.current?.contains(target)) {
         return;
       }
 
@@ -167,6 +210,79 @@ const InlineCustomSelect = ({
     onBlur?.();
   };
 
+  const listbox =
+    shouldRenderList && listPosition ? (
+      <div
+        ref={listRef}
+        id={listboxId}
+        role="listbox"
+        aria-labelledby={labelId}
+        aria-hidden={!isOpen}
+        style={{
+          position: "fixed",
+          top: listPosition.top,
+          left: listPosition.left,
+          width: listPosition.width,
+          maxHeight: listPosition.maxHeight,
+        }}
+        onMouseDown={(event) => {
+          // Keep focus on the trigger until the option click completes.
+          event.preventDefault();
+        }}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+        onWheel={(event) => {
+          event.stopPropagation();
+        }}
+        onTouchMove={(event) => {
+          event.stopPropagation();
+        }}
+        className={cn(
+          "verticleMobileScrollbar z-[100] flex flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+          "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
+          "motion-safe:origin-top",
+          isListVisible
+            ? "motion-safe:translate-y-0 motion-safe:opacity-100"
+            : "motion-safe:-translate-y-1 motion-safe:opacity-0",
+          !isOpen && "pointer-events-none",
+          listClassName,
+        )}
+      >
+        {options.map((option) => {
+          const selected = value === option;
+
+          return (
+            <button
+              key={option}
+              type="button"
+              role="option"
+              aria-selected={selected}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                selectOption(option);
+              }}
+              className={cn(
+                "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110",
+                "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
+                selected
+                  ? "bg-[#DECAA0] font-normal text-darkblack"
+                  : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
+                optionClassName,
+              )}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+    ) : null;
+
   return (
     <div ref={rootRef} className="relative flex w-full flex-col gap-2">
       {!hideLabel ? (
@@ -181,6 +297,7 @@ const InlineCustomSelect = ({
         </span>
       ) : null}
       <button
+        ref={triggerRef}
         type="button"
         id={id}
         aria-haspopup="listbox"
@@ -209,64 +326,7 @@ const InlineCustomSelect = ({
         <span id={valueId}>{triggerLabel}</span>
         <SelectChevron open={isOpen} />
       </button>
-      {shouldRenderList ? (
-        <div
-          ref={listRef}
-          id={listboxId}
-          role="listbox"
-          aria-labelledby={labelId}
-          aria-hidden={!isOpen}
-          onMouseDown={(event) => {
-            // Keep focus on the trigger until the option click completes.
-            event.preventDefault();
-          }}
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-          className={cn(
-            "verticleMobileScrollbar absolute left-0 right-0 top-full z-[90] mt-1 flex max-h-64 flex-col overflow-y-auto scroll-mb-4 bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
-            "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
-            "motion-safe:origin-top",
-            isListVisible
-              ? "motion-safe:translate-y-0 motion-safe:opacity-100"
-              : "motion-safe:-translate-y-1 motion-safe:opacity-0",
-            !isOpen && "pointer-events-none",
-            listClassName,
-          )}
-        >
-          {options.map((option) => {
-            const selected = value === option;
-
-            return (
-              <button
-                key={option}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  selectOption(option);
-                }}
-                className={cn(
-                  "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110",
-                  "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
-                  selected
-                    ? "bg-[#DECAA0] font-normal text-darkblack"
-                    : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
-                  optionClassName,
-                )}
-              >
-                {option}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+      {listbox ? createPortal(listbox, document.body) : null}
     </div>
   );
 };

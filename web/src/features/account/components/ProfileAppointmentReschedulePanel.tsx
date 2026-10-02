@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { DetailDarkButton } from "@/features/products/components/detail/shared";
@@ -24,6 +23,7 @@ import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky
 import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import OverlaySelectField from "@/shared/ui/OverlaySelectField";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
@@ -31,7 +31,6 @@ import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import {
   invalidFieldClassName,
-  invalidFieldContainerClassName,
   sanitizePincodeInput,
   validateAddressLine1,
   validateCity,
@@ -40,7 +39,7 @@ import {
   validateOptionalAddressLine2,
   validateRequiredDate,
 } from "@/shared/utils/formValidation";
-import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
+import { getTryAtHomeStateSelectOptions } from "@/features/products/data/tryAtHomeContent";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 
@@ -152,15 +151,14 @@ export function ProfileAppointmentReschedulePanel({
   const { errors, markTouched, showError, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
-  const cmsStateOptions = cmsForm?.stateOptions;
-  const savedState = address?.state?.trim() ?? "";
-  const stateOptions = useMemo(() => {
-    const options: readonly string[] = cmsStateOptions?.length
-      ? cmsStateOptions
-      : TRY_AT_HOME_INDIAN_STATES;
-    // Keep a saved state that is missing from the list selectable, so it still displays.
-    return savedState && !options.includes(savedState) ? [savedState, ...options] : options;
-  }, [cmsStateOptions, savedState]);
+  const stateOptions = useMemo(
+    () =>
+      getTryAtHomeStateSelectOptions(
+        cmsForm?.stateOptions,
+        addressState || address?.state,
+      ),
+    [address?.state, addressState, cmsForm?.stateOptions],
+  );
 
   const isAddressChanged =
     isTryAtHome &&
@@ -518,47 +516,20 @@ export function ProfileAppointmentReschedulePanel({
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="reschedule-appointment-state"
-                      className={appointmentLabelClassName}
-                    >
-                      {cmsForm?.stateLabel ?? "State"}
-                    </label>
-                    <div
-                      className={cn(
-                        "flex h-14 w-full items-center border border-transparent bg-[#F2F2F2] px-3",
-                        showAddressError("state") && invalidFieldContainerClassName,
-                      )}
-                    >
-                      <select
-                        id="reschedule-appointment-state"
-                        value={addressState}
-                        onChange={(event) => setAddressState(event.target.value)}
-                        onBlur={() => markAddressTouched("state")}
-                        aria-invalid={showAddressError("state") || undefined}
-                        className={cn(
-                          "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
-                          addressState ? "text-darkblack" : "text-neutral400",
-                        )}
-                      >
-                        <option value="">{cmsForm?.statePlaceholder ?? "-select-"}</option>
-                        {stateOptions.map((entry) => (
-                          <option key={entry} value={entry}>
-                            {entry}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown
-                        className="pointer-events-none size-6 shrink-0 text-darkblack"
-                        strokeWidth={1}
-                        aria-hidden
-                      />
-                    </div>
-                    <FormFieldError
-                      message={showAddressError("state") ? addressErrors.state : undefined}
-                    />
-                  </div>
+                  <OverlaySelectField
+                    id="reschedule-appointment-state"
+                    label={cmsForm?.stateLabel ?? "State"}
+                    value={addressState}
+                    options={stateOptions}
+                    placeholder={cmsForm?.statePlaceholder ?? "-select-"}
+                    onChange={setAddressState}
+                    onBlur={() => markAddressTouched("state")}
+                    labelClassName={appointmentLabelClassName}
+                    invalid={showAddressError("state")}
+                    error={
+                      showAddressError("state") ? addressErrors.state : undefined
+                    }
+                  />
                 </>
               ) : null}
 

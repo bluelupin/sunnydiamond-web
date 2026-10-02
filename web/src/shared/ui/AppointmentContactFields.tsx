@@ -66,6 +66,7 @@ type AppointmentContactFieldsProps = {
   emailPlaceholder?: string;
   emailRequired?: boolean;
   dateLabel?: string;
+  datePlaceholder?: string;
   dateRequired?: boolean;
   timeSlotsLabel?: string;
   timeSlotRequired?: boolean;
@@ -121,6 +122,7 @@ const AppointmentContactFields = ({
   emailPlaceholder = "Enter",
   emailRequired = false,
   dateLabel = "Date",
+  datePlaceholder,
   dateRequired = false,
   timeSlotsLabel = "Time Slots",
   timeSlotRequired = false,
@@ -276,6 +278,7 @@ const AppointmentContactFields = ({
             value={date}
             minDate={minDate}
             maxDate={maxDate}
+            placeholder={datePlaceholder}
             onChange={onDateChange}
             onBlur={() => markTouched("date")}
             hasError={showError("date")}
@@ -322,7 +325,7 @@ const AppointmentContactFields = ({
                           ? "cursor-not-allowed bg-[#F2F2F2] font-light text-darkblack opacity-40"
                           : isSelected
                             ? selectedSlotStyle === "gold"
-                              ? "bg-[#DECAA0] font-normal text-darkblack"
+                              ? "bg-gold300 font-normal text-darkblack"
                               : "bg-darkblack font-normal text-white"
                             : cn(
                                 "bg-[#F2F2F2] font-light text-darkblack",

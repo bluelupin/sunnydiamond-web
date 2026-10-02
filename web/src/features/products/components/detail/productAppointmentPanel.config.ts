@@ -25,7 +25,7 @@ export const PRODUCT_APPOINTMENT_PANEL_CONFIG: Record<
 > = {
   "schedule-video-call": {
     title: "Schedule a Video call",
-    noteLabel: "Describe more about your visit",
+    noteLabel: "What are you looking for?",
     noteLabelClassName: "font-gill text-sm leading-110 text-darkblack",
     noteTextareaClassName: "font-gill text-sm leading-110",
     notePlaceholder: "Eg: I am looking for an engagement ring",

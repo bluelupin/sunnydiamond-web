@@ -18,6 +18,7 @@ import {
   getAuthLoginIdentifierKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import OverlaySelectField from "@/shared/ui/OverlaySelectField";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
@@ -31,7 +32,7 @@ import {
 } from "@/features/products/utils/appointmentDuplicateBooking";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
-import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
+import { getTryAtHomeStateSelectOptions } from "@/features/products/data/tryAtHomeContent";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import {
   createProductSubmission,
@@ -45,7 +46,6 @@ import { mapCustomerAddressToFormInput } from "@/services/customer/customer-acco
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
   invalidFieldClassName,
-  invalidFieldContainerClassName,
   sanitizePincodeInput,
   validateAddressLine1,
   validateCity,
@@ -91,6 +91,8 @@ type TryAtHomeDetailsStepProps = {
   open: boolean;
   onClose: () => void;
   onProceed: (details: TryAtHomeDetailsData) => void;
+  /** Restored when returning from the address step before submit. */
+  savedDetails?: TryAtHomeDetailsData | null;
 };
 
 const TryAtHomeDetailsStep = ({
@@ -100,16 +102,21 @@ const TryAtHomeDetailsStep = ({
   open,
   onClose,
   onProceed,
+  savedDetails = null,
 }: TryAtHomeDetailsStepProps) => {
   const { contact: profileContact } = useCustomerProfileContact(open);
-  const [name, setName] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [date, setDate] = useState("");
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [note, setNote] = useState("");
-  const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
+  const [name, setName] = useState(() => savedDetails?.name ?? "");
+  const [countryCode, setCountryCode] = useState(() => savedDetails?.countryCode ?? "+91");
+  const [phone, setPhone] = useState(() => savedDetails?.phone ?? "");
+  const [email, setEmail] = useState(() => savedDetails?.email ?? "");
+  const [date, setDate] = useState(() => savedDetails?.date ?? "");
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(
+    () => savedDetails?.selectedSlot ?? null,
+  );
+  const [note, setNote] = useState(() => savedDetails?.note ?? "");
+  const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(
+    () => savedDetails != null,
+  );
 
   const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
   const hasTimeSlots = Boolean(timeSlots?.length ?? true);
@@ -239,6 +246,7 @@ const TryAtHomeDetailsStep = ({
               emailPlaceholder={form?.emailPlaceholder}
               emailRequired
               dateLabel={form?.dateLabel}
+              datePlaceholder="Select"
               dateRequired
               timeSlotRequired={hasTimeSlots}
               noteLabel={form?.notesLabel ?? "What are you looking for?"}
@@ -248,6 +256,7 @@ const TryAtHomeDetailsStep = ({
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
               bookingWindow={TRY_AT_HOME_BOOKING_WINDOW}
+              selectedSlotStyle="gold"
             />
           </div>
         </div>
@@ -321,8 +330,10 @@ const TryAtHomeAddressStep = ({
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
   const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
-  const stateOptions =
-    form?.stateOptions?.length ? form.stateOptions : [...TRY_AT_HOME_INDIAN_STATES];
+  const stateOptions = useMemo(
+    () => getTryAtHomeStateSelectOptions(form?.stateOptions, state),
+    [form?.stateOptions, state],
+  );
 
   const defaultShippingAddress = useMemo(() => {
     if (addresses.length === 0) {
@@ -550,57 +561,19 @@ const TryAtHomeAddressStep = ({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label htmlFor="try-at-home-state" className={appointmentLabelClassName}>
-                {form?.stateLabel ?? "State"}
-              </label>
-              <div
-                className={cn(
-                  "flex h-14 w-full items-center border border-transparent bg-aboutInactive px-3",
-                  showError("state") && invalidFieldContainerClassName,
-                )}
-              >
-                <select
-                  id="try-at-home-state"
-                  value={state}
-                  onChange={(event) => setState(event.target.value)}
-                  onBlur={() => markTouched("state")}
-                  aria-invalid={showError("state") || undefined}
-                  aria-describedby={showError("state") ? "try-at-home-state-error" : undefined}
-                  className={cn(
-                    "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
-                    state ? "text-darkblack" : "text-neutral400",
-                  )}
-                >
-                  <option value="">{form?.statePlaceholder ?? "-select-"}</option>
-                  {stateOptions.map((entry) => (
-                    <option key={entry} value={entry}>
-                      {entry}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden
-                  className="pointer-events-none shrink-0 text-darkblack"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M4.13134 9.19969C4.17617 9.15167 4.23002 9.11295 4.28982 9.08575C4.34963 9.05855 4.4142 9.04341 4.47986 9.04118C4.54552 9.03895 4.61097 9.04968 4.67248 9.07276C4.73399 9.09584 4.79035 9.13082 4.83833 9.17569L11.9983 15.8557L19.1583 9.17569C19.2553 9.08512 19.3842 9.03677 19.5168 9.04127C19.6494 9.04577 19.7748 9.10275 19.8653 9.19969C19.9559 9.29663 20.0043 9.42557 19.9998 9.55816C19.9953 9.69075 19.9383 9.81612 19.8413 9.90669L12.3413 16.9067C12.2488 16.993 12.1269 17.041 12.0003 17.041C11.8738 17.041 11.7519 16.993 11.6593 16.9067L4.15933 9.90669C4.11124 9.86193 4.07245 9.80812 4.04516 9.74836C4.01787 9.68859 4.00263 9.62403 4.00031 9.55837C3.99799 9.49271 4.00863 9.42724 4.03163 9.36569C4.05462 9.30415 4.08953 9.24774 4.13433 9.19969H4.13134Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </div>
-              <FormFieldError
-                id="try-at-home-state-error"
-                message={showError("state") ? errors.state : undefined}
-              />
-            </div>
+            <OverlaySelectField
+              id="try-at-home-state"
+              label={form?.stateLabel ?? "State"}
+              value={state}
+              options={stateOptions}
+              placeholder={form?.statePlaceholder ?? "-select-"}
+              onChange={setState}
+              onBlur={() => markTouched("state")}
+              labelClassName={appointmentLabelClassName}
+              invalid={showError("state")}
+              errorId={showError("state") ? "try-at-home-state-error" : undefined}
+              error={showError("state") ? errors.state : undefined}
+            />
           </div>
         </div>
       </div>
@@ -796,6 +769,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             form={cmsForm}
             open={open}
             onClose={handleClose}
+            savedDetails={details}
             onProceed={(nextDetails) => {
               setDetails(nextDetails);
               setStep("address");
@@ -805,7 +779,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
           <TryAtHomeAddressStep
             form={cmsForm}
             formTitle={cmsForm?.formName ?? "Try At Home"}
-            submitLabel={cmsForm?.submitButtonText ?? "Schedule Try At Home"}
+            submitLabel="Schedule Try At Home"
             isSubmitting={isSubmitting}
             onBack={() => setStep("details")}
             onClose={handleClose}

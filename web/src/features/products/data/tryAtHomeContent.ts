@@ -36,3 +36,25 @@ export const TRY_AT_HOME_INDIAN_STATES = [
   "Lakshadweep",
   "Puducherry",
 ] as const;
+
+/** Full state/UT list for address forms; CMS entries are merged in but never replace this list. */
+export function getTryAtHomeStateSelectOptions(
+  cmsStateOptions?: readonly string[] | null,
+  currentState?: string,
+): string[] {
+  const options = new Set<string>(TRY_AT_HOME_INDIAN_STATES);
+
+  for (const state of cmsStateOptions ?? []) {
+    const trimmed = state.trim();
+    if (trimmed) {
+      options.add(trimmed);
+    }
+  }
+
+  const selected = currentState?.trim();
+  if (selected) {
+    options.add(selected);
+  }
+
+  return Array.from(options).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+}

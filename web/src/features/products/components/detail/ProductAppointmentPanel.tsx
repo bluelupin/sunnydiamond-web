@@ -178,6 +178,12 @@ const ProductAppointmentForm = ({
 
     if (!isPersonalise && !isScheduleVideoCall) return;
 
+    setFormTitle(config.title);
+    setSubmitLabel(config.submitLabel);
+    setNotesLabel(config.noteLabel);
+    setNotesPlaceholder(config.notePlaceholder);
+    setNotesRequired(config.noteRequired);
+
     const controller = new AbortController();
     const cmsFormTag = isPersonalise ? PERSONALISE_FORM_TAG : SCHEDULE_VIDEO_CALL_FORM_TAG;
 
@@ -187,8 +193,13 @@ const ProductAppointmentForm = ({
         if (!form) return;
 
         setFormTag(form.formTag || cmsFormTag);
-        if (form.formName) setFormTitle(form.formName);
-        if (form.submitButtonText) setSubmitLabel(form.submitButtonText);
+        // Keep storefront titles; CMS formName is admin-facing.
+        if (form.formName && !isScheduleVideoCall && !isPersonalise) {
+          setFormTitle(form.formName);
+        }
+        if (form.submitButtonText && !isPersonalise) {
+          setSubmitLabel(form.submitButtonText);
+        }
         if (form.nameLabel) {
           setNameLabel(
             isScheduleVideoCall ? formatRequiredFieldLabel(form.nameLabel) : form.nameLabel,
@@ -208,9 +219,15 @@ const ProductAppointmentForm = ({
             isScheduleVideoCall ? formatRequiredFieldLabel(form.dateLabel) : form.dateLabel,
           );
         }
-        if (form.notesLabel) setNotesLabel(form.notesLabel);
-        if (form.notesPlaceholder) setNotesPlaceholder(form.notesPlaceholder);
-        setNotesRequired(form.notesRequired);
+        if (form.notesLabel && !isScheduleVideoCall && !isPersonalise) {
+          setNotesLabel(form.notesLabel);
+        }
+        if (form.notesPlaceholder && !isPersonalise) {
+          setNotesPlaceholder(form.notesPlaceholder);
+        }
+        if (!isPersonalise) {
+          setNotesRequired(form.notesRequired);
+        }
         setAllowImageUpload(form.allowImageUpload);
         if (form.timeSlots.length > 0) setTimeSlots(form.timeSlots);
       } catch {
@@ -397,6 +414,7 @@ const ProductAppointmentForm = ({
               emailLabel={emailLabel}
               emailPlaceholder={emailPlaceholder}
               dateLabel={dateLabel}
+              datePlaceholder={isScheduleVideoCall ? "Select" : undefined}
               dateRequired={isScheduleVideoCall && config.showTimeSlots}
               timeSlotRequired={isScheduleVideoCall && config.showTimeSlots}
               noteLabel={notesLabel}
@@ -408,6 +426,7 @@ const ProductAppointmentForm = ({
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
               bookingWindow={isScheduleVideoCall ? VIDEO_CALL_BOOKING_WINDOW : undefined}
+              selectedSlotStyle={isScheduleVideoCall ? "gold" : "dark"}
             />
 
             {allowImageUpload ? (
