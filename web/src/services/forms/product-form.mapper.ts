@@ -33,6 +33,11 @@ const formatFieldLabel = (field?: StrapiProductFormDynamicField): string | undef
   return label.endsWith("*") ? label : `${label}*`;
 };
 
+const mapFieldOptions = (field?: StrapiProductFormDynamicField): string[] =>
+  field?.dropdownOptions
+    ?.map((option) => cleanText(option.optionValue))
+    .filter((option): option is string => Boolean(option)) ?? [];
+
 export function mapProductForm(
   raw?: StrapiProductForm | null,
 ): NormalizedProductForm | null {
@@ -65,7 +70,8 @@ export function mapProductForm(
       label.includes("request") ||
       label.includes("looking") ||
       label.includes("note") ||
-      label.includes("detail"),
+      label.includes("detail") ||
+      label.includes("describe"),
   );
   const addressLine1Field = findField(
     raw.dynamicFields,
@@ -86,6 +92,12 @@ export function mapProductForm(
   const stateField = findField(
     raw.dynamicFields,
     (_field, label) => label === "state",
+  );
+  const purposeField = findField(
+    raw.dynamicFields,
+    (_field, label, fieldType) =>
+      fieldType === "dropdown" &&
+      (label.includes("purpose") || label.includes("reason")),
   );
 
   const timeSlots =
@@ -133,5 +145,9 @@ export function mapProductForm(
     cityPlaceholder: normalizePlaceholder(cityField?.placeholder),
     stateLabel: formatFieldLabel(stateField) ?? cleanText(stateField?.label),
     statePlaceholder: cleanText(stateField?.placeholder),
+    purposeOptions: mapFieldOptions(purposeField),
+    purposeLabel: cleanText(purposeField?.label),
+    purposePlaceholder: normalizePlaceholder(purposeField?.placeholder),
+    purposeRequired: Boolean(purposeField?.isRequired),
   };
 }

@@ -1,17 +1,28 @@
 import type { AppointmentBookingWindow } from "@/shared/utils/appointmentTimeSlots";
 
+/** First selectable appointment day is today + this many calendar days. */
+export const APPOINTMENT_MIN_DAYS_AHEAD = 3;
+
+const sharedAppointmentLeadTime: Pick<
+  AppointmentBookingWindow,
+  "minNoticeMinutes" | "minDaysAhead"
+> = {
+  minNoticeMinutes: 0,
+  minDaysAhead: APPOINTMENT_MIN_DAYS_AHEAD,
+};
+
 export const STORE_VISIT_BOOKING_WINDOW: AppointmentBookingWindow = {
-  minNoticeMinutes: 2 * 60,
+  ...sharedAppointmentLeadTime,
   maxDaysAhead: 60,
 };
 
 export const VIDEO_CALL_BOOKING_WINDOW: AppointmentBookingWindow = {
-  minNoticeMinutes: 2 * 60,
+  ...sharedAppointmentLeadTime,
   maxDaysAhead: 30,
 };
 
 export const TRY_AT_HOME_BOOKING_WINDOW: AppointmentBookingWindow = {
-  minNoticeMinutes: 48 * 60,
+  ...sharedAppointmentLeadTime,
   maxDaysAhead: 30,
 };
 

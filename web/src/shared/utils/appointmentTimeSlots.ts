@@ -47,8 +47,10 @@ function toDateInputValue(date: Date): string {
 }
 
 export type AppointmentBookingWindow = {
-  /** A slot must start at least this long after now. */
+  /** A slot must start at least this long after now (when {@link minDaysAhead} is not set). */
   minNoticeMinutes: number;
+  /** Earliest bookable calendar day = start of today + this many days (local). */
+  minDaysAhead?: number;
   /** Last bookable day, counted from today (inclusive). */
   maxDaysAhead: number;
 };
@@ -58,8 +60,16 @@ export function getAppointmentBookingDateBounds(
   window: AppointmentBookingWindow,
   referenceDate = new Date(),
 ): { minDate: string; maxDate: string } {
-  const earliest = new Date(referenceDate.getTime() + window.minNoticeMinutes * 60_000);
-  const latest = startOfLocalDay(referenceDate);
+  const today = startOfLocalDay(referenceDate);
+  const earliest =
+    window.minDaysAhead != null && window.minDaysAhead > 0
+      ? (() => {
+          const date = new Date(today);
+          date.setDate(date.getDate() + window.minDaysAhead);
+          return date;
+        })()
+      : new Date(referenceDate.getTime() + window.minNoticeMinutes * 60_000);
+  const latest = new Date(today);
   latest.setDate(latest.getDate() + window.maxDaysAhead);
 
   return { minDate: toDateInputValue(earliest), maxDate: toDateInputValue(latest) };

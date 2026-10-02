@@ -35,6 +35,11 @@ async function mergeGuestCart(): Promise<void> {
   setGuestCartId(customerCartId);
 }
 
+/** Cart-only merge for authenticated sessions (safe to call on auth transitions). */
+export async function mergeGuestCartForAuthenticatedSession(): Promise<void> {
+  await mergeGuestCart();
+}
+
 /** Merges local guest wishlist SKUs into Magento, then clears local storage on success. */
 async function syncWishlistAfterLogin(): Promise<void> {
   const localSkus = readGuestWishlistFromStorage();

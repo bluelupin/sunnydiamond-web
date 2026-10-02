@@ -1,1 +1,1 @@
-{"sessionId":"9fb89b","runId":"pre-fix","hypothesisId":"E","location":"useAuthFlow.ts:active-false","message":"auth flow inactive — resetState","data":{"surface":"modal"},"timestamp":1790940627414}
+{"sessionId":"9fb89b","runId":"pre-fix","hypothesisId":"C","location":"CartContext.tsx:initializeCart:authenticated","message":"customer cart loaded on init","data":{"itemCount":1,"cartId":"bOC9U3B2N7L4hf8TNXhsqN77pYkg2BAc","storedGuestCartId":"bOC9U3B2N7L4hf8TNXhsqN77pYkg2BAc"},"timestamp":1790947630013}

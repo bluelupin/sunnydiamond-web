@@ -8,7 +8,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
-import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import OverlaySelectField from "@/shared/ui/OverlaySelectField";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
@@ -349,23 +349,19 @@ const AppointmentContactFields = ({
       ) : null}
 
       {showPurpose && onPurposeChange && purposeOptions.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          <InlineCustomSelect
-            id={`${idPrefix}-purpose`}
-            label={purposeLabel}
-            value={purpose}
-            options={purposeOptions}
-            placeholder={purposePlaceholder}
-            onChange={onPurposeChange}
-            onBlur={() => markTouched("purpose")}
-            invalid={showError("purpose")}
-            errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
-          />
-          <FormFieldError
-            id={`${idPrefix}-purpose-error`}
-            message={showError("purpose") ? errors.purpose : undefined}
-          />
-        </div>
+        <OverlaySelectField
+          id={`${idPrefix}-purpose`}
+          label={purposeLabel}
+          value={purpose}
+          options={purposeOptions}
+          placeholder={purposePlaceholder}
+          onChange={onPurposeChange}
+          onBlur={() => markTouched("purpose")}
+          labelClassName={labelClassName}
+          invalid={showError("purpose")}
+          errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
+          error={showError("purpose") ? errors.purpose : undefined}
+        />
       ) : null}
 
       {showContactDetails ? (

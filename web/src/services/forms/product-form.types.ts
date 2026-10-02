@@ -70,6 +70,10 @@ export type NormalizedProductForm = {
   cityPlaceholder?: string;
   stateLabel?: string;
   statePlaceholder?: string;
+  purposeOptions: string[];
+  purposeLabel?: string;
+  purposePlaceholder?: string;
+  purposeRequired: boolean;
 };
 
 export type ProductSubmissionPayload = {

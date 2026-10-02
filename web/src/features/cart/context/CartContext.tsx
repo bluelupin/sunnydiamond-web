@@ -12,6 +12,7 @@ import {
 } from "react";
 import type { Product } from "@/features/products/data/products";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { mergeGuestCartForAuthenticatedSession } from "@/features/auth/services/postLoginSync";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import {
   buildCartLineOrderKeys,
@@ -305,6 +306,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const cartStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
+  const prevAuthStatusRef = useRef<"loading" | "guest" | "authenticated">("loading");
   const shippingEstimateRequestRef = useRef(0);
 
   useEffect(() => {
@@ -418,16 +420,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [applyCartState, isAuthenticated],
   );
 
+  const loadAuthenticatedCart = useCallback(async () => {
+    setIsHydrating(true);
+
+    try {
+      await mergeGuestCartForAuthenticatedSession();
+      const nextState = await fetchCustomerCart(lineMetadataRef.current);
+      applyCartState(nextState);
+      setCartRefreshError(null);
+    } catch (error) {
+      console.error("Failed to load customer cart:", error);
+      setCartRefreshError(formatCartRefreshError());
+    } finally {
+      setIsHydrating(false);
+    }
+  }, [applyCartState]);
+
   useEffect(() => {
     if (status === "loading") {
       return;
     }
 
-    if (initRef.current) {
+    const previousStatus = prevAuthStatusRef.current;
+    prevAuthStatusRef.current = status;
+
+    const becameAuthenticated =
+      previousStatus === "guest" && status === "authenticated";
+
+    if (!initRef.current) {
+      initRef.current = true;
+    } else if (!becameAuthenticated) {
       return;
     }
-
-    initRef.current = true;
 
     async function initializeCart() {
       setIsHydrating(true);
@@ -438,6 +462,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         lineMetadataRef.current = metadata;
 
         if (isAuthenticated) {
+          await mergeGuestCartForAuthenticatedSession();
           const nextState = await fetchCustomerCart(metadata);
           applyCartState(nextState);
           return;
@@ -492,7 +517,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         await refreshCart(cartId);
       } catch (error) {
         console.error("Failed to initialize cart:", error);
-        clearGuestCartId();
         shippingEstimateRequestRef.current += 1;
         setCartState(null);
         setEstimatedShippingMethods([]);
@@ -502,8 +526,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    if (becameAuthenticated && initRef.current) {
+      void loadAuthenticatedCart();
+      return;
+    }
+
     void initializeCart();
-  }, [applyCartState, isAuthenticated, refreshCart, status]);
+  }, [applyCartState, isAuthenticated, loadAuthenticatedCart, refreshCart, status]);
 
   const addItem = useCallback(async (payload: AddToBagPayload | Product): Promise<AddItemResult> => {
     const normalized = normalizePayload(payload);

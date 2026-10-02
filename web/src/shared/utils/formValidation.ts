@@ -175,6 +175,12 @@ export const validateBookingWindowDate = (
   const { minDate, maxDate } = getAppointmentBookingDateBounds(window);
   const min = parseDateOnly(minDate);
   if (min && selected < min) {
+    if (window.minDaysAhead != null && window.minDaysAhead > 0) {
+      return {
+        valid: false,
+        error: `Book at least ${window.minDaysAhead} days in advance`,
+      };
+    }
     return {
       valid: false,
       error: `Book at least ${Math.round(window.minNoticeMinutes / 60)} hours in advance`,

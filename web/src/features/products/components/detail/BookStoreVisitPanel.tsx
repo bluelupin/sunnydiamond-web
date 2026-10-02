@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -30,7 +29,7 @@ import {
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
 import type { NormalizedStoreLocatorListCopy } from "@/services/store-locator/store-locator-page.types";
-import { BookStoreVisitLocationDetails } from "./BookStoreVisitLocationDetails";
+import { BookStoreVisitStoreHero } from "./BookStoreVisitStoreHero";
 import {
   mapBookStoreVisitStoreToLayoutItem,
   ShowroomsLayout,
@@ -56,6 +55,7 @@ import {
   hasDuplicateAppointmentBooking,
 } from "@/features/products/utils/appointmentDuplicateBooking";
 import {
+  DEFAULT_STORE_VISIT_PURPOSE_OPTIONS,
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
 import {
@@ -78,6 +78,7 @@ const PRODUCT_STORE_VISIT_FORM_TAG = "product-store-visit";
 /** Fallback product identity when booking outside PDP (store locator / nav). */
 const STORE_VISIT_PRODUCT_NAME = "Store Visit";
 const STORE_VISIT_PRODUCT_ID = "store-visit";
+const STORE_VISIT_PANEL_TITLE = "Book Your Store Visit";
 
 type StoreLocatorListStatus = "default" | "search-match" | "no-area";
 
@@ -150,8 +151,10 @@ const BookStoreVisitPanel = ({
   const [step, setStep] = useState<BookVisitStep>(initialStoreId ? "form" : "select-store");
   const [stores, setStores] = useState<BookStoreVisitStore[]>(() => initialStores ?? []);
   const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
-  const [purposeOptions, setPurposeOptions] = useState<readonly string[]>([]);
-  const [formTitle, setFormTitle] = useState("Book Your Store Visit");
+  const [purposeOptions, setPurposeOptions] = useState<readonly string[]>(
+    () => [...DEFAULT_STORE_VISIT_PURPOSE_OPTIONS],
+  );
+  const [formTitle, setFormTitle] = useState(STORE_VISIT_PANEL_TITLE);
   const [nameLabel, setNameLabel] = useState("Your Name*");
   const [namePlaceholder, setNamePlaceholder] = useState<string | undefined>(undefined);
   const [phoneLabel, setPhoneLabel] = useState("Phone No.*");
@@ -160,8 +163,9 @@ const BookStoreVisitPanel = ({
   const [emailPlaceholder, setEmailPlaceholder] = useState("Enter");
   const [dateLabel, setDateLabel] = useState("Date");
   const [purposeLabel, setPurposeLabel] = useState("Purpose of Visit");
-  const [purposePlaceholder, setPurposePlaceholder] = useState("-select-");
-  const [notesLabel, setNotesLabel] = useState("Describe more about your visit");
+  const [purposePlaceholder, setPurposePlaceholder] = useState("Select");
+  const [purposeRequired, setPurposeRequired] = useState(false);
+  const [notesLabel, setNotesLabel] = useState("What are you looking for?");
   const [notesPlaceholder, setNotesPlaceholder] = useState("Enter");
   const [submitButtonText, setSubmitButtonText] = useState("BOOK A VISIT");
   const [formTag, setFormTag] = useState(
@@ -357,6 +361,11 @@ const BookStoreVisitPanel = ({
   useEffect(() => {
     if (!open && variant === "modal") return;
 
+    setFormTitle(STORE_VISIT_PANEL_TITLE);
+    setPurposeLabel("Purpose of Visit");
+    setPurposePlaceholder("Select");
+    setNotesLabel("What are you looking for?");
+
     const controller = new AbortController();
 
     void (async () => {
@@ -381,9 +390,6 @@ const BookStoreVisitPanel = ({
         }
 
         setFormTag(form.formTag || activeFormTag);
-        if (form.formName) {
-          setFormTitle(form.formName);
-        }
         if (form.submitButtonText) {
           setSubmitButtonText(form.submitButtonText.toUpperCase());
         }
@@ -411,12 +417,15 @@ const BookStoreVisitPanel = ({
         if (form.dateLabel) {
           setDateLabel(form.dateLabel);
         }
-        if (form.notesLabel) {
-          setNotesLabel(form.notesLabel);
-        }
         if (form.notesPlaceholder) {
           setNotesPlaceholder(form.notesPlaceholder);
         }
+        setPurposeOptions(
+          form.purposeOptions.length > 0
+            ? form.purposeOptions
+            : [...DEFAULT_STORE_VISIT_PURPOSE_OPTIONS],
+        );
+        setPurposeRequired(form.purposeRequired);
 
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
@@ -644,6 +653,7 @@ const BookStoreVisitPanel = ({
         dateLabel={dateLabel}
         purposeLabel={purposeLabel}
         purposePlaceholder={purposePlaceholder}
+        purposeRequired={purposeRequired}
         notesLabel={notesLabel}
         notesPlaceholder={notesPlaceholder}
         submitButtonText={submitButtonText}
@@ -834,7 +844,6 @@ const StoreSelectionStep = ({
 
   const selectedStore =
     stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
-  const heroImage = selectedStore?.heroImage || selectedStore?.mobileHeroImage;
 
   return (
     <>
@@ -906,32 +915,10 @@ const StoreSelectionStep = ({
                 </div>
 
                 {selectedStore ? (
-                  <div className="relative w-full">
-                    {heroImage ? (
-                      <div className="relative aspect-[3/4] min-h-[420px] w-full">
-                        <Image
-                          src={heroImage}
-                          alt={selectedStore.imageAlt || selectedStore.storeName}
-                          fill
-                          className="object-cover object-center"
-                          sizes="(max-width: 480px) 100vw, 480px"
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
-                      <div className="flex flex-col gap-4">
-                        <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-                          {selectedStore.storeName}
-                        </p>
-                        <BookStoreVisitLocationDetails
-                          store={selectedStore}
-                          directionsLabel={getDirectionsLabel}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <BookStoreVisitStoreHero
+                    store={selectedStore}
+                    directionsLabel={getDirectionsLabel}
+                  />
                 ) : null}
               </>
             )}
@@ -970,6 +957,7 @@ type BookingFormStepProps = {
   dateLabel: string;
   purposeLabel: string;
   purposePlaceholder: string;
+  purposeRequired: boolean;
   notesLabel: string;
   notesPlaceholder: string;
   submitButtonText: string;
@@ -1010,6 +998,7 @@ const BookingFormStep = ({
   dateLabel,
   purposeLabel,
   purposePlaceholder,
+  purposeRequired,
   notesLabel,
   notesPlaceholder,
   submitButtonText,
@@ -1037,11 +1026,10 @@ const BookingFormStep = ({
   );
 
   const hasTimeSlots = timeSlots.length > 0;
-  const heroImage = selectedStore.heroImage || selectedStore.mobileHeroImage;
 
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
-      validatePurpose: purposeOptions.length > 0,
+      validatePurpose: purposeRequired,
       emailRequired: true,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
@@ -1075,32 +1063,10 @@ const BookingFormStep = ({
           </div>
 
           <div className="mt-6 flex flex-col gap-6 pb-72">
-            <div className="relative w-full">
-              {heroImage ? (
-                <div className="relative aspect-[3/4] min-h-[420px] w-full">
-                  <Image
-                    src={heroImage}
-                    alt={selectedStore.imageAlt || selectedStore.storeName}
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 480px) 100vw, 480px"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
-                <div className="flex flex-col gap-4">
-                  <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-                    {selectedStore.storeName}
-                  </p>
-                  <BookStoreVisitLocationDetails
-                    store={selectedStore}
-                    directionsLabel={getDirectionsLabel}
-                  />
-                </div>
-              </div>
-            </div>
+            <BookStoreVisitStoreHero
+              store={selectedStore}
+              directionsLabel={getDirectionsLabel}
+            />
 
             <div className="flex flex-col gap-6">
               <AppointmentContactFields
@@ -1138,6 +1104,7 @@ const BookingFormStep = ({
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}
+                datePlaceholder="Select"
                 dateRequired
                 timeSlotRequired={hasTimeSlots}
                 purposeLabel={purposeLabel}

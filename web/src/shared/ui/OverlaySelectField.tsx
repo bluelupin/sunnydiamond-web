@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName } from "@/shared/utils/formValidation";
 
@@ -41,7 +42,7 @@ const OverlaySelectField = ({
   onBlur,
   options,
   placeholder = "-select-",
-  labelClassName,
+  labelClassName = appointmentLabelClassName,
   triggerClassName,
   invalid = false,
   errorId,

@@ -62,7 +62,6 @@ const ProductDetailBelowFoldLazy = ({
       visitUs={productDisplay.visitUs}
       productName={productName}
       productId={productId}
-      hereForYou={productDisplay.hereForYou}
     />
   </>
 );

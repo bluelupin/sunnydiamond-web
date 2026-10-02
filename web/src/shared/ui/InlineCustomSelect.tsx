@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName } from "@/shared/utils/formValidation";
 
@@ -288,10 +289,7 @@ const InlineCustomSelect = ({
       {!hideLabel ? (
         <span
           id={labelId}
-          className={cn(
-            "font-gill text-sm font-normal leading-110 text-darkblack",
-            labelClassName,
-          )}
+          className={cn(appointmentLabelClassName, labelClassName)}
         >
           {label}
         </span>
