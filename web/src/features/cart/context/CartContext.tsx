@@ -13,6 +13,7 @@ import {
 import type { Product } from "@/features/products/data/products";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { preserveCartItemsOrder } from "@/features/cart/utils/preserveCartItemsOrder";
 import {
   addProductToGuestCart,
   applyCartGiftCard,
@@ -368,7 +369,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const applyCartState = useCallback(
     (nextState: GuestCartState) => {
-      setCartState((previous) => withKnownProductCustomOptions(previous, nextState));
+      setCartState((previous) => {
+        const merged = withKnownProductCustomOptions(previous, nextState);
+        if (!previous?.items.length) {
+          return merged;
+        }
+
+        return {
+          ...merged,
+          items: preserveCartItemsOrder(previous.items, merged.items),
+        };
+      });
       void refreshShippingEstimate(nextState);
     },
     [refreshShippingEstimate],

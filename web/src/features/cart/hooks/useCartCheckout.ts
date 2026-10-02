@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
-import { getGiftingOptionsCtaLabel, hasSavedGiftingNotes } from "../utils/cartGiftNotes";
+import {
+  getGiftingOptionsCtaLabel,
+  hasGiftMarkedCartItems,
+  hasSavedGiftingNotes,
+} from "../utils/cartGiftNotes";
 
 /** Checkout from the bag: nudge gifting, then guest welcome before /checkout when needed. */
 export function useCartCheckout() {
@@ -44,18 +48,26 @@ export function useCartCheckout() {
     router.push("/checkout");
   };
 
+  const shouldShowGiftingIntroOnCheckout = () => {
+    if (items.length === 0 || hasExploredGiftingOptions) {
+      return false;
+    }
+
+    // Logged-in: always nudge gifting before checkout (unchanged from original behaviour).
+    if (status === "authenticated") {
+      return true;
+    }
+
+    // Guest: personalise intro only when at least one line is marked as a gift.
+    return hasGiftMarkedCartItems(items);
+  };
+
   const proceedToCheckout = () => {
-    if (isNavigatingToCheckout) {
+    if (isNavigatingToCheckout || status === "loading") {
       return;
     }
 
-    // Gifting intro on checkout is for logged-in users only.
-    // Guests skip straight to the guest checkout / login modal.
-    if (
-      status === "authenticated" &&
-      items.length > 0 &&
-      !hasExploredGiftingOptions
-    ) {
+    if (shouldShowGiftingIntroOnCheckout()) {
       openGiftingPanel("intro");
       return;
     }

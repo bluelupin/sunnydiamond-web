@@ -31,6 +31,7 @@ import {
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
+import { useCheckoutPincodeAutofill } from "@/features/checkout/hooks/use-checkout-pincode-autofill";
 import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, validateRequiredEmail } from "@/shared/utils/formValidation";
 import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
 import {
@@ -190,6 +191,9 @@ const CheckoutPage = () => {
 
   // Backend strips cod-family payment methods from carts holding engraved items.
   const hasEngravedItems = items.some((item) => Boolean(item.options.engraving?.trim()));
+
+  const pincodeAutofillEnabled = step === "form" && !shouldShowSuccess;
+  useCheckoutPincodeAutofill(form, setForm, pincodeAutofillEnabled);
 
   const formValidation = useCheckoutFormValidation(form, {
     emailOnly: contactEmailOnly,
