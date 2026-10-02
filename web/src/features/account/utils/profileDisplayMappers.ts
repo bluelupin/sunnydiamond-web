@@ -290,7 +290,10 @@ function mapStoreVisitDetails(
 
   const directionsHref = showroom.mapUrl.trim() || undefined;
 
+  const showroomDocumentId = showroom.documentId.trim();
+
   return {
+    ...(showroomDocumentId ? { showroomDocumentId } : {}),
     city: city || storeName,
     storeName,
     lines,

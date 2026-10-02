@@ -332,16 +332,16 @@ export function ProfileAppointmentCard({
   const yourRequirement = appointment.yourRequirement?.trim() ?? notesText;
   const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
   const { windows } = useUiPlatform();
-  const canAddPiece =
-    appointment.canCancel &&
-    (appointment.type === "store_visit" || appointment.type === "video_call");
+  // The Figma store visit card has no product images or ADD A PIECE.
+  const isStoreVisit = appointment.type === "store_visit";
+  const canAddPiece = appointment.canCancel && appointment.type === "video_call";
   return (
     <ProfileCard className="relative flex flex-col gap-6 !py-6 md:!px-6 px-4">
       <div className={cn("absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal whitespace-nowrap text-darkblack")}>
         <span className={cn(!windows && "-translate-y-0.5")}>{appointment.typeLabel}</span>
       </div>
 
-      {appointment.products.length > 0 ? (
+      {!isStoreVisit && appointment.products.length > 0 ? (
         <ProductGallery products={appointment.products} />
       ) : (
         null

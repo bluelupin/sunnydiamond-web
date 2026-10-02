@@ -74,8 +74,9 @@ export type NormalizedProductForm = {
 
 export type ProductSubmissionPayload = {
   formTag: string;
+  /** "null" for product-store-visit (the CMS requires a value), which also leaves out productId. */
   productName: string;
-  productId: string;
+  productId?: string;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;

@@ -73,7 +73,7 @@ const EducationDiscoverStepsList = ({
             <li
               key={step}
               className={cn(
-                isActive || isComplete ? "text-darkblack" : "text-neutral500",
+                isActive || isComplete ? "text-darkblack" : "text-darkblack",
                 isActive && "font-normal",
               )}
             >

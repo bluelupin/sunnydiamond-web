@@ -3,8 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
+import { BookStoreVisitLocationDetails } from "@/features/products/components/detail/BookStoreVisitLocationDetails";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { DetailDarkButton } from "@/features/products/components/detail/shared";
+import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
+import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
+import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { normalizeAppointmentDateInput } from "@/features/products/utils/tryAtHomeBooking";
 import {
   getAppointmentContactLocks,
@@ -86,6 +90,66 @@ function splitStoredPhone(rawPhone: string): { countryCode: string; phone: strin
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
+/** Same showroom card as the PDP Book a Visit panel, for the booked store. */
+function RescheduleStoreVisitCard({
+  storeVisit,
+}: {
+  storeVisit: NonNullable<ProfileAppointmentUi["storeVisit"]>;
+}) {
+  const { data: editorialData } = useHomepageEditorialBlocks();
+  const editorialShowrooms = editorialData?.showroomSection?.showrooms;
+
+  const store = useMemo<BookStoreVisitStore>(() => {
+    const matched = storeVisit.showroomDocumentId
+      ? resolveBookStoreVisitStores([], editorialShowrooms ?? []).find(
+          (entry) => entry.documentId === storeVisit.showroomDocumentId,
+        )
+      : undefined;
+
+    return (
+      matched ?? {
+        id: storeVisit.showroomDocumentId ?? storeVisit.city,
+        tabLabel: storeVisit.city.toUpperCase(),
+        storeName: storeVisit.city,
+        address: storeVisit.lines.join(", "),
+        phone: "",
+        directionsUrl: storeVisit.directionsHref ?? "",
+      }
+    );
+  }, [editorialShowrooms, storeVisit]);
+
+  const heroImage = store.heroImage || store.mobileHeroImage;
+
+  return (
+    <div className="relative w-full">
+      {heroImage ? (
+        <div className="relative aspect-[3/4] min-h-[420px] w-full">
+          <Image
+            src={heroImage}
+            alt={store.imageAlt || store.storeName}
+            fill
+            className="object-cover object-center"
+            sizes="(max-width: 480px) 100vw, 480px"
+          />
+        </div>
+      ) : (
+        <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
+        <div className="flex flex-col gap-4">
+          <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+            {store.storeName}
+          </p>
+          <BookStoreVisitLocationDetails
+            store={store}
+            directionsLabel={profileTabsContent.appointments.getDirectionsLabel}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type ProfileAppointmentReschedulePanelProps = {
   open: boolean;
   appointment: ProfileAppointmentUi | null;
@@ -122,6 +186,7 @@ export function ProfileAppointmentReschedulePanel({
   const timeSlots = cmsForm?.timeSlots?.length ? cmsForm.timeSlots : undefined;
   const hasTimeSlots = Boolean(timeSlots?.length ?? true);
   const isTryAtHome = appointment?.type === "try_at_home";
+  const isStoreVisit = appointment?.type === "store_visit";
   const address = appointment?.appointmentAddress;
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
     getAuthLoginIdentifierKind(),
@@ -335,7 +400,11 @@ export function ProfileAppointmentReschedulePanel({
               <div className="h-[1px] w-full bg-neutral300" aria-hidden />
             </div>
 
-            {product ? (
+            {isStoreVisit && appointment.storeVisit ? (
+              <RescheduleStoreVisitCard storeVisit={appointment.storeVisit} />
+            ) : null}
+
+            {product && !isStoreVisit ? (
               <div className="flex flex-col items-center gap-2 pb-4">
                 <div className="relative h-[133px] w-[206px]">
                   {product.imageSrc ? (
@@ -388,6 +457,7 @@ export function ProfileAppointmentReschedulePanel({
                 detailsReadOnly
                 showDate
                 showTimeSlots
+                selectedSlotStyle={isStoreVisit ? "gold" : "dark"}
                 phoneLocked={phoneLocked}
                 emailLocked={emailLocked}
                 nameLabel={cmsForm?.nameLabel}
@@ -531,25 +601,6 @@ export function ProfileAppointmentReschedulePanel({
                     }
                   />
                 </>
-              ) : null}
-
-              {appointment.type === "store_visit" && appointment.storeVisit ? (
-                <div className="flex flex-col gap-2">
-                  <p className={appointmentLabelClassName}>Store</p>
-                  <div
-                    className={cn(
-                      appointmentFieldClassName,
-                      "flex h-auto min-h-14 flex-col justify-center gap-1 py-3 opacity-70",
-                    )}
-                  >
-                    <span>{appointment.storeVisit.city}</span>
-                    {appointment.storeVisit.lines.map((line) => (
-                      <span key={line} className="font-light text-neutral500">
-                        {line}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               ) : null}
 
               <FormFieldError message={formError ?? undefined} />

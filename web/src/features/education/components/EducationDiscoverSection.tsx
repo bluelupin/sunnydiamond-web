@@ -44,11 +44,11 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
 
   return (
     <section aria-labelledby="education-discover-title" className="bg-gray300">
-      <div className="isolate flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-20 md:gap-8">
+      <div className="isolate flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-20 xl:gap-101px] md:gap-8">
         {hasImage ? (
           <Reveal
             direction="up"
-            className="flex w-full md:order-1 order-2 lg:justify-start justify-end"
+            className="flex xl:w-[621px] xl:h-[585px] w-full md:h-auto h-[307px] overflow-hidden md:order-1 order-2 lg:justify-start justify-end relative"
           >
             <ResponsiveImage
               desktopSrc={ctaBanner.imageDesktopUrl}
@@ -57,14 +57,14 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
               width={621}
               height={585}
               quality={85}
-              className="h-full w-full object-cover object-center mix-blend-darken"
+              className="md:h-full md:w-full w-[326px] h-auto object-cover object-center mix-blend-darken md:relative absolute md:right-0 right-[-54px]"
             />
           </Reveal>
         ) : null}
         <Reveal
           direction="up"
           className={cn(
-            "relative z-10 md:order-2 order-1 w-full max-w-640 lg:justify-start justify-center lg:pt-104 lg:pb-104 pt-16 lg:px-0 px-4 md:mx-0 mx-auto",
+            "max-w-[585px] relative z-10 md:order-2 order-1 w-full lg:justify-start justify-center md:pt-104 md:pb-104 pt-16 lg:px-0 px-4 md:mx-0 mx-auto",
             !hasImage && "md:col-span-2",
           )}
         >

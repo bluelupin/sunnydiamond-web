@@ -198,7 +198,7 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
                 value={deliveryAddress.addressLine1}
                 onChange={(event) => setDeliveryAddress({ addressLine1: event.target.value })}
                 onBlur={() => markTouched("addressLine1")}
-                placeholder={address.placeholder}
+                placeholder={address.addressLine1Placeholder}
                 autoComplete="address-line1"
                 className={cn(giftCardFieldClassName, showError("addressLine1") && invalidFieldClassName)}
               />
@@ -217,7 +217,7 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
                 value={deliveryAddress.addressLine2}
                 onChange={(event) => setDeliveryAddress({ addressLine2: event.target.value })}
                 onBlur={() => markTouched("addressLine2")}
-                placeholder={address.placeholder}
+                placeholder={address.addressLine2Placeholder}
                 autoComplete="address-line2"
                 className={giftCardFieldClassName}
               />
@@ -237,7 +237,7 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
                     setDeliveryAddress({ pincode: sanitizePincodeInput(event.target.value) })
                   }
                   onBlur={() => markTouched("pincode")}
-                  placeholder={address.placeholder}
+                  placeholder={address.pincodePlaceholder}
                   autoComplete="postal-code"
                   maxLength={6}
                   className={cn(giftCardFieldClassName, showError("pincode") && invalidFieldClassName)}
@@ -255,7 +255,7 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
                   value={deliveryAddress.city}
                   onChange={(event) => setDeliveryAddress({ city: event.target.value })}
                   onBlur={() => markTouched("city")}
-                  placeholder={address.placeholder}
+                  placeholder={address.cityPlaceholder}
                   autoComplete="address-level2"
                   className={cn(giftCardFieldClassName, showError("city") && invalidFieldClassName)}
                 />
