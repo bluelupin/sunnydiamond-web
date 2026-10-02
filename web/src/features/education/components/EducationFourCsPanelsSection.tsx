@@ -103,7 +103,7 @@ const PanelMedia = ({
           "relative z-10 flex w-full min-w-0 flex-col",
           panel.id === "carat"
             ? "items-start lg:px-0"
-            : " items-center max-w-[322px] lg:max-w-[528px] lg:px-0 px-4",
+            : " items-center max-w-[322px] md:max-w-[500px] xl:max-w-[528px] lg:px-0 px-4",
         )}
       >
         {panel.id === "carat" ? (
@@ -146,6 +146,16 @@ const PanelMedia = ({
               <div className="flex items-center gap-4 lg:gap-6">
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <Image
+                    key={`${panel.id}-${activeIndex}-dual-1-${cutDualImages[1]}`}
+                    src={cutDualImages[1]}
+                    alt={slider.options[activeIndex]?.dualImageAlts?.[1] ?? ""}
+                    fill
+                    className="object-contain"
+                    sizes="200px"
+                  />
+                </div>
+                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
+                  <Image
                     key={`${panel.id}-${activeIndex}-dual-0-${cutDualImages[0]}`}
                     src={cutDualImages[0]}
                     alt={slider.options[activeIndex]?.dualImageAlts?.[0] ?? ""}
@@ -154,25 +164,15 @@ const PanelMedia = ({
                     sizes="200px"
                   />
                 </div>
-                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
-                  <Image
-                    key={`${panel.id}-${activeIndex}-dual-1-${cutDualImages[1]}`}
-                    src={cutDualImages[1]}
-                    alt={slider.options[activeIndex]?.dualImageAlts?.[1] ?? ""}
-                    fill
-                    className="object-cover"
-                    sizes="200px"
-                  />
-                </div>
               </div>
             ) : activeImage ? (
-              <div className="relative size-[120px] shrink-0 overflow-hidden transition-opacity duration-300 lg:size-[200px]">
+              <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                 <Image
                   key={`${panel.id}-${activeIndex}-${activeImage}`}
                   src={activeImage}
                   alt={slider.options[activeIndex]?.imageAlt ?? ""}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   sizes="200px"
                 />
               </div>
@@ -229,7 +229,7 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
       <Reveal as="p" direction="up" className="font-larken font-light leading-110 text-linkGold opacity-50 lg:text-[110px] text-6xl">
         {panel.code}
       </Reveal>
-      <div className="flex flex-col max-w-[303px] lg:max-w-[441px] lg:gap-4 gap-3">
+      <div className="flex flex-col max-w-[303px] md:max-w-[400px] xl:max-w-[441px] lg:gap-4 gap-3">
         <Reveal as="h3" direction="up"
           id={`education-panel-${panel.id}`}
           className="font-larken text-xl font-light leading-110 text-darkblack lg:text-32"

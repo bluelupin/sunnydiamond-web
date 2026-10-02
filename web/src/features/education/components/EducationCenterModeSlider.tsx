@@ -16,7 +16,7 @@ type SliderWithInner = Slider & {
 };
 
 const CENTER_PADDING_RULES = [
-  { maxWidth: 480, padding: "100px" },
+  { maxWidth: 480, padding: "90px" },
   { maxWidth: 640, padding: "120px" },
   { maxWidth: 768, padding: "150px" },
   { maxWidth: 1024, padding: "200px" },
@@ -123,7 +123,7 @@ export default function EducationCenterModeSlider({
         {items.map((item) => (
           <div key={String(item.id)}>
             <div className="flex w-full items-center justify-center">
-              <div className="h-[120px] w-[120px] sm:h-[170px] sm:w-[170px] md:h-[200px] md:w-[200px] lg:h-[250px] lg:w-[250px] xl:h-[300px] xl:w-[300px]">
+              <div className="h-[113px] w-[120px] sm:h-[170px] sm:w-[170px] md:h-[200px] md:w-[200px] lg:h-[250px] lg:w-[250px] xl:h-[283px] xl:w-[300px]">
                 <Image
                   src={item.image}
                   alt={item.name}
@@ -139,9 +139,9 @@ export default function EducationCenterModeSlider({
         ))}
       </Slider>
 
-      <div className="content-section mx-auto mt-3 flex w-full max-w-[300px] flex-col items-center gap-4 text-center md:gap-6">
-        <div className="flex flex-col items-center gap-4 md:min-h-0">
-          {activeItem.name ? (
+      <div className="content-section mx-auto md:mt-10 mt-[205px] flex w-full max-w-fit flex-col items-center gap-4 text-center md:gap-6">
+        {activeItem.name ? (
+          <div className="flex flex-col items-center gap-4 md:min-h-0">
             <p
               className={cn(
                 "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
@@ -150,12 +150,12 @@ export default function EducationCenterModeSlider({
             >
               {activeItem.name}
             </p>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         {showCta && (activeItem.ctaLabel || ctaLabel) && activeItem.href ? (
           <Link
             href={activeItem.href}
-            className="group relative flex h-14 min-w-[122px] items-center justify-center overflow-hidden border-[1px] border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 hover:border-neutral300"
+            className="group relative flex h-14 min-w-[122px] w-fit items-center justify-center overflow-hidden border-[1px] border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 hover:border-neutral300"
           >
             <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
             <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
