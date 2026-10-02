@@ -551,10 +551,16 @@ const BookStoreVisitPanel = ({
         return;
       }
 
+      const resolvedFormTag = formTag || PRODUCT_STORE_VISIT_FORM_TAG;
+
       await createProductSubmission({
-        formTag: formTag || PRODUCT_STORE_VISIT_FORM_TAG,
-        productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,
-        productId: productId?.trim() || STORE_VISIT_PRODUCT_ID,
+        formTag: resolvedFormTag,
+        ...(resolvedFormTag === PRODUCT_STORE_VISIT_FORM_TAG
+          ? { productName: "null" }
+          : {
+              productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,
+              productId: productId?.trim() || STORE_VISIT_PRODUCT_ID,
+            }),
         customerName: name.trim(),
         customerPhone: `${countryCode} ${phone}`.trim(),
         customerEmail: email.trim() || undefined,
@@ -1031,6 +1037,7 @@ const BookingFormStep = ({
   );
 
   const hasTimeSlots = timeSlots.length > 0;
+  const heroImage = selectedStore.heroImage || selectedStore.mobileHeroImage;
 
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
@@ -1068,12 +1075,31 @@ const BookingFormStep = ({
           </div>
 
           <div className="mt-6 flex flex-col gap-6 pb-72">
-            <div className="flex flex-col gap-4 bg-gray300 px-4 py-8 lg:px-6">
-              <p className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {selectedStore.storeName}
-              </p>
-              <div className="h-px w-full bg-neutral300" aria-hidden />
-              <BookStoreVisitLocationDetails store={selectedStore} directionsLabel={getDirectionsLabel} />
+            <div className="relative w-full">
+              {heroImage ? (
+                <div className="relative aspect-[3/4] min-h-[420px] w-full">
+                  <Image
+                    src={heroImage}
+                    alt={selectedStore.imageAlt || selectedStore.storeName}
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 480px) 100vw, 480px"
+                  />
+                </div>
+              ) : (
+                <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
+              )}
+              <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
+                <div className="flex flex-col gap-4">
+                  <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+                    {selectedStore.storeName}
+                  </p>
+                  <BookStoreVisitLocationDetails
+                    store={selectedStore}
+                    directionsLabel={getDirectionsLabel}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex flex-col gap-6">
