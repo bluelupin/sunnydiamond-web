@@ -111,15 +111,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
-      setCustomer(null);
-      applyStatus("guest");
-      // Full reload so cart/wishlist providers reset to a clean guest state.
+      // Do not set guest in React here — ProfileAuthGate would router.replace to
+      // /login before navigation finishes (login UI flicker). Home reload
+      // rehydrates guest state from /api/auth/me.
       window.localStorage.removeItem("sunny-guest-cart-id");
       clearGuestWishlistStorage();
       clearAuthLoginIdentifierKind();
-      window.location.assign("/");
+      window.location.replace("/");
     }
-  }, [applyStatus]);
+  }, []);
 
   // The session lives behind /api/auth/me — an external system this effect
   // subscribes to on mount. Every state write happens in the promise callback,
