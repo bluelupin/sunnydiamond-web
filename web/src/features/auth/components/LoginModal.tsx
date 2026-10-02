@@ -15,13 +15,15 @@ const LOGIN_MODAL_OVERLAY_CLASS = "z-[70] bg-[rgba(30,30,30,0.75)] backdrop-blur
 
 const LoginModal = () => {
   const router = useRouter();
-  const { isLoginModalOpen, returnUrl, initialIdentifier, closeLoginModal } = useLoginModal();
+  const { isLoginModalOpen, returnUrl, initialIdentifier, createAccountResume, closeLoginModal } =
+    useLoginModal();
   const { showMobileShell } = useResponsiveOverlayShell(isLoginModalOpen, LOGIN_MODAL_MOBILE_QUERY);
 
   const { step, contentProps } = useAuthFlow({
     active: isLoginModalOpen,
     returnUrl,
     initialIdentifier,
+    createAccountResume,
     surface: "modal",
     onComplete: (nextReturnUrl) => {
       closeLoginModal();

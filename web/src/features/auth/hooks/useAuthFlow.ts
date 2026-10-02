@@ -30,6 +30,7 @@ import {
 } from "../utils/authValidation";
 import { getLoginHrefForReturn, getPostSignupReturnUrl, sanitizeReturnUrl } from "../utils/authNavigation";
 import { setAuthLoginIdentifierKind } from "../utils/authLoginIdentifier";
+import type { AuthCreateAccountResume } from "../context/LoginModalContext";
 
 /**
  * Sign-in is passwordless: every identifier — mobile or email — leads to a
@@ -43,10 +44,16 @@ type UseAuthFlowOptions = {
   active: boolean;
   returnUrl?: string;
   initialIdentifier?: string;
+  createAccountResume?: AuthCreateAccountResume | null;
   onComplete: (returnUrl: string) => void;
   onAbort: () => void;
   surface?: "modal" | "standalone";
 };
+
+function otpCodeToDigitArray(code: string): string[] {
+  const chars = code.replace(/\D/g, "").slice(0, LOGIN_OTP_LENGTH).split("");
+  return Array.from({ length: LOGIN_OTP_LENGTH }, (_, index) => chars[index] ?? "");
+}
 
 export type AuthFlowContentProps = {
   step: AuthFlowStep;
@@ -116,6 +123,7 @@ export function useAuthFlow({
   active,
   returnUrl: returnUrlInput,
   initialIdentifier = "",
+  createAccountResume = null,
   onAbort,
   surface = "standalone",
 }: UseAuthFlowOptions) {
@@ -159,6 +167,9 @@ export function useAuthFlow({
   /** Focus the identifier only on a return to the step — an initial render must
    *  not steal focus (or pop the keyboard on mobile) on the standalone page. */
   const hasLeftSignIn = useRef(false);
+  /** Synchronous guard for create-account reachability right after OTP acceptance. */
+  const otpAcceptedForRegistrationRef = useRef(false);
+  const resumeAppliedKeyRef = useRef<string | null>(null);
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
 
@@ -171,7 +182,9 @@ export function useAuthFlow({
   const stepIsReachable =
     requestedStep === "sign-in"
     || (requestedStep === "otp" && otpTarget !== null)
-    || (requestedStep === "create-account" && otpTarget !== null && otpVerified);
+    || (requestedStep === "create-account"
+      && otpTarget !== null
+      && (otpVerified || otpAcceptedForRegistrationRef.current));
   const step: AuthFlowStep = stepIsReachable ? requestedStep : "sign-in";
 
   // With SMS off, the field accepts email only — there is no other code to send.
@@ -238,6 +251,8 @@ export function useAuthFlow({
     setCreateAccountFormError(undefined);
     setIsSubmitting(false);
     hasLeftSignIn.current = false;
+    otpAcceptedForRegistrationRef.current = false;
+    resumeAppliedKeyRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -247,7 +262,7 @@ export function useAuthFlow({
     }
 
     const seeded = initialIdentifier.trim();
-    if (!seeded) {
+    if (!seeded || createAccountResume) {
       return;
     }
 
@@ -255,7 +270,54 @@ export function useAuthFlow({
     // send one on their behalf just because we know their address.
     setIdentifier(seeded);
     setIdentifierError(undefined);
-  }, [active, initialIdentifier, resetState]);
+  }, [active, createAccountResume, initialIdentifier, resetState]);
+
+  useEffect(() => {
+    if (!active || !createAccountResume) {
+      return;
+    }
+
+    const resumeKey = `${createAccountResume.target.kind}:${createAccountResume.otp}`;
+    if (resumeAppliedKeyRef.current === resumeKey) {
+      return;
+    }
+    resumeAppliedKeyRef.current = resumeKey;
+
+    const {
+      target,
+      otp: otpCode,
+      fullName: seededName,
+      email: seededEmail,
+      countryCode: seededCountry,
+      phoneDisplay,
+    } = createAccountResume;
+
+    otpAcceptedForRegistrationRef.current = true;
+    setOtpTarget(target);
+    setOtpVerified(true);
+    setOtp(otpCodeToDigitArray(otpCode));
+    setOtpError(undefined);
+    setOtpChannel(target.kind === "email" ? "email" : "sms");
+
+    if (target.kind === "email") {
+      setIdentifier(target.email);
+      setEmail(target.email);
+    } else {
+      const cc = seededCountry ?? DEFAULT_COUNTRY_CODE;
+      setCountryCode(cc);
+      setVerifiedCountryCode(cc);
+      setIdentifier(phoneDisplay ?? target.phone.replace(/\D/g, ""));
+      if (seededEmail) {
+        setEmail(seededEmail);
+      }
+    }
+
+    if (seededName?.trim()) {
+      setFullName(seededName.trim());
+    }
+
+    setStep("create-account");
+  }, [active, createAccountResume]);
 
   /**
    * Back onto /login restores it from bfcache with the state it was left in — a completed
@@ -492,6 +554,7 @@ export function useAuthFlow({
     }
 
     setOtpError(undefined);
+    otpAcceptedForRegistrationRef.current = true;
     setOtpVerified(true);
 
     if (result.requiresAccountSetup) {
@@ -502,6 +565,8 @@ export function useAuthFlow({
       setStep("create-account");
       return;
     }
+
+    otpAcceptedForRegistrationRef.current = false;
 
     setAuthLoginIdentifierKind(otpTarget.kind === "email" ? "email" : "phone");
     setIsSubmitting(true);

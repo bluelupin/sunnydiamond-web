@@ -1,3 +1,1 @@
-{"sessionId":"9fb89b","hypothesisId":"A","location":"AuthContext.tsx:logout:start","message":"logout invoked","data":{"href":"/profile"},"timestamp":1790939679594}
-{"sessionId":"9fb89b","hypothesisId":"A","location":"AuthContext.tsx:logout:beforeGuest","message":"setting guest then assign home","data":{"href":"/profile"},"timestamp":1790939681341}
-{"sessionId":"9fb89b","hypothesisId":"A","location":"ProfileAuthGate.tsx:redirect","message":"guest status -> router.replace login","data":{"pathname":"/profile","loginHref":"/login?returnUrl=%2Fprofile"},"timestamp":1790939681355}
+{"sessionId":"9fb89b","runId":"pre-fix","hypothesisId":"E","location":"useAuthFlow.ts:active-false","message":"auth flow inactive — resetState","data":{"surface":"modal"},"timestamp":1790940627414}

@@ -3,6 +3,20 @@ import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
 import { resolveGuestCheckoutEmail } from "@/services/magento/cart/checkoutAddress.mapper";
 import type { CheckoutFormData } from "../types/checkout.types";
 
+/** OTP verify target for the contact the guest typed on checkout. */
+export function buildCheckoutOtpTarget(form: CheckoutFormData): OtpTarget {
+  const contact = form.phoneOrEmail.trim();
+  if (contact.includes("@")) {
+    return { kind: "email", email: contact.toLowerCase() };
+  }
+
+  const phone = getCheckoutPhoneDigits(form);
+  return {
+    kind: "phone",
+    phone: formatLoginPhoneForMagento(form.contactCountryCode || "+91", phone),
+  };
+}
+
 export function getCheckoutPhoneDigits(form: CheckoutFormData): string {
   const candidate = form.phoneOrEmail.includes("@")
     ? form.shippingPhone

@@ -24,7 +24,12 @@ import {
   resetCheckoutSuccessHeaderActive,
   setCheckoutSuccessHeaderActive,
 } from "../context/checkoutHeaderBridge";
-import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
+import {
+  buildCheckoutOtpTarget,
+  getCheckoutRegistrationEmail,
+  getCheckoutRegistrationName,
+  registerGuestCustomerAfterOrder,
+} from "../services/guestCustomerRegistration";
 import { persistGuestCheckoutAddresses } from "../services/persistGuestCheckoutAddresses";
 import {
   useCheckoutFormValidation,
@@ -579,8 +584,30 @@ const CheckoutPage = () => {
 
   const handleOtpVerified = (result: CheckoutOtpVerifyResult) => {
     verifiedCheckoutOtpRef.current = result.otp;
-    setPhoneVerified(true);
     setShowOtpModal(false);
+
+    if (result.registrationRequired) {
+      openLoginModal({
+        returnUrl: "/checkout",
+        createAccountResume: {
+          target: buildCheckoutOtpTarget(form),
+          otp: result.otp,
+          fullName: getCheckoutRegistrationName(form),
+          email: getCheckoutRegistrationEmail(form),
+          countryCode: form.contactCountryCode,
+          phoneDisplay: isCheckoutEmailContact(form.phoneOrEmail)
+            ? undefined
+            : form.phoneOrEmail.replace(/\D/g, ""),
+        },
+      });
+      toast({
+        title: "Almost there",
+        description: "Enter your details to finish creating your account.",
+      });
+      return;
+    }
+
+    setPhoneVerified(true);
 
     if (result.loggedIn) {
       void refreshAuth();
