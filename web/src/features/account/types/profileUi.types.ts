@@ -150,6 +150,8 @@ export type ProfileAppointmentUi = {
     phone: string;
   };
   storeVisit?: {
+    /** Strapi showroom documentId — matches the Book a Visit showroom (photo, phone). */
+    showroomDocumentId?: string;
     city: string;
     storeName: string;
     lines: string[];
