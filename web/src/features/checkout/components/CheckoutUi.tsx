@@ -17,8 +17,8 @@ import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 import FormRadioButtonIcon from "@/assets/Icons/FormRadioButtonIcon";
 
-function formatRequiredFieldLabel(label: string): string {
-  return label.endsWith("*") ? label : `${label}*`;
+function normalizeCheckoutFieldLabel(label: string): string {
+  return label.replace(/\*+$/, "").trimEnd();
 }
 
 type CheckoutFieldLabelProps = {
@@ -29,7 +29,7 @@ type CheckoutFieldLabelProps = {
 
 const CheckoutFieldLabel = ({ id, label, optional }: CheckoutFieldLabelProps) => (
   <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
-    {optional ? label : formatRequiredFieldLabel(label)}
+    {optional ? label : normalizeCheckoutFieldLabel(label)}
     {optional ? <span className="font-light text-gray600"> (Optional)</span> : null}
   </label>
 );

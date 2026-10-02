@@ -243,7 +243,7 @@ export const CheckoutFormStep = ({
       <div className="space-y-4">
         <CheckoutField
           id="checkout-name"
-          label="Your Name*"
+          label="Your Name"
           placeholder="Enter Your Name"
           value={form.name}
           onChange={(value) => onChange("name", value)}

@@ -223,9 +223,6 @@ const MetalEngravingPanel = ({
           </div>
 
           <PanelFooter contentClassName="flex flex-col items-center gap-4">
-            <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
-              Our representative will get in touch with you soon
-            </p>
             <DetailDarkButton
               onClick={handleSave}
               disabled={isSaving || (requiresFont && !font.trim())}
