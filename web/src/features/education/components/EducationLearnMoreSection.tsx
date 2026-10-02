@@ -109,7 +109,7 @@ const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCa
   const mobileSpec = careSpec.mobile;
 
   return (
-    <div className="flex flex-col items-center text-center gap-4">
+    <div className="flex flex-col items-center text-center md:gap-4 gap-3">
       <div className="relative shrink-0 w-20 h-20">
         <Image
           src={mobile && tip.mobileIcon ? tip.mobileIcon : tip.icon}
@@ -321,10 +321,10 @@ const LearnMoreHeaderAndTabs = ({
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => onTabChange(index)}
                   className={cn(
-                    "pb-2 !w-fit relative shrink-0 cursor-pointer whitespace-nowrap font-gill text-sm font-normal uppercase leading-110 transition-colors md:flex md:items-center md:justify-center md:text-center",
+                    "pb-2 max-h-[19px] !w-fit relative shrink-0 cursor-pointer whitespace-nowrap font-gill text-sm font-normal uppercase leading-110 transition-colors md:flex md:items-center md:justify-center md:text-center",
                     "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-linkGold after:transition-all after:duration-300 hover:text-linkGold hover:after:w-full",
                     isActive
-                      ? "border-b-[1.5px] border-linkGold pb-2 text-linkGold"
+                      ? "border-b-[1px] border-linkGold pb-2 text-linkGold"
                       : "pb-2 text-darkblack",
                   )}
                 >
@@ -406,7 +406,7 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
   return (
     <section
       aria-labelledby="education-learn-more-title"
-      className={cn("bg-white py-16 md:py-104", isCarousel && "overflow-x-clip")}
+      className={cn("bg-white pt-16 pb-[65px] md:pt-104 md:pb-[94px]", isCarousel && "overflow-x-clip")}
     >
       <div className="flex w-full max-w-full flex-col items-center overflow-x-clip max-md:gap-6 md:gap-10">
         {isAnatomyDetail && anatomyDetail ? (
@@ -436,13 +436,13 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
 
             {usePinnedScroll
               ? anatomyDetail.sections.map((section) => (
-                  <div
-                    key={`anatomy-step-${section.id}`}
-                    data-anatomy-step={section.id}
-                    className="hidden h-screen md:block"
-                    aria-hidden
-                  />
-                ))
+                <div
+                  key={`anatomy-step-${section.id}`}
+                  data-anatomy-step={section.id}
+                  className="hidden h-screen md:block"
+                  aria-hidden
+                />
+              ))
               : null}
           </section>
         ) : (

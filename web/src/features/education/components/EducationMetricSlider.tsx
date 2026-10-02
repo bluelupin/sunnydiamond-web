@@ -300,7 +300,7 @@ const EducationMetricSlider = ({
   return (
     <div
       ref={sliderRef}
-      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none min-w-[322px] lg:min-w-[528px] max-w-fit", className)}
+      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none max-w-[322px] md:max-w-[500px] xl:max-w-[528px]", className)}
       style={{ width: "100%", height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
@@ -509,12 +509,14 @@ const EducationMetricSlider = ({
             >
               {Array.isArray(option.sublabel) ? (
                 option.sublabel.map((line) => (
-                  <span key={line} className="block whitespace-nowrap">
+                  <span key={line} className={cn(isActive ? "text-linkGold" : "text-neutral500", "block whitespace-nowrap")}>
                     {line}
                   </span>
                 ))
               ) : (
-                <span className="block whitespace-nowrap">{option.sublabel}</span>
+                <span className={cn(isActive ? "text-linkGold" : "text-neutral500", "block whitespace-nowrap")}>
+                  {option.sublabel}
+                </span>
               )}
             </span>
           );

@@ -58,8 +58,8 @@ const PANEL_ID_BY_LABEL: Record<string, EducationFourCsPanelContent["id"]> = {
   CARAT: "carat",
 };
 
-const DEFAULT_LOGO_CLASS = "size-[79px]";
-const DEFAULT_MOBILE_LOGO_CLASS = "size-[59.286px]";
+const DEFAULT_LOGO_CLASS = "w-[77px] h-[77px]";
+const DEFAULT_MOBILE_LOGO_CLASS = "size-[60px]";
 
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();

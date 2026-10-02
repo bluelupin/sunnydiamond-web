@@ -59,7 +59,9 @@ const CertificationLabel = ({
     return (
       <div className="max-w-[100px] mx-auto text-center font-gill text-sm font-light leading-110 text-darkblack">
         {cert.mobileLabelLines.map((line) => (
-          <p key={line}>{line}</p>
+          <p key={line}>
+            {line}
+          </p>
         ))}
       </div>
     );
@@ -69,7 +71,7 @@ const CertificationLabel = ({
     <p
       className={cn(
         "w-full px-2 text-center font-gill leading-110 text-darkblack",
-        mobile ? "text-sm font-light" : "lg:text-base text-sm font-normal",
+        mobile ? "text-sm font-light" : "lg:text-base text-sm font-normal uppercase",
       )}
     >
       {cert.label}
@@ -114,7 +116,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
           />
         </div>
       ) : null}
-      <div className="relative flex flex-col items-center md:gap[40px] md:gap-10 gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">
+      <div className="relative flex flex-col items-center md:gap-10 gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">
         <ScrollReveal
           as="h2"
           delayMs={0}
@@ -122,7 +124,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         >
           <span
             id="education-certified-title"
-            className="block font-larken text-32 font-light leading-110 text-darkblack md:text-5xl md:leading-none"
+            className="block font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 md:leading-none"
           >
             {certificate.title}
           </span>
@@ -134,10 +136,9 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
           <div className="grid grid-cols-2">
             {mobileCertifications.slice(0, 2).map((cert, index) => (
               <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 justify-between h-full">
                   <div
                     className="flex w-full items-center justify-center"
-                    style={{ minHeight: logosSpec.mobile.logoSlotHeight }}
                   >
                     <CertificationLogo cert={cert} mobile />
                   </div>
@@ -149,10 +150,9 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
           <div className="grid grid-cols-2">
             {mobileCertifications.slice(2, 4).map((cert, index) => (
               <ScrollReveal key={cert.id} delayMs={240 + index * 80}>
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 justify-between h-full">
                   <div
                     className="flex w-full items-center justify-center"
-                    style={{ minHeight: logosSpec.mobile.logoSlotHeight }}
                   >
                     <CertificationLogo cert={cert} mobile />
                   </div>
@@ -169,7 +169,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
             <ScrollReveal
               key={cert.id}
               delayMs={80 + index * 80}
-              className="flex w-full flex-col items-center gap-2"
+              className="flex w-full flex-col items-center gap-2 h-full justify-between"
             >
               <div
                 className="flex w-full items-center justify-center"
@@ -186,17 +186,8 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         <div
           className="flex w-full flex-col md:hidden gap-8">
           <ScrollReveal delayMs={400}>
-            <Image
-              src={educationPageImages.certifiedDividerMobile}
-              alt=""
-              width={copySpec.mobile.dividerWidth}
-              height={1}
-              className="h-px max-w-full"
-              style={{ width: copySpec.mobile.dividerWidth }}
-              aria-hidden
-            />
+            <div className="h-[1px] w-full bg-neutral300"></div>
           </ScrollReveal>
-
           <ScrollReveal delayMs={460}>
             <div className="flex flex-col" style={{ gap: copySpec.mobile.blockGap }}>
               {certificate.whyTitle || certificate.whyDescription ? (
@@ -235,8 +226,8 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         {/* Desktop copy + girdle visual — Figma 692:29096 */}
         <div className="relative hidden w-full md:block">
           <ScrollReveal delayMs={120} className="w-full lg:max-w-[647px] md:max-w-[430px]">
-            <div className="flex flex-col gap-10">
-              <div className="h-px w-full">
+            <div className="flex flex-col md:gap-10 gap-6">
+              <div className="h-px w-full md:hidden flex">
                 <Image
                   src={educationPageImages.certifiedDivider}
                   alt=""
