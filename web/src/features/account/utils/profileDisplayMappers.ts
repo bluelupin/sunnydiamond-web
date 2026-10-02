@@ -645,9 +645,10 @@ export function mapCustomerAppointmentToProfileUi(
     );
   const rescheduleDeadline = formatTryAtHomeRescheduleDeadline(appointment.requestedDate);
   const isCancelled = workflowStatus.toLowerCase().includes("cancel");
-  const cancelledOnNote = isCancelled
-    ? formatAppointmentCancelledOnNote(appointment.updatedAt)
-    : undefined;
+  const cancelledOnNote =
+    isCancelled && appointment.cancelledAt
+      ? formatAppointmentCancelledOnNote(appointment.cancelledAt)
+      : undefined;
 
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,

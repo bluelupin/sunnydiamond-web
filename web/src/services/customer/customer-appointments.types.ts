@@ -42,6 +42,8 @@ export type CustomerAppointment = {
   preferredShowroom: CustomerAppointmentShowroom | null;
   /** Null when the CMS does not send it (older CMS) — treat as allowed. */
   reschedulesLeft: number | null;
+  /** Null for appointments cancelled before the CMS started sending it. */
+  cancelledAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -124,6 +126,7 @@ export type StrapiCustomerAppointment = {
   state?: string | null;
   preferredShowroom?: StrapiCustomerAppointmentShowroom | null;
   reschedulesLeft?: number | null;
+  cancelledAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 };

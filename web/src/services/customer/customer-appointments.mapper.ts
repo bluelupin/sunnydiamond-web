@@ -363,6 +363,7 @@ export function mapCustomerAppointment(
     preferredShowroom: mapShowroom(normalized.preferredShowroom),
     reschedulesLeft:
       typeof normalized.reschedulesLeft === "number" ? normalized.reschedulesLeft : null,
+    cancelledAt: cleanText(normalized.cancelledAt) || null,
     createdAt: cleanText(normalized.createdAt),
     updatedAt: cleanText(normalized.updatedAt),
   };

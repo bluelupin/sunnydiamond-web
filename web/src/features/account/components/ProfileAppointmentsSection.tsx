@@ -52,7 +52,7 @@ const ProfileAppointmentsSection = () => {
     () => new Set(),
   );
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
-  const [cancelledToastAppointmentId, setCancelledToastAppointmentId] = useState<string | null>(
+  const [toastAppointmentId, setToastAppointmentId] = useState<string | null>(
     null,
   );
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,9 +66,9 @@ const ProfileAppointmentsSection = () => {
   }, []);
 
   const showStatusToast = useCallback(
-    (message: string, cancelledAppointmentId: string | null = null) => {
+    (message: string, appointmentId: string | null = null) => {
       dismissStatusToast();
-      setCancelledToastAppointmentId(cancelledAppointmentId);
+      setToastAppointmentId(appointmentId);
       setStatusToastMessage(message);
       statusToastTimeoutRef.current = setTimeout(() => {
         setStatusToastMessage(null);
@@ -148,9 +148,12 @@ const ProfileAppointmentsSection = () => {
     return appointments.filter((appointment) => appointment.type === activeFilter);
   }, [appointments, activeFilter]);
 
-  const showRescheduleSuccessToast = useCallback(() => {
-    showStatusToast(content.reschedulePanel.successToast);
-  }, [showStatusToast]);
+  const showRescheduleSuccessToast = useCallback(
+    (appointmentId: string | null) => {
+      showStatusToast(content.reschedulePanel.successToast, appointmentId);
+    },
+    [showStatusToast],
+  );
 
   const openReschedulePanel = useCallback((appointment: ProfileAppointmentUi) => {
     setCancelDialogOpen(false);
@@ -199,12 +202,12 @@ const ProfileAppointmentsSection = () => {
       open={Boolean(statusToastMessage)}
       message={statusToastMessage ?? ""}
       action={
-        cancelledToastAppointmentId ? (
+        toastAppointmentId ? (
           <AppStatusToastAction
             onClick={() => {
               dismissStatusToast();
               document
-                .getElementById(`profile-appointment-${cancelledToastAppointmentId}`)
+                .getElementById(`profile-appointment-${toastAppointmentId}`)
                 ?.scrollIntoView({ behavior: "smooth", block: "center" });
             }}
           >
@@ -212,7 +215,8 @@ const ProfileAppointmentsSection = () => {
           </AppStatusToastAction>
         ) : undefined
       }
-      onDismiss={cancelledToastAppointmentId ? dismissStatusToast : undefined}
+      onDismiss={toastAppointmentId ? dismissStatusToast : undefined}
+      hideIcon={Boolean(toastAppointmentId)}
     />
   );
 
@@ -324,7 +328,7 @@ const ProfileAppointmentsSection = () => {
           onClose={() => setRescheduleAppointment(null)}
           onRescheduled={() => {
             refresh();
-            showRescheduleSuccessToast();
+            showRescheduleSuccessToast(rescheduleAppointment?.id ?? null);
           }}
         />
       </div>

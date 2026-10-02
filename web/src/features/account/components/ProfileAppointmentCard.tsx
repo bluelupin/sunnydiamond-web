@@ -414,40 +414,71 @@ export function ProfileAppointmentCard({
       ) : (
         <div className="flex flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-2 md:gap-6">
-            {appointment.rescheduleLimitReached ? (
+            {appointment.canCancel && appointment.rescheduleLimitReached ? (
               <>
                 <DetailOutlineLink href={content.contactUsHref} className="w-full">
                   {content.contactUsLabel}
                 </DetailOutlineLink>
-                <DetailDarkButton
-                  type="button"
-                  className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={onCancel}
-                  disabled={!appointment.canCancel}
-                >
+                <DetailDarkButton type="button" className="w-full" onClick={onCancel}>
                   {content.cancelLabel}
                 </DetailDarkButton>
               </>
-            ) : (
+            ) : null}
+            {appointment.canCancel && !appointment.rescheduleLimitReached ? (
               <DetailOutlineButton
                 type="button"
-                className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full"
                 onClick={onCancel}
-                disabled={!appointment.canCancel}
               >
                 {content.cancelLabel}
               </DetailOutlineButton>
-            )}
-            {appointment.rescheduleLimitReached ? null : (
-              <DetailDarkButton
-                type="button"
-                className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={onReschedule}
-                disabled={!appointment.canReschedule}
+            ) : null}
+            {appointment.canCancel && !appointment.rescheduleLimitReached ? (
+              appointment.canReschedule && !appointment.rescheduleLimitReached ? (
+                <DetailDarkButton
+                  type="button"
+                  className="w-full"
+                  onClick={onReschedule}
+                >
+                  {content.rescheduleLabel}
+                </DetailDarkButton>
+              ) : (
+                <Link
+                  href={content.contactUsHref}
+                  className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white"
+                >
+                  <span className="relative z-10">{content.contactUsLabel}</span>
+                </Link>
+              )
+            ) : null}
+            {!appointment.canCancel &&
+            appointment.canReschedule &&
+            !appointment.rescheduleLimitReached ? (
+              <>
+                <Link
+                  href={content.contactUsHref}
+                  className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white"
+                >
+                  <span className="relative z-10">{content.contactUsLabel}</span>
+                </Link>
+                <DetailDarkButton
+                  type="button"
+                  className="w-full"
+                  onClick={onReschedule}
+                >
+                  {content.rescheduleLabel}
+                </DetailDarkButton>
+              </>
+            ) : null}
+            {!appointment.canCancel &&
+            (!appointment.canReschedule || appointment.rescheduleLimitReached) ? (
+              <Link
+                href={content.contactUsHref}
+                className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white md:col-start-2"
               >
-                {content.rescheduleLabel}
-              </DetailDarkButton>
-            )}
+                <span className="relative z-10">{content.contactUsLabel}</span>
+              </Link>
+            ) : null}
           </div>
 
           {appointment.rescheduleLimitReached ? (

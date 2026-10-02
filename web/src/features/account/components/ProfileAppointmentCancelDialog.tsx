@@ -13,7 +13,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
-import { ProfileInfoNote } from "./profileUi";
+// import { ProfileInfoNote } from "./profileUi";
 
 type ProfileAppointmentCancelDialogProps = {
   open: boolean;
@@ -22,7 +22,7 @@ type ProfileAppointmentCancelDialogProps = {
   onConfirmCancel: () => void;
   /** When false, Reschedule in this popup stays disabled (same as the card button). */
   canReschedule?: boolean;
-  /** Reschedule limit used up — hide Reschedule and show the contact-us note instead. */
+  /** Reschedule limit used up — hide Reschedule. */
   rescheduleLimitReached?: boolean;
 };
 
@@ -37,9 +37,10 @@ export function ProfileAppointmentCancelDialog({
 }: ProfileAppointmentCancelDialogProps) {
   const isMobile = useIsMobile();
   const content = profileTabsContent.appointments.cancelDialog;
-  const rescheduleLimitNote = rescheduleLimitReached ? (
-    <ProfileInfoNote>{profileTabsContent.appointments.rescheduleLimitNote}</ProfileInfoNote>
-  ) : null;
+  // The Figma cancel modal doesn't have the "rescheduled twice" note, so it is not shown.
+  // const rescheduleLimitNote = rescheduleLimitReached ? (
+  //   <ProfileInfoNote>{profileTabsContent.appointments.rescheduleLimitNote}</ProfileInfoNote>
+  // ) : null;
 
   if (isMobile) {
     return (
@@ -86,7 +87,7 @@ export function ProfileAppointmentCancelDialog({
                   {content.rescheduleLabel}
                 </DetailOutlineButton>
               )}
-              {rescheduleLimitNote}
+              {/* {rescheduleLimitNote} */}
             </div>
           </div>
         </SheetContent>
@@ -136,7 +137,7 @@ export function ProfileAppointmentCancelDialog({
           </DetailDarkButton>
         </div>
 
-        {rescheduleLimitNote}
+        {/* {rescheduleLimitNote} */}
       </DialogContent>
     </Dialog>
   );

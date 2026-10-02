@@ -353,7 +353,7 @@ export const profileTabsContent = {
       title: "Reschedule Appointment",
       submitLabel: "SAVE",
       savingLabel: "SAVING...",
-      successToast: "Appointment rescheduled",
+      successToast: "Appointment Rescheduled Successfully",
       errorToast: "Could not reschedule appointment",
       footerNote: "Our representative will get in touch with you soon",
     },
