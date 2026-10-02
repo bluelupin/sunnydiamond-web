@@ -13,7 +13,11 @@ import {
 import type { Product } from "@/features/products/data/products";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
-import { preserveCartItemsOrder } from "@/features/cart/utils/preserveCartItemsOrder";
+import {
+  buildCartLineOrderKeys,
+  preserveCartItemsOrder,
+  preserveCartItemsOrderByKeys,
+} from "@/features/cart/utils/preserveCartItemsOrder";
 import {
   addProductToGuestCart,
   applyCartGiftCard,
@@ -40,7 +44,9 @@ import {
   clearGuestCartId,
   getGuestCartId,
   readCartLineMetadata,
+  readCartLineOrder,
   writeCartLineMetadata,
+  writeCartLineOrder,
   type CartLineMetadata,
   type StoredCartLineMetadata,
 } from "@/services/magento/cart/cartSession";
@@ -371,14 +377,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (nextState: GuestCartState) => {
       setCartState((previous) => {
         const merged = withKnownProductCustomOptions(previous, nextState);
-        if (!previous?.items.length) {
+        let items = merged.items;
+        let shouldPersistOrder = false;
+
+        if (merged.items.length === 0) {
+          writeCartLineOrder([]);
           return merged;
         }
 
-        return {
-          ...merged,
-          items: preserveCartItemsOrder(previous.items, merged.items),
-        };
+        if (previous?.items.length) {
+          items = preserveCartItemsOrder(previous.items, items);
+          shouldPersistOrder = true;
+        } else {
+          const storedOrder = readCartLineOrder();
+          if (storedOrder.length > 0) {
+            items = preserveCartItemsOrderByKeys(storedOrder, items);
+            shouldPersistOrder = true;
+          }
+        }
+
+        if (shouldPersistOrder) {
+          writeCartLineOrder(buildCartLineOrderKeys(items));
+        }
+
+        return items === merged.items ? merged : { ...merged, items };
       });
       void refreshShippingEstimate(nextState);
     },
