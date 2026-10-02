@@ -69,7 +69,7 @@ const ProductDetailVisitUsSection = ({
         className={cn(
           isContactVariant
             ? "relative h-[320px] w-full overflow-hidden md:h-[387px]"
-            : "relative h-[800px] w-full overflow-hidden md:h-804",
+            : "relative h-361 w-full overflow-hidden md:h-600 lg:h-804",
         )}
       >
         {/* Absolute media layer so non-banner showroom crops don't expand the section and clip copy */}
@@ -115,8 +115,8 @@ const ProductDetailVisitUsSection = ({
             </div>
           </div>
         ) : (
-          <div className="relative z-10 flex h-full items-end justify-center px-4 pb-16 md:px-8 lg:px-10">
-            <div className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-10">
+          <div className="relative z-10 flex h-full items-end justify-center px-4 pb-10 md:px-8 md:pb-16 lg:px-10">
+            <div className="flex w-full max-w-311 flex-col items-center gap-4 md:gap-6 lg:max-w-1360 lg:gap-10">
               <div className="flex flex-col items-center gap-6 text-center text-white md:gap-3 lg:gap-4">
                 <h2
                   id="visit-us-heading"

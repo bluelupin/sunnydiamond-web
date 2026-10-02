@@ -9,9 +9,11 @@ import {
   buildPriceBreakup,
   formatPriceBreakupGstLabel,
 } from "@/features/products/utils/priceBreakup";
-import { PanelFooter } from "@/shared/ui/PanelFooter";
+import {
+  PanelFooter,
+  panelFooterHorizontalPaddingClassName,
+} from "@/shared/ui/PanelFooter";
 import { RightPanelHeader } from "@/shared/ui/RightPanelHeader";
-import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import {
   RIGHT_PANEL_SCROLL_AREA_CLASS,
   RIGHT_PANEL_SCROLL_LAYOUT_CLASS,
@@ -75,81 +77,84 @@ const PriceBreakupPanel = ({
       dialogAriaLabel="Price Breakup"
     >
       <div className={RIGHT_PANEL_SCROLL_LAYOUT_CLASS}>
-        <div className={RIGHT_PANEL_SCROLL_AREA_CLASS}>
+        <div className={cn(RIGHT_PANEL_SCROLL_AREA_CLASS, "flex min-h-0 flex-1 flex-col")}>
           <RightPanelHeader
             title="Price Breakup"
             onClose={onClose}
             closeAriaLabel="Close price breakup panel"
             alignWithContent
+            className={cn("shrink-0", panelFooterHorizontalPaddingClassName)}
           />
 
           <div
-            className={cn(
-              "flex flex-col justify-between gap-6 py-6",
-              RIGHT_PANEL_CONTENT_PADDING_CLASS,
-            )}
+            className="flex flex-col gap-6 px-6 pt-6 md:min-h-0 md:flex-1 md:gap-0"
           >
-          <div className="bg-gray200 px-4 py-6">
-            <div className="flex items-center gap-4">
-              <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">
-                <Image
-                  src={productImage}
-                  alt=""
-                  width={91}
-                  height={68}
-                  className="size-full object-cover object-center"
-                  sizes="91px"
-                />
-              </div>
-              <div className="flex min-w-0 flex-col gap-2">
-                <p
-                  className={cn(
-                    "font-gill text-base font-normal leading-110 text-darkblack",
-                    productNameDisplayClassName,
-                  )}
-                >
-                  {productName}
-                </p>
-                {ringSize || metalLabel ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    {ringSize ? (
-                      <span className="font-gill text-sm font-light leading-110 text-neutral500">
-                        Size: {ringSize}
-                      </span>
-                    ) : null}
-                    {ringSize && metalLabel ? <AttributeSeparator /> : null}
-                    {metalLabel ? (
-                      <span className="font-gill text-sm font-light leading-110 text-neutral500">
-                        {metalLabel}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
+            <div className="shrink-0 bg-gray200 px-4 py-6">
+              <div className="flex items-center gap-4">
+                <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">
+                  <Image
+                    src={productImage}
+                    alt=""
+                    width={91}
+                    height={68}
+                    className="size-full object-cover object-center"
+                    sizes="91px"
+                  />
+                </div>
+                <div className="flex min-w-0 flex-col gap-2">
+                  <p
+                    className={cn(
+                      "font-gill text-base font-normal leading-110 text-darkblack",
+                      productNameDisplayClassName,
+                    )}
+                  >
+                    {productName}
+                  </p>
+                  {ringSize || metalLabel ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {ringSize ? (
+                        <span className="font-gill text-sm font-light leading-110 text-neutral500">
+                          Size: {ringSize}
+                        </span>
+                      ) : null}
+                      {ringSize && metalLabel ? <AttributeSeparator /> : null}
+                      {metalLabel ? (
+                        <span className="font-gill text-sm font-light leading-110 text-neutral500">
+                          {metalLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-3">
-            <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
-            <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
-            <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
-            {/* <PriceBreakupRow label="Sub Total" value={formatAmount(breakup.subtotal)} /> */}
-            <PriceBreakupRow
-              label={formatPriceBreakupGstLabel(breakup.gstRate)}
-              value={formatAmount(breakup.gst)}
-            />
-            {breakup.discount > 0 ? (
+            <div aria-hidden className="hidden min-h-0 flex-1 md:block" />
+
+            <div className="flex shrink-0 flex-col gap-3 pb-6">
+              <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
+              <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
+              <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
               <PriceBreakupRow
-                label="Discount"
-                value={formatAmount(breakup.discount)}
-                discount
+                label={formatPriceBreakupGstLabel(breakup.gstRate)}
+                value={formatAmount(breakup.gst)}
               />
-            ) : null}
+              {breakup.discount > 0 ? (
+                <PriceBreakupRow
+                  label="Discount"
+                  value={formatAmount(breakup.discount)}
+                  discount
+                />
+              ) : null}
+            </div>
           </div>
         </div>
-        </div>
 
-        <PanelFooter showGradient={false} contentClassName="flex flex-col gap-4 px-4 py-6 lg:px-4">
+        <PanelFooter
+          showGradient={false}
+          className="hidden md:block"
+          contentClassName="flex flex-col gap-4 pt-6 pb-6"
+        >
           <div className="flex items-center justify-between gap-4">
             <span className="font-gill text-base font-normal leading-110 text-darkblack">Total</span>
             <span className="font-gill text-base font-normal leading-110 text-darkblack">

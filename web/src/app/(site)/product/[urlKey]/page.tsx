@@ -9,7 +9,6 @@ import JsonLd from "@/shared/lib/seo/JsonLd";
 import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
 import { buildProductBreadcrumbJsonLd } from "@/shared/lib/seo/schema/breadcrumb";
 import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
-import ProductDetailBelowFoldLazy from "@/features/products/components/ProductDetailBelowFoldLazy";
 import { getProductDetailContent } from "@/features/products/data/productDetailContent";
 import { prefetchProductDetailAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import { resolveImageSrcString } from "@/shared/utils/image";
@@ -97,14 +96,9 @@ export default async function ProductPage({ params }: PageProps) {
         sizeGuide={sizeGuide}
         stockAlertEnabled={isMagentoStockAlertEnabled()}
         productDisplay={productDisplay}
-      />
-      <ProductDetailBelowFoldLazy
         heroBannerImage={content.heroBannerImage}
         heroBannerVideo={content.heroBannerVideo}
-        productName={product.name}
-        productId={product.id}
         moreForYou={moreForYou}
-        productDisplay={productDisplay}
         alankaraPrefetch={alankaraPrefetch}
       />
     </>

@@ -51,24 +51,22 @@ const ProductDetailGallery = ({ product, galleryRef }: ProductDetailGalleryProps
         className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden touch-pan-y select-none md:hidden"
         {...swipeProps}
       >
-        <div className="grid min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
-          <div className="flex items-center justify-center bg-gray300">
-            <div className="flex h-500 w-full max-w-375 items-center justify-center overflow-hidden">
-              <OptimizedImage
-                src={carouselImages[activeSlide]}
-                alt={`${product.name} — view ${activeSlide + 1}`}
-                priority={activeSlide === 0}
-                sizes="375px"
-                className="object-contain object-center"
-              />
-            </div>
+        <div className="grid h-full min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
+          <div className="relative h-full min-h-0 w-full overflow-hidden bg-gray300">
+            <OptimizedImage
+              src={carouselImages[activeSlide]}
+              alt={`${product.name} — view ${activeSlide + 1}`}
+              priority={activeSlide === 0}
+              sizes="100vw"
+              className="size-full object-cover object-center"
+            />
           </div>
-          <div className="flex items-center justify-end px-4">
+          <div className="pointer-events-none relative z-10 flex min-h-0 items-center justify-end px-4">
             <button
               type="button"
               onClick={goToNextSlide}
               aria-label="Next product image"
-              className="inline-flex size-6 items-center justify-center text-darkblack"
+              className="pointer-events-auto inline-flex size-6 items-center justify-center text-darkblack"
             >
               <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 12.5H21M12.5 21L21 12.5L12.5 4" stroke="#0A0A0A" strokeLinejoin="round" />

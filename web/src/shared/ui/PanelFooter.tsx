@@ -3,8 +3,18 @@ import { cn } from "@/shared/utils/cn";
 /** Footer fade height — rounded from 71px Figma spec to 72px. */
 export const PANEL_FOOTER_GRADIENT_HEIGHT = 72;
 
-const panelFooterContentClassName =
-  "border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8";
+/** Shared with panel scroll bodies so footer, header, and content align (Figma price breakup). */
+export const panelFooterHorizontalPaddingClassName = "px-4";
+
+export const panelFooterContentPaddingClassName = cn(
+  panelFooterHorizontalPaddingClassName,
+  "py-6",
+);
+
+const panelFooterContentClassName = cn(
+  "border-t border-neutral300/50 bg-white",
+  panelFooterContentPaddingClassName,
+);
 
 type PanelFooterGradientProps = {
   className?: string;

@@ -15,6 +15,9 @@ import {
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
+import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
+import type { PdpMobilePurchaseBarLayout } from "./pdpMobilePurchaseBar.types";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
@@ -85,6 +88,8 @@ type ProductDetailSidebarProps = {
   initialEngravingSelection?: EngravingSelection | null;
   initialIsGift?: boolean;
   addToBagLabel?: string;
+  /** When set (PDP page shell), shares measured clearance with below-the-fold sections. */
+  mobilePurchaseBar?: PdpMobilePurchaseBarLayout;
   children?: (sections: {
     purchase: ReactNode;
     details: ReactNode;
@@ -108,9 +113,13 @@ const ProductDetailSidebar = ({
   initialEngravingSelection = null,
   initialIsGift = false,
   addToBagLabel = "Add to Bag",
+  mobilePurchaseBar,
   children,
 }: ProductDetailSidebarProps) => {
   const { windows } = useUiPlatform();
+  const internalPurchaseBar = useMobileStickyFooterClearance();
+  const footerRef = mobilePurchaseBar?.footerRef ?? internalPurchaseBar.footerRef;
+  const clearancePx = mobilePurchaseBar?.clearancePx ?? internalPurchaseBar.clearancePx;
   const [selectedMetalInternal, setSelectedMetalInternal] = useState(
     () => selectedMetalProp ?? content.metalColors[0]?.id ?? "",
   );
@@ -118,6 +127,7 @@ const ProductDetailSidebar = ({
   const setSelectedMetal = onSelectedMetalChange ?? setSelectedMetalInternal;
   const [ringSize, setRingSize] = useState<string>(() => initialRingSize ?? "");
   const [ringSizeError, setRingSizeError] = useState<string | null>(null);
+  const ringSizeSectionRef = useRef<HTMLDivElement>(null);
   const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(
     () => initialEngravingSelection,
   );
@@ -367,6 +377,19 @@ const ProductDetailSidebar = ({
   const showNotifyWhenAvailable = stockAlertEnabled && !displayProduct.inStock;
   const addingToBagLabel = addToBagLabel === "Update Bag" ? "Updating…" : "Adding…";
 
+  const scrollToRingSizeField = useCallback(() => {
+    const section = ringSizeSectionRef.current;
+    if (!section) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      const trigger = section.querySelector<HTMLElement>("button,[role='combobox']");
+      trigger?.focus({ preventScroll: true });
+    });
+  }, []);
+
   const handleAddToBagClick = async () => {
     if (isAddingToBag) return;
 
@@ -374,6 +397,7 @@ const ProductDetailSidebar = ({
       setRingSizeError(
         `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
       );
+      scrollToRingSizeField();
       return;
     }
 
@@ -395,6 +419,74 @@ const ProductDetailSidebar = ({
     } finally {
       setIsAddingToBag(false);
     }
+  };
+
+  const renderPurchaseActionsBar = (layout: "desktop" | "mobileSticky") => {
+    const isMobileSticky = layout === "mobileSticky";
+
+    return (
+      <div className="flex w-full flex-col gap-4">
+        <div className="flex w-full items-end justify-between gap-4">
+          <div
+            className={cn(
+              "flex shrink-0 items-center font-gill leading-110 text-darkblack",
+              isMobileSticky ? "gap-0 text-xl font-normal" : "gap-3 text-xl md:text-2xl",
+            )}
+          >
+            <span>₹{formatJewelleryPrice(pricing.price)}</span>
+            {!isMobileSticky &&
+            pricing.originalPrice != null &&
+            pricing.originalPrice > pricing.price ? (
+              <span className="text-gray600 line-through">
+                ₹{formatJewelleryPrice(pricing.originalPrice)}
+              </span>
+            ) : null}
+          </div>
+          {pricing.breakup ? (
+            <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="shrink-0 uppercase">
+              View Price Breakup
+            </DetailTextLink>
+          ) : null}
+        </div>
+
+        <div className="flex w-full gap-2">
+          {showNotifyWhenAvailable ? (
+            <NotifyWhenAvailableButton key={stockAlertSku} sku={stockAlertSku} />
+          ) : (
+            <DetailDarkButton
+              className="h-14 min-h-14 flex-1 px-7 uppercase disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => {
+                void handleAddToBagClick();
+              }}
+              disabled={isAddingToBag}
+            >
+              {isAddingToBag ? addingToBagLabel : addToBagLabel}
+            </DetailDarkButton>
+          )}
+          <button
+            type="button"
+            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={wishlisted}
+            onClick={() => {
+              if (status !== "authenticated") {
+                router.push("/wishlist");
+                return;
+              }
+              toggleWishlist(product.id);
+            }}
+            className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
+          >
+            <WishlistIcon
+              filled={wishlisted}
+              className={cn(
+                "size-6 transition-colors duration-200",
+                wishlisted ? "text-linkGold" : "text-darkblack",
+              )}
+            />
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const purchaseSection = (
@@ -462,7 +554,11 @@ const ProductDetailSidebar = ({
 
           <div className="flex flex-col gap-6">
             {showSizeSelector ? (
-              <div className="flex flex-col gap-2">
+              <div
+                ref={ringSizeSectionRef}
+                className="flex scroll-mt-28 flex-col gap-2"
+                style={{ scrollMarginBottom: clearancePx }}
+              >
                 <div className="flex items-center justify-between">
                   <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
                     {sizeGuide?.sizeFieldLabel ?? "Size"}
@@ -480,6 +576,7 @@ const ProductDetailSidebar = ({
                   value={ringSize}
                   options={sizeLabels}
                   placeholder="Select"
+                  invalid={ringSizeError != null}
                   onChange={(value) => {
                     setRingSize(value);
                     if (value) {
@@ -509,61 +606,7 @@ const ProductDetailSidebar = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex items-end justify-between gap-4">
-            <div className="flex items-center gap-3 font-gill md:text-2xl text-xl leading-110 text-darkblack">
-              <span>₹{formatJewelleryPrice(pricing.price)}</span>
-              {pricing.originalPrice != null && pricing.originalPrice > pricing.price ? (
-                <span className="text-gray600 line-through">
-                  ₹{formatJewelleryPrice(pricing.originalPrice)}
-                </span>
-              ) : null}
-            </div>
-            {pricing.breakup ? (
-              <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
-                View Price Breakup
-              </DetailTextLink>
-            ) : null}
-          </div>
-
-          <div className="flex gap-2">
-            {showNotifyWhenAvailable ? (
-              // Keyed by SKU: a metal/purity switch is a different alert, so state resets.
-              <NotifyWhenAvailableButton key={stockAlertSku} sku={stockAlertSku} />
-            ) : (
-              <DetailDarkButton
-                className="flex-1 uppercase disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() => {
-                  void handleAddToBagClick();
-                }}
-                disabled={isAddingToBag}
-              >
-                {isAddingToBag ? addingToBagLabel : addToBagLabel}
-              </DetailDarkButton>
-            )}
-            <button
-              type="button"
-              aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              aria-pressed={wishlisted}
-              onClick={() => {
-                if (status !== "authenticated") {
-                  router.push("/wishlist");
-                  return;
-                }
-                toggleWishlist(product.id);
-              }}
-              className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
-            >
-              <WishlistIcon
-                filled={wishlisted}
-                className={cn(
-                  "size-6 transition-colors duration-200",
-                  wishlisted ? "text-linkGold" : "text-darkblack",
-                )}
-              />
-            </button>
-          </div>
-        </div>
+        <div className="hidden md:block">{renderPurchaseActionsBar("desktop")}</div>
 
         <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
           <GiftingCheckboxLabelRow
@@ -786,6 +829,20 @@ const ProductDetailSidebar = ({
           </div>
         </section>
       ) : null}
+
+      {mobilePurchaseBar ? null : <MobileStickyFooterSpacer height={clearancePx} />}
+    </div>
+  );
+
+  const mobilePurchaseStickyFooter = (
+    <div ref={footerRef} className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+      {/* Figma 4903:34207 — mobile PDP purchase bar */}
+      <div
+        className="border-t border-neutral300 bg-white px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] [border-top-width:0.5px]"
+        aria-label="Purchase actions"
+      >
+        {renderPurchaseActionsBar("mobileSticky")}
+      </div>
     </div>
   );
 
@@ -853,6 +910,7 @@ const ProductDetailSidebar = ({
     return (
       <>
         {children({ purchase: purchaseSection, details: detailsSection, panels })}
+        {mobilePurchaseStickyFooter}
         {panels}
       </>
     );
@@ -862,6 +920,7 @@ const ProductDetailSidebar = ({
     <aside className="flex flex-col gap-10">
       {purchaseSection}
       {detailsSection}
+      {mobilePurchaseStickyFooter}
       {panels}
     </aside>
   );

@@ -166,9 +166,15 @@ export function shouldHideFooter(pathname: string): boolean {
   return isAuthRoute(pathname) || isDfeInvestRoute(pathname);
 }
 
-/** Cart/checkout use a sticky mobile action bar; hide the site footer below md. */
+export function isProductDetailRoute(pathname: string): boolean {
+  const normalized = pathname.replace(/\/$/, "") || "/";
+  const segments = normalized.split("/").filter(Boolean);
+  return segments.length === 2 && segments[0] === "product" && Boolean(segments[1]);
+}
+
+/** Cart/checkout sticky bars and PDP purchase bar — hide the site footer below md. */
 export function shouldHideFooterOnMobile(pathname: string): boolean {
-  return isCartOrCheckoutRoute(pathname);
+  return isCartOrCheckoutRoute(pathname) || isProductDetailRoute(pathname);
 }
 
 /** Reset scroll before client navigation so route loading skeletons do not flash the footer. */
