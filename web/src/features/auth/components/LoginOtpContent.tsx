@@ -8,6 +8,7 @@ import { CartDivider } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
+import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { formatLoginPhoneDisplay, isOtpComplete, LOGIN_OTP_LENGTH } from "../utils/authValidation";
 
@@ -95,14 +96,7 @@ const LoginOtpContent = ({
             >
               <LeftArrow className="size-6" />
             </button>
-            <h2
-              className={cn(
-                "font-larken font-light leading-110 text-darkblack",
-                titleClassName ?? "text-32",
-              )}
-            >
-              Enter Code
-            </h2>
+            <h2 className={getAuthFlowTitleClassName(titleClassName)}>Enter Code</h2>
           </div>
           <button
             type="button"

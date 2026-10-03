@@ -6,6 +6,7 @@ import { CartDivider, CartPrimaryButton } from "@/features/cart/components/CartF
 import FormFieldError from "@/shared/ui/FormFieldError";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { cn } from "@/shared/utils/cn";
+import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
@@ -107,14 +108,7 @@ const LoginCreateAccountContent = ({
                 >
                   <LeftArrow className="size-6" />
                 </button>
-                <h2
-                  className={cn(
-                    "shrink-0 font-larken font-light leading-110 text-darkblack",
-                    titleClassName ?? "text-32",
-                  )}
-                >
-                  Create Your Account
-                </h2>
+                <h2 className={getAuthFlowTitleClassName(titleClassName)}>Create Your Account</h2>
               </div>
               <button
                 type="button"

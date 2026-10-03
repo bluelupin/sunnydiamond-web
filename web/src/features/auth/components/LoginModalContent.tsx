@@ -7,7 +7,7 @@ import {
   CartDivider,
   CartPrimaryButton,
 } from "@/features/cart/components/CartFlowUi";
-import { cn } from "@/shared/utils/cn";
+import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
 import LoginIdentifierField from "./LoginIdentifierField";
 import { isLoginIdentifierReadyForOtp } from "../utils/authValidation";
 
@@ -98,14 +98,7 @@ const LoginModalContent = ({
       <div className="flex w-full flex-col gap-6">
         <div className="flex w-full flex-col gap-3">
           <div className="flex w-full items-center justify-between gap-4">
-            <h2
-              className={cn(
-                "shrink-0 font-larken font-light leading-110 text-darkblack",
-                titleClassName ?? "text-32",
-              )}
-            >
-              Sign In
-            </h2>
+            <h2 className={getAuthFlowTitleClassName(titleClassName)}>Sign In</h2>
             <button
               type="button"
               onClick={onClose}
