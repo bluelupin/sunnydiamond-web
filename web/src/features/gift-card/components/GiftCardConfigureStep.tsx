@@ -203,6 +203,7 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
         {hasOccasionOptions ? (
           <GiftCardSelectField
             id="gift-card-occasion"
+            variant="contact"
             label={occasionConfig.label}
             value={occasion}
             onChange={setOccasion}

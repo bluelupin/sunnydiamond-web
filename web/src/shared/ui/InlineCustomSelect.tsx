@@ -6,6 +6,9 @@ import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName } from "@/shared/utils/formValidation";
 
+/** Portaled list — overlay panels must ignore outside clicks on this node (e.g. gift card sheet). */
+export const INLINE_CUSTOM_SELECT_LISTBOX_SELECTOR = "[data-inline-custom-select-listbox]";
+
 const LIST_ANIMATION_MS = 200;
 const LIST_GAP_PX = 4;
 const VIEWPORT_PADDING_PX = 8;
@@ -34,6 +37,11 @@ type InlineCustomSelectProps = {
   errorId?: string;
   hideLabel?: boolean;
   placeholderClassName?: string;
+  /**
+   * `inline` renders the list under the trigger (for modal sheets where body portals
+   * cannot receive clicks). Default `portaled` matches Contact Us page behaviour.
+   */
+  listPlacement?: "portaled" | "inline";
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
@@ -88,7 +96,9 @@ const InlineCustomSelect = ({
   errorId,
   hideLabel = false,
   placeholderClassName,
+  listPlacement = "portaled",
 }: InlineCustomSelectProps) => {
+  const isInlineList = listPlacement === "inline";
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
   const [isListVisible, setIsListVisible] = useState(false);
@@ -130,11 +140,15 @@ const InlineCustomSelect = ({
   useEffect(() => {
     if (isOpen) {
       setShouldRenderList(true);
-      updateListPosition();
+      if (!isInlineList) {
+        updateListPosition();
+      }
 
       const frame = window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          updateListPosition();
+          if (!isInlineList) {
+            updateListPosition();
+          }
           setIsListVisible(true);
         });
       });
@@ -148,16 +162,18 @@ const InlineCustomSelect = ({
 
     const timeoutId = window.setTimeout(() => {
       setShouldRenderList(false);
-      setListPosition(null);
+      if (!isInlineList) {
+        setListPosition(null);
+      }
     }, LIST_ANIMATION_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isOpen, updateListPosition]);
+  }, [isInlineList, isOpen, updateListPosition]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || isInlineList) {
       return;
     }
 
@@ -174,7 +190,7 @@ const InlineCustomSelect = ({
       window.removeEventListener("resize", handleLayoutChange);
       window.removeEventListener("scroll", handleLayoutChange, true);
     };
-  }, [isOpen, updateListPosition]);
+  }, [isInlineList, isOpen, updateListPosition]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -212,24 +228,25 @@ const InlineCustomSelect = ({
   };
 
   const listbox =
-    shouldRenderList && listPosition ? (
+    shouldRenderList && (isInlineList || listPosition) ? (
       <div
         ref={listRef}
         id={listboxId}
+        data-inline-custom-select-listbox=""
         role="listbox"
         aria-labelledby={labelId}
         aria-hidden={!isOpen}
-        style={{
-          position: "fixed",
-          top: listPosition.top,
-          left: listPosition.left,
-          width: listPosition.width,
-          maxHeight: listPosition.maxHeight,
-        }}
-        onMouseDown={(event) => {
-          // Keep focus on the trigger until the option click completes.
-          event.preventDefault();
-        }}
+        style={
+          isInlineList
+            ? { maxHeight: LIST_MAX_HEIGHT_PX }
+            : {
+                position: "fixed",
+                top: listPosition!.top,
+                left: listPosition!.left,
+                width: listPosition!.width,
+                maxHeight: listPosition!.maxHeight,
+              }
+        }
         onClick={(event) => {
           event.stopPropagation();
         }}
@@ -240,13 +257,16 @@ const InlineCustomSelect = ({
           event.stopPropagation();
         }}
         className={cn(
-          "verticleMobileScrollbar z-[100] flex flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+          "verticleMobileScrollbar flex flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
           "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
           "motion-safe:origin-top",
+          isInlineList
+            ? "absolute left-0 top-[calc(100%+4px)] z-[80] w-full"
+            : "z-[100] fixed",
           isListVisible
             ? "motion-safe:translate-y-0 motion-safe:opacity-100"
             : "motion-safe:-translate-y-1 motion-safe:opacity-0",
-          !isOpen && "pointer-events-none",
+          isOpen ? "pointer-events-auto" : "pointer-events-none",
           listClassName,
         )}
       >
@@ -259,11 +279,7 @@ const InlineCustomSelect = ({
               type="button"
               role="option"
               aria-selected={selected}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={(event) => {
+              onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 selectOption(option);
@@ -324,7 +340,11 @@ const InlineCustomSelect = ({
         <span id={valueId}>{triggerLabel}</span>
         <SelectChevron open={isOpen} />
       </button>
-      {listbox ? createPortal(listbox, document.body) : null}
+      {listbox
+        ? isInlineList
+          ? listbox
+          : createPortal(listbox, document.body)
+        : null}
     </div>
   );
 };

@@ -29,6 +29,14 @@ export const giftCardSectionHeadingClass =
 export const giftCardFieldClassName =
   "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-base font-normal leading-110 text-darkblack placeholder:text-[#999999] outline-none";
 
+/** Contact Us reason dropdown — trigger (Radix Select in modal-safe gift card flow). */
+const giftCardContactSelectTriggerClassName =
+  "h-14 w-full rounded-none border border-transparent bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack shadow-none focus:ring-0 data-[state=open]:border-darkblack [&>svg]:size-4 [&>svg]:text-darkblack";
+
+/** Contact Us reason dropdown — list option row. */
+const giftCardContactSelectItemClassName =
+  "h-14 rounded-none border-0 bg-[#F2F2F2] px-3 font-gill text-base font-normal leading-110 text-neutral500 shadow-none focus:bg-[#DECAA0] focus:text-darkblack data-[highlighted]:bg-[#DECAA0] data-[highlighted]:text-darkblack data-[state=checked]:bg-[#DECAA0] data-[state=checked]:text-darkblack data-[state=checked]:data-[highlighted]:bg-[#DECAA0] [&>span:first-child]:hidden";
+
 type GiftCardTextFieldProps = {
   id: string;
   label: string;
@@ -113,6 +121,8 @@ type GiftCardSelectFieldProps = {
   placeholder: string;
   options: Array<{ label: string; value: string }>;
   invalid?: boolean;
+  /** Same as Contact Us reason dropdown (`InlineCustomSelect`). */
+  variant?: "careers" | "contact";
 };
 
 export const GiftCardSelectField = ({
@@ -123,38 +133,84 @@ export const GiftCardSelectField = ({
   placeholder,
   options,
   invalid = false,
-}: GiftCardSelectFieldProps) => (
-  <div className="flex flex-col gap-2">
-    <label className={giftCardFieldLabelClass} htmlFor={id}>
-      {label}
-    </label>
-    <Select
-      value={value}
-      onValueChange={(next) => {
-        onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
-      }}
-    >
-      <SelectTrigger
-        id={id}
-        className={cn(
-          careersSelectTriggerClassName,
-          !value && "!text-[#999999]",
-          invalid && invalidFieldClassName,
-        )}
+  variant = "careers",
+}: GiftCardSelectFieldProps) => {
+  if (variant === "contact") {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
+          <label className={giftCardFieldLabelClass} htmlFor={id}>
+            {label}
+          </label>
+          <Select
+            value={value || undefined}
+            onValueChange={(next) => {
+              onChange(next);
+            }}
+          >
+            <SelectTrigger
+              id={id}
+              className={cn(
+                giftCardContactSelectTriggerClassName,
+                !value && "[&>span]:font-normal [&>span]:text-gray600",
+                invalid && invalidFieldClassName,
+              )}
+            >
+              <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
+            <SelectContent
+              position="popper"
+              className="z-[80] max-h-64 rounded-none border-0 bg-[#F2F2F2] p-0 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+            >
+              {options.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className={giftCardContactSelectItemClassName}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className={giftCardFieldLabelClass} htmlFor={id}>
+        {label}
+      </label>
+      <Select
+        value={value}
+        onValueChange={(next) => {
+          onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
+        }}
       >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="z-[80]">
-        <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
+        <SelectTrigger
+          id={id}
+          className={cn(
+            careersSelectTriggerClassName,
+            !value && "!text-[#999999]",
+            invalid && invalidFieldClassName,
+          )}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent className="z-[80]">
+          <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
 
 type GiftCardTextAreaFieldProps = {
   id: string;
