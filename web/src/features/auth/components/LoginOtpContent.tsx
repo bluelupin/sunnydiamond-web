@@ -90,31 +90,29 @@ const LoginOtpContent = ({
   return (
     <form className="flex w-full flex-col gap-10" onSubmit={handleSubmit} noValidate>
       <div className="flex w-full flex-col gap-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-2">
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="Go back"
+                className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+              >
+                <LeftArrow className="size-6" />
+              </button>
+              <h2 className={getAuthFlowTitleClassName(titleClassName)}>Enter Code</h2>
+            </div>
             <button
               type="button"
-              onClick={onBack}
-              aria-label="Go back"
+              onClick={onClose}
+              aria-label="Close sign in"
               className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
             >
-              <LeftArrow className="size-6" />
+              <CloseIcon />
             </button>
-            <h2 className={getAuthFlowTitleClassName(titleClassName)}>Enter Code</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close sign in"
-            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
-          >
-            <CloseIcon />
-          </button>
-        </div>
 
-        <CartDivider />
-
-        <div className="flex w-full flex-col gap-4">
           <div className="flex w-full items-start gap-4 lg:flex-wrap lg:items-center lg:gap-3">
             <p className={authFlowOtpInstructionClassName}>
               Please enter the OTP sent to{" "}
@@ -128,7 +126,11 @@ const LoginOtpContent = ({
               EDIT
             </DetailTextLink>
           </div>
+        </div>
 
+        <CartDivider />
+
+        <div className="flex w-full flex-col gap-4">
           <div
             className="flex w-full gap-2"
             role="group"
