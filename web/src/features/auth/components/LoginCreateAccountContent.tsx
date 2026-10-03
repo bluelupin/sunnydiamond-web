@@ -11,7 +11,7 @@ import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
-import { isCreateAccountReady, type CreateAccountSecondaryField } from "../utils/authValidation";
+import type { CreateAccountSecondaryField } from "../utils/authValidation";
 
 type LoginCreateAccountContentProps = {
   fullName: string;
@@ -79,18 +79,9 @@ const LoginCreateAccountContent = ({
   onCreateAccount,
   titleClassName,
 }: LoginCreateAccountContentProps) => {
-  const canSubmit = isCreateAccountReady({
-    fullName,
-    termsAccepted,
-    secondaryField: missingIdentifier,
-    email,
-    phone,
-    countryCode,
-  });
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (canSubmit) onCreateAccount();
+    onCreateAccount();
   };
 
   return (
@@ -261,7 +252,7 @@ const LoginCreateAccountContent = ({
       <CartPrimaryButton
         type="submit"
         className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={!canSubmit || submitting}
+        disabled={submitting}
       >
         {submitting ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
       </CartPrimaryButton>
