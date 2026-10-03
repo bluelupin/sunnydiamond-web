@@ -94,7 +94,7 @@ const LoginCreateAccountContent = ({
   };
 
   return (
-    <form className="flex w-full flex-col gap-10" onSubmit={handleSubmit} noValidate>
+    <form className="flex w-full flex-col md:gap-10 gap-6" onSubmit={handleSubmit} noValidate>
       <div className="flex w-full flex-col gap-4">
         <div className="flex w-full flex-col gap-6">
           <div className="flex w-full flex-col gap-3">
@@ -119,14 +119,12 @@ const LoginCreateAccountContent = ({
                 <CloseIcon />
               </button>
             </div>
-            <p className="w-full font-gill text-base font-light leading-110 text-neutral500">
+            <p className="md:max-w-full max-w-[275px] w-full font-gill text-base font-light leading-110 text-neutral500">
               {CREATE_ACCOUNT_DESCRIPTION}
             </p>
           </div>
-
           <CartDivider />
-
-          <div className="flex w-full flex-col gap-6">
+          <div className="flex w-full flex-col md:gap-6 gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="create-account-full-name" className="font-gill text-base font-normal leading-110 text-darkblack">
                 Full Name*
@@ -136,7 +134,7 @@ const LoginCreateAccountContent = ({
                 type="text"
                 value={fullName}
                 onChange={(event) => onFullNameChange(event.target.value)}
-                placeholder="Enter"
+                placeholder="Enter your full name"
                 autoComplete="name"
                 required
                 aria-invalid={fullNameError ? true : undefined}

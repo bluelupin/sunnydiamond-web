@@ -194,9 +194,6 @@ const LoginOtpContent = ({
           )}
         </div>
       </div>
-
-      <CartDivider />
-
       <div className="flex w-full flex-col items-center gap-4">
         {hasError ? (
           <button
