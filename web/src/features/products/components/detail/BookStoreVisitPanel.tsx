@@ -524,10 +524,6 @@ const BookStoreVisitPanel = ({
 
     setIsSubmitting(true);
     try {
-      const composedNotes = [purpose ? `Purpose: ${purpose}` : "", note.trim()]
-        .filter(Boolean)
-        .join("\n");
-
       // preferredShowroom is a Strapi relation — send documentId, not the display name
       const preferredShowroom =
         selectedStore.documentId ?? selectedStore.id;
@@ -574,7 +570,7 @@ const BookStoreVisitPanel = ({
         customerPhone: `${countryCode} ${phone}`.trim(),
         customerEmail: email.trim() || undefined,
         ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-        requestDetails: composedNotes || undefined,
+        requestDetails: note.trim() || undefined,
         purposeOfVisit: purpose.trim() || undefined,
         requestedDate: date || undefined,
         selectedTimeSlot: selectedSlot ?? undefined,
