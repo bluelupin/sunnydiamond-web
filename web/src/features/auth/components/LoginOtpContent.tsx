@@ -170,9 +170,9 @@ const LoginOtpContent = ({
 
           {hasError ? (
             <div className="flex w-full items-center justify-between gap-4">
-              <FormFieldError message={otpError} className="min-w-0 flex-1" />
+              <FormFieldError message={otpError} className="min-w-0 flex-1 text-nowrap w-fit" />
               {secondsLeft > 0 ? (
-                <p className={cn(authFlowOtpResendClassName, "shrink-0")}>
+                <p className={cn(authFlowOtpResendClassName, "shrink-0 w-fit")}>
                   <span className="text-neutral500">Resend code in</span>{" "}
                   <span className="font-normal text-darkblack">{formatCountdown(secondsLeft)}</span>
                 </p>
