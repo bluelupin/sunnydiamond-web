@@ -55,7 +55,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
         />
 
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-black/10 md:bg-none"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[344px] bg-gradient-to-b from-black to-transparent md:hidden"
           aria-hidden
         />
       </div>
