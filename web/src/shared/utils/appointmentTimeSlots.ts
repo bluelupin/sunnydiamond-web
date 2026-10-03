@@ -113,6 +113,29 @@ export function isAppointmentTimeSlotAvailable(
   return slotStart.getTime() > referenceDate.getTime() + minNoticeMinutes * 60_000;
 }
 
+/**
+ * `minDate`, or the following day when every slot on `minDate` is already past the notice
+ * window. One step is enough: all slots on the next day start after the earliest bookable moment.
+ */
+export function getEarliestDateWithAvailableSlot(
+  minDate: string,
+  slots: readonly string[],
+  referenceDate = new Date(),
+  minNoticeMinutes = 0,
+): string {
+  const day = parseBookingDateLocal(minDate);
+  if (
+    !day ||
+    slots.length === 0 ||
+    slots.some((slot) => isAppointmentTimeSlotAvailable(slot, minDate, referenceDate, minNoticeMinutes))
+  ) {
+    return minDate;
+  }
+
+  day.setDate(day.getDate() + 1);
+  return toDateInputValue(day);
+}
+
 /** Drop slots whose start time has already passed when booking for today (or a past date). */
 export function filterAvailableAppointmentTimeSlots(
   slots: readonly string[],

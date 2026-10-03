@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import {
   APPOINTMENT_TIME_SLOTS,
@@ -13,6 +13,7 @@ import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
   getAppointmentBookingDateBounds,
+  getEarliestDateWithAvailableSlot,
   isAppointmentTimeSlotAvailable,
   type AppointmentBookingWindow,
 } from "@/shared/utils/appointmentTimeSlots";
@@ -82,6 +83,9 @@ type AppointmentContactFieldsProps = {
   bookingWindow?: AppointmentBookingWindow;
 };
 
+/** How often slot availability is re-checked while the form stays open. */
+const SLOT_AVAILABILITY_REFRESH_MS = 30_000;
+
 const AppointmentContactFields = ({
   idPrefix,
   name,
@@ -135,12 +139,28 @@ const AppointmentContactFields = ({
   detailsReadOnly = false,
   bookingWindow,
 }: AppointmentContactFieldsProps) => {
-  const bookingBounds = bookingWindow ? getAppointmentBookingDateBounds(bookingWindow) : null;
-  const minDate = bookingBounds?.minDate ?? getMinSelectableDate();
-  const maxDate = bookingBounds?.maxDate ?? getMaxSelectableDate();
-  const minNoticeMinutes = bookingWindow?.minNoticeMinutes ?? 0;
   // Explicit `[]` means no slots (CMS empty). Only default when prop is omitted.
   const slots = timeSlots ?? APPOINTMENT_TIME_SLOTS;
+  const hasTimeSlotPicker = showTimeSlots && Boolean(onSelectedSlotChange) && slots.length > 0;
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!hasTimeSlotPicker) {
+      return;
+    }
+
+    const timer = window.setInterval(() => setNowMs(Date.now()), SLOT_AVAILABILITY_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [hasTimeSlotPicker]);
+
+  const now = new Date(nowMs);
+  const bookingBounds = bookingWindow ? getAppointmentBookingDateBounds(bookingWindow, now) : null;
+  const minNoticeMinutes = bookingWindow?.minNoticeMinutes ?? 0;
+  const baseMinDate = bookingBounds?.minDate ?? getMinSelectableDate();
+  const minDate = hasTimeSlotPicker
+    ? getEarliestDateWithAvailableSlot(baseMinDate, slots, now, minNoticeMinutes)
+    : baseMinDate;
+  const maxDate = bookingBounds?.maxDate ?? getMaxSelectableDate();
   const isPhoneLocked = phoneLocked || detailsReadOnly;
   const isEmailLocked = emailLocked || detailsReadOnly;
   const phoneMaxLength =
@@ -160,10 +180,10 @@ const AppointmentContactFields = ({
       return;
     }
 
-    if (!isAppointmentTimeSlotAvailable(selectedSlot, date, new Date(), minNoticeMinutes)) {
+    if (!isAppointmentTimeSlotAvailable(selectedSlot, date, new Date(nowMs), minNoticeMinutes)) {
       onSelectedSlotChange(null);
     }
-  }, [date, minNoticeMinutes, onSelectedSlotChange, selectedSlot]);
+  }, [date, minNoticeMinutes, nowMs, onSelectedSlotChange, selectedSlot]);
 
   return (
     <>
@@ -306,7 +326,7 @@ const AppointmentContactFields = ({
                   const isSelected = selectedSlot === slot;
                   const isSlotAvailable =
                     !date.trim() ||
-                    isAppointmentTimeSlotAvailable(slot, date, new Date(), minNoticeMinutes);
+                    isAppointmentTimeSlotAvailable(slot, date, now, minNoticeMinutes);
 
                   return (
                     <button
