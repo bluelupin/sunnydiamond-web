@@ -10,7 +10,7 @@ import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
  * - Do not attach Magento Bearer — collection create rejects Magento JWT (401).
  * - Strip `magentoCustomerId` — not a collection attribute (400 Invalid key).
  *
- * PDP Visit Us → My Appointments uses `product-store-visit` via
+ * PDP Visit Us → My Appointments uses `store-visit` via
  * `/api/product-submissions/submit` (not this route).
  * Try at Home / Video Call also use product-submissions (not this route).
  */

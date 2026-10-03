@@ -14,6 +14,7 @@ import { resolveHeaderNavHref, isHeaderNavLinkActive, isJewelleryNavLink } from 
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
+import { STORE_VISIT_FORM_TAG } from "@/services/forms/product-form.service";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { JewelleryCategoryMenu } from "@/shared/ui/layout/JewelleryCategoryMenu";
@@ -591,7 +592,7 @@ const MobileNavigation = ({
               variant="embedded"
               onBack={() => setSubPanel(null)}
               onClose={handleClose}
-              submissionFormTag="product-store-visit"
+              submissionFormTag={STORE_VISIT_FORM_TAG}
               productName="Store Visit"
               productId="store-visit"
             />

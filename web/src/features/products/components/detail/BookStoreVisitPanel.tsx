@@ -62,6 +62,8 @@ import {
   createProductSubmission,
   ProductSubmissionRefusedError,
   getProductFormByTag,
+  isStoreVisitFormTag,
+  STORE_VISIT_FORM_TAG,
 } from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
@@ -74,7 +76,6 @@ import {
   ProductDetailSidePanelShell,
 } from "./ProductDetailSidePanelShell";
 
-const PRODUCT_STORE_VISIT_FORM_TAG = "product-store-visit";
 /** Fallback product identity when booking outside PDP (store locator / nav). */
 const STORE_VISIT_PRODUCT_NAME = "Store Visit";
 const STORE_VISIT_PRODUCT_ID = "store-visit";
@@ -98,7 +99,7 @@ type BookStoreVisitPanelProps = {
   invalidPincodeMessage?: string | null;
   listCopy?: NormalizedStoreLocatorListCopy | null;
   /**
-   * Overrides the default `product-store-visit` form tag.
+   * Overrides the default `store-visit` form tag.
    * Submit always uses product-submissions (My Appointments).
    */
   submissionFormTag?: string;
@@ -169,7 +170,7 @@ const BookStoreVisitPanel = ({
   const [notesPlaceholder, setNotesPlaceholder] = useState("Enter");
   const [submitButtonText, setSubmitButtonText] = useState("BOOK A VISIT");
   const [formTag, setFormTag] = useState(
-    submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG,
+    submissionFormTag ?? STORE_VISIT_FORM_TAG,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState(
@@ -370,7 +371,7 @@ const BookStoreVisitPanel = ({
 
     void (async () => {
       try {
-        const activeFormTag = submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG;
+        const activeFormTag = submissionFormTag ?? STORE_VISIT_FORM_TAG;
         const form = await getProductFormByTag(activeFormTag, controller.signal);
         const resolvedStores = resolveBookStoreVisitStoresForPanel(
           variant,
@@ -455,7 +456,7 @@ const BookStoreVisitPanel = ({
   }, [open, variant, editorialShowrooms, submissionFormTag, initialStores]);
 
   useEffect(() => {
-    setFormTag(submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG);
+    setFormTag(submissionFormTag ?? STORE_VISIT_FORM_TAG);
   }, [submissionFormTag]);
 
   useEffect(() => {
@@ -556,11 +557,11 @@ const BookStoreVisitPanel = ({
         return;
       }
 
-      const resolvedFormTag = formTag || PRODUCT_STORE_VISIT_FORM_TAG;
+      const resolvedFormTag = formTag || STORE_VISIT_FORM_TAG;
 
       await createProductSubmission({
         formTag: resolvedFormTag,
-        ...(resolvedFormTag === PRODUCT_STORE_VISIT_FORM_TAG
+        ...(isStoreVisitFormTag(resolvedFormTag)
           ? { productName: "null" }
           : {
               productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,

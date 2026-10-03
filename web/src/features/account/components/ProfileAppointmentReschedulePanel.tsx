@@ -14,7 +14,11 @@ import {
   getAppointmentContactLocks,
   getAuthLoginIdentifierKind,
 } from "@/features/auth/utils/authLoginIdentifier";
-import { getProductFormByTag, type NormalizedProductForm } from "@/services/forms/product-form.service";
+import {
+  getProductFormByTag,
+  STORE_VISIT_FORM_TAG,
+  type NormalizedProductForm,
+} from "@/services/forms/product-form.service";
 import { rescheduleCustomerAppointment } from "@/services/customer/customer-appointments.client";
 import {
   APPOINTMENT_COUNTRY_CODES,
@@ -52,7 +56,7 @@ const panelContent = profileTabsContent.appointments.reschedulePanel;
 const DEFAULT_FORM_TAGS: Record<ProfileAppointmentUi["type"], string> = {
   try_at_home: "try-at-home-form",
   video_call: "product-video-call",
-  store_visit: "product-store-visit",
+  store_visit: STORE_VISIT_FORM_TAG,
 };
 
 function splitStoredPhone(rawPhone: string): { countryCode: string; phone: string } {
