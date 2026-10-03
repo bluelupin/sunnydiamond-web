@@ -11,8 +11,11 @@ type AuthStandalonePageProps = {
   returnUrl: string;
 };
 
-const LOGIN_BACKGROUND_IMAGE_URL =
-  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_bg_0e012a2085.png";
+const LOGIN_WEB_BACKGROUND_IMAGE_URL =
+  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_web_bg_47c3f1e510.avif";
+
+const LOGIN_MOBILE_BACKGROUND_IMAGE_URL =
+  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_mobile_bg_c7195b83ef.avif";
 
 const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
   const router = useRouter();
@@ -45,15 +48,23 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
     <div className="relative h-full">
       <div className="absolute inset-0">
         <Image
-          src={LOGIN_BACKGROUND_IMAGE_URL}
+          src={LOGIN_WEB_BACKGROUND_IMAGE_URL}
           alt=""
           fill
           priority
-          className="object-cover object-center md:object-left"
+          className="object-cover object-center md:object-left md:block hidden"
           sizes="100vw"
           aria-hidden
         />
-
+        <Image
+          src={LOGIN_MOBILE_BACKGROUND_IMAGE_URL}
+          alt=""
+          fill
+          priority
+          className="object-cover object-center md:object-left md:hidden block"
+          sizes="100vw"
+          aria-hidden
+        />
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-[344px] bg-gradient-to-b from-black to-transparent md:hidden"
           aria-hidden
