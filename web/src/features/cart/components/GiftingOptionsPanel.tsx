@@ -403,9 +403,9 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
         <div className={cn("w-full shrink-0 md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
           <div className="flex h-[26px] items-center justify-between">
             <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-              Gifting Options
+              Personalise Your Gift
             </h2>
-            <RightPanelCloseButton onClick={onClose} aria-label="Close gifting options" />
+            <RightPanelCloseButton onClick={onClose} aria-label="Close personalise your gift" />
           </div>
           <div className="mt-6">
             <CartDivider weight={1} />
@@ -534,7 +534,9 @@ const GiftingOptionsPanel = () => {
               : "h-[90vh] max-h-[90vh] bg-white",
           )}
         >
-          <DrawerTitle className="sr-only">Gifting options</DrawerTitle>
+          <DrawerTitle className="sr-only">
+            {giftingStep === "intro" ? "Make It Extra Special" : "Personalise Your Gift"}
+          </DrawerTitle>
           {giftingStep === "intro" ? (
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{introPanel}</div>
           ) : (
@@ -571,7 +573,7 @@ const GiftingOptionsPanel = () => {
           "[&>button]:hidden",
         )}
       >
-        <SheetTitle className="sr-only">Gifting options</SheetTitle>
+        <SheetTitle className="sr-only">Personalise Your Gift</SheetTitle>
         <div className="flex h-full min-h-0 flex-col overflow-hidden">{personalisePanel}</div>
       </SheetContent>
     </Sheet>
