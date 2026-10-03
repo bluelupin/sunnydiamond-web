@@ -1,9 +1,5 @@
-"use client";
-
-import { useRef } from "react";
-import CraftingRarityScrollLine from "@/features/about/components/CraftingRarityScrollLine";
-import { useCraftingRarityScrollReveal } from "@/features/about/hooks/useCraftingRarityScrollReveal";
-import Reveal from "@/shared/Animation/Reveal";
+import VerticalScrollLine from "@/features/about/components/VerticalScrollLine";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { NormalizedDfePlanIntro } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
@@ -24,9 +20,6 @@ type DfePlanBannerSectionProps = {
 };
 
 const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
-  const sectionRef = useRef<HTMLElement>(null);
-  useCraftingRarityScrollReveal(sectionRef);
-
   const texture = planIntro.textureImage;
   const textureMobileUrl =
     texture?.mobileUrl?.trim() || texture?.desktopUrl?.trim() || "";
@@ -44,7 +37,6 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
 
   return (
     <section
-      ref={sectionRef}
       aria-labelledby="dfe-plan-banner-title"
       className="relative flex flex-col items-center overflow-hidden bg-white py-16 md:min-h-[700px] md:py-104"
     >
@@ -70,50 +62,41 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
 
       <PageContainer className="relative flex w-full justify-center max-md:px-0">
         <div className="flex w-full max-w-[592px] flex-col items-center px-6 text-center md:px-0">
-          <div data-reveal-mask="heading" className="w-full overflow-hidden">
-            <Reveal
-              as="h2"
+          <ScrollReveal as="h2" delayMs={0} className="w-full">
+            <span
               id="dfe-plan-banner-title"
-              direction="up"
-              className="font-larken text-2xl font-light leading-110 text-darkblack md:text-5xl"
+              className="block font-larken text-2xl font-light leading-110 text-darkblack md:text-5xl"
             >
               {planIntro.title}
-            </Reveal>
-          </div>
+            </span>
+          </ScrollReveal>
 
           {hasDesktopProduct ? (
-            <div
-              data-reveal-mask="image"
+            <ScrollReveal
+              delayMs={100}
               className="relative mt-6 hidden h-[223px] w-[240px] overflow-hidden md:block"
             >
-              <Reveal direction="up" className="relative size-full">
-                <ResponsiveImage
-                  desktopSrc={desktopProductUrl}
-                  mobileSrc={desktopProductUrl}
-                  alt={desktopProductAlt}
-                  width={240}
-                  height={223}
-                  quality={80}
-                  sizes="240px"
-                  className="absolute top-[-17.89%] left-[-42.4%] h-[134.34%] max-w-none w-[187.23%] object-cover"
-                />
-              </Reveal>
-            </div>
+              <ResponsiveImage
+                desktopSrc={desktopProductUrl}
+                mobileSrc={desktopProductUrl}
+                alt={desktopProductAlt}
+                width={240}
+                height={223}
+                quality={80}
+                sizes="240px"
+                className="absolute top-[-17.89%] left-[-42.4%] h-[134.34%] max-w-none w-[187.23%] object-cover"
+              />
+            </ScrollReveal>
           ) : null}
 
-          <CraftingRarityScrollLine
-            className="mt-6 hidden md:flex"
-            lineHeight={56}
-          />
+          <VerticalScrollLine height={56} className="mt-6 hidden md:flex" />
 
           {planIntro.description ? (
-            <Reveal
-              as="p"
-              direction="up"
-              className="mt-3 w-full font-gill text-base font-light leading-110 text-neutral500 md:mt-6 md:text-xl md:text-darkblack"
-            >
-              {planIntro.description}
-            </Reveal>
+            <ScrollReveal delayMs={220}>
+              <p className="mt-3 w-full font-gill text-base font-light leading-110 text-neutral500 md:mt-6 md:text-xl md:text-darkblack">
+                {planIntro.description}
+              </p>
+            </ScrollReveal>
           ) : null}
         </div>
       </PageContainer>

@@ -13,7 +13,7 @@ import { cn } from "@/shared/utils/cn";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const SAVINGS_PLAN_DESKTOP_VIGNETTE =
-  "radial-gradient(ellipse 90% 80% at 62% 58%, rgba(244,243,238,0) 0%, rgba(244,243,238,1) 100%)";
+  "radial-gradient(ellipse 90% 80% at 62% 58%, #f4f3eef0 0%, #F4F3EE 100%)";
 
 /** Figma 4453:39478 — rotated silk texture (not the CMS bangles photo). */
 const SAVINGS_PLAN_HORIZONTAL_TEXTURE = "/images/horizontal-texture.png";
