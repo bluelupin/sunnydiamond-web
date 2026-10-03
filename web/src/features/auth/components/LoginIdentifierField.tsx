@@ -31,6 +31,7 @@ const LoginIdentifierField = ({
   onCountryCodeChange,
 }: LoginIdentifierFieldProps) => {
   const isEmailMode = emailOnly || isEmailIdentifier(identifier);
+  const showCountryCode = !emailOnly && !isEmailMode;
 
   return (
     <div className="flex flex-col gap-2">
@@ -39,33 +40,13 @@ const LoginIdentifierField = ({
         <span aria-hidden="true">*</span>
       </label>
 
-      {isEmailMode ? (
-        <input
-          ref={inputRef}
-          id="login-identifier"
-          type="email"
-          inputMode="email"
-          value={identifier}
-          onChange={(event) => onIdentifierChange(event.target.value)}
-          placeholder={
-            emailOnly ? "Enter your email address." : "Enter your phone number or email address."
-          }
-          autoComplete="username"
-          required
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? "login-identifier-error" : undefined}
-          className={cn(
-            "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack",
-            error && "border-[#F91616] bg-[#FEDCDC]",
-          )}
-        />
-      ) : (
-        <div
-          className={cn(
-            "flex h-14 w-full items-center gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
-            error && "border-[#F91616] bg-[#FEDCDC]",
-          )}
-        >
+      <div
+        className={cn(
+          "flex h-14 w-full items-center gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
+          error && "border-[#F91616] bg-[#FEDCDC]",
+        )}
+      >
+        {showCountryCode ? (
           <PhoneCountryCodeSelect
             id="login-country-code"
             value={countryCode || DEFAULT_COUNTRY_CODE}
@@ -75,22 +56,24 @@ const LoginIdentifierField = ({
               onIdentifierChange(sanitizePhoneInput(identifier, nextCode));
             }}
           />
-          <input
-            ref={inputRef}
-            id="login-identifier"
-            type="tel"
-            inputMode="numeric"
-            value={identifier}
-            onChange={(event) => onIdentifierChange(event.target.value)}
-            placeholder="Enter your phone number or email address."
-            autoComplete="tel-national"
-            required
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? "login-identifier-error" : undefined}
-            className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
-          />
-        </div>
-      )}
+        ) : null}
+        <input
+          ref={inputRef}
+          id="login-identifier"
+          type={emailOnly ? "email" : "text"}
+          inputMode={isEmailMode ? "email" : "tel"}
+          value={identifier}
+          onChange={(event) => onIdentifierChange(event.target.value)}
+          placeholder={
+            emailOnly ? "Enter your email address." : "Enter your phone number or email address."
+          }
+          autoComplete={isEmailMode ? "username" : "tel-national"}
+          required
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "login-identifier-error" : undefined}
+          className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
+        />
+      </div>
 
       <FormFieldError id="login-identifier-error" message={error} />
     </div>
