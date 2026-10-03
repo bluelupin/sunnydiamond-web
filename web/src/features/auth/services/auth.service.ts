@@ -192,6 +192,8 @@ export async function createCustomerAccount(input: {
   otp: string;
   fullName: string;
   email: string;
+  /** Collected when the customer verified their email and still needs a phone on the account. */
+  phone?: string;
   marketingOptIn: boolean;
 }): Promise<CreateAccountResult> {
   const { firstname, lastname } = splitProfileFullName(input.fullName);
@@ -202,7 +204,9 @@ export async function createCustomerAccount(input: {
   const identity =
     input.target.kind === "phone"
       ? { phone: input.target.phone, email: input.email }
-      : { email: input.target.email };
+      : input.phone
+        ? { email: input.target.email, phone: input.phone }
+        : { email: input.target.email };
 
   const { ok, data } = await postJson("/api/auth/otp/verify", {
     ...identity,

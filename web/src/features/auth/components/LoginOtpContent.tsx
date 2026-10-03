@@ -119,15 +119,11 @@ const LoginOtpContent = ({
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <p className="font-gill text-base font-normal leading-110 text-darkblack">
+              Please enter the OTP sent to{" "}
               {channel === "email" ? (
-                <>
-                  {/* Not "registered email": the same step serves first-time
-                      sign-ups, whose address has no account behind it yet. */}
-                  We&rsquo;ve sent a {OTP_LENGTH}-digit code to{" "}
-                  <span className="font-normal">{maskedDestination ?? phone}</span>
-                </>
+                <span className="font-normal">{maskedDestination ?? phone}</span>
               ) : (
-                <>Please enter the OTP sent to {formatPhoneForOtp(countryCode, phone)}</>
+                formatPhoneForOtp(countryCode, phone)
               )}
             </p>
             <DetailTextLink onClick={onEdit}>EDIT</DetailTextLink>

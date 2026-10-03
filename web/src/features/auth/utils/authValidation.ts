@@ -106,15 +106,22 @@ export function applyOtpInput(
   return { next, focusIndex: lastFilled };
 }
 
+export type CreateAccountSecondaryField = "email" | "phone";
+
 export type CreateAccountFormValues = {
   fullName: string;
-  email: string;
   termsAccepted: boolean;
+  /** Identifier collected on create-account when it was not used to sign in. */
+  secondaryField: CreateAccountSecondaryField;
+  email: string;
+  phone: string;
+  countryCode: string;
 };
 
 export type CreateAccountFormErrors = {
   fullName?: string;
   email?: string;
+  phone?: string;
   terms?: string;
 };
 
@@ -122,16 +129,24 @@ export const validateCreateAccountForm = (
   values: CreateAccountFormValues,
 ): { valid: boolean; errors: CreateAccountFormErrors } => {
   const nameValidation = validateRequiredName(values.fullName);
-  const emailValidation = validateRequiredEmail(values.email);
+  const emailValidation =
+    values.secondaryField === "email" ? validateRequiredEmail(values.email) : { valid: true as const };
+  const phoneValidation =
+    values.secondaryField === "phone"
+      ? validatePhone(values.phone, values.countryCode)
+      : { valid: true as const };
 
   const errors: CreateAccountFormErrors = {
     fullName: nameValidation.valid ? undefined : nameValidation.error,
     email: emailValidation.valid ? undefined : emailValidation.error,
-    terms: values.termsAccepted ? undefined : "Please accept the terms and conditions",
+    phone: phoneValidation.valid ? undefined : phoneValidation.error,
+    terms: values.termsAccepted
+      ? undefined
+      : "Please agree to the Terms & Conditions and Privacy Policy.",
   };
 
   return {
-    valid: !errors.fullName && !errors.email && !errors.terms,
+    valid: !errors.fullName && !errors.email && !errors.phone && !errors.terms,
     errors,
   };
 };

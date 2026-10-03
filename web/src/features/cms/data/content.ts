@@ -146,7 +146,7 @@ export const seoContent = {
   },
   login: {
     title: "Sign In",
-    description: "Sign in or create your Sunny Diamonds account with your mobile number.",
+    description: "Access your account to continue your journey with Sunny Diamonds.",
   },
   wishlist: {
     title: "Wishlist",

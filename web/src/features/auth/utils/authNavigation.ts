@@ -25,7 +25,7 @@ export function getPostSignupReturnUrl(returnUrl: string): string {
 export function getAuthFlowLabel(step: AuthFlowStep): string {
   if (step === "sign-in") return "Sign In";
   if (step === "otp") return "Enter Code";
-  return "Enter Details";
+  return "Create Your Account";
 }
 
 export function getLoginHrefForReturn(

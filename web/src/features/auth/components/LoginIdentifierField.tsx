@@ -35,7 +35,8 @@ const LoginIdentifierField = ({
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor="login-identifier" className="font-gill text-base font-normal leading-110 text-darkblack">
-        {emailOnly ? "Email ID*" : "Phone Number / Email ID*"}
+        {emailOnly ? "Email Address" : "Phone Number or Email Address"}
+        <span aria-hidden="true">*</span>
       </label>
 
       {isEmailMode ? (
@@ -46,7 +47,9 @@ const LoginIdentifierField = ({
           inputMode="email"
           value={identifier}
           onChange={(event) => onIdentifierChange(event.target.value)}
-          placeholder="Enter email"
+          placeholder={
+            emailOnly ? "Enter your email address." : "Enter your phone number or email address."
+          }
           autoComplete="username"
           required
           aria-invalid={error ? true : undefined}
@@ -79,7 +82,7 @@ const LoginIdentifierField = ({
             inputMode="numeric"
             value={identifier}
             onChange={(event) => onIdentifierChange(event.target.value)}
-            placeholder="Enter phone number"
+            placeholder="Enter your phone number or email address."
             autoComplete="tel-national"
             required
             aria-invalid={error ? true : undefined}

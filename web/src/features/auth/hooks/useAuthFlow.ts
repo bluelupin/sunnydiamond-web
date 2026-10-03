@@ -101,17 +101,25 @@ export type AuthFlowContentProps = {
   createAccount: {
     fullName: string;
     email: string;
-    emailReadOnly: boolean;
+    missingIdentifier: "email" | "phone";
+    phone: string;
+    countryCode: string;
+    otpCountryCodes: readonly string[];
     termsAccepted: boolean;
+    marketingOptIn: boolean;
     fullNameError?: string;
     emailError?: string;
+    phoneError?: string;
     termsError?: string;
     /** Failures that belong to no single field — an expired code, a rejected save. */
     formError?: string;
     submitting: boolean;
     onFullNameChange: (value: string) => void;
     onEmailChange: (value: string) => void;
+    onPhoneChange: (value: string) => void;
+    onCountryCodeChange: (value: string) => void;
     onTermsAcceptedChange: (value: boolean) => void;
+    onMarketingOptInChange: (value: boolean) => void;
     onBack: () => void;
     onClose: () => void;
     onCreateAccount: () => void;
@@ -156,9 +164,12 @@ export function useAuthFlow({
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [createAccountPhone, setCreateAccountPhone] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [fullNameError, setFullNameError] = useState<string | undefined>();
   const [emailError, setEmailError] = useState<string | undefined>();
+  const [phoneError, setPhoneError] = useState<string | undefined>();
   const [termsError, setTermsError] = useState<string | undefined>();
   const [createAccountFormError, setCreateAccountFormError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -194,8 +205,9 @@ export function useAuthFlow({
     && !isEmailIdentifier(identifier)
     && !flags.otpCountryCodes.includes(countryCode);
   const offerEmailFallback = smsSendFailed && !emailOnly && flags.emailOtpLoginEnabled;
-  /** Registering by email: the address was already proven, so it is not editable. */
-  const emailIsVerifiedIdentifier = otpTarget?.kind === "email";
+  /** Sign-in channel — create-account collects the other identifier (email ↔ phone). */
+  const createAccountMissingIdentifier: "email" | "phone" =
+    otpTarget?.kind === "email" ? "phone" : "email";
   /**
    * Every channel is off — which is also the fail-closed state when the flag fetch
    * errors. Without this the form would look usable and could only ever produce an
@@ -244,9 +256,12 @@ export function useAuthFlow({
     setSecondsLeft(RESEND_SECONDS);
     setFullName("");
     setEmail("");
+    setCreateAccountPhone("");
     setTermsAccepted(false);
+    setMarketingOptIn(false);
     setFullNameError(undefined);
     setEmailError(undefined);
+    setPhoneError(undefined);
     setTermsError(undefined);
     setCreateAccountFormError(undefined);
     setIsSubmitting(false);
@@ -576,27 +591,41 @@ export function useAuthFlow({
   const handleCreateAccount = useCallback(async () => {
     if (!otpTarget || isSubmitting) return;
 
+    const missingIdentifier = otpTarget.kind === "email" ? "phone" : "email";
     const accountEmail = otpTarget.kind === "email" ? otpTarget.email : email;
     const { valid, errors } = validateCreateAccountForm({
       fullName,
-      email: accountEmail,
       termsAccepted,
+      secondaryField: missingIdentifier,
+      email: missingIdentifier === "email" ? email : "",
+      phone: missingIdentifier === "phone" ? createAccountPhone : "",
+      countryCode,
     });
 
     setFullNameError(errors.fullName);
     setEmailError(errors.email);
+    setPhoneError(errors.phone);
     setTermsError(errors.terms);
     setCreateAccountFormError(undefined);
 
     if (!valid) return;
 
     setIsSubmitting(true);
+    const supplementalPhone =
+      otpTarget.kind === "email"
+        ? formatLoginPhoneForMagento(
+            countryCode,
+            normalizeLoginPhoneDigits(createAccountPhone, countryCode),
+          )
+        : undefined;
+
     const result = await createCustomerAccount({
       target: otpTarget,
       otp: otp.join(""),
       fullName: fullName.trim(),
       email: accountEmail.trim(),
-      marketingOptIn: termsAccepted,
+      phone: supplementalPhone,
+      marketingOptIn,
     });
 
     if (!result.success) {
@@ -609,7 +638,19 @@ export function useAuthFlow({
 
     setAuthLoginIdentifierKind(otpTarget.kind === "email" ? "email" : "phone");
     await completeAuth(getPostSignupReturnUrl(returnUrl));
-  }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, returnUrl, termsAccepted]);
+  }, [
+    completeAuth,
+    countryCode,
+    createAccountPhone,
+    email,
+    fullName,
+    isSubmitting,
+    marketingOptIn,
+    otp,
+    otpTarget,
+    returnUrl,
+    termsAccepted,
+  ]);
 
   const handleGoogleCredential = useCallback(
     async (credential: string) => {
@@ -695,10 +736,15 @@ export function useAuthFlow({
     createAccount: {
       fullName,
       email,
-      emailReadOnly: emailIsVerifiedIdentifier,
+      missingIdentifier: createAccountMissingIdentifier,
+      phone: createAccountPhone,
+      countryCode,
+      otpCountryCodes: flags.otpCountryCodes,
       termsAccepted,
+      marketingOptIn,
       fullNameError,
       emailError,
+      phoneError,
       termsError,
       formError: createAccountFormError,
       submitting: isSubmitting,
@@ -707,14 +753,22 @@ export function useAuthFlow({
         setFullNameError(undefined);
       },
       onEmailChange: (value) => {
-        if (emailIsVerifiedIdentifier) return;
         setEmail(value);
         setEmailError(undefined);
+      },
+      onPhoneChange: (value) => {
+        setCreateAccountPhone(value);
+        setPhoneError(undefined);
+      },
+      onCountryCodeChange: (value) => {
+        setCountryCode(value);
+        setPhoneError(undefined);
       },
       onTermsAcceptedChange: (value) => {
         setTermsAccepted(value);
         setTermsError(undefined);
       },
+      onMarketingOptInChange: setMarketingOptIn,
       onBack: handleBackToSignIn,
       onClose: handleClose,
       onCreateAccount: handleCreateAccount,

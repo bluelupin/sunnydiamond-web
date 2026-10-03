@@ -50,10 +50,15 @@ const CloseIcon = () => (
 const OrDivider = () => (
   <div className="flex w-full items-center gap-2">
     <CartDivider className="flex-1" />
-    <span className="shrink-0 font-gill text-sm font-normal leading-110 text-gray600">or</span>
+    <span className="shrink-0 font-gill text-sm font-normal leading-110 text-gray600">
+      or continue with
+    </span>
     <CartDivider className="flex-1" />
   </div>
 );
+
+const SIGN_IN_DESCRIPTION =
+  "Access your account to continue your journey with Sunny Diamonds.";
 
 const LoginModalContent = ({
   identifier,
@@ -91,23 +96,28 @@ const LoginModalContent = ({
   return (
     <form className="flex w-full flex-col gap-10" onSubmit={handleSubmit} noValidate>
       <div className="flex w-full flex-col gap-6">
-        <div className="flex items-center justify-between gap-4">
-          <h2
-            className={cn(
-              "font-larken font-light leading-110 text-darkblack",
-              titleClassName ?? "text-32",
-            )}
-          >
-            Sign In
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close sign in"
-            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
-          >
-            <CloseIcon />
-          </button>
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full items-center justify-between gap-4">
+            <h2
+              className={cn(
+                "shrink-0 font-larken font-light leading-110 text-darkblack",
+                titleClassName ?? "text-32",
+              )}
+            >
+              Sign In
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close sign in"
+              className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+            >
+              <CloseIcon />
+            </button>
+          </div>
+          <p className="w-full font-gill text-base font-light leading-110 text-neutral500">
+            {SIGN_IN_DESCRIPTION}
+          </p>
         </div>
 
         <CartDivider />
