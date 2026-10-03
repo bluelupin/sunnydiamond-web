@@ -53,7 +53,7 @@ export function ProfileAppointmentCancelDialog({
           <div className="px-4 pt-6">
             <div className="flex items-center justify-between gap-4">
               <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {content.title}
+                {content.mobileTitle}
               </SheetTitle>
               <button
                 type="button"
@@ -68,7 +68,7 @@ export function ProfileAppointmentCancelDialog({
             <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
 
             <SheetDescription className="mt-6 font-gill text-base font-light leading-110 text-darkblack">
-              {content.description}
+              {content.mobileDescription}
             </SheetDescription>
           </div>
 

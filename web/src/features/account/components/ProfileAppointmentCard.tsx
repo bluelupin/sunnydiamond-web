@@ -430,7 +430,7 @@ export function ProfileAppointmentCard({
               appointment.canReschedule && !appointment.rescheduleLimitReached ? (
                 <DetailDarkButton
                   type="button"
-                  className="w-full"
+                  className="order-first w-full md:order-none"
                   onClick={onReschedule}
                 >
                   {content.rescheduleLabel}
