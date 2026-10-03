@@ -18,7 +18,9 @@ import {
 } from "@/shared/ui/drawer";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import { CheckoutSummaryDivider } from "./CheckoutUi";
 import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
 import { applyOtpInput } from "@/features/auth/utils/authValidation";
 import { validatePhone } from "@/shared/utils/formValidation";
@@ -138,13 +140,7 @@ const CheckoutOtpFields = ({
         {`Resend code in ${String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:${String(secondsLeft % 60).padStart(2, "0")}`}
       </p>
     ) : (
-      <button
-        type="button"
-        onClick={onResend}
-        className="font-gill text-base font-light leading-110 text-darkblack underline"
-      >
-        Resend code
-      </button>
+      <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
     )}
   </div>
 );
@@ -181,32 +177,32 @@ const CheckoutOtpDesktopPanel = ({
   isVerifying: boolean;
   onVerify: () => void;
 }) => (
-  <div className="flex w-full max-w-[560px] flex-col gap-6 bg-white p-6">
-    <div className="flex items-center justify-between">
-      <div className="flex min-w-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Go back"
-          className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
-        >
+  <div className="flex w-full max-w-[560px] flex-col gap-10 bg-white p-6">
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Go back"
+            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Enter OTP</h2>
+        </div>
+        <button type="button" onClick={onClose} aria-label="Close" className="text-darkblack">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-            <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M18.5 5L5 18.5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M18.5 18.5L5 5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Enter OTP</h2>
       </div>
-      <button type="button" onClick={onClose} aria-label="Close" className="text-darkblack">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-          <path d="M18.5 5L5 18.5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M18.5 18.5L5 5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+      <CheckoutSummaryDivider />
+      <CheckoutOtpFields {...otpFieldsProps} variant="desktop" />
     </div>
-
-    <CheckoutOtpFields {...otpFieldsProps} variant="desktop" />
-
-    <hr className="border-neutral300" />
     <CheckoutOtpVerifyButton
       disabled={!isComplete}
       loading={isVerifying}
@@ -386,6 +382,9 @@ const CheckoutOtpModal = ({
                     </svg>
                   </button>
                 </div>
+                <div className="mt-6">
+                  <CheckoutSummaryDivider />
+                </div>
               </div>
 
               <div className="px-4 pb-4 pt-6 lg:pb-6 lg:pt-6">
@@ -393,12 +392,11 @@ const CheckoutOtpModal = ({
               </div>
             </div>
 
-            <div className="relative shrink-0 border-t border-neutral300 bg-white pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+            <div className="relative shrink-0 border-t border-neutral300 bg-white pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
               <div
                 className="pointer-events-none absolute inset-x-0 bottom-full h-[71px] bg-gradient-to-b from-transparent to-white"
                 aria-hidden
               />
-              <hr className="mb-6 border-neutral300" />
               <div className="w-full px-4">
                 <CheckoutOtpVerifyButton
                   disabled={!isComplete}

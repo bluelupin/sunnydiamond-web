@@ -188,18 +188,14 @@ const LoginOtpContent = ({
                   <span className="font-normal text-darkblack">{formatCountdown(secondsLeft)}</span>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={onResend}
-                  className="font-normal underline decoration-darkblack underline-offset-2"
-                >
-                  Resend code
-                </button>
+                <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
               )}
             </p>
           )}
         </div>
       </div>
+
+      <CartDivider />
 
       <div className="flex w-full flex-col items-center gap-4">
         {hasError ? (
