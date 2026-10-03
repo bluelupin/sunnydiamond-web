@@ -562,7 +562,7 @@ const BookStoreVisitPanel = ({
       await createProductSubmission({
         formTag: resolvedFormTag,
         ...(isStoreVisitFormTag(resolvedFormTag)
-          ? { productName: "null" }
+          ? {}
           : {
               productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,
               productId: productId?.trim() || STORE_VISIT_PRODUCT_ID,
