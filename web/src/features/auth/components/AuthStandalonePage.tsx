@@ -12,7 +12,7 @@ type AuthStandalonePageProps = {
 };
 
 const LOGIN_WEB_BACKGROUND_IMAGE_URL =
-  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_web_bg_47c3f1e510.avif";
+  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_web_bg_a141f6da7f.avif";
 
 const LOGIN_MOBILE_BACKGROUND_IMAGE_URL =
   "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_mobile_bg_c7195b83ef.avif";
