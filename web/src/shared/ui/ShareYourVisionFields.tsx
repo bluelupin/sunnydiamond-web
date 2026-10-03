@@ -5,6 +5,10 @@ import {
     APPOINTMENT_TIME_SLOTS,
     appointmentFieldClassName,
     appointmentLabelClassName,
+    appointmentTimeSlotButtonBaseClassName,
+    appointmentTimeSlotSelectedDarkClassName,
+    appointmentTimeSlotSelectedGoldClassName,
+    appointmentTimeSlotUnselectedClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
@@ -209,12 +213,12 @@ const ShareYourVisionFields = ({
                                             type="button"
                                             onClick={() => onSelectedSlotChange(isSelected ? null : slot)}
                                             className={cn(
-                                                "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
+                                                appointmentTimeSlotButtonBaseClassName,
                                                 isSelected
                                                     ? selectedSlotStyle === "gold"
-                                                        ? "bg-[#DECAA0] font-normal text-darkblack"
-                                                        : "bg-darkblack font-normal text-white"
-                                                    : "bg-[#F2F2F2] font-light text-darkblack",
+                                                        ? appointmentTimeSlotSelectedGoldClassName
+                                                        : appointmentTimeSlotSelectedDarkClassName
+                                                    : appointmentTimeSlotUnselectedClassName,
                                             )}
                                         >
                                             {slot}

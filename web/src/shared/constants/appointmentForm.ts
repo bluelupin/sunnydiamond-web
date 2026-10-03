@@ -40,3 +40,20 @@ export const appointmentFieldClassName =
   "h-14 w-full border border-transparent bg-[#F2F2F2] px-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none focus:border-darkblack";
 
 export const appointmentLabelClassName = "font-gill text-base leading-110 text-darkblack";
+
+/** Figma 4903:37722 — time slot button grid (all appointment flows). */
+export const appointmentTimeSlotButtonBaseClassName =
+  "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110";
+
+/** Figma 4903:37722 — Neutrals/200 fill, Neutrals/400 t3-16-Regular. */
+export const appointmentTimeSlotUnselectedClassName =
+  "bg-aboutInactive font-normal text-gray600";
+
+export const appointmentTimeSlotDisabledClassName =
+  "cursor-not-allowed bg-aboutInactive font-normal text-gray600 opacity-40";
+
+export const appointmentTimeSlotSelectedGoldClassName =
+  "bg-gold300 font-normal text-darkblack";
+
+export const appointmentTimeSlotSelectedDarkClassName =
+  "bg-darkblack font-normal text-white";

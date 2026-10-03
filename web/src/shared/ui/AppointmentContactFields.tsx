@@ -6,6 +6,11 @@ import {
   APPOINTMENT_TIME_SLOTS,
   appointmentFieldClassName,
   appointmentLabelClassName,
+  appointmentTimeSlotButtonBaseClassName,
+  appointmentTimeSlotDisabledClassName,
+  appointmentTimeSlotSelectedDarkClassName,
+  appointmentTimeSlotSelectedGoldClassName,
+  appointmentTimeSlotUnselectedClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import OverlaySelectField from "@/shared/ui/OverlaySelectField";
@@ -340,15 +345,15 @@ const AppointmentContactFields = ({
                         markTouched("selectedSlot");
                       }}
                       className={cn(
-                        "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
+                        appointmentTimeSlotButtonBaseClassName,
                         !isSlotAvailable
-                          ? "cursor-not-allowed bg-[#F2F2F2] font-light text-darkblack opacity-40"
+                          ? appointmentTimeSlotDisabledClassName
                           : isSelected
                             ? selectedSlotStyle === "gold"
-                              ? "bg-gold300 font-normal text-darkblack"
-                              : "bg-darkblack font-normal text-white"
+                              ? appointmentTimeSlotSelectedGoldClassName
+                              : appointmentTimeSlotSelectedDarkClassName
                             : cn(
-                                "bg-[#F2F2F2] font-light text-darkblack",
+                                appointmentTimeSlotUnselectedClassName,
                                 showError("selectedSlot") &&
                                   invalidFieldContainerClassName,
                               ),
