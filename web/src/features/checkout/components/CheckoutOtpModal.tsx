@@ -353,7 +353,7 @@ const CheckoutOtpModal = ({
       <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
         <DrawerContent
           overlayClassName={CHECKOUT_OTP_OVERLAY_CLASS}
-          className="flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
+          className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
         >
           <DrawerTitle className="sr-only">Enter OTP</DrawerTitle>
 

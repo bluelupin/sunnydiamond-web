@@ -5,6 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthFlow } from "../hooks/useAuthFlow";
 import { getAuthFlowLabel } from "../utils/authNavigation";
+import {
+  authLoginMobileBackgroundImageClassName,
+  authLoginWebBackgroundImageClassName,
+} from "../constants/authLoginBackground";
 import AuthFlowSteps from "./AuthFlowSteps";
 
 type AuthStandalonePageProps = {
@@ -52,7 +56,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
           alt=""
           fill
           priority
-          className="object-cover object-center md:object-left md:block hidden"
+          className={authLoginWebBackgroundImageClassName}
           sizes="100vw"
           aria-hidden
         />
@@ -61,7 +65,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
           alt=""
           fill
           priority
-          className="object-cover object-center md:object-left md:hidden block"
+          className={authLoginMobileBackgroundImageClassName}
           sizes="100vw"
           aria-hidden
         />
