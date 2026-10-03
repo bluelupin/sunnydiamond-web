@@ -60,7 +60,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
         />
       </div>
 
-      <div className="relative flex min-h-full flex-col justify-end px-4 md:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pb-[52px] pt-8 md:items-center md:justify-center md:px-8 md:py-12 lg:items-end lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]">
+      <div className="relative flex min-h-full flex-col justify-end px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-8 md:items-center md:justify-center md:px-8 md:py-12 lg:items-end lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]">
         <div
           role="region"
           aria-label={flowLabel}
