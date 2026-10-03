@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckoutField,
-  CheckoutPhoneField,
   CheckoutSelectField,
 } from "@/features/checkout/components/CheckoutUi";
 import { joinAddressPhone, splitPhoneNumber } from "@/lib/auth/magentoPhone";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
@@ -20,7 +20,6 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
 import {
   getProfileAddressFormErrors,
-  isProfileAddressFormValid,
   sanitizePhoneInput,
   sanitizePincodeInput,
   shouldShowFieldError,
@@ -44,6 +43,11 @@ const emptyAddressForm = (): CustomerAddressInput => ({
 });
 
 const stateOptions = INDIAN_STATES.map((state) => ({ value: state, label: state }));
+
+const INVALID_PINCODE_ERROR = "Invalid Pincode";
+
+/** Same placeholder checkout sends when no number exists; checkout's own Phone field rejects it. */
+const MISSING_ADDRESS_PHONE = "0000000000";
 
 /** Saved telephones are bare digits for India and "+<code>…" elsewhere (joinAddressPhone). */
 function normalizeProfileAddressForm(input: CustomerAddressInput): AddressFormState {
@@ -78,6 +82,8 @@ export function ProfileAddressFormSheet({
 }: ProfileAddressFormSheetProps) {
   const isMobile = useIsMobile();
   const { detectAddress, isLocating } = useCurrentLocationAddress();
+  const { customer } = useAuth();
+  const accountPhone = customer?.phone?.trim() ?? "";
   const [form, setForm] = useState<AddressFormState>(
     normalizeProfileAddressForm(initialValues ?? emptyAddressForm()),
   );
@@ -88,19 +94,28 @@ export function ProfileAddressFormSheet({
 
   useEffect(() => {
     if (open && !wasOpenRef.current) {
-      setForm(normalizeProfileAddressForm(initialValues ?? emptyAddressForm()));
+      // Magento requires an address phone but Figma has no Phone field: new addresses
+      // carry the account mobile, edits keep the saved phone.
+      setForm(
+        normalizeProfileAddressForm(initialValues ?? { ...emptyAddressForm(), phone: accountPhone }),
+      );
       setFormError(null);
       setSubmitted(false);
       setTouched({});
     }
 
     wasOpenRef.current = open;
-  }, [open, initialValues]);
+  }, [open, initialValues, accountPhone]);
 
-  const errors = useMemo(
-    () => getProfileAddressFormErrors(form, INDIAN_STATES),
-    [form],
-  );
+  const errors = useMemo(() => {
+    const fieldErrors = getProfileAddressFormErrors(form, INDIAN_STATES);
+    const visibleErrors: Partial<Record<ProfileAddressFormField, string | undefined>> = {
+      ...fieldErrors,
+      pincode: fieldErrors.pincode ? INVALID_PINCODE_ERROR : undefined,
+      phone: undefined,
+    };
+    return visibleErrors;
+  }, [form]);
 
   const showError = (field: ProfileAddressFormField) =>
     shouldShowFieldError(Boolean(touched[field]), submitted, errors[field]);
@@ -165,13 +180,16 @@ export function ProfileAddressFormSheet({
     setFormError(null);
     setSubmitted(true);
 
-    if (!isProfileAddressFormValid(form, INDIAN_STATES)) {
+    if (Object.values(errors).some(Boolean)) {
       return;
     }
 
     try {
       const { phoneCountryCode, ...address } = form;
-      await onSubmit({ ...address, phone: joinAddressPhone(phoneCountryCode, address.phone) });
+      await onSubmit({
+        ...address,
+        phone: joinAddressPhone(phoneCountryCode, address.phone) || MISSING_ADDRESS_PHONE,
+      });
     } catch (error) {
       setFormError(error instanceof Error ? error.message : addressContent.saveErrorToast);
     }
@@ -221,6 +239,7 @@ export function ProfileAddressFormSheet({
             <CheckoutField
               id="profile-address-name"
               label={addressContent.fullNameLabel}
+              placeholder="Enter your full name"
               value={form.name}
               onChange={(value) => handleChange("name", value)}
               onBlur={() => markTouched("name")}
@@ -231,6 +250,7 @@ export function ProfileAddressFormSheet({
             <CheckoutField
               id="profile-address-line-1"
               label="Address Line 1"
+              placeholder="Enter House Number and Street Name"
               value={form.addressLine1}
               onChange={(value) => handleChange("addressLine1", value)}
               onBlur={() => markTouched("addressLine1")}
@@ -242,6 +262,8 @@ export function ProfileAddressFormSheet({
               id="profile-address-line-2"
               label="Address Line 2"
               optional
+              optionalClassName="text-darkblack"
+              placeholder="Enter Address Line 2"
               value={form.addressLine2 ?? ""}
               onChange={(value) => handleChange("addressLine2", value)}
               onBlur={() => markTouched("addressLine2")}
@@ -253,6 +275,7 @@ export function ProfileAddressFormSheet({
               <CheckoutField
                 id="profile-address-pincode"
                 label="Pincode"
+                placeholder="Enter Pin code"
                 value={form.pincode}
                 onChange={(value) => handleChange("pincode", value)}
                 onBlur={() => markTouched("pincode")}
@@ -263,6 +286,7 @@ export function ProfileAddressFormSheet({
               <CheckoutField
                 id="profile-address-city"
                 label="City"
+                placeholder="Enter City"
                 value={form.city}
                 onChange={(value) => handleChange("city", value)}
                 onBlur={() => markTouched("city")}
@@ -280,26 +304,8 @@ export function ProfileAddressFormSheet({
               invalid={showError("state")}
               error={showError("state") ? errors.state : undefined}
               options={stateOptions}
-              placeholder="Select"
-              disabled={isSaving}
-            />
-            <CheckoutPhoneField
-              id="profile-address-phone"
-              label="Phone"
-              showVerify={false}
-              value={form.phone}
-              countryCode={form.phoneCountryCode}
-              onCountryCodeChange={(code) =>
-                setForm((current) => ({
-                  ...current,
-                  phoneCountryCode: code,
-                  phone: sanitizePhoneInput(current.phone, code),
-                }))
-              }
-              onChange={(value) => handleChange("phone", value)}
-              onBlur={() => markTouched("phone")}
-              invalid={showError("phone")}
-              error={showError("phone") ? errors.phone : undefined}
+              placeholder="Select State"
+              triggerClassName="data-[placeholder]:text-gray600"
               disabled={isSaving}
             />
             <FormFieldError message={formError ?? undefined} />

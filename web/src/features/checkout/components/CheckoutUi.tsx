@@ -25,12 +25,13 @@ type CheckoutFieldLabelProps = {
   id: string;
   label: string;
   optional?: boolean;
+  optionalClassName?: string;
 };
 
-const CheckoutFieldLabel = ({ id, label, optional }: CheckoutFieldLabelProps) => (
+const CheckoutFieldLabel = ({ id, label, optional, optionalClassName }: CheckoutFieldLabelProps) => (
   <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
     {optional ? label : normalizeCheckoutFieldLabel(label)}
-    {optional ? <span className="font-light text-gray600"> (Optional)</span> : null}
+    {optional ? <span className={cn("font-light text-gray600", optionalClassName)}> (Optional)</span> : null}
   </label>
 );
 
@@ -52,6 +53,7 @@ export type CheckoutFieldProps = {
   id: string;
   label: string;
   optional?: boolean;
+  optionalClassName?: string;
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -68,6 +70,7 @@ export const CheckoutField = ({
   id,
   label,
   optional,
+  optionalClassName,
   value,
   onChange,
   onBlur,
@@ -80,7 +83,7 @@ export const CheckoutField = ({
   readOnly = false,
 }: CheckoutFieldProps) => (
   <div className="flex flex-col gap-2">
-    <CheckoutFieldLabel id={id} label={label} optional={optional} />
+    <CheckoutFieldLabel id={id} label={label} optional={optional} optionalClassName={optionalClassName} />
     {verified ? (
       <div
         className={cn(
@@ -142,6 +145,7 @@ type CheckoutSelectFieldProps = {
   error?: string;
   invalid?: boolean;
   disabled?: boolean;
+  triggerClassName?: string;
 };
 
 export const CheckoutSelectField = ({
@@ -156,6 +160,7 @@ export const CheckoutSelectField = ({
   error,
   invalid,
   disabled = false,
+  triggerClassName,
 }: CheckoutSelectFieldProps) => (
   <div className="flex flex-col gap-2">
     <CheckoutFieldLabel id={id} label={label} optional={optional} />
@@ -174,6 +179,7 @@ export const CheckoutSelectField = ({
         className={cn(
           "h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0",
           invalid && invalidFieldClassName,
+          triggerClassName,
         )}
       >
         <SelectValue placeholder={placeholder} />

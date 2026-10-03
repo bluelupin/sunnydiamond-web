@@ -32,9 +32,9 @@ export const profileDetailsContent = {
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
-      title: "Delete Account",
+      title: "Delete Account?",
       description:
-        "You will be signed out now and your account will be deleted in 30 days. Once it is deleted, you lose access to your orders, savings plans, saved preferences and account history.",
+        "Once your account is deleted, you will lose access to your orders, savings plans, saved preferences, and account history permanently.",
       cancelLabel: "CANCEL",
       confirmLabel: "DELETE",
     },
