@@ -144,7 +144,6 @@ export function mapProductForm(
     pincodePlaceholder: normalizePlaceholder(pincodeField?.placeholder),
     cityLabel: formatFieldLabel(cityField) ?? cleanText(cityField?.label),
     cityPlaceholder: normalizePlaceholder(cityField?.placeholder),
-    cityOptions: mapFieldOptions(cityField),
     stateLabel: formatFieldLabel(stateField) ?? cleanText(stateField?.label),
     statePlaceholder: cleanText(stateField?.placeholder),
     stateFieldOptions: mapFieldOptions(stateField),

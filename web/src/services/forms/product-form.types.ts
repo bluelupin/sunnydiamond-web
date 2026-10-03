@@ -69,7 +69,6 @@ export type NormalizedProductForm = {
   pincodePlaceholder?: string;
   cityLabel?: string;
   cityPlaceholder?: string;
-  cityOptions: string[];
   stateLabel?: string;
   statePlaceholder?: string;
   /** Dropdown options on the State dynamic field (separate from the top-level `stateOptions` relation). */

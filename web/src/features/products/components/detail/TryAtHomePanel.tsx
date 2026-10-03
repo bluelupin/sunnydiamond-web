@@ -303,7 +303,7 @@ type TryAtHomeAddressStepProps = {
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
-/** Prefilled/detected values may differ in case from the CMS options (e.g. "noida" vs "Noida"). */
+/** Prefilled/detected values may differ in case from the CMS options (e.g. "uttar pradesh" vs "Uttar Pradesh"). */
 const matchSelectOption = (value: string, options: readonly string[]): string => {
   const normalized = value.trim().toLowerCase();
   if (!normalized) return "";
@@ -332,10 +332,7 @@ const TryAtHomeAddressStep = ({
   const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
   const stateOptions = useMemo(() => form?.stateFieldOptions ?? [], [form?.stateFieldOptions]);
-  const cityOptions = useMemo(() => form?.cityOptions ?? [], [form?.cityOptions]);
-  const hasCityOptions = cityOptions.length > 0;
   const selectedState = matchSelectOption(state, stateOptions);
-  const selectedCity = hasCityOptions ? matchSelectOption(city, cityOptions) : city;
 
   const defaultShippingAddress = useMemo(() => {
     if (addresses.length === 0) {
@@ -365,10 +362,10 @@ const TryAtHomeAddressStep = ({
       addressLine1: validateAddressLine1(addressLine1).error,
       addressLine2: validateOptionalAddressLine2(addressLine2).error,
       pincode: validateIndianPincode(pincode).error,
-      city: validateCity(selectedCity).error,
+      city: validateCity(city).error,
       state: validateIndianState(selectedState, stateOptions).error,
     }),
-    [addressLine1, addressLine2, pincode, selectedCity, selectedState, stateOptions],
+    [addressLine1, addressLine2, pincode, city, selectedState, stateOptions],
   );
 
   const isValid = Object.values(errors).every((error) => !error);
@@ -411,7 +408,7 @@ const TryAtHomeAddressStep = ({
     if (!isValid) {
       return;
     }
-    onSubmit({ addressLine1, addressLine2, pincode, city: selectedCity, state: selectedState });
+    onSubmit({ addressLine1, addressLine2, pincode, city, state: selectedState });
   };
 
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
@@ -539,46 +536,28 @@ const TryAtHomeAddressStep = ({
                   message={showError("pincode") ? errors.pincode : undefined}
                 />
               </div>
-              {hasCityOptions ? (
-                <div className="min-w-0 flex-1">
-                  <OverlaySelectField
-                    id="try-at-home-city"
-                    label={form?.cityLabel ?? ""}
-                    value={selectedCity}
-                    options={cityOptions}
-                    placeholder={form?.cityPlaceholder ?? ""}
-                    onChange={setCity}
-                    onBlur={() => markTouched("city")}
-                    labelClassName={appointmentLabelClassName}
-                    invalid={showError("city")}
-                    errorId={showError("city") ? "try-at-home-city-error" : undefined}
-                    error={showError("city") ? errors.city : undefined}
-                  />
-                </div>
-              ) : (
-                <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <label htmlFor="try-at-home-city" className={appointmentLabelClassName}>
-                    {form?.cityLabel ?? ""}
-                  </label>
-                  <input
-                    id="try-at-home-city"
-                    type="text"
-                    value={city}
-                    onChange={(event) => setCity(event.target.value)}
-                    onBlur={() => markTouched("city")}
-                    placeholder={form?.cityPlaceholder ?? ""}
-                    autoComplete="address-level2"
-                    maxLength={80}
-                    aria-invalid={showError("city") || undefined}
-                    aria-describedby={showError("city") ? "try-at-home-city-error" : undefined}
-                    className={cn(appointmentFieldClassName, showError("city") && invalidFieldClassName)}
-                  />
-                  <FormFieldError
-                    id="try-at-home-city-error"
-                    message={showError("city") ? errors.city : undefined}
-                  />
-                </div>
-              )}
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <label htmlFor="try-at-home-city" className={appointmentLabelClassName}>
+                  {form?.cityLabel ?? ""}
+                </label>
+                <input
+                  id="try-at-home-city"
+                  type="text"
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  onBlur={() => markTouched("city")}
+                  placeholder={form?.cityPlaceholder ?? ""}
+                  autoComplete="address-level2"
+                  maxLength={80}
+                  aria-invalid={showError("city") || undefined}
+                  aria-describedby={showError("city") ? "try-at-home-city-error" : undefined}
+                  className={cn(appointmentFieldClassName, showError("city") && invalidFieldClassName)}
+                />
+                <FormFieldError
+                  id="try-at-home-city-error"
+                  message={showError("city") ? errors.city : undefined}
+                />
+              </div>
             </div>
 
             <OverlaySelectField

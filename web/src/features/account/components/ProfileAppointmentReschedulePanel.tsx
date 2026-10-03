@@ -23,9 +23,13 @@ import { rescheduleCustomerAppointment } from "@/services/customer/customer-appo
 import {
   APPOINTMENT_COUNTRY_CODES,
   DEFAULT_COUNTRY_CODE,
+  STORE_VISIT_BOOKING_WINDOW,
+  TRY_AT_HOME_BOOKING_WINDOW,
+  VIDEO_CALL_BOOKING_WINDOW,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
+import type { AppointmentBookingWindow } from "@/shared/utils/appointmentTimeSlots";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
@@ -44,8 +48,8 @@ import {
   validateCity,
   validateIndianPincode,
   validateIndianState,
+  validateBookingWindowDate,
   validateOptionalAddressLine2,
-  validateRequiredDate,
 } from "@/shared/utils/formValidation";
 import { getTryAtHomeStateSelectOptions } from "@/features/products/data/tryAtHomeContent";
 import { profileTabsContent } from "../data/profileContent";
@@ -57,6 +61,12 @@ const DEFAULT_FORM_TAGS: Record<ProfileAppointmentUi["type"], string> = {
   try_at_home: "try-at-home-form",
   video_call: "product-video-call",
   store_visit: STORE_VISIT_FORM_TAG,
+};
+
+const BOOKING_WINDOWS: Record<ProfileAppointmentUi["type"], AppointmentBookingWindow> = {
+  try_at_home: TRY_AT_HOME_BOOKING_WINDOW,
+  video_call: VIDEO_CALL_BOOKING_WINDOW,
+  store_visit: STORE_VISIT_BOOKING_WINDOW,
 };
 
 function splitStoredPhone(rawPhone: string): { countryCode: string; phone: string } {
@@ -168,6 +178,7 @@ export function ProfileAppointmentReschedulePanel({
   const hasTimeSlots = Boolean(timeSlots?.length ?? true);
   const isTryAtHome = appointment?.type === "try_at_home";
   const isStoreVisit = appointment?.type === "store_visit";
+  const bookingWindow = BOOKING_WINDOWS[appointment?.type ?? "store_visit"];
   const storeVisitPurpose = isStoreVisit ? (appointment?.purposeOfVisit?.trim() ?? "") : "";
   const address = appointment?.appointmentAddress;
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
@@ -191,8 +202,9 @@ export function ProfileAppointmentReschedulePanel({
     () => ({
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
+      bookingWindow,
     }),
-    [hasTimeSlots],
+    [bookingWindow, hasTimeSlots],
   );
 
   const { errors, markTouched, showError, resetValidation } =
@@ -241,11 +253,11 @@ export function ProfileAppointmentReschedulePanel({
 
   const canSave = useMemo(() => {
     if (isSubmitting) return false;
-    if (validateRequiredDate(date).error) return false;
+    if (validateBookingWindowDate(date, bookingWindow, true).error) return false;
     if (hasTimeSlots && !selectedSlot?.trim()) return false;
     if (hasAddressErrors) return false;
     return true;
-  }, [date, hasAddressErrors, hasTimeSlots, isSubmitting, selectedSlot]);
+  }, [bookingWindow, date, hasAddressErrors, hasTimeSlots, isSubmitting, selectedSlot]);
 
   useEffect(() => {
     if (!open || !appointment) {
@@ -456,6 +468,7 @@ export function ProfileAppointmentReschedulePanel({
                 dateLabel={cmsForm?.dateLabel}
                 dateRequired
                 timeSlotRequired={hasTimeSlots}
+                bookingWindow={bookingWindow}
                 noteLabel={
                   cmsForm?.notesLabel ??
                   (isTryAtHome ? "What are you looking for?" : appointment.notesLabel)
@@ -552,7 +565,7 @@ export function ProfileAppointmentReschedulePanel({
                         htmlFor="reschedule-appointment-city"
                         className={appointmentLabelClassName}
                       >
-                        {cmsForm?.cityLabel ?? "City"}
+                        {cmsForm?.cityLabel ?? ""}
                       </label>
                       <input
                         id="reschedule-appointment-city"
@@ -560,7 +573,7 @@ export function ProfileAppointmentReschedulePanel({
                         value={city}
                         onChange={(event) => setCity(event.target.value)}
                         onBlur={() => markAddressTouched("city")}
-                        placeholder={cmsForm?.cityPlaceholder ?? "Enter"}
+                        placeholder={cmsForm?.cityPlaceholder ?? ""}
                         aria-invalid={showAddressError("city") || undefined}
                         className={cn(
                           appointmentFieldClassName,
