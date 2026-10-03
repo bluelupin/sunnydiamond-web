@@ -231,8 +231,17 @@ export const CheckoutPhoneField = ({
   invalid,
   disabled = false,
 }: CheckoutPhoneFieldProps) => {
-  const isEmailInput = mode === "email" || (mode === "phoneOrEmail" && /[a-zA-Z@]/.test(value));
+  const isPhoneOrEmailMode = mode === "phoneOrEmail";
+  const isEmailInput =
+    mode === "email" || (isPhoneOrEmailMode && /[a-zA-Z@]/.test(value));
   const shouldShowVerify = showVerify;
+  const inputType = isEmailInput ? "email" : isPhoneOrEmailMode ? "text" : "tel";
+  const inputMode = isEmailInput ? "email" : isPhoneOrEmailMode ? "text" : "numeric";
+  const inputAutoComplete = isEmailInput
+    ? "email"
+    : isPhoneOrEmailMode
+      ? "username"
+      : "tel";
 
   return (
     <div className="flex flex-col gap-2">
@@ -256,14 +265,14 @@ export const CheckoutPhoneField = ({
           ) : null}
           <input
             id={id}
-            type={isEmailInput ? "email" : "tel"}
-            inputMode={isEmailInput ? "email" : "numeric"}
+            type={inputType}
+            inputMode={inputMode}
             value={value}
             disabled={disabled}
             onChange={(event) => onChange(event.target.value)}
             onBlur={onBlur}
             placeholder={placeholder}
-            autoComplete={isEmailInput ? "email" : "tel"}
+            autoComplete={inputAutoComplete}
             aria-invalid={invalid || undefined}
             aria-describedby={error ? `${id}-error` : undefined}
             className={cn(

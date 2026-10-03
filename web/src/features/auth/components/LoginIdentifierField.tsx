@@ -61,7 +61,7 @@ const LoginIdentifierField = ({
           ref={inputRef}
           id="login-identifier"
           type={emailOnly ? "email" : "text"}
-          inputMode={isEmailMode ? "email" : "tel"}
+          inputMode={emailOnly || isEmailMode ? "email" : "text"}
           value={identifier}
           onChange={(event) => onIdentifierChange(event.target.value)}
           placeholder={
