@@ -35,7 +35,8 @@ export const APPOINTMENT_COUNTRY_CODES = [
 /** Default country code for phone inputs (India). */
 export const DEFAULT_COUNTRY_CODE = APPOINTMENT_COUNTRY_CODES[0].code;
 
+/** Figma 4903:44932 — Neutrals/200 fill; Neutrals/600 1px border on focus. */
 export const appointmentFieldClassName =
-  "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none";
+  "h-14 w-full border border-transparent bg-[#F2F2F2] px-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none focus:border-darkblack";
 
 export const appointmentLabelClassName = "font-gill text-base leading-110 text-darkblack";

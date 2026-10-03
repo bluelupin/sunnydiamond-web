@@ -17,7 +17,7 @@ import { invalidFieldClassName } from "@/shared/utils/formValidation";
 const SELECT_EMPTY_VALUE = "__overlay_select_empty__";
 
 const defaultTriggerClassName =
-  "h-14 rounded-none border-0 bg-[#F2F2F2] px-3 font-gill text-base text-darkblack focus:ring-0";
+  "h-14 rounded-none border border-transparent bg-[#F2F2F2] px-3 font-gill text-base text-darkblack focus:ring-0 focus:border-darkblack data-[state=open]:border-darkblack";
 
 type OverlaySelectFieldProps = {
   id?: string;
