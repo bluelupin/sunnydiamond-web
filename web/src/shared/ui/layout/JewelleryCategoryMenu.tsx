@@ -37,7 +37,7 @@ const VARIANT_CONFIG = {
     rowsClassName: "flex flex-col gap-3",
     rowClassName: "flex items-stretch gap-3",
     itemClassName: "flex min-w-0 flex-1 flex-col gap-2",
-    imageClassName: "relative lg:h-100 h-[140px] w-full shrink-0 overflow-hidden",
+    imageClassName: "relative lg:h-100 h-[104px] w-full shrink-0 overflow-hidden",
     imageSizes: "50vw",
     imageCoverClassName: "object-cover",
     labelClassName: "font-gill md:text-base text-sm leading-110 text-darkblack",

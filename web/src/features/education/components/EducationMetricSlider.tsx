@@ -40,6 +40,8 @@ const labelFontProps = (useMobileLayout: boolean, mobileFontSize?: number) =>
     : { className: "text-base", style: undefined as CSSProperties | undefined };
 
 const TRACK_DOT_GAP = 10;
+/** Visual-only: lengthen gold track segments so lines meet endpoint dots (layout math unchanged). */
+const TRACK_SEGMENT_WIDTH_SCALE = 1.02;
 
 /** Segmented track: ~10px gap on each side of interior dots; first/last flush to track ends. */
 const buildTrackSegments = (
@@ -236,7 +238,7 @@ const EducationMetricSlider = ({
       style={{
         left: toPercent(left, spec.width),
         top: spec.trackTop,
-        width: toPercent(width, spec.width),
+        width: toPercent(width * TRACK_SEGMENT_WIDTH_SCALE, spec.width),
         height: spec.trackHeight,
       }}
       aria-hidden

@@ -1,10 +1,6 @@
-"use client";
-
-import { useRef } from "react";
-import CraftingRarityScrollLine from "@/features/about/components/CraftingRarityScrollLine";
-import { useCraftingRarityScrollReveal } from "@/features/about/hooks/useCraftingRarityScrollReveal";
+import VerticalScrollLine from "@/features/about/components/VerticalScrollLine";
 import { splitTitleLinesOnNewline } from "@/lib/homepage/resolveHomepageAboveFold";
-import Reveal from "@/shared/Animation/Reveal";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { NormalizedGiftingIntro } from "@/services/gifting/gifting-page.types";
@@ -14,65 +10,52 @@ type GiftingWithLoveSectionProps = {
 };
 
 const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
-  const sectionRef = useRef<HTMLElement>(null);
-  useCraftingRarityScrollReveal(sectionRef);
-
   const imageAlt = intro.background?.alt?.trim() || intro.title;
   const descriptionLines = splitTitleLinesOnNewline(intro.description ?? "");
 
   return (
     <section
-      ref={sectionRef}
       aria-labelledby="gifting-with-love-title"
       className="bg-white pt-10 sm:pt-16 lg:min-h-[700px] lg:pt-104 lg:pb-104"
     >
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full max-w-[700px] flex-col items-center text-center lg:max-w-[950px]">
-          <div
-            data-reveal-mask="heading"
-            className="mb-8 w-full overflow-hidden pt-0 lg:mb-6"
-          >
-            <Reveal
-              as="h2"
+          <ScrollReveal as="h2" delayMs={0} className="mb-8 w-full pt-0 lg:mb-6">
+            <span
               id="gifting-with-love-title"
-              direction="up"
-              className="whitespace-pre-line font-larken font-light leading-110 text-darkblack text-32 md:text-4xl lg:text-5xl lg:leading-110"
+              className="block whitespace-pre-line font-larken font-light leading-110 text-darkblack text-32 md:text-4xl lg:text-5xl lg:leading-110"
             >
               {intro.title}
-            </Reveal>
-          </div>
+            </span>
+          </ScrollReveal>
           {intro.background ? (
-            <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
-              <Reveal
-                direction="up"
-                className="mx-auto h-[300px] w-[300px] lg:h-[246px] lg:w-[250px]"
-              >
-                <ResponsiveImage
-                  desktopSrc={intro.background.desktopUrl}
-                  mobileSrc={intro.background.mobileUrl}
-                  alt={imageAlt}
-                  width={intro.background.width ?? 354}
-                  height={intro.background.height ?? 354}
-                  quality={80}
-                  sizes="(max-width: 1536px) 300px, 400px"
-                  className="object-contain object-center lg:object-cover"
-                />
-              </Reveal>
-            </div>
-          ) : null}
-          <CraftingRarityScrollLine className="mt-5 lg:mt-[11px]" />
-          {descriptionLines.length > 0 ? (
-            <Reveal
-              as="p"
-              direction="up"
-              className="mx-auto mt-2.5 max-w-full font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:max-w-[450px] lg:mt-[13px] lg:text-xl lg:leading-110 lg:max-w-[592px] 2xl:max-w-[650px] 2xl:text-22"
+            <ScrollReveal
+              delayMs={100}
+              className="relative mx-auto overflow-hidden h-[300px] w-[300px] lg:h-[246px] lg:w-[250px]"
             >
-              {descriptionLines.map((line, index) => (
-                <span key={`${line}-${index}`} className="block">
-                  {line}
-                </span>
-              ))}
-            </Reveal>
+              <ResponsiveImage
+                desktopSrc={intro.background.desktopUrl}
+                mobileSrc={intro.background.mobileUrl}
+                alt={imageAlt}
+                width={intro.background.width ?? 354}
+                height={intro.background.height ?? 354}
+                quality={80}
+                sizes="(max-width: 1536px) 300px, 400px"
+                className="object-contain object-center lg:object-cover"
+              />
+            </ScrollReveal>
+          ) : null}
+          <VerticalScrollLine height={56} className="mt-5 lg:mt-[11px]" />
+          {descriptionLines.length > 0 ? (
+            <ScrollReveal delayMs={220}>
+              <p className="mx-auto mt-2.5 max-w-full font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:max-w-[450px] lg:mt-[13px] lg:text-xl lg:leading-110 lg:max-w-[592px] 2xl:max-w-[650px] 2xl:text-22">
+                {descriptionLines.map((line, index) => (
+                  <span key={`${line}-${index}`} className="block">
+                    {line}
+                  </span>
+                ))}
+              </p>
+            </ScrollReveal>
           ) : null}
         </div>
       </PageContainer>
