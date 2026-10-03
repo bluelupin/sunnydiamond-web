@@ -64,7 +64,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
         <div
           role="region"
           aria-label={flowLabel}
-          className="w-full md:max-w-[520px] max-w-full bg-white p-6 shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
+          className="w-full md:max-w-[520px] max-w-full bg-white px-4 py-6 shadow-[0_8px_40px_rgba(0,0,0,0.08)] md:p-6"
         >
           <AuthFlowSteps {...contentProps} titleClassName={titleClassName} />
         </div>

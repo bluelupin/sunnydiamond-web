@@ -8,7 +8,11 @@ import { CartDivider } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
-import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
+import {
+  authFlowOtpInstructionClassName,
+  authFlowOtpResendClassName,
+  getAuthFlowTitleClassName,
+} from "../constants/authFlowTypography";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { formatLoginPhoneDisplay, isOtpComplete, LOGIN_OTP_LENGTH } from "../utils/authValidation";
 
@@ -111,16 +115,18 @@ const LoginOtpContent = ({
         <CartDivider />
 
         <div className="flex w-full flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack">
+          <div className="flex w-full items-start gap-4 lg:flex-wrap lg:items-center lg:gap-3">
+            <p className={authFlowOtpInstructionClassName}>
               Please enter the OTP sent to{" "}
               {channel === "email" ? (
-                <span className="font-normal">{maskedDestination ?? phone}</span>
+                maskedDestination ?? phone
               ) : (
                 formatPhoneForOtp(countryCode, phone)
               )}
             </p>
-            <DetailTextLink onClick={onEdit}>EDIT</DetailTextLink>
+            <DetailTextLink onClick={onEdit} className="shrink-0">
+              EDIT
+            </DetailTextLink>
           </div>
 
           <div
@@ -166,20 +172,20 @@ const LoginOtpContent = ({
             <div className="flex w-full items-center justify-between gap-4">
               <FormFieldError message={otpError} className="min-w-0 flex-1" />
               {secondsLeft > 0 ? (
-                <p className="shrink-0 text-right font-gill text-base font-light leading-110 text-darkblack">
-                  Resend code in{" "}
-                  <span className="font-normal">{formatCountdown(secondsLeft)}</span>
+                <p className={cn(authFlowOtpResendClassName, "shrink-0")}>
+                  <span className="text-neutral500">Resend code in</span>{" "}
+                  <span className="font-normal text-darkblack">{formatCountdown(secondsLeft)}</span>
                 </p>
               ) : (
                 <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
               )}
             </div>
           ) : (
-            <p className="w-full text-right font-gill text-base font-light leading-110 text-darkblack">
+            <p className={authFlowOtpResendClassName}>
               {secondsLeft > 0 ? (
                 <>
-                  Resend code in{" "}
-                  <span className="font-normal">{formatCountdown(secondsLeft)}</span>
+                  <span className="text-neutral500">Resend code in</span>{" "}
+                  <span className="font-normal text-darkblack">{formatCountdown(secondsLeft)}</span>
                 </>
               ) : (
                 <button

@@ -13,3 +13,14 @@ export const authFlowTitleClassName = cn(authFlowTitleBaseClassName, "text-32");
 
 export const getAuthFlowTitleClassName = (titleClassName?: string) =>
   cn(authFlowTitleBaseClassName, titleClassName ?? "text-32");
+
+/** Figma Desktop/Title/t4-14-Regular — OTP destination copy (4903:134440). */
+export const authFlowOtpInstructionClassName = cn(
+  "min-w-0 flex-1 break-words font-gill font-normal leading-110 text-darkblack",
+  "text-sm lg:text-base",
+);
+
+/** Figma Desktop/Body/b3-14-Light — OTP resend line (4903:134444). */
+export const authFlowOtpResendClassName = cn(
+  "w-full text-right font-gill text-sm font-light leading-110 lg:text-base",
+);
