@@ -127,7 +127,9 @@ const Header = () => {
       ? responsiveCheckoutHeaderSurfaceClass
       : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
-  const isLightOverlay = isOverlay && !isAuthPage && !isScrollReturnSurface;
+  const isAuthMobileHeroOverlay = isAuthPage && isMobileHeader;
+  const isLightOverlay =
+    isOverlay && !isScrollReturnSurface && (!isAuthPage || isAuthMobileHeroOverlay);
   const themeHeaderVariant = isScrollReturnSurface ? "solid" : headerVariant;
 
   const { data: shellData } = useHomepageShell();
