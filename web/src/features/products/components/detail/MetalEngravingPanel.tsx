@@ -14,14 +14,8 @@ import {
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import OverlaySelectField from "@/shared/ui/OverlaySelectField";
 import { cn } from "@/shared/utils/cn";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
@@ -52,7 +46,7 @@ const MetalEngravingPanel = ({
   // Fontless products save text-only engravings — "" means no font selection.
   const requiresFont = availableFonts.length > 0;
   const [text, setText] = useState("");
-  const [font, setFont] = useState<string>(availableFonts[0] ?? "");
+  const [font, setFont] = useState("");
   const [charsetError, setCharsetError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
@@ -97,7 +91,7 @@ const MetalEngravingPanel = ({
     }
 
     setText(clampEngravingText(initialValue?.text ?? "", maxCharacters));
-    setFont(initialValue?.font ?? availableFonts[0] ?? "");
+    setFont(initialValue?.font ?? "");
     setCharsetError(false);
     setIsSaving(false);
   }, [open, initialValue, availableFonts, maxCharacters]);
@@ -165,7 +159,7 @@ const MetalEngravingPanel = ({
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="engraving-text" className={appointmentLabelClassName}>
-                    What do you want engraved?
+                    Type here (Up to {maxCharacters} characters)
                   </label>
                   <input
                     id="engraving-text"
@@ -185,26 +179,14 @@ const MetalEngravingPanel = ({
                 </div>
 
                 {requiresFont ? (
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="engraving-font" className={appointmentLabelClassName}>
-                      Font*
-                    </label>
-                    <Select value={font} onValueChange={setFont}>
-                      <SelectTrigger
-                        id="engraving-font"
-                        className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
-                      >
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent className="z-[80]">
-                        {availableFonts.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <OverlaySelectField
+                    id="engraving-font"
+                    label="Font*"
+                    value={font}
+                    onChange={setFont}
+                    options={availableFonts}
+                    placeholder="Select"
+                  />
                 ) : null}
 
                 <div className="flex flex-wrap items-center gap-2">
