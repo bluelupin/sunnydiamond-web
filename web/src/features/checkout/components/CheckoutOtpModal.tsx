@@ -416,7 +416,7 @@ const CheckoutOtpModal = ({
       <DialogContent
         hideCloseButton
         overlayClassName={CHECKOUT_OTP_OVERLAY_CLASS}
-        className="z-[70] max-w-[560px] gap-0 border-0 bg-transparent p-0 shadow-none sm:rounded-none top-[231px] translate-x-[-50%] translate-y-0 data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 [&>button]:hidden"
+        className="z-[70] max-w-[560px] gap-0 border-0 bg-transparent p-0 shadow-none sm:rounded-none data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 [&>button]:hidden"
       >
         <DialogTitle className="sr-only">Enter OTP</DialogTitle>
         <CheckoutOtpDesktopPanel

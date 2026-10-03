@@ -49,7 +49,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
   const flowLabel = getAuthFlowLabel(step);
 
   return (
-    <div className="relative h-full">
+    <div className="relative flex h-full min-h-0 flex-col">
       <div className="absolute inset-0">
         <Image
           src={LOGIN_WEB_BACKGROUND_IMAGE_URL}
@@ -75,11 +75,13 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
         />
       </div>
 
-      <div className="relative flex min-h-full flex-col justify-end px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:items-center md:px-8 md:py-104 py-6 lg:items-end lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]">
+      <div
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(64px+env(safe-area-inset-top,0px))] md:px-8 md:landscape:justify-center md:landscape:pt-104 md:landscape:py-6 justify-end lg:items-end lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]"
+      >
         <div
           role="region"
           aria-label={flowLabel}
-          className="w-full md:max-w-[520px] max-w-full bg-white px-4 py-6 shadow-[0_8px_40px_rgba(0,0,0,0.08)] md:p-6"
+          className="w-full max-w-full shrink-0 bg-white px-4 py-6 shadow-[0_8px_40px_rgba(0,0,0,0.08)] md:max-w-[520px] md:p-6 md:landscape:my-auto"
         >
           <AuthFlowSteps {...contentProps} titleClassName={titleClassName} />
         </div>
