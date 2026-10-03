@@ -32,7 +32,6 @@ import {
 } from "@/features/products/utils/appointmentDuplicateBooking";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
-import { getTryAtHomeStateSelectOptions } from "@/features/products/data/tryAtHomeContent";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import {
   createProductSubmission,
@@ -134,8 +133,6 @@ const TryAtHomeDetailsStep = ({
       noteRequired: form?.notesRequired ?? false,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
-      // Auth is email-based — Try at Home must collect a valid email.
-      emailRequired: true,
       bookingWindow: TRY_AT_HOME_BOOKING_WINDOW,
     }),
     [form?.notesRequired, hasTimeSlots],
@@ -189,7 +186,7 @@ const TryAtHomeDetailsStep = ({
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {form?.formName ?? "Try At Home"}
+                {form?.formName ?? ""}
               </h2>
               <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
@@ -238,21 +235,18 @@ const TryAtHomeDetailsStep = ({
               markTouched={markTouched}
               showDate
               showTimeSlots
-              nameLabel={form?.nameLabel}
+              nameLabel={form?.nameLabel ?? ""}
               namePlaceholder={form?.namePlaceholder}
-              phoneLabel={form?.phoneLabel}
+              phoneLabel={form?.phoneLabel ?? ""}
               phonePlaceholder={form?.phonePlaceholder}
-              emailLabel={form?.emailLabel}
-              emailPlaceholder={form?.emailPlaceholder}
-              emailRequired
-              dateLabel={form?.dateLabel}
-              datePlaceholder="Select"
+              emailLabel={form?.emailLabel ?? ""}
+              emailPlaceholder={form?.emailPlaceholder ?? ""}
+              dateLabel={form?.dateLabel ?? ""}
+              datePlaceholder={form?.datePlaceholder ?? ""}
               dateRequired
               timeSlotRequired={hasTimeSlots}
-              noteLabel={form?.notesLabel ?? "What are you looking for?"}
-              notePlaceholder={
-                form?.notesPlaceholder ?? "Eg: I am looking for an engagement ring"
-              }
+              noteLabel={form?.notesLabel ?? ""}
+              notePlaceholder={form?.notesPlaceholder ?? ""}
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
               bookingWindow={TRY_AT_HOME_BOOKING_WINDOW}
@@ -283,7 +277,7 @@ const TryAtHomeDetailsStep = ({
           disabled={!isValid}
           className="disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {form?.stepOneButtonText ?? "Add Address"}
+          {form?.stepOneButtonText ?? ""}
         </DetailDarkButton>
       </PanelFooter>
       </div>
@@ -309,6 +303,13 @@ type TryAtHomeAddressStepProps = {
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
+/** Prefilled/detected values may differ in case from the CMS options (e.g. "noida" vs "Noida"). */
+const matchSelectOption = (value: string, options: readonly string[]): string => {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return "";
+  return options.find((option) => option.toLowerCase() === normalized) ?? "";
+};
+
 const TryAtHomeAddressStep = ({
   form,
   formTitle,
@@ -330,10 +331,11 @@ const TryAtHomeAddressStep = ({
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
   const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
-  const stateOptions = useMemo(
-    () => getTryAtHomeStateSelectOptions(form?.stateOptions, state),
-    [form?.stateOptions, state],
-  );
+  const stateOptions = useMemo(() => form?.stateFieldOptions ?? [], [form?.stateFieldOptions]);
+  const cityOptions = useMemo(() => form?.cityOptions ?? [], [form?.cityOptions]);
+  const hasCityOptions = cityOptions.length > 0;
+  const selectedState = matchSelectOption(state, stateOptions);
+  const selectedCity = hasCityOptions ? matchSelectOption(city, cityOptions) : city;
 
   const defaultShippingAddress = useMemo(() => {
     if (addresses.length === 0) {
@@ -363,10 +365,10 @@ const TryAtHomeAddressStep = ({
       addressLine1: validateAddressLine1(addressLine1).error,
       addressLine2: validateOptionalAddressLine2(addressLine2).error,
       pincode: validateIndianPincode(pincode).error,
-      city: validateCity(city).error,
-      state: validateIndianState(state, stateOptions).error,
+      city: validateCity(selectedCity).error,
+      state: validateIndianState(selectedState, stateOptions).error,
     }),
-    [addressLine1, addressLine2, pincode, city, state, stateOptions],
+    [addressLine1, addressLine2, pincode, selectedCity, selectedState, stateOptions],
   );
 
   const isValid = Object.values(errors).every((error) => !error);
@@ -409,7 +411,7 @@ const TryAtHomeAddressStep = ({
     if (!isValid) {
       return;
     }
-    onSubmit({ addressLine1, addressLine2, pincode, city, state });
+    onSubmit({ addressLine1, addressLine2, pincode, city: selectedCity, state: selectedState });
   };
 
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
@@ -456,7 +458,7 @@ const TryAtHomeAddressStep = ({
           <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
             <div className="flex flex-col gap-2">
               <label htmlFor="try-at-home-address-line-1" className={appointmentLabelClassName}>
-                {form?.addressLine1Label ?? "Address Line 1"}
+                {form?.addressLine1Label ?? ""}
               </label>
               <input
                 id="try-at-home-address-line-1"
@@ -464,7 +466,7 @@ const TryAtHomeAddressStep = ({
                 value={addressLine1}
                 onChange={(event) => setAddressLine1(event.target.value)}
                 onBlur={() => markTouched("addressLine1")}
-                placeholder={form?.addressLine1Placeholder ?? "Enter"}
+                placeholder={form?.addressLine1Placeholder ?? ""}
                 autoComplete="address-line1"
                 maxLength={120}
                 aria-invalid={showError("addressLine1") || undefined}
@@ -484,7 +486,7 @@ const TryAtHomeAddressStep = ({
 
             <div className="flex flex-col gap-2">
               <label htmlFor="try-at-home-address-line-2" className={appointmentLabelClassName}>
-                {form?.addressLine2Label ?? "Address Line 2 (Optional)"}
+                {form?.addressLine2Label ?? ""}
               </label>
               <input
                 id="try-at-home-address-line-2"
@@ -492,7 +494,7 @@ const TryAtHomeAddressStep = ({
                 value={addressLine2}
                 onChange={(event) => setAddressLine2(event.target.value)}
                 onBlur={() => markTouched("addressLine2")}
-                placeholder={form?.addressLine2Placeholder ?? "Enter"}
+                placeholder={form?.addressLine2Placeholder ?? ""}
                 autoComplete="address-line2"
                 maxLength={120}
                 aria-invalid={showError("addressLine2") || undefined}
@@ -513,7 +515,7 @@ const TryAtHomeAddressStep = ({
             <div className="flex gap-6">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <label htmlFor="try-at-home-pincode" className={appointmentLabelClassName}>
-                  {form?.pincodeLabel ?? "Pincode"}
+                  {form?.pincodeLabel ?? ""}
                 </label>
                 <input
                   id="try-at-home-pincode"
@@ -522,7 +524,7 @@ const TryAtHomeAddressStep = ({
                   value={pincode}
                   onChange={(event) => setPincode(sanitizePincodeInput(event.target.value))}
                   onBlur={() => markTouched("pincode")}
-                  placeholder={form?.pincodePlaceholder ?? "Enter"}
+                  placeholder={form?.pincodePlaceholder ?? ""}
                   autoComplete="postal-code"
                   maxLength={6}
                   aria-invalid={showError("pincode") || undefined}
@@ -537,36 +539,54 @@ const TryAtHomeAddressStep = ({
                   message={showError("pincode") ? errors.pincode : undefined}
                 />
               </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <label htmlFor="try-at-home-city" className={appointmentLabelClassName}>
-                  {form?.cityLabel ?? "City"}
-                </label>
-                <input
-                  id="try-at-home-city"
-                  type="text"
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                  onBlur={() => markTouched("city")}
-                  placeholder={form?.cityPlaceholder ?? "Enter"}
-                  autoComplete="address-level2"
-                  maxLength={80}
-                  aria-invalid={showError("city") || undefined}
-                  aria-describedby={showError("city") ? "try-at-home-city-error" : undefined}
-                  className={cn(appointmentFieldClassName, showError("city") && invalidFieldClassName)}
-                />
-                <FormFieldError
-                  id="try-at-home-city-error"
-                  message={showError("city") ? errors.city : undefined}
-                />
-              </div>
+              {hasCityOptions ? (
+                <div className="min-w-0 flex-1">
+                  <OverlaySelectField
+                    id="try-at-home-city"
+                    label={form?.cityLabel ?? ""}
+                    value={selectedCity}
+                    options={cityOptions}
+                    placeholder={form?.cityPlaceholder ?? ""}
+                    onChange={setCity}
+                    onBlur={() => markTouched("city")}
+                    labelClassName={appointmentLabelClassName}
+                    invalid={showError("city")}
+                    errorId={showError("city") ? "try-at-home-city-error" : undefined}
+                    error={showError("city") ? errors.city : undefined}
+                  />
+                </div>
+              ) : (
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <label htmlFor="try-at-home-city" className={appointmentLabelClassName}>
+                    {form?.cityLabel ?? ""}
+                  </label>
+                  <input
+                    id="try-at-home-city"
+                    type="text"
+                    value={city}
+                    onChange={(event) => setCity(event.target.value)}
+                    onBlur={() => markTouched("city")}
+                    placeholder={form?.cityPlaceholder ?? ""}
+                    autoComplete="address-level2"
+                    maxLength={80}
+                    aria-invalid={showError("city") || undefined}
+                    aria-describedby={showError("city") ? "try-at-home-city-error" : undefined}
+                    className={cn(appointmentFieldClassName, showError("city") && invalidFieldClassName)}
+                  />
+                  <FormFieldError
+                    id="try-at-home-city-error"
+                    message={showError("city") ? errors.city : undefined}
+                  />
+                </div>
+              )}
             </div>
 
             <OverlaySelectField
               id="try-at-home-state"
-              label={form?.stateLabel ?? "State"}
-              value={state}
+              label={form?.stateLabel ?? ""}
+              value={selectedState}
               options={stateOptions}
-              placeholder={form?.statePlaceholder ?? "-select-"}
+              placeholder={form?.statePlaceholder ?? ""}
               onChange={setState}
               onBlur={() => markTouched("state")}
               labelClassName={appointmentLabelClassName}
@@ -778,8 +798,8 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         ) : step === "address" ? (
           <TryAtHomeAddressStep
             form={cmsForm}
-            formTitle={cmsForm?.formName ?? "Try At Home"}
-            submitLabel="Schedule Try At Home"
+            formTitle={cmsForm?.formName ?? ""}
+            submitLabel={cmsForm?.submitButtonText ?? ""}
             isSubmitting={isSubmitting}
             onBack={() => setStep("details")}
             onClose={handleClose}

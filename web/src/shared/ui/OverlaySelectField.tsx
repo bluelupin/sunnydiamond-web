@@ -32,6 +32,7 @@ type OverlaySelectFieldProps = {
   invalid?: boolean;
   errorId?: string;
   error?: string;
+  disabled?: boolean;
 };
 
 const OverlaySelectField = ({
@@ -47,11 +48,12 @@ const OverlaySelectField = ({
   invalid = false,
   errorId,
   error,
+  disabled = false,
 }: OverlaySelectFieldProps) => {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const [open, setOpen] = useState(false);
-  const selectPlaceholder = placeholder.trim() || "Select";
+  const selectPlaceholder = placeholder.trim();
 
   return (
     <div className="flex flex-col gap-2">
@@ -60,13 +62,14 @@ const OverlaySelectField = ({
         className={labelClassName}
         onClick={(event) => {
           event.preventDefault();
-          setOpen(true);
+          if (!disabled) setOpen(true);
         }}
       >
         {label}
       </label>
       <Select
         open={open}
+        disabled={disabled}
         value={value || SELECT_EMPTY_VALUE}
         onValueChange={(next) => {
           onChange(next === SELECT_EMPTY_VALUE ? "" : next);
@@ -87,6 +90,7 @@ const OverlaySelectField = ({
             defaultTriggerClassName,
             !value && "text-gray600 [&>span]:text-gray600",
             invalid && invalidFieldClassName,
+            disabled && "disabled:opacity-70",
             triggerClassName,
           )}
         >
@@ -100,7 +104,9 @@ const OverlaySelectField = ({
           data-vaul-no-drag
           className="z-[90] max-h-none overflow-visible rounded-none border-0 bg-[#F2F2F2] p-0 shadow-[0_8px_24px_rgba(0,0,0,0.12)] [&>[data-radix-select-viewport]]:max-h-[min(16rem,var(--radix-select-content-available-height))] [&>[data-radix-select-viewport]]:overflow-y-auto [&>[data-radix-select-viewport]]:overscroll-contain [&>[data-radix-select-viewport]]:p-0 [&>[data-radix-select-viewport]]:touch-pan-y"
         >
-          <SelectItem value={SELECT_EMPTY_VALUE}>{selectPlaceholder}</SelectItem>
+          {selectPlaceholder ? (
+            <SelectItem value={SELECT_EMPTY_VALUE}>{selectPlaceholder}</SelectItem>
+          ) : null}
           {options.map((option) => (
             <SelectItem key={option} value={option}>
               {option}

@@ -42,7 +42,6 @@ import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
-import AddToAppointmentNotice from "./AddToAppointmentNotice";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import type { NormalizedProductDisplayPage } from "@/services/product-display/product-display-page.service";
 import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
@@ -737,8 +736,6 @@ const ProductDetailSidebar = ({
           </Reveal>
         </section>
       ) : null}
-
-      <AddToAppointmentNotice productId={product.id} productName={product.name} />
 
       {hereForYou.isActive ? (
         <section

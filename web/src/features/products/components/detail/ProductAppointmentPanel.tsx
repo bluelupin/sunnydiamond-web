@@ -540,12 +540,8 @@ const ProductAppointmentPanel = ({
   };
 
   const handleLegacySuccess = (message: string) => {
-    if (variant === "personalise") {
+    if (variant === "personalise" || variant === "schedule-video-call") {
       showStatusToast(message);
-      return;
-    }
-
-    if (variant === "schedule-video-call") {
       return;
     }
 
