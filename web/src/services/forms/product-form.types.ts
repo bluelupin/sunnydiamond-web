@@ -82,7 +82,7 @@ export type NormalizedProductForm = {
 
 export type ProductSubmissionPayload = {
   formTag: string;
-  /** "null" for product-store-visit (the CMS requires a value), which also leaves out productId. */
+  /** "null" for the store visit form (the CMS requires a value), which also leaves out productId. */
   productName: string;
   productId?: string;
   customerName: string;
@@ -94,7 +94,7 @@ export type ProductSubmissionPayload = {
   purposeOfVisit?: string;
   requestedDate?: string;
   selectedTimeSlot?: string;
-  /** Showroom documentId — used by product-store-visit for My Appointments. */
+  /** Showroom documentId — used by the store visit form for My Appointments. */
   preferredShowroom?: string;
   addressLine1?: string;
   addressLine2?: string;

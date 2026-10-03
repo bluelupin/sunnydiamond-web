@@ -12,7 +12,16 @@ const PRODUCT_FORM_POPULATE_QUERY =
   "&populate[availableTimeSlots]=true" +
   "&populate[dynamicFields][populate]=*";
 
-export async function getProductFormByTag(
+export const STORE_VISIT_FORM_TAG = "store-visit";
+/** Store visit tag before the CMS rename — still looked up while the CMS form or older bookings use it. */
+export const LEGACY_STORE_VISIT_FORM_TAG = "product-store-visit";
+
+export function isStoreVisitFormTag(formTag?: string | null): boolean {
+  const normalized = formTag?.trim().toLowerCase();
+  return normalized === STORE_VISIT_FORM_TAG || normalized === LEGACY_STORE_VISIT_FORM_TAG;
+}
+
+async function fetchProductFormByTag(
   formTag: string,
   signal?: AbortSignal,
 ): Promise<NormalizedProductForm | null> {
@@ -27,6 +36,22 @@ export async function getProductFormByTag(
 
   const entity = Array.isArray(raw) ? raw[0] : raw;
   return mapProductForm(entity);
+}
+
+export async function getProductFormByTag(
+  formTag: string,
+  signal?: AbortSignal,
+): Promise<NormalizedProductForm | null> {
+  const form = await fetchProductFormByTag(formTag, signal);
+  if (form || !isStoreVisitFormTag(formTag)) {
+    return form;
+  }
+
+  const alternateTag =
+    formTag.trim().toLowerCase() === STORE_VISIT_FORM_TAG
+      ? LEGACY_STORE_VISIT_FORM_TAG
+      : STORE_VISIT_FORM_TAG;
+  return fetchProductFormByTag(alternateTag, signal);
 }
 
 /**

@@ -6,6 +6,7 @@ import { DetailTextLink } from "./shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
+import { STORE_VISIT_FORM_TAG } from "@/services/forms/product-form.service";
 
 type ProductDetailVisitUsSectionProps = {
   visitUs: NormalizedVisitUsSection;
@@ -29,7 +30,7 @@ const ProductDetailVisitUsSection = ({
 
   const ctaLabel = visitUs.ctaLabel.trim();
   const bookVisitFormTag = productId
-    ? "product-store-visit"
+    ? STORE_VISIT_FORM_TAG
     : visitUs.bookVisitFormTag;
   const hasImage = visitUs.imageSrc.trim().length > 0;
   const welcomeNote = visitUs.welcomeNote?.trim() ?? "";

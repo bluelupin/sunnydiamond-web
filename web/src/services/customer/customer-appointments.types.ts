@@ -52,7 +52,7 @@ export type CustomerAppointment = {
 export type CustomerOpenAppointment = {
   documentId: string;
   appointmentId: string;
-  formTag: "product-store-visit" | "product-video-call";
+  formTag: "store-visit" | "product-store-visit" | "product-video-call";
   requestedDate: string;
   selectedTimeSlot: string;
   showroomCity: string | null;
