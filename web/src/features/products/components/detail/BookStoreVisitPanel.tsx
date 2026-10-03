@@ -575,6 +575,7 @@ const BookStoreVisitPanel = ({
         customerEmail: email.trim() || undefined,
         ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
         requestDetails: composedNotes || undefined,
+        purposeOfVisit: purpose.trim() || undefined,
         requestedDate: date || undefined,
         selectedTimeSlot: selectedSlot ?? undefined,
         preferredShowroom,
@@ -1030,7 +1031,6 @@ const BookingFormStep = ({
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
       validatePurpose: purposeRequired,
-      emailRequired: true,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
       bookingWindow: STORE_VISIT_BOOKING_WINDOW,
@@ -1100,7 +1100,6 @@ const BookingFormStep = ({
                 namePlaceholder={namePlaceholder}
                 phoneLabel={phoneLabel}
                 phonePlaceholder={phonePlaceholder}
-                emailRequired
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}

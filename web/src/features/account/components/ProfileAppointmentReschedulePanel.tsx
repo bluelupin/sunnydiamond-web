@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
-import { BookStoreVisitLocationDetails } from "@/features/products/components/detail/BookStoreVisitLocationDetails";
+import { BookStoreVisitStoreHero } from "@/features/products/components/detail/BookStoreVisitStoreHero";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { DetailDarkButton } from "@/features/products/components/detail/shared";
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
@@ -111,6 +111,7 @@ function RescheduleStoreVisitCard({
         id: storeVisit.showroomDocumentId ?? storeVisit.city,
         tabLabel: storeVisit.city.toUpperCase(),
         storeName: storeVisit.city,
+        city: storeVisit.city,
         address: storeVisit.lines.join(", "),
         phone: "",
         directionsUrl: storeVisit.directionsHref ?? "",
@@ -118,35 +119,11 @@ function RescheduleStoreVisitCard({
     );
   }, [editorialShowrooms, storeVisit]);
 
-  const heroImage = store.heroImage || store.mobileHeroImage;
-
   return (
-    <div className="relative w-full">
-      {heroImage ? (
-        <div className="relative aspect-[3/4] min-h-[420px] w-full">
-          <Image
-            src={heroImage}
-            alt={store.imageAlt || store.storeName}
-            fill
-            className="object-cover object-center"
-            sizes="(max-width: 480px) 100vw, 480px"
-          />
-        </div>
-      ) : (
-        <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
-      )}
-      <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
-        <div className="flex flex-col gap-4">
-          <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-            {store.storeName}
-          </p>
-          <BookStoreVisitLocationDetails
-            store={store}
-            directionsLabel={profileTabsContent.appointments.getDirectionsLabel}
-          />
-        </div>
-      </div>
-    </div>
+    <BookStoreVisitStoreHero
+      store={store}
+      directionsLabel={profileTabsContent.appointments.getDirectionsLabel}
+    />
   );
 }
 
@@ -187,6 +164,7 @@ export function ProfileAppointmentReschedulePanel({
   const hasTimeSlots = Boolean(timeSlots?.length ?? true);
   const isTryAtHome = appointment?.type === "try_at_home";
   const isStoreVisit = appointment?.type === "store_visit";
+  const storeVisitPurpose = isStoreVisit ? (appointment?.purposeOfVisit?.trim() ?? "") : "";
   const address = appointment?.appointmentAddress;
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
     getAuthLoginIdentifierKind(),
@@ -458,6 +436,11 @@ export function ProfileAppointmentReschedulePanel({
                 showDate
                 showTimeSlots
                 selectedSlotStyle={isStoreVisit ? "gold" : "dark"}
+                showPurpose={Boolean(storeVisitPurpose)}
+                purpose={storeVisitPurpose}
+                purposeOptions={storeVisitPurpose ? [storeVisitPurpose] : []}
+                purposeLabel={profileTabsContent.appointments.purposeOfVisitLabel}
+                onPurposeChange={() => undefined}
                 phoneLocked={phoneLocked}
                 emailLocked={emailLocked}
                 nameLabel={cmsForm?.nameLabel}

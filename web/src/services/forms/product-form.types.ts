@@ -57,6 +57,7 @@ export type NormalizedProductForm = {
   emailLabel?: string;
   emailPlaceholder?: string;
   dateLabel?: string;
+  datePlaceholder?: string;
   notesLabel?: string;
   notesPlaceholder?: string;
   notesRequired: boolean;
@@ -68,8 +69,11 @@ export type NormalizedProductForm = {
   pincodePlaceholder?: string;
   cityLabel?: string;
   cityPlaceholder?: string;
+  cityOptions: string[];
   stateLabel?: string;
   statePlaceholder?: string;
+  /** Dropdown options on the State dynamic field (separate from the top-level `stateOptions` relation). */
+  stateFieldOptions: string[];
   purposeOptions: string[];
   purposeLabel?: string;
   purposePlaceholder?: string;
@@ -87,6 +91,7 @@ export type ProductSubmissionPayload = {
   /** Magento customer id from `/api/auth/me` — links submission to My Appointments. */
   magentoCustomerId?: number;
   requestDetails?: string;
+  purposeOfVisit?: string;
   requestedDate?: string;
   selectedTimeSlot?: string;
   /** Showroom documentId — used by product-store-visit for My Appointments. */

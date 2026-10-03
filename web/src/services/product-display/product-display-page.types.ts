@@ -92,25 +92,13 @@ export type StrapiProductDisplayToggleSection = {
   isActive?: boolean | null;
 };
 
-export type StrapiProductDisplayVisitShowroom = {
-  id?: number;
-  documentId?: string;
-  name?: string | null;
-  slug?: string | null;
-  isActive?: boolean | null;
-  image?: StrapiProductDisplayResponsiveImage | null;
-};
-
 export type StrapiProductDisplayVisitUsSection = {
   id?: number;
   sectionTitle?: string | null;
-  description?: string | null;
-  sortOrder?: number | null;
+  welcomeNote?: string | null;
+  appointmentLabel?: string | null;
   showField?: boolean | null;
-  image?: StrapiProductDisplayResponsiveImage | null;
-  cta?: StrapiProductDisplayCta | null;
-  formCta?: { label?: string | null; modalTag?: string | null } | null;
-  showrooms?: StrapiProductDisplayVisitShowroom[] | null;
+  backgroundImage?: StrapiProductDisplayResponsiveImage | null;
 };
 
 export type StrapiProductDisplayPage = {

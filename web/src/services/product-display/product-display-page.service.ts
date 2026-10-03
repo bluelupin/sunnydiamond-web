@@ -24,9 +24,8 @@ const PRODUCT_DISPLAY_PAGE_POPULATE =
   "&populate[personaliseCard][populate][0]=image" +
   "&populate[personaliseCard][populate][1]=buttons" +
   "&populate[pairItWith]=true" +
-  "&populate[visitUsSection][populate][showrooms][populate][image][populate][desktopImage]=true" +
-  "&populate[visitUsSection][populate][showrooms][populate][image][populate][mobileImage]=true" +
-  "&populate[visitUsSection][populate][cta]=true";
+  "&populate[visitUsSection][populate][backgroundImage][populate][desktopImage]=true" +
+  "&populate[visitUsSection][populate][backgroundImage][populate][mobileImage]=true";
 
 export const getProductDisplayPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedProductDisplayPage> => {

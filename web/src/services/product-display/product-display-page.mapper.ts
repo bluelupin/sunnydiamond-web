@@ -14,7 +14,6 @@ import {
   type StrapiProductDisplayCartStripSection,
   type StrapiProductDisplayPage,
   type StrapiProductDisplayStripItem,
-  type StrapiProductDisplayVisitShowroom,
   type StrapiProductDisplayVisitUsSection,
 } from "./product-display-page.types";
 
@@ -23,30 +22,8 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
-type VisitUsCtaSource = {
-  cta?: StrapiProductDisplayVisitUsSection["cta"];
-  formCta?: StrapiProductDisplayVisitUsSection["formCta"];
-};
-
-export function resolveVisitUsCtaFields(raw?: VisitUsCtaSource | null): {
-  ctaLabel: string;
-  ctaUrl?: string;
-  bookVisitFormTag?: string;
-} {
-  const ctaLabel =
-    cleanText(raw?.cta?.label) ?? cleanText(raw?.formCta?.label) ?? "";
-  const ctaUrl = cleanText(raw?.cta?.url);
-  const bookVisitFormTag = cleanText(raw?.formCta?.modalTag);
-
-  return {
-    ctaLabel,
-    ...(ctaUrl ? { ctaUrl } : {}),
-    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
-  };
-}
-
 function resolveVisitUsResponsiveImage(
-  image?: StrapiProductDisplayVisitUsSection["image"] | null,
+  image?: StrapiProductDisplayVisitUsSection["backgroundImage"] | null,
 ): { desktopSrc: string; mobileSrc: string; imageAlt: string } | null {
   const desktopSrc = resolveCmsMediaUrl(image?.desktopImage);
   const mobileSrc = resolveCmsMediaUrl(image?.mobileImage);
@@ -64,17 +41,7 @@ function resolveVisitUsResponsiveImage(
   };
 }
 
-function resolveFirstShowroomVisitImage(
-  showrooms?: StrapiProductDisplayVisitShowroom[] | null,
-): { desktopSrc: string; mobileSrc: string; imageAlt: string } | null {
-  const firstShowroom = Array.isArray(showrooms) ? showrooms[0] : undefined;
-  if (!firstShowroom || !isSectionActive(firstShowroom.isActive)) {
-    return null;
-  }
-
-  return resolveVisitUsResponsiveImage(firstShowroom.image);
-}
-
+/** Only the fields exposed in the PDP Visit Us CMS editor: title, welcome note, appointment label, background image, show section. */
 export function mapVisitUsSection(
   raw?: StrapiProductDisplayVisitUsSection | null,
 ): NormalizedVisitUsSection {
@@ -84,24 +51,21 @@ export function mapVisitUsSection(
     return { ...empty, isActive: false };
   }
 
-  const showroomImage = resolveFirstShowroomVisitImage(raw.showrooms);
-  const { ctaLabel, ctaUrl, bookVisitFormTag } = resolveVisitUsCtaFields(raw);
+  const backgroundImage = resolveVisitUsResponsiveImage(raw.backgroundImage);
 
-  const desktopSrc = showroomImage?.desktopSrc ?? "";
-  const mobileSrc = showroomImage?.mobileSrc ?? "";
+  const desktopSrc = backgroundImage?.desktopSrc ?? "";
+  const mobileSrc = backgroundImage?.mobileSrc ?? "";
   const imageSrc = desktopSrc || mobileSrc;
-  const imageAlt = showroomImage?.imageAlt ?? "";
+  const imageAlt = backgroundImage?.imageAlt ?? "";
 
   return {
     isActive: true,
     title: cleanText(raw.sectionTitle) ?? "",
-    description: cleanText(raw.description) ?? "",
+    description: cleanText(raw.welcomeNote) ?? "",
     imageSrc,
     mobileImageSrc: mobileSrc && mobileSrc !== imageSrc ? mobileSrc : undefined,
     imageAlt,
-    ctaLabel,
-    ...(ctaUrl ? { ctaUrl } : {}),
-    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
+    ctaLabel: cleanText(raw.appointmentLabel) ?? "",
   };
 }
 

@@ -361,6 +361,7 @@ const AppointmentContactFields = ({
           invalid={showError("purpose")}
           errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
           error={showError("purpose") ? errors.purpose : undefined}
+          disabled={detailsReadOnly}
         />
       ) : null}
 
