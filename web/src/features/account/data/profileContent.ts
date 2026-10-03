@@ -362,6 +362,9 @@ export const profileTabsContent = {
       title: "Cancel Appointment",
       description:
         "Something came up? Cancel or reschedule the appointment at your convenience.",
+      mobileTitle: "Cancel Appointment?",
+      mobileDescription:
+        "Plans changed? Choose another time that works for you, or cancel your appointment.",
       rescheduleLabel: "RESCHEDULE",
       confirmLabel: "CANCEL APPOINTMENT",
       unavailableTitle: "Appointment updates",
