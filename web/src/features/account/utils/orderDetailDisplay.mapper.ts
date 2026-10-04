@@ -211,6 +211,8 @@ export function mapTrackedOrderToProfileDetailUi(
     // invoice CTA stays on the detail page (Figma).
     return {
       ...base,
+      // Paid but not emailed yet: Magento calls it "Complete", the customer is still waiting.
+      ...(category === "in_progress" ? { statusLabel: ordersContent.statusInProgress } : {}),
       showCancel: false,
       showReturn: false,
       showCancelNote: false,

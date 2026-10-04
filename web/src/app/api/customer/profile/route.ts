@@ -8,6 +8,7 @@ import { splitProfileFullName } from "@/features/account/utils/formatAccountData
 import { normalizePhoneForMagento } from "@/lib/auth/magentoPhone";
 import { mapAuthErrorMessage } from "@/services/auth/authErrorMessages";
 import { fetchAuthFeatureFlags } from "@/features/auth/services/authFeatures.server";
+import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 
 export async function PATCH(request: Request) {
   const token = await getCustomerTokenFromRequest(request);
@@ -19,16 +20,25 @@ export async function PATCH(request: Request) {
   try {
     const body = (await request.json()) as { fullName?: string; phone?: string };
 
-    // Unverified save, allowed only while SMS OTP is switched off. With OTP on
-    // the number is a sign-in factor, so it must go through /api/customer/phone
-    // and be proven reachable first — enforced here, not just in the UI.
+    // Saves a number as typed, without a code. The store signs in only numbers
+    // proven with a code, and an account that merely typed one gives it up when its
+    // owner proves it, so a typed number is a contact detail (Profile shows VERIFY).
+    // A number that IS proven signs the customer in: replacing it needs a code
+    // (/api/customer/phone), enforced here and not just in the UI.
     if (body.phone !== undefined) {
       const { otpLoginEnabled } = await fetchAuthFeatureFlags();
       if (otpLoginEnabled) {
-        return NextResponse.json(
-          { error: "Mobile numbers must be verified with an OTP before they can be saved." },
-          { status: 409 },
-        );
+        const current = await magentoGraphqlFetch<{ customer?: { sd_mobile_verified?: boolean | null } }>({
+          query: "query ProfilePhoneProven { customer { sd_mobile_verified } }",
+          authToken: token,
+          cache: "no-store",
+        });
+        if (current.customer?.sd_mobile_verified === true) {
+          return NextResponse.json(
+            { error: "Mobile numbers must be verified with an OTP before they can be saved." },
+            { status: 409 },
+          );
+        }
       }
       const phone = normalizePhoneForMagento(body.phone.trim());
       if (phone && !/^\+\d{8,15}$/.test(phone)) {

@@ -131,8 +131,9 @@ export const validateCreateAccountForm = (
   const nameValidation = validateRequiredName(values.fullName);
   const emailValidation =
     values.secondaryField === "email" ? validateRequiredEmail(values.email) : { valid: true as const };
+  // Signing up by email makes the email the identity; the mobile number is optional.
   const phoneValidation =
-    values.secondaryField === "phone"
+    values.secondaryField === "phone" && values.phone.trim()
       ? validatePhone(values.phone, values.countryCode)
       : { valid: true as const };
 

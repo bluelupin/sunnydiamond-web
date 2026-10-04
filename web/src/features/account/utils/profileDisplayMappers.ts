@@ -551,6 +551,8 @@ export function mapCustomerOrderToProfileUi(
     // and the invoice stay (gift card success-to-profile flow, 30 Sep).
     return {
       ...base,
+      // Paid but not emailed yet: Magento calls it "Complete", the customer is still waiting.
+      ...(category === "in_progress" ? { statusLabel: ordersContent.statusInProgress } : {}),
       showTrack: false,
       showCancel: false,
       showReturn: false,

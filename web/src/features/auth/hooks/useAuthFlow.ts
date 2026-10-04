@@ -612,7 +612,7 @@ export function useAuthFlow({
 
     setIsSubmitting(true);
     const supplementalPhone =
-      otpTarget.kind === "email"
+      otpTarget.kind === "email" && createAccountPhone.trim()
         ? formatLoginPhoneForMagento(
             countryCode,
             normalizeLoginPhoneDigits(createAccountPhone, countryCode),

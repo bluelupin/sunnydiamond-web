@@ -232,8 +232,7 @@ export async function createCustomerAccount(input: {
   // The number typed on an email sign-up is not proven, so it must not travel with
   // the code: Magento reads a phone as the verified identifier, finds no SMS code for
   // it and answers "Incorrect code" (QA bug #25). It is saved to the new profile
-  // instead, which the profile route allows only while SMS sign-in is off; with it
-  // on, the customer verifies the number from their profile.
+  // as an unverified contact number instead; Profile offers VERIFY for it.
   if (input.target.kind === "email" && input.phone) {
     try {
       await fetch("/api/customer/profile", {

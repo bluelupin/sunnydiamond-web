@@ -160,7 +160,7 @@ const LoginCreateAccountContent = ({
             ) : (
               <div className="flex flex-col gap-2">
                 <label htmlFor="create-account-phone" className="font-gill text-base font-normal leading-110 text-darkblack">
-                  Phone Number*
+                  Phone Number (optional)
                 </label>
                 <div
                   className={cn(
@@ -185,7 +185,6 @@ const LoginCreateAccountContent = ({
                     onChange={(event) => onPhoneChange(event.target.value)}
                     placeholder="Enter your phone number."
                     autoComplete="tel-national"
-                    required
                     aria-invalid={phoneError ? true : undefined}
                     aria-describedby={phoneError ? "create-account-phone-error" : undefined}
                     className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"

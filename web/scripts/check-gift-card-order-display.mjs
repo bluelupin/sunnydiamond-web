@@ -77,6 +77,7 @@ assert.deepEqual(
 assert.equal(digital.timeline, undefined, "digital card: no delivery steps");
 assert.equal(digital.footnote, undefined, "digital card: no return-by note");
 assert.equal(digital.deliveryBy, undefined, "digital card: no delivery date");
+assert.equal(digital.statusLabel, "Order in Progress", "digital card not emailed yet: In Progress badge, not Complete");
 
 // Once the card has been emailed the store reports DELIVERED with the email time (QA bugs 35, 36).
 const emailed = mapCustomerOrderToProfileUi({
