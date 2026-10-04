@@ -185,7 +185,7 @@ export async function verifyLoginOtp(
  *
  * Registering by phone sends both identifiers — the phone is what was verified,
  * the email is the address for the new account. Registering by email sends only
- * the email, which is both.
+ * the email, which is both; a phone typed on that form is saved afterwards.
  */
 export async function createCustomerAccount(input: {
   target: OtpTarget;
@@ -204,9 +204,7 @@ export async function createCustomerAccount(input: {
   const identity =
     input.target.kind === "phone"
       ? { phone: input.target.phone, email: input.email }
-      : input.phone
-        ? { email: input.target.email, phone: input.phone }
-        : { email: input.target.email };
+      : { email: input.target.email };
 
   const { ok, data } = await postJson("/api/auth/otp/verify", {
     ...identity,
@@ -229,6 +227,23 @@ export async function createCustomerAccount(input: {
         (data?.error as string) ??
         "Your account may have been created, but sign-in failed. Try logging in again.",
     };
+  }
+
+  // The number typed on an email sign-up is not proven, so it must not travel with
+  // the code: Magento reads a phone as the verified identifier, finds no SMS code for
+  // it and answers "Incorrect code" (QA bug #25). It is saved to the new profile
+  // instead, which the profile route allows only while SMS sign-in is off; with it
+  // on, the customer verifies the number from their profile.
+  if (input.target.kind === "email" && input.phone) {
+    try {
+      await fetch("/api/customer/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: input.phone }),
+      });
+    } catch {
+      // The account exists and is signed in; the number can be added from the profile.
+    }
   }
 
   return { success: true };
