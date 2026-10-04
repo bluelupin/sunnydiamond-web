@@ -83,6 +83,9 @@ import { isCustomerEmailAvailable } from "@/services/magento/customer/customerEm
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
 
+/** The form a guest filled before the create-account step reloads the page. */
+const CHECKOUT_FORM_RESUME_KEY = "sunny-checkout-form-resume";
+
 const CheckoutPage = () => {
   const {
     items,
@@ -449,6 +452,20 @@ const CheckoutPage = () => {
   ]);
 
   useEffect(() => {
+    const saved = window.sessionStorage.getItem(CHECKOUT_FORM_RESUME_KEY);
+    if (!saved) {
+      return;
+    }
+    window.sessionStorage.removeItem(CHECKOUT_FORM_RESUME_KEY);
+    try {
+      const resumed = JSON.parse(saved) as Partial<CheckoutFormData>;
+      setForm((current) => ({ ...current, ...resumed }));
+    } catch {
+      // Unreadable copy: start from the empty form.
+    }
+  }, []);
+
+  useEffect(() => {
     const handlePageShow = () => {
       if (isAuthenticated) {
         refreshAddresses();
@@ -579,6 +596,12 @@ const CheckoutPage = () => {
     setShowOtpModal(false);
 
     if (result.registrationRequired) {
+      // Finishing the account reloads this page; keep what the guest already typed.
+      try {
+        window.sessionStorage.setItem(CHECKOUT_FORM_RESUME_KEY, JSON.stringify(form));
+      } catch {
+        // Storage unavailable: the guest retypes the address.
+      }
       openLoginModal({
         returnUrl: "/checkout",
         createAccountResume: {
