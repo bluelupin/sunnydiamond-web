@@ -1070,9 +1070,14 @@ const CheckoutPage = () => {
                 contactVerified={
                   isAuthenticated &&
                   (isCheckoutEmailContact(form.phoneOrEmail)
-                    ? customer?.emailVerified === true
+                    ? customer?.emailVerified === true &&
+                      form.phoneOrEmail.trim().toLowerCase() === customer.email.toLowerCase()
                     : customer?.phoneVerified === true)
                 }
+                // The mobile number is this customer's identity, so the email is theirs to
+                // change for this order. Signed up by email: the email is the identity and
+                // stays as it is (QA bug #28, decision of 4 Oct).
+                contactEmailEditable={customer?.phoneVerified === true}
               />
             ) : (
               <CheckoutPaymentStep
