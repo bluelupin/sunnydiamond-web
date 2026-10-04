@@ -25,10 +25,9 @@ register(`data:text/javascript,${encodeURIComponent(aliasHooks)}`);
 const { mapCustomerOrderToProfileUi } = await import("../src/features/account/utils/profileDisplayMappers.ts");
 const { giftCardSuccessHref } = await import("../src/features/gift-card/utils/giftCardCta.utils.ts");
 
-// Success screen primary button.
-assert.equal(giftCardSuccessHref("digital", "000000246"), "/profile?section=orders&order=000000246");
-assert.equal(giftCardSuccessHref("digital", ""), "/profile?section=orders");
-assert.equal(giftCardSuccessHref("physical", "000000214"), "/order-tracking?order=000000214");
+// Both success screen buttons open the placed order in My Orders.
+assert.equal(giftCardSuccessHref("000000246"), "/profile?section=orders&order=000000246");
+assert.equal(giftCardSuccessHref(""), "/profile?section=orders");
 
 const actions = {
   canTrack: true,
@@ -79,6 +78,20 @@ assert.equal(digital.timeline, undefined, "digital card: no delivery steps");
 assert.equal(digital.footnote, undefined, "digital card: no return-by note");
 assert.equal(digital.deliveryBy, undefined, "digital card: no delivery date");
 
+// Once the card has been emailed the store reports DELIVERED with the email time (QA bugs 35, 36).
+const emailed = mapCustomerOrderToProfileUi({
+  ...order("sd-gift-card-digital", "Complete", "DELIVERED"),
+  sunnyDelivery: { estimatedDeliveryAt: null, deliveredAt: "2026-10-03T19:20:05+05:30", returnableTill: null },
+});
+assert.equal(emailed.category, "delivered", "emailed digital card: Delivered tab");
+assert.equal(emailed.statusLabel, "Delivered", "emailed digital card: Delivered badge, not Complete");
+assert.ok(emailed.deliveryBy, "emailed digital card: delivery date shown");
+assert.deepEqual(
+  [emailed.showTrack, emailed.showCancel, emailed.showReturn, emailed.showContactUs, emailed.showDownloadInvoice],
+  [false, false, false, true, true],
+  "emailed digital card: Contact Us and invoice only",
+);
+
 const physical = mapCustomerOrderToProfileUi(order("sd-gift-card-physical", "processing"));
 assert.equal(physical.items[0].subtitle, "Physical Card");
 assert.equal(physical.showTrack, true, "physical card keeps Track");
@@ -101,4 +114,4 @@ const jewellery = mapCustomerOrderToProfileUi(order("SD-RING-001"));
 assert.equal(jewellery.items[0].subtitle, undefined, "jewellery has no card label");
 assert.equal(jewellery.showReturn, true);
 
-console.log("gift card order display: 5/5 passed");
+console.log("gift card order display: 6/6 passed");

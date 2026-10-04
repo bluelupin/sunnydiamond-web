@@ -225,7 +225,12 @@ export function isDigitalGiftCardContactUsOnlyOrder(
 }
 
 /** Display label for ProfileStatusBadge — uses canonical timeline label when status matches. */
-export function formatOrderStatusLabel(status: string): string {
+export function formatOrderStatusLabel(status: string, sunnyStatus?: string | null): string {
+  // An emailed digital gift card is delivered while Magento still calls it "Complete".
+  if (sunnyStatus === "DELIVERED") {
+    return "Delivered";
+  }
+
   const normalized = normalizeOrderStatus(status);
 
   if (!normalized) {

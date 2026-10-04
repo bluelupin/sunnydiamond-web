@@ -200,9 +200,13 @@ const CheckoutPage = () => {
   const pincodeAutofillEnabled = step === "form" && !shouldShowSuccess;
   useCheckoutPincodeAutofill(form, setForm, pincodeAutofillEnabled);
 
+  // A customer with no saved address types one here, exactly like a guest. That is
+  // everyone who registers from the email-code step of this page.
+  const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
+
   const formValidation = useCheckoutFormValidation(form, {
     emailOnly: contactEmailOnly,
-    requireDeliveryPhone: contactEmailOnly && !isAuthenticated,
+    requireDeliveryPhone: contactEmailOnly && (!isAuthenticated || !hasDeliveryAddressAvailable),
   });
   const paymentValidation = useCheckoutPaymentValidation(
     payment,
@@ -210,9 +214,6 @@ const CheckoutPage = () => {
     hasEngravedItems,
     totalPrice,
   );
-
-  // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
-  const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
 
   const scrollToCheckoutSection = useCallback((sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -231,15 +232,6 @@ const CheckoutPage = () => {
     pendingCheckoutScrollSectionRef.current = null;
     scrollToCheckoutSection(sectionId);
   }, [step, scrollToCheckoutSection]);
-
-  const showDeliveryAddressRequiredFeedback = () => {
-    scrollToCheckoutSection("checkout-delivery-address-required");
-    toast({
-      title: "Delivery address required",
-      description:
-        "Add a delivery address in My Addresses on your profile, then return here to continue.",
-    });
-  };
 
   const dismissCheckoutStatusToast = useCallback(() => {
     if (checkoutStatusToastTimeoutRef.current) {
@@ -659,15 +651,12 @@ const CheckoutPage = () => {
   const handleContinueToPayment = () => {
     if (checkoutLockedRef.current) return;
 
-    // Must run before form validation: with no saved address the shipping fields are
-    // hidden/empty, so validateSubmit fails silently and never reaches this toast.
-    if (isAuthenticated && !hasDeliveryAddressAvailable) {
-      showDeliveryAddressRequiredFeedback();
-      return;
-    }
-
     formValidation.validateSubmit(() => {
-      const submittedForm = { ...form };
+      // A first address typed here becomes the customer's saved address.
+      const submittedForm = {
+        ...form,
+        ...(isAuthenticated && !hasDeliveryAddressAvailable ? { saveAddressToProfile: true } : {}),
+      };
       const contactIsEmail = isCheckoutEmailContact(submittedForm.phoneOrEmail);
 
       // Guests prove they own the contact they typed — SMS OTP for a number,
@@ -757,6 +746,9 @@ const CheckoutPage = () => {
       checkoutLockedRef.current = true;
       paymentInFlightRef.current = true;
       setSubmitting(true);
+      // The message from an earlier failed attempt stayed on screen through the
+      // next one, so a successful retry still read "Payment failed" (QA bug #31).
+      dismissPaymentFailedToast();
 
       void (async () => {
         try {
@@ -1048,10 +1040,10 @@ const CheckoutPage = () => {
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
-                hasSavedDeliveryAddress={hasDeliveryAddressAvailable}
                 savedAddresses={addresses}
                 onSelectSavedShippingAddress={handleSelectSavedShippingAddress}
-                fieldsDisabled={isSavingAddresses}
+                // Saved addresses still loading: typing now would be overwritten by the prefill.
+                fieldsDisabled={isSavingAddresses || (isAuthenticated && addressesLoading)}
                 contactVerified={
                   isAuthenticated &&
                   (isCheckoutEmailContact(form.phoneOrEmail)

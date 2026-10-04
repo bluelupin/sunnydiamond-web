@@ -135,7 +135,7 @@ export function mapTrackedOrderToProfileDetailUi(
   imageBySku: Record<string, string> = {},
 ): ProfileOrderDetailUi {
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
-  const statusLabel = formatOrderStatusLabel(order.status);
+  const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapDetailItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
   const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"

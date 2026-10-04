@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "crypto";
-import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
-import {
-  MAGENTO_CREATE_CUSTOMER_MUTATION,
-  MAGENTO_GENERATE_CUSTOMER_TOKEN_MUTATION,
-  SUNNY_DELETE_CUSTOMER_MUTATION,
-} from "@/services/customer/customer.gql";
 
 type EmailAvailabilityBody = {
   email?: string;
 };
-
-const DUPLICATE_EMAIL_PATTERN =
-  /same email address already exists|already (?:exists|registered)|email.*(?:exists|taken)/i;
 
 async function isEmailAvailableViaGraphql(email: string): Promise<boolean | null> {
   try {
@@ -40,74 +30,6 @@ async function isEmailAvailableViaGraphql(email: string): Promise<boolean | null
   }
 }
 
-function buildProbePassword(): string {
-  return `Tmp!${randomBytes(12).toString("base64url")}Aa1`;
-}
-
-/**
- * Magento 2.4.7+ hides existence via isEmailAvailable. createCustomerV2 still
- * rejects duplicates. New emails briefly create then delete (server-side only).
- */
-async function isEmailAvailableViaCreateProbe(email: string): Promise<boolean> {
-  const password = buildProbePassword();
-
-  try {
-    await magentoGraphqlFetch({
-      query: MAGENTO_CREATE_CUSTOMER_MUTATION,
-      variables: {
-        input: {
-          email,
-          firstname: "Guest",
-          lastname: "Checkout",
-          password,
-          is_subscribed: false,
-        },
-      },
-      cache: "no-store",
-    });
-  } catch (error) {
-    const message =
-      error instanceof MagentoGraphqlError
-        ? error.message
-        : error instanceof Error
-          ? error.message
-          : "";
-
-    if (DUPLICATE_EMAIL_PATTERN.test(message)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  try {
-    const tokenData = await magentoGraphqlFetch<{
-      generateCustomerToken?: { token?: string | null } | null;
-    }>({
-      query: MAGENTO_GENERATE_CUSTOMER_TOKEN_MUTATION,
-      variables: { email, password },
-      cache: "no-store",
-    });
-
-    const token = tokenData.generateCustomerToken?.token;
-    if (token) {
-      await magentoGraphqlFetch({
-        query: SUNNY_DELETE_CUSTOMER_MUTATION,
-        variables: { input: { reason: "checkout_email_probe" } },
-        authToken: token,
-        cache: "no-store",
-      });
-    }
-  } catch (error) {
-    console.warn(
-      "[email-availability] Probe account cleanup failed",
-      error instanceof Error ? error.message : error,
-    );
-  }
-
-  return true;
-}
-
 /** Guest-checkout email gate only. */
 export async function POST(request: NextRequest) {
   let body: EmailAvailabilityBody;
@@ -123,15 +45,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "A valid email is required" }, { status: 400 });
   }
 
+  // Only Magento's own answer is used. This route used to "probe" by creating a
+  // customer and deleting it, which left a real "Guest Checkout" account (and its
+  // welcome and deletion emails) behind for every address typed at checkout
+  // (QA bugs 25-27). When Magento does not say, the email-code step decides:
+  // an existing account is signed in, a new address goes on to registration.
   const graphqlAvailable = await isEmailAvailableViaGraphql(email);
-  if (graphqlAvailable === false) {
-    return NextResponse.json({ available: false });
-  }
-
-  try {
-    const available = await isEmailAvailableViaCreateProbe(email);
-    return NextResponse.json({ available });
-  } catch {
-    return NextResponse.json({ available: true });
-  }
+  return NextResponse.json({ available: graphqlAvailable !== false });
 }

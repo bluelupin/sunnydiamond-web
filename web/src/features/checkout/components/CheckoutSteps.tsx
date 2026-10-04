@@ -49,7 +49,6 @@ type CheckoutFormStepProps = {
   onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
   isAuthenticated?: boolean;
-  hasSavedDeliveryAddress?: boolean;
   savedAddresses?: CustomerAddress[];
   onSelectSavedShippingAddress?: (addressUid: string) => void;
   fieldsDisabled?: boolean;
@@ -231,7 +230,6 @@ export const CheckoutFormStep = ({
   onContactBlur,
   validation,
   isAuthenticated = false,
-  hasSavedDeliveryAddress = true,
   savedAddresses = [],
   onSelectSavedShippingAddress,
   fieldsDisabled = false,
@@ -295,54 +293,38 @@ export const CheckoutFormStep = ({
 
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
       <CheckoutSectionHeading>Delivery Address</CheckoutSectionHeading>
-      {isAuthenticated && !hasSavedDeliveryAddress ? (
-        <p
-          id="checkout-delivery-address-required"
-          className="font-gill text-sm font-light leading-130 text-neutral500"
-          role="status"
-        >
-          Add a delivery address in{" "}
-          <a href="/profile?section=addresses" className="border-b border-darkblack text-darkblack">
-            My Addresses
-          </a>{" "}
-          on your profile before continuing checkout.
-        </p>
-      ) : (
-        <>
-          <div className="space-y-6">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack">SHIPPING ADDRESS</p>
-            <CheckoutAddressFields
-              idPrefix="checkout-shipping"
-              fields={SHIPPING_ADDRESS_FIELDS}
-              form={form}
-              onChange={onChange}
-              validation={validation}
-              disabled={fieldsDisabled}
-            />
-          </div>
+      <div className="space-y-6">
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">SHIPPING ADDRESS</p>
+        <CheckoutAddressFields
+          idPrefix="checkout-shipping"
+          fields={SHIPPING_ADDRESS_FIELDS}
+          form={form}
+          onChange={onChange}
+          validation={validation}
+          disabled={fieldsDisabled}
+        />
+      </div>
 
-          <div className="flex flex-col lg:gap-6 gap-4">
-            <CheckoutSubheading className="md:!text-xl !text-base">BILLING ADDRESS</CheckoutSubheading>
-            <CheckoutCheckbox
-              checked={form.billingSameAsShipping}
-              onChange={(checked) => onChange("billingSameAsShipping", checked)}
-              label="My billing address is the same as my shipping address"
-              disabled={fieldsDisabled}
-            />
-          </div>
+      <div className="flex flex-col lg:gap-6 gap-4">
+        <CheckoutSubheading className="md:!text-xl !text-base">BILLING ADDRESS</CheckoutSubheading>
+        <CheckoutCheckbox
+          checked={form.billingSameAsShipping}
+          onChange={(checked) => onChange("billingSameAsShipping", checked)}
+          label="My billing address is the same as my shipping address"
+          disabled={fieldsDisabled}
+        />
+      </div>
 
-          {!form.billingSameAsShipping ? (
-            <CheckoutAddressFields
-              idPrefix="checkout-billing"
-              fields={BILLING_ADDRESS_FIELDS}
-              form={form}
-              onChange={onChange}
-              validation={validation}
-              disabled={fieldsDisabled}
-            />
-          ) : null}
-        </>
-      )}
+      {!form.billingSameAsShipping ? (
+        <CheckoutAddressFields
+          idPrefix="checkout-billing"
+          fields={BILLING_ADDRESS_FIELDS}
+          form={form}
+          onChange={onChange}
+          validation={validation}
+          disabled={fieldsDisabled}
+        />
+      ) : null}
     </CheckoutSectionCard>
   </div>
 );

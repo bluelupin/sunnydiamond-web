@@ -60,7 +60,7 @@ function buildOrderOverride(order: TrackedOrder): ProfileOrderOverride {
 
   return {
     status: order.status,
-    statusLabel: formatOrderStatusLabel(order.status),
+    statusLabel: formatOrderStatusLabel(order.status, order.sunnyStatus),
     category,
     subState,
     showTrack: actions ? actions.canTrack : false,

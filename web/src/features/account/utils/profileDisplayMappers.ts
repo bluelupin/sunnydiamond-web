@@ -471,7 +471,7 @@ export function mapCustomerOrderToProfileUi(
   imageBySku?: Record<string, string>,
 ): ProfileOrderUi {
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
-  const statusLabel = formatOrderStatusLabel(order.status);
+  const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapOrderItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
   const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
@@ -538,7 +538,8 @@ export function mapCustomerOrderToProfileUi(
       showTrack: false,
       showCancel: false,
       showReturn: false,
-      showDownloadInvoice: false,
+      // The invoice stays for a digital card (success-to-profile flow, 30 Sep).
+      showDownloadInvoice: isDigitalGiftCardProfileOrder(base),
       showContactUs: true,
       showCancelNote: false,
       footnote: undefined,
