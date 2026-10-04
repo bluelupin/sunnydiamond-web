@@ -208,7 +208,8 @@ const CheckoutPage = () => {
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
 
   const formValidation = useCheckoutFormValidation(form, {
-    emailOnly: contactEmailOnly,
+    // A signed-in customer's contact field is the order email, never a number.
+    emailOnly: contactEmailOnly || isAuthenticated,
     requireDeliveryPhone: contactEmailOnly && (!isAuthenticated || !hasDeliveryAddressAvailable),
   });
   const paymentValidation = useCheckoutPaymentValidation(
