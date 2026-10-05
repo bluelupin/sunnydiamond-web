@@ -250,6 +250,24 @@ function ProfileAppointmentAddress({
   );
 }
 
+/** Figma: store name, street address, then state + pincode — three lines at most. */
+function groupStoreVisitAddressLines(
+  storeVisit: NonNullable<ProfileAppointmentUi["storeVisit"]>,
+): string[] {
+  const rest = [...storeVisit.lines];
+  const storeNameLine =
+    rest.length > 0 &&
+    storeVisit.storeName.trim() &&
+    rest[0].toLowerCase() === storeVisit.storeName.trim().toLowerCase()
+      ? rest.shift()
+      : undefined;
+  const lastLine = rest.length > 1 ? rest.pop() : undefined;
+
+  return [storeNameLine, rest.join(", "), lastLine].filter(
+    (line): line is string => Boolean(line),
+  );
+}
+
 function ProfileAppointmentStoreVisit({
   title,
   storeVisit,
@@ -259,6 +277,8 @@ function ProfileAppointmentStoreVisit({
   storeVisit: NonNullable<ProfileAppointmentUi["storeVisit"]>;
   directionsLabel: string;
 }) {
+  const addressLines = groupStoreVisitAddressLines(storeVisit);
+
   return (
     <div className={sectionCardClassName}>
       <h4 className={sectionTitleClassName}>{title}</h4>
@@ -266,7 +286,7 @@ function ProfileAppointmentStoreVisit({
       <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
         {storeVisit.city ? <p className="font-normal">{storeVisit.city}</p> : null}
         <div className="font-light">
-          {storeVisit.lines.map((line, index) => (
+          {addressLines.map((line, index) => (
             <p key={`${index}-${line}`}>{line}</p>
           ))}
         </div>

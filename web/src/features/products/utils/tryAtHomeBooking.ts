@@ -1,3 +1,5 @@
+import { parseAppointmentSlotStartMinutes } from "@/shared/utils/appointmentTimeSlots";
+
 export type TryAtHomeBookingSummary = {
   date: string;
   selectedSlot: string | null;
@@ -12,9 +14,6 @@ const BOOKING_DATE_PART_DISPLAY: Intl.DateTimeFormatOptions = {
   month: "long",
   year: "numeric",
 };
-
-/** Booking changes (add items, reschedule) allowed until this many days before the appointment. */
-export const APPOINTMENT_MODIFY_DEADLINE_DAYS = 3;
 
 function parseBookingDate(value: string): Date | null {
   const trimmed = value.trim();
@@ -72,29 +71,76 @@ export function getDaysUntilAppointment(
   return Math.round((booking.getTime() - reference.getTime()) / 86_400_000);
 }
 
-export function canModifyAppointmentBeforeDeadline(
+type AppointmentModifyDeadline = {
+  deadline: Date;
+  /** False when the slot has no readable start time; the deadline is then date-only. */
+  hasTime: boolean;
+};
+
+/**
+ * Booking changes (add items, reschedule) are allowed until the slot start minus the booking
+ * notice (client rule: 2 h store visit / video call, 48 h Try at Home). Without a readable
+ * slot time the appointment day's start is used.
+ */
+function getModifyDeadline(
   requestedDate: string,
-  referenceDate = new Date(),
-): boolean {
-  const bookingDate = parseBookingDate(requestedDate);
-  if (!bookingDate) {
-    return false;
-  }
-
-  return (
-    getDaysUntilAppointment(bookingDate, referenceDate) >= APPOINTMENT_MODIFY_DEADLINE_DAYS
-  );
-}
-
-function getModifyDeadlineDate(requestedDate: string): Date | null {
+  selectedSlot: string | null | undefined,
+  minNoticeMinutes: number,
+): AppointmentModifyDeadline | null {
   const bookingDate = parseBookingDate(requestedDate);
   if (!bookingDate) {
     return null;
   }
 
-  const deadline = new Date(bookingDate);
-  deadline.setDate(deadline.getDate() - APPOINTMENT_MODIFY_DEADLINE_DAYS);
-  return deadline;
+  const startMinutes = parseAppointmentSlotStartMinutes(selectedSlot ?? "");
+  const start = new Date(
+    bookingDate.getFullYear(),
+    bookingDate.getMonth(),
+    bookingDate.getDate(),
+    startMinutes == null ? 0 : Math.floor(startMinutes / 60),
+    startMinutes == null ? 0 : startMinutes % 60,
+  );
+
+  return {
+    deadline: new Date(start.getTime() - minNoticeMinutes * 60_000),
+    hasTime: startMinutes != null,
+  };
+}
+
+export function canModifyAppointmentBeforeDeadline(
+  requestedDate: string,
+  selectedSlot: string | null | undefined,
+  minNoticeMinutes: number,
+  referenceDate = new Date(),
+): boolean {
+  const modifyDeadline = getModifyDeadline(requestedDate, selectedSlot, minNoticeMinutes);
+  return modifyDeadline != null && referenceDate.getTime() < modifyDeadline.deadline.getTime();
+}
+
+function formatDeadlineTime(date: Date): string {
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours % 12 || 12}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
+}
+
+function formatModifyDeadline(
+  requestedDate: string,
+  selectedSlot: string | null | undefined,
+  minNoticeMinutes: number,
+  includeWeekday: boolean,
+  includeTime = true,
+): string {
+  const modifyDeadline = getModifyDeadline(requestedDate, selectedSlot, minNoticeMinutes);
+  if (!modifyDeadline) {
+    return "";
+  }
+
+  const { deadline, hasTime } = modifyDeadline;
+  const datePart = deadline.toLocaleDateString("en-IN", BOOKING_DATE_PART_DISPLAY);
+  const dateLabel = includeWeekday
+    ? `${deadline.toLocaleDateString("en-IN", BOOKING_WEEKDAY_DISPLAY)}, ${datePart}`
+    : datePart;
+  return includeTime && hasTime ? `${dateLabel}, ${formatDeadlineTime(deadline)}` : dateLabel;
 }
 
 /** Figma success: "Booking for: Sunday, 14 May 2026; 12:00 PM" (start time only). */
@@ -126,27 +172,19 @@ export function formatSuccessBookingStartTime(selectedSlot: string | null | unde
   return (rangeSplit[0] ?? trimmed).trim();
 }
 
-/** Figma success: "You can add more items till Friday, 12 May 2026" */
-export const formatTryAtHomeAddItemsDeadline = (date: string): string => {
-  const deadline = getModifyDeadlineDate(date);
-  if (!deadline) {
-    return "";
-  }
+/** Figma success: "You can add more items till Friday, 12 May 2026" (date only). */
+export const formatTryAtHomeAddItemsDeadline = (
+  date: string,
+  selectedSlot: string | null | undefined,
+  minNoticeMinutes: number,
+): string => formatModifyDeadline(date, selectedSlot, minNoticeMinutes, true, false);
 
-  const day = deadline.toLocaleDateString("en-IN", BOOKING_WEEKDAY_DISPLAY);
-  const datePart = deadline.toLocaleDateString("en-IN", BOOKING_DATE_PART_DISPLAY);
-  return `${day}, ${datePart}`;
-};
-
-/** Listing note: "Appointment can be rescheduled before {date}" — date only. */
-export const formatTryAtHomeRescheduleDeadline = (date: string): string => {
-  const deadline = getModifyDeadlineDate(date);
-  if (!deadline) {
-    return "";
-  }
-
-  return deadline.toLocaleDateString("en-IN", BOOKING_DATE_PART_DISPLAY);
-};
+/** Listing note: "Appointment can be rescheduled before {date}" (date only). */
+export const formatTryAtHomeRescheduleDeadline = (
+  date: string,
+  selectedSlot: string | null | undefined,
+  minNoticeMinutes: number,
+): string => formatModifyDeadline(date, selectedSlot, minNoticeMinutes, false, false);
 
 export type TryAtHomeSlotAddress = {
   addressLine1: string;

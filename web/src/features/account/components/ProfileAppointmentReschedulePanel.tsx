@@ -2,10 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { ChevronLeft } from "lucide-react";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { BookStoreVisitStoreHero } from "@/features/products/components/detail/BookStoreVisitStoreHero";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
-import { DetailDarkButton } from "@/features/products/components/detail/shared";
+import {
+  DetailDarkButton,
+  DetailTextLink,
+} from "@/features/products/components/detail/shared";
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
 import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
@@ -31,6 +35,7 @@ import {
 } from "@/shared/constants/appointmentForm";
 import type { AppointmentBookingWindow } from "@/shared/utils/appointmentTimeSlots";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -104,6 +109,16 @@ function splitStoredPhone(rawPhone: string): { countryCode: string; phone: strin
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
+type RescheduleStep = "details" | "address";
+
+const ALL_ADDRESS_FIELDS: AddressField[] = [
+  "addressLine1",
+  "addressLine2",
+  "pincode",
+  "city",
+  "state",
+];
+
 /** Same showroom card as the PDP Book a Visit panel, for the booked store. */
 function RescheduleStoreVisitCard({
   storeVisit,
@@ -155,6 +170,7 @@ export function ProfileAppointmentReschedulePanel({
   onRescheduled,
 }: ProfileAppointmentReschedulePanelProps) {
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
+  const [step, setStep] = useState<RescheduleStep>("details");
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [phone, setPhone] = useState("");
@@ -181,9 +197,12 @@ export function ProfileAppointmentReschedulePanel({
   const bookingWindow = BOOKING_WINDOWS[appointment?.type ?? "store_visit"];
   const storeVisitPurpose = isStoreVisit ? (appointment?.purposeOfVisit?.trim() ?? "") : "";
   const address = appointment?.appointmentAddress;
+  const hasAddressStep = isTryAtHome && Boolean(address);
+  const isAddressStep = hasAddressStep && step === "address";
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
     getAuthLoginIdentifierKind(),
   );
+  const { detectAddress, isLocating } = useCurrentLocationAddress();
 
   const formValues = useMemo(
     () => ({
@@ -251,13 +270,28 @@ export function ProfileAppointmentReschedulePanel({
   const showAddressError = (field: AddressField) =>
     touchedAddressFields.has(field) && Boolean(addressErrors[field]);
 
-  const canSave = useMemo(() => {
+  const canProceedToAddress = useMemo(() => {
     if (isSubmitting) return false;
     if (validateBookingWindowDate(date, bookingWindow, true).error) return false;
     if (hasTimeSlots && !selectedSlot?.trim()) return false;
-    if (hasAddressErrors) return false;
     return true;
-  }, [bookingWindow, date, hasAddressErrors, hasTimeSlots, isSubmitting, selectedSlot]);
+  }, [bookingWindow, date, hasTimeSlots, isSubmitting, selectedSlot]);
+
+  const canSave = canProceedToAddress && !hasAddressErrors;
+
+  const handleUseCurrentLocation = async () => {
+    const detected = await detectAddress();
+    if (!detected) {
+      return;
+    }
+
+    setAddressLine1(detected.addressLine1);
+    setAddressLine2(detected.addressLine2);
+    setPincode(detected.pincode);
+    setCity(detected.city);
+    setAddressState(detected.state);
+    setTouchedAddressFields(new Set(ALL_ADDRESS_FIELDS));
+  };
 
   useEffect(() => {
     if (!open || !appointment) {
@@ -265,6 +299,7 @@ export function ProfileAppointmentReschedulePanel({
     }
 
     const parts = splitStoredPhone(appointment.customerPhone);
+    setStep("details");
     setName(appointment.customerName ?? "");
     setCountryCode(parts.countryCode);
     setPhone(parts.phone);
@@ -376,6 +411,7 @@ export function ProfileAppointmentReschedulePanel({
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div
+          key={step}
           ref={scrollRef}
           onFocusCapture={handleFocusCapture}
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar"
@@ -383,9 +419,26 @@ export function ProfileAppointmentReschedulePanel({
           <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                  {panelTitle}
-                </h2>
+                <div className="flex min-w-0 items-center gap-2">
+                  {isAddressStep ? (
+                    <button
+                      type="button"
+                      onClick={() => setStep("details")}
+                      aria-label="Back to try at home details"
+                      className="inline-flex size-6 shrink-0 items-center justify-center"
+                    >
+                      <ChevronLeft
+                        size={24}
+                        strokeWidth={1.25}
+                        aria-hidden
+                        className="text-darkblack"
+                      />
+                    </button>
+                  ) : null}
+                  <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                    {panelTitle}
+                  </h2>
+                </div>
                 <RightPanelCloseButton
                   onClick={onClose}
                   aria-label="Close reschedule appointment panel"
@@ -398,7 +451,18 @@ export function ProfileAppointmentReschedulePanel({
               <RescheduleStoreVisitCard storeVisit={appointment.storeVisit} />
             ) : null}
 
-            {product && !isStoreVisit ? (
+            {isAddressStep ? (
+              <div className="flex justify-center">
+                <DetailTextLink
+                  onClick={() => void handleUseCurrentLocation()}
+                  disabled={isLocating}
+                >
+                  {isLocating ? "DETECTING LOCATION..." : "USE CURRENT LOCATION"}
+                </DetailTextLink>
+              </div>
+            ) : null}
+
+            {product && !isStoreVisit && !isAddressStep ? (
               <div className="flex flex-col items-center gap-2 pb-4">
                 <div className="relative h-[133px] w-[206px]">
                   {product.imageSrc ? (
@@ -427,58 +491,60 @@ export function ProfileAppointmentReschedulePanel({
             ) : null}
 
             <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
-              <AppointmentContactFields
-                idPrefix="reschedule-appointment"
-                name={name}
-                countryCode={countryCode}
-                phone={phone}
-                email={email}
-                date={date}
-                note={note}
-                selectedSlot={selectedSlot}
-                timeSlots={timeSlots}
-                onNameChange={setName}
-                onCountryCodeChange={setCountryCode}
-                onPhoneChange={setPhone}
-                onEmailChange={setEmail}
-                onDateChange={setDate}
-                onNoteChange={setNote}
-                onSelectedSlotChange={setSelectedSlot}
-                errors={errors}
-                showError={showError}
-                markTouched={markTouched}
-                showContactDetails
-                detailsReadOnly
-                showDate
-                showTimeSlots
-                selectedSlotStyle={isStoreVisit ? "gold" : "dark"}
-                showPurpose={Boolean(storeVisitPurpose)}
-                purpose={storeVisitPurpose}
-                purposeOptions={storeVisitPurpose ? [storeVisitPurpose] : []}
-                purposeLabel={profileTabsContent.appointments.purposeOfVisitLabel}
-                onPurposeChange={() => undefined}
-                phoneLocked={phoneLocked}
-                emailLocked={emailLocked}
-                nameLabel={cmsForm?.nameLabel}
-                namePlaceholder={cmsForm?.namePlaceholder}
-                phoneLabel={cmsForm?.phoneLabel}
-                phonePlaceholder={cmsForm?.phonePlaceholder}
-                emailLabel={cmsForm?.emailLabel}
-                emailPlaceholder={cmsForm?.emailPlaceholder}
-                dateLabel={cmsForm?.dateLabel}
-                dateRequired
-                timeSlotRequired={hasTimeSlots}
-                bookingWindow={bookingWindow}
-                noteLabel={
-                  cmsForm?.notesLabel ??
-                  (isTryAtHome ? "What are you looking for?" : appointment.notesLabel)
-                }
-                notePlaceholder={
-                  cmsForm?.notesPlaceholder ?? "Eg: I am looking for an engagement ring"
-                }
-              />
+              {!isAddressStep ? (
+                <AppointmentContactFields
+                  idPrefix="reschedule-appointment"
+                  name={name}
+                  countryCode={countryCode}
+                  phone={phone}
+                  email={email}
+                  date={date}
+                  note={note}
+                  selectedSlot={selectedSlot}
+                  timeSlots={timeSlots}
+                  onNameChange={setName}
+                  onCountryCodeChange={setCountryCode}
+                  onPhoneChange={setPhone}
+                  onEmailChange={setEmail}
+                  onDateChange={setDate}
+                  onNoteChange={setNote}
+                  onSelectedSlotChange={setSelectedSlot}
+                  errors={errors}
+                  showError={showError}
+                  markTouched={markTouched}
+                  showContactDetails
+                  detailsReadOnly
+                  showDate
+                  showTimeSlots
+                  selectedSlotStyle={isStoreVisit ? "gold" : "dark"}
+                  showPurpose={Boolean(storeVisitPurpose)}
+                  purpose={storeVisitPurpose}
+                  purposeOptions={storeVisitPurpose ? [storeVisitPurpose] : []}
+                  purposeLabel={profileTabsContent.appointments.purposeOfVisitLabel}
+                  onPurposeChange={() => undefined}
+                  phoneLocked={phoneLocked}
+                  emailLocked={emailLocked}
+                  nameLabel={cmsForm?.nameLabel}
+                  namePlaceholder={cmsForm?.namePlaceholder}
+                  phoneLabel={cmsForm?.phoneLabel}
+                  phonePlaceholder={cmsForm?.phonePlaceholder}
+                  emailLabel={cmsForm?.emailLabel}
+                  emailPlaceholder={cmsForm?.emailPlaceholder}
+                  dateLabel={cmsForm?.dateLabel}
+                  dateRequired
+                  timeSlotRequired={hasTimeSlots}
+                  bookingWindow={bookingWindow}
+                  noteLabel={
+                    cmsForm?.notesLabel ??
+                    (isTryAtHome ? "What are you looking for?" : appointment.notesLabel)
+                  }
+                  notePlaceholder={
+                    cmsForm?.notesPlaceholder ?? "Eg: I am looking for an engagement ring"
+                  }
+                />
+              ) : null}
 
-              {isTryAtHome && address ? (
+              {isAddressStep ? (
                 <>
                   <div className="flex flex-col gap-2">
                     <label
@@ -534,8 +600,8 @@ export function ProfileAppointmentReschedulePanel({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-2">
+                  <div className="flex gap-6">
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <label
                         htmlFor="reschedule-appointment-pincode"
                         className={appointmentLabelClassName}
@@ -560,7 +626,7 @@ export function ProfileAppointmentReschedulePanel({
                         message={showAddressError("pincode") ? addressErrors.pincode : undefined}
                       />
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <label
                         htmlFor="reschedule-appointment-city"
                         className={appointmentLabelClassName}
@@ -612,13 +678,23 @@ export function ProfileAppointmentReschedulePanel({
           <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
             {panelContent.footerNote}
           </p>
-          <DetailDarkButton
-            onClick={handleSubmit}
-            disabled={!canSave}
-            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSubmitting ? panelContent.savingLabel : panelContent.submitLabel}
-          </DetailDarkButton>
+          {hasAddressStep && !isAddressStep ? (
+            <DetailDarkButton
+              onClick={() => setStep("address")}
+              disabled={!canProceedToAddress}
+              className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {cmsForm?.stepOneButtonText || "PROCEED"}
+            </DetailDarkButton>
+          ) : (
+            <DetailDarkButton
+              onClick={handleSubmit}
+              disabled={!canSave}
+              className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSubmitting ? panelContent.savingLabel : panelContent.submitLabel}
+            </DetailDarkButton>
+          )}
         </PanelFooter>
       </div>
     </ProductDetailSidePanelShell>

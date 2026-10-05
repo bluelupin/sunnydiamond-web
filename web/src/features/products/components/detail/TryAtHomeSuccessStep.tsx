@@ -13,6 +13,7 @@ import {
   formatTryAtHomeBookingLabel,
   type TryAtHomeBookingSummary,
 } from "@/features/products/utils/tryAtHomeBooking";
+import { TRY_AT_HOME_BOOKING_WINDOW } from "@/shared/constants/appointmentForm";
 import { DetailDarkButton, DetailOutlineButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
@@ -39,7 +40,11 @@ const TryAtHomeSuccessStep = ({
   onViewBooking,
   onContinueShopping,
 }: TryAtHomeSuccessStepProps) => {
-  const addItemsDeadline = formatTryAtHomeAddItemsDeadline(booking.date);
+  const addItemsDeadline = formatTryAtHomeAddItemsDeadline(
+    booking.date,
+    booking.selectedSlot,
+    TRY_AT_HOME_BOOKING_WINDOW.minNoticeMinutes,
+  );
 
   return (
     <>
