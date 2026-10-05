@@ -25,6 +25,7 @@ import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeat
 import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { unlockBodyScroll, useBodyScrollLock } from "@/shared/hooks/use-body-scroll-lock";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import type {
   NormalizedBespokeFeaturedSlide,
   NormalizedBespokeFeaturedStories,
@@ -795,6 +796,8 @@ const BespokeFeaturedStoriesSection = ({
   const skipHistoryPopRef = useRef(false);
   const modalOpenRef = useRef(modalOpen);
   const pastCreationsOpenRef = useRef(pastCreationsOpen);
+  const { show: showInspirationStatusToast, node: inspirationStatusToast } =
+    useAppStatusToastController();
 
   modalOpenRef.current = modalOpen;
   pastCreationsOpenRef.current = pastCreationsOpen;
@@ -996,6 +999,7 @@ const BespokeFeaturedStoriesSection = ({
         elevated={pastCreationsOpen}
         modalCtaLabel={featuredStories?.modalCtaLabel}
         onClose={closeStoryModal}
+        onShowStatusToast={showInspirationStatusToast}
       />
       {pastCreations &&
         <BespokePastCreationsModal
@@ -1006,6 +1010,7 @@ const BespokeFeaturedStoriesSection = ({
           suppressEscape={modalOpen}
         />
       }
+      {inspirationStatusToast}
     </>
   );
 };

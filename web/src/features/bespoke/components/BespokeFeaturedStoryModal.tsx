@@ -16,7 +16,6 @@ import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
-import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { getLoginHrefForReturn } from "@/features/auth/utils/authNavigation";
@@ -49,6 +48,7 @@ type BespokeFeaturedStoryModalProps = {
   initialImageIndex?: number;
   elevated?: boolean;
   onClose: () => void;
+  onShowStatusToast: (message: string) => void;
 };
 
 type FeaturedStoryModalCarouselProps = {
@@ -302,7 +302,7 @@ const FeaturedStoryModalPanel = ({
     setIsSaving(true);
     try {
       const result = await saveCustomerCreationClient(creationDocumentId);
-      onShowStatusToast(result.alreadySaved ? "Already saved" : "Saved as inspiration");
+      onShowStatusToast(result.alreadySaved ? "Already saved" : "Inspiration Saved");
       onClose();
     } catch (error) {
       toast({
@@ -385,48 +385,15 @@ const BespokeFeaturedStoryModal = ({
   initialImageIndex = 0,
   elevated = false,
   onClose,
+  onShowStatusToast,
 }: BespokeFeaturedStoryModalProps) => {
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { showMobileShell } = useResponsiveOverlayShell(open && Boolean(slide), FEATURED_STORY_MOBILE_QUERY);
   const overlayZClass = elevated ? "z-[80]" : "z-[70]";
   const overlayClassName = cn(overlayZClass, "bg-[rgba(30,30,30,0.75)] backdrop-blur-[10px]");
   const shellZClass = overlayZClass;
 
-  const dismissStatusToast = useCallback(() => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  }, []);
-
-  const showStatusToast = useCallback(
-    (message: string) => {
-      dismissStatusToast();
-      setStatusToastMessage(message);
-      statusToastTimeoutRef.current = setTimeout(() => {
-        setStatusToastMessage(null);
-        statusToastTimeoutRef.current = null;
-      }, appStatusToastDurationMs);
-    },
-    [dismissStatusToast],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const statusToast = (
-    <AppStatusToast open={Boolean(statusToastMessage)} message={statusToastMessage ?? ""} />
-  );
-
   if (!open || !slide) {
-    return statusToastMessage ? statusToast : null;
+    return null;
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -442,13 +409,12 @@ const BespokeFeaturedStoryModal = ({
       modalCtaLabel={modalCtaLabel}
       initialImageIndex={initialImageIndex}
       onClose={onClose}
-      onShowStatusToast={showStatusToast}
+      onShowStatusToast={onShowStatusToast}
     />
   );
 
   return (
     <>
-      {statusToast}
       {showMobileShell ? (
         <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
           <DrawerContent
