@@ -8,13 +8,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import {
   chunkFilterOptions,
   createDefaultFilterState,
@@ -98,11 +92,7 @@ const FILTER_DRAWER_OVERLAY_CLASS =
 const FILTER_DRAWER_SHELL_CLASS =
   "z-[80] flex min-h-0 flex-col gap-0 overflow-hidden border-0 bg-white p-0 shadow-2xl";
 
-/** Radix Select does not allow empty string values — maps cleared gemstone to this sentinel. */
-const JEWELLERY_GEMSTONE_TYPE_EMPTY_VALUE = "__jewellery_gemstone_empty__";
-
-const jewelleryFilterSelectTriggerClassName =
-  "h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0";
+const JEWELLERY_GEMSTONE_TYPE_PLACEHOLDER = "Select";
 
 type FilterDrawerPanelProps = {
   categoryFilterHeading?: string | null;
@@ -430,37 +420,36 @@ const FilterDrawerPanel = ({
 
         {facets.gemstoneTypes.length > 0 ? (
           <section className="flex flex-col gap-2">
-            <label
-              htmlFor="jewellery-filter-gemstone-type"
-              className="font-gill text-base leading-normal tracking-normal text-darkblack"
-            >
-              Gemstone Type:
-            </label>
-            <Select
-              value={draft.gemstoneType || JEWELLERY_GEMSTONE_TYPE_EMPTY_VALUE}
-              onValueChange={(nextValue) =>
-                setDraft((current) => ({
-                  ...current,
-                  gemstoneType:
-                    nextValue === JEWELLERY_GEMSTONE_TYPE_EMPTY_VALUE ? "" : nextValue,
-                }))
-              }
-            >
-              <SelectTrigger
-                id="jewellery-filter-gemstone-type"
-                className={jewelleryFilterSelectTriggerClassName}
+            <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
+              <label
+                htmlFor="jewellery-filter-gemstone-type"
+                className="font-gill text-base leading-normal tracking-normal text-darkblack"
               >
-                <SelectValue placeholder="-select-" />
-              </SelectTrigger>
-              <SelectContent className="z-[90]">
-                <SelectItem value={JEWELLERY_GEMSTONE_TYPE_EMPTY_VALUE}>-select-</SelectItem>
-                {facets.gemstoneTypes.map((option) => (
-                  <SelectItem key={option.label} value={option.label}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                Gemstone Type:
+              </label>
+              <InlineCustomSelect
+                id="jewellery-filter-gemstone-type"
+                hideLabel
+                label="Gemstone Type"
+                value={draft.gemstoneType}
+                options={[
+                  // JEWELLERY_GEMSTONE_TYPE_PLACEHOLDER,
+                  ...facets.gemstoneTypes.map((option) => option.label),
+                ]}
+                placeholder={JEWELLERY_GEMSTONE_TYPE_PLACEHOLDER}
+                onChange={(nextLabel) =>
+                  setDraft((current) => ({
+                    ...current,
+                    gemstoneType:
+                      nextLabel === JEWELLERY_GEMSTONE_TYPE_PLACEHOLDER ? "" : nextLabel,
+                  }))
+                }
+                triggerClassName="text-base font-normal"
+                placeholderClassName="font-normal text-gray600"
+                listClassName="mt-2 shadow-none"
+                optionClassName="text-base font-normal text-neutral500"
+              />
+            </div>
           </section>
         ) : null}
       </div>
