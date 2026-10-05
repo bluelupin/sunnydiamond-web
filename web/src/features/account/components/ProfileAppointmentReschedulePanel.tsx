@@ -359,25 +359,28 @@ export function ProfileAppointmentReschedulePanel({
         const customerEmail = email.trim();
         const requestDetails = note.trim();
 
-        await rescheduleCustomerAppointment(appointment.id, {
-          requestedDate: date,
-          selectedTimeSlot: selectedSlot ?? "",
-          ...(customerName ? { customerName } : {}),
-          ...(customerPhone ? { customerPhone } : {}),
-          ...(customerEmail ? { customerEmail } : {}),
-          ...(requestDetails ? { requestDetails } : {}),
-          ...(isAddressChanged
-            ? {
-                address: {
-                  addressLine1: addressLine1.trim(),
-                  pincode: pincode.trim(),
-                  city: city.trim(),
-                  ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
-                  ...(addressState.trim() ? { state: addressState.trim() } : {}),
-                },
-              }
-            : {}),
-        });
+        const appointmentIds = [...new Set([appointment.id, ...(appointment.clubbedAppointmentIds ?? [])])];
+        for (const appointmentId of appointmentIds) {
+          await rescheduleCustomerAppointment(appointmentId, {
+            requestedDate: date,
+            selectedTimeSlot: selectedSlot ?? "",
+            ...(customerName ? { customerName } : {}),
+            ...(customerPhone ? { customerPhone } : {}),
+            ...(customerEmail ? { customerEmail } : {}),
+            ...(requestDetails ? { requestDetails } : {}),
+            ...(isAddressChanged
+              ? {
+                  address: {
+                    addressLine1: addressLine1.trim(),
+                    pincode: pincode.trim(),
+                    city: city.trim(),
+                    ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
+                    ...(addressState.trim() ? { state: addressState.trim() } : {}),
+                  },
+                }
+              : {}),
+          });
+        }
         onRescheduled();
         onClose();
       } catch (error) {
