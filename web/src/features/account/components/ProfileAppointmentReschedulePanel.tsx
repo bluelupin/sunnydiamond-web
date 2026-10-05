@@ -374,7 +374,10 @@ export function ProfileAppointmentReschedulePanel({
         const customerEmail = email.trim();
         const requestDetails = note.trim();
 
-        const appointmentIds = [...new Set([appointment.id, ...(appointment.clubbedAppointmentIds ?? [])])];
+        // Video calls are rescheduled atomically by the CMS appointment group.
+        const appointmentIds = appointment.type === 'video_call'
+          ? [appointment.id]
+          : [...new Set([appointment.id, ...(appointment.clubbedAppointmentIds ?? [])])];
         for (const appointmentId of appointmentIds) {
           await rescheduleCustomerAppointment(appointmentId, {
             requestedDate: date,
