@@ -11,6 +11,7 @@ import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
+import { isGuestCheckoutPlaceholderEmail } from "@/services/magento/cart/checkoutAddress.mapper";
 import type { CreateAccountSecondaryField } from "../utils/authValidation";
 
 type LoginCreateAccountContentProps = {
@@ -83,6 +84,8 @@ const LoginCreateAccountContent = ({
 }: LoginCreateAccountContentProps) => {
   const isRegistrationSessionRefreshing =
     registrationSessionRefreshSeconds !== null && registrationSessionRefreshSeconds > 0;
+  const emailFieldValue =
+    email && !isGuestCheckoutPlaceholderEmail(email) ? email : "";
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -154,7 +157,7 @@ const LoginCreateAccountContent = ({
                 <input
                   id="create-account-email"
                   type="email"
-                  value={email}
+                  value={emailFieldValue}
                   onChange={(event) => onEmailChange(event.target.value)}
                   placeholder="Enter your email address."
                   autoComplete="email"
@@ -252,17 +255,7 @@ const LoginCreateAccountContent = ({
         </div>
       </div>
 
-      {isRegistrationSessionRefreshing ? (
-        <FormFieldError
-          id="create-account-form-error"
-          message={`Session Expired. Returning to verification in ${registrationSessionRefreshSeconds} second${
-            registrationSessionRefreshSeconds === 1 ? "" : "s"
-          }...`}
-          className="motion-safe:animate-pulse"
-          role="status"
-          aria-live="polite"
-        />
-      ) : formError ? (
+      {formError ? (
         <FormFieldError id="create-account-form-error" message={formError} />
       ) : null}
 

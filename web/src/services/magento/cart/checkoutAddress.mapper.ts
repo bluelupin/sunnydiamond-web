@@ -22,6 +22,11 @@ export function resolveGuestCheckoutEmail(phoneOrEmail: string): string {
   return `guest+${phone || "checkout"}@sunnydiamond.com`;
 }
 
+/** Magento cart placeholder — not a real address to show on create-account. */
+export function isGuestCheckoutPlaceholderEmail(email: string): boolean {
+  return /^guest\+.+@sunnydiamond\.com$/i.test(email.trim());
+}
+
 type PhoneWithCode = { phone: string; countryCode?: string };
 
 /**

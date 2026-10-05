@@ -26,7 +26,6 @@ import {
 } from "../context/checkoutHeaderBridge";
 import {
   buildCheckoutOtpTarget,
-  getCheckoutRegistrationEmail,
   getCheckoutRegistrationName,
   registerGuestCustomerAfterOrder,
 } from "../services/guestCustomerRegistration";
@@ -632,7 +631,6 @@ const CheckoutPage = () => {
           target: buildCheckoutOtpTarget(form),
           otp: result.otp,
           fullName: getCheckoutRegistrationName(form),
-          email: getCheckoutRegistrationEmail(form),
           countryCode: form.contactCountryCode,
           phoneDisplay: isCheckoutEmailContact(form.phoneOrEmail)
             ? undefined
