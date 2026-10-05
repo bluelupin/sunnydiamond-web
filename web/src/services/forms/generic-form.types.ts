@@ -74,6 +74,7 @@ export type NormalizedGenericFormShowroom = {
 };
 
 export type NormalizedGenericFormField = {
+  id?: string;
   label: string;
   fieldType: string;
   placeholder?: string;

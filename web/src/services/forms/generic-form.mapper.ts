@@ -60,6 +60,7 @@ const mapDynamicFields = (
     if (!label || !fieldType) continue;
 
     mapped.push({
+      ...(field.id != null ? { id: String(field.id) } : {}),
       label,
       fieldType,
       placeholder: cleanText(field.placeholder),

@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
-import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
-import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import AppointmentGenericFields from "./AppointmentGenericFields";
+import { appointmentFieldKey, appointmentFieldKind, appointmentFormErrors, appointmentSubmission } from "../utils/appointmentGenericForm";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
-import { getProductFormByTag } from "@/services/forms/product-form.service";
-import type { NormalizedProductForm } from "@/services/forms/product-form.types";
+import { fetchGenericFormByTag, createGenericSubmission } from "@/services/forms/generic-form.service";
+import type { NormalizedGenericForm } from "@/services/forms/generic-form.types";
 
-const TRY_AT_HOME_FORM_TAG = "try-at-home-form";
-
-const labelClassName = "font-gill text-sm leading-110 text-darkblack";
-const fieldClassName =
-  "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-sm leading-110 text-darkblack placeholder:text-[#999999] outline-none";
+const APPOINTMENT_FORM_TAG = "book-an-appointment";
 
 type BookAnAppointmentPanelProps = {
   variant?: "embedded" | "page" | "modal";
@@ -37,27 +33,17 @@ const BookAnAppointmentPanel = ({
   showClose = true,
 }: BookAnAppointmentPanelProps) => {
   const { toast } = useToast();
-  const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
-  const [name, setName] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [date, setDate] = useState("");
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [note, setNote] = useState("");
-
-  const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note, selectedSlot }),
-    [name, countryCode, phone, email, date, note, selectedSlot],
-  );
-
-  const validationOptions = useMemo(
-    () => ({ dateRequired: true, selectedSlotRequired: true }),
-    [],
-  );
-
-  const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
-    useAppointmentFormValidation(formValues, validationOptions);
+  const [cmsForm, setCmsForm] = useState<NormalizedGenericForm | null>(null);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [countryCodes, setCountryCodes] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const [loadError, setLoadError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [now, setNow] = useState(() => new Date());
+  const errors = cmsForm ? appointmentFormErrors(cmsForm, values, countryCodes, now) : {};
 
   const panelActive = variant !== "modal" || open;
 
@@ -70,36 +56,53 @@ const BookAnAppointmentPanel = ({
 
     void (async () => {
       try {
-        const form = await getProductFormByTag(TRY_AT_HOME_FORM_TAG, controller.signal);
-        if (form) {
-          setCmsForm(form);
-        }
+        const form = await fetchGenericFormByTag(APPOINTMENT_FORM_TAG, controller.signal);
+        if (controller.signal.aborted) return;
+        if (!form || !form.fields.length) throw new Error("Appointment form is unavailable. Please try again.");
+        setCmsForm(form);
+        setLoadError("");
       } catch {
-        // Match Try at Home: keep field defaults when CMS is unavailable.
+        if (!controller.signal.aborted) setLoadError("Unable to load the appointment form. Please try again.");
       }
     })();
 
     return () => controller.abort();
+  }, [panelActive, loadAttempt]);
+
+  useEffect(() => {
+    if (!panelActive) return;
+    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(timer);
   }, [panelActive]);
 
   const handleClear = () => {
-    setName("");
-    setPhone("");
-    setEmail("");
-    setDate("");
-    setSelectedSlot(null);
-    setNote("");
-    resetValidation();
+    setValues({});
+    setCountryCodes({});
+    setSubmitted(false);
+    setTouched({});
   };
 
-  const handleSubmit = () => {
-    validateSubmit(() => {
+  const handleSubmit = async () => {
+    if (!cmsForm || loadError || submittingRef.current) return;
+    setSubmitted(true);
+    setNow(new Date());
+    if (Object.keys(appointmentFormErrors(cmsForm, values, countryCodes)).length) return;
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    try {
+      await createGenericSubmission(appointmentSubmission(cmsForm, values, countryCodes, window.location.pathname));
       toast({
         title: "Appointment requested",
         description: "Our representative will get in touch with you soon.",
       });
+      handleClear();
       onClose?.();
-    });
+    } catch (error) {
+      toast({ title: "Unable to request appointment", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   if (variant === "modal" && !open) {
@@ -107,7 +110,7 @@ const BookAnAppointmentPanel = ({
   }
 
   const formContent = (
-    <>
+    <form className="contents" noValidate onSubmit={(event) => { event.preventDefault(); void handleSubmit(); }}>
       <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
         <div
           className={cn(
@@ -130,7 +133,7 @@ const BookAnAppointmentPanel = ({
                   </button>
                 ) : null}
                 <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                  Book an Appointment
+                  {cmsForm?.formName ?? "Book an Appointment"}
                 </h1>
               </div>
               {showClose ? (
@@ -144,37 +147,27 @@ const BookAnAppointmentPanel = ({
           </div>
 
           <div className="mt-[22px] flex flex-col gap-6 pb-72">
-            <AppointmentContactFields
-              idPrefix="appointment"
-              name={name}
-              countryCode={countryCode}
-              phone={phone}
-              email={email}
-              date={date}
-              note={note}
-              selectedSlot={selectedSlot}
-              onNameChange={setName}
-              onCountryCodeChange={setCountryCode}
-              onPhoneChange={setPhone}
-              onEmailChange={setEmail}
-              onDateChange={setDate}
-              onNoteChange={setNote}
-              onSelectedSlotChange={setSelectedSlot}
-              errors={errors}
-              showError={showError}
-              markTouched={markTouched}
-              labelClassName={labelClassName}
-              fieldClassName={fieldClassName}
-              selectedSlotStyle="gold"
-              namePlaceholder={cmsForm?.namePlaceholder}
-              phonePlaceholder={cmsForm?.phonePlaceholder}
-              emailPlaceholder={cmsForm?.emailPlaceholder ?? ""}
-              dateRequired
-              datePlaceholder="Select"
-              timeSlotRequired
-              notePlaceholder="I am looking for an engagement ring"
-              noteTextareaClassName="font-gill text-sm leading-110"
-            />
+            {loadError ? (
+              <div role="alert" className="font-gill text-sm">
+                <p>{loadError}</p>
+                <button type="button" className="mt-3 underline" onClick={() => { setLoadError(""); setCmsForm(null); setLoadAttempt((attempt) => attempt + 1); }}>Try again</button>
+              </div>
+            ) : !cmsForm ? <p role="status" className="font-gill text-sm">Loading appointment form...</p> : (
+              <AppointmentGenericFields form={cmsForm} values={values} codes={countryCodes}
+                errors={Object.fromEntries(Object.entries(errors).filter(([key]) => submitted || touched[key]))}
+                disabled={isSubmitting} now={now}
+                onBlur={(key) => setTouched((current) => ({ ...current, [key]: true }))}
+                onCodeChange={(key, code) => setCountryCodes((current) => ({ ...current, [key]: code }))}
+                onChange={(key, value) => setValues((current) => {
+                  const updated = { ...current, [key]: value };
+                  const field = cmsForm.fields.find((item, index) => appointmentFieldKey(item, index) === key);
+                  if (field && appointmentFieldKind(field) === "date") cmsForm.fields.forEach((item, index) => {
+                    if (appointmentFieldKind(item) === "slot") updated[appointmentFieldKey(item, index)] = "";
+                  });
+                  return updated;
+                })}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -192,21 +185,21 @@ const BookAnAppointmentPanel = ({
           <button
             type="button"
             onClick={handleClear}
+            disabled={isSubmitting}
             className="btn-border-slide order-2 flex h-14 w-full min-w-0 items-center justify-center border border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack md:order-1 md:flex-1 md:whitespace-nowrap"
           >
             Clear All
           </button>
           <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitted && !isValid}
+            type="submit"
+            disabled={!cmsForm || Boolean(loadError) || isSubmitting}
             className="order-1 flex h-14 w-full max-w-[343px] min-w-0 items-center justify-center bg-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50 md:order-2 md:max-w-none md:flex-[1.35] md:whitespace-nowrap"
           >
             Book an Appointment
           </button>
         </div>
       </PanelFooter>
-    </>
+    </form>
   );
 
   if (variant === "embedded") {
