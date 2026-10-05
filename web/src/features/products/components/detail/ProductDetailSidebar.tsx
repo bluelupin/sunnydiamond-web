@@ -540,13 +540,13 @@ const ProductDetailSidebar = ({
                       <div
                         key={metal.id}
                         aria-label={metal.label}
-                        className="size-51 shrink-0 border-2 border-darkblack"
+                        className="size-[52px] shrink-0 border-2 border-darkblack"
                         style={{ backgroundColor: metal.color }}
                       />
                     ),
                   )}
                 </div>
-                <p className="font-gill text-base leading-110 text-neutral500">{activeMetal?.label}</p>
+                <p className="font-gill text-base leading-110 text-neutral500 max-w-[52px]">{activeMetal?.label}</p>
               </div>
             </div>
           ) : null}
@@ -583,6 +583,7 @@ const ProductDetailSidebar = ({
                     }
                   }}
                   triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+                  placeholderClassName="font-normal text-gray600"
                   listClassName="bg-aboutInactive"
                   optionClassName="text-base"
                 />
@@ -668,7 +669,7 @@ const ProductDetailSidebar = ({
   const detailsSection = (
     <div className="flex flex-col gap-10 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
       {showBenefitsStrip ? (
-        <section aria-label="Shopping benefits" className="flex flex-col gap-6">
+        <section aria-label="Shopping benefits" className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="font-gill md:text-2xl text-xl leading-110 text-darkblack">{strip.title}</h2>
             {showStripTnc ? (
@@ -753,7 +754,7 @@ const ProductDetailSidebar = ({
               </p>
             </div>
             {hereForYou.buttons.length > 0 ? (
-              <div className="flex w-fit flex-col gap-3">
+              <div className="flex w-fit flex-col gap-4">
                 {hereForYou.buttons.map(renderHereForYouButton)}
               </div>
             ) : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
+import { cartCheckoutAsideLayout } from "@/features/cart/data/cartFlowSpec";
 import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
 import ProductDetailGallery from "./ProductDetailGallery";
@@ -28,13 +29,15 @@ const ProductDetailHeroLayout = ({ product, purchase, details }: ProductDetailHe
       : undefined;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] md:items-start md:gap-4 lg:gap-6">
+    <div className={cn(cartCheckoutAsideLayout.gridClassName, "md:items-start")}>
       <div className="flex min-w-0 flex-col">
         <ProductDetailGallery product={product} galleryRef={galleryRef} />
       </div>
-
       <div
-        className="grid min-w-0 grid-cols-1 gap-8 md:mt-8 md:gap-0"
+        className={cn(
+          cartCheckoutAsideLayout.asideClassName,
+          "grid min-w-0 grid-cols-1 gap-8 md:mt-8 md:gap-0",
+        )}
         data-pdp-right-column
         data-pdp-sticky-aligned={isBottomAligned ? "true" : "false"}
         style={rightColumnStyle}
@@ -44,14 +47,7 @@ const ProductDetailHeroLayout = ({ product, purchase, details }: ProductDetailHe
           className={cn("row-start-1 min-w-0 md:sticky md:self-start", PDP_STICKY_TOP_CLASS)}
         >
           {purchase}
-          <div
-            className="row-start-2 min-w-0 md:mt-10 mt-6"
-          // style={
-          //   stickyRunwayHeight > 0
-          //     ? { marginTop: `-${stickyRunwayHeight}px` }
-          //     : undefined
-          // }
-          >
+          <div className="row-start-2 min-w-0 md:mt-10 mt-6">
             {details}
           </div>
         </div>

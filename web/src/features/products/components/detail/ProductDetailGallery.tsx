@@ -21,7 +21,7 @@ const heroGalleryFrameClass =
   "relative flex w-full overflow-hidden bg-gray300 md:h-520 lg:h-680";
 
 const thumbGalleryFrameClass =
-  "relative flex w-full overflow-hidden bg-gray300 md:h-380 lg:h-465 sm:w-1/2";
+  "relative flex w-full overflow-hidden bg-gray300 md:h-380 lg:h-[464px] sm:w-1/2";
 
 const ProductDetailGallery = ({ product, galleryRef }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);

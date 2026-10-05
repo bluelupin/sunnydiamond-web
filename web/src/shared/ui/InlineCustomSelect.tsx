@@ -12,7 +12,7 @@ export const INLINE_CUSTOM_SELECT_LISTBOX_SELECTOR = "[data-inline-custom-select
 const LIST_ANIMATION_MS = 200;
 const LIST_GAP_PX = 4;
 const VIEWPORT_PADDING_PX = 8;
-const LIST_MAX_HEIGHT_PX = 256;
+const LIST_MAX_HEIGHT_PX = 280;
 
 type ListPosition = {
   top: number;
