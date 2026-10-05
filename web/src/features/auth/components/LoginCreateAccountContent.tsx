@@ -255,7 +255,7 @@ const LoginCreateAccountContent = ({
       {isRegistrationSessionRefreshing ? (
         <FormFieldError
           id="create-account-form-error"
-          message={`Session Expired. Refreshing in ${registrationSessionRefreshSeconds} second${
+          message={`Session Expired. Returning to verification in ${registrationSessionRefreshSeconds} second${
             registrationSessionRefreshSeconds === 1 ? "" : "s"
           }...`}
           className="motion-safe:animate-pulse"

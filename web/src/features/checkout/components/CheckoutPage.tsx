@@ -106,7 +106,11 @@ const CheckoutPage = () => {
   const noPaymentNeeded = items.length > 0 && totalPrice === 0;
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
-  const { openLoginModal } = useLoginModal();
+  const {
+    openLoginModal,
+    closeLoginModal,
+    registerCheckoutRegistrationSessionExpiredHandler,
+  } = useLoginModal();
   const { otpLoginEnabled, emailOtpLoginEnabled, otpCountryCodes } = useAuthFeatures();
   /**
    * With SMS sign-in off there is no mobile identity to take, so the contact field is an
@@ -465,6 +469,25 @@ const CheckoutPage = () => {
       // Unreadable copy: start from the empty form.
     }
   }, []);
+
+  const handleCheckoutRegistrationSessionExpired = useCallback(() => {
+    closeLoginModal();
+    verifiedCheckoutOtpRef.current = null;
+    setPhoneVerified(false);
+    setShowOtpModal(true);
+    toast({
+      title: "Session expired",
+      description: "Please verify your contact again to continue creating your account.",
+    });
+  }, [closeLoginModal, toast]);
+
+  useEffect(() => {
+    registerCheckoutRegistrationSessionExpiredHandler(handleCheckoutRegistrationSessionExpired);
+    return () => registerCheckoutRegistrationSessionExpiredHandler(null);
+  }, [
+    handleCheckoutRegistrationSessionExpired,
+    registerCheckoutRegistrationSessionExpiredHandler,
+  ]);
 
   useEffect(() => {
     const handlePageShow = () => {

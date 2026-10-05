@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -35,6 +36,9 @@ type LoginModalContextType = {
   createAccountResume: AuthCreateAccountResume | null;
   openLoginModal: (options?: OpenLoginModalOptions) => void;
   closeLoginModal: () => void;
+  /** Checkout guest flow: reopen contact OTP after registration session expiry. */
+  registerCheckoutRegistrationSessionExpiredHandler: (handler: (() => void) | null) => void;
+  invokeCheckoutRegistrationSessionExpired: () => boolean;
 };
 
 const LoginModalContext = createContext<LoginModalContextType | undefined>(undefined);
@@ -46,6 +50,23 @@ export function LoginModalProvider({ children }: { children: ReactNode }) {
   const [createAccountResume, setCreateAccountResume] = useState<AuthCreateAccountResume | null>(
     null,
   );
+  const checkoutRegistrationSessionExpiredRef = useRef<(() => void) | null>(null);
+
+  const registerCheckoutRegistrationSessionExpiredHandler = useCallback(
+    (handler: (() => void) | null) => {
+      checkoutRegistrationSessionExpiredRef.current = handler;
+    },
+    [],
+  );
+
+  const invokeCheckoutRegistrationSessionExpired = useCallback(() => {
+    const handler = checkoutRegistrationSessionExpiredRef.current;
+    if (!handler) {
+      return false;
+    }
+    handler();
+    return true;
+  }, []);
 
   const openLoginModal = useCallback((options?: OpenLoginModalOptions) => {
     setReturnUrl(sanitizeReturnUrl(options?.returnUrl));
@@ -70,6 +91,8 @@ export function LoginModalProvider({ children }: { children: ReactNode }) {
         createAccountResume,
         openLoginModal,
         closeLoginModal,
+        registerCheckoutRegistrationSessionExpiredHandler,
+        invokeCheckoutRegistrationSessionExpired,
       }}
     >
       {children}

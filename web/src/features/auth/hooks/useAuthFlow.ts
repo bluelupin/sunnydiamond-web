@@ -53,6 +53,8 @@ type UseAuthFlowOptions = {
   onComplete: (returnUrl: string) => void;
   onAbort: () => void;
   surface?: "modal" | "standalone";
+  /** Guest checkout create-account: reopen checkout OTP instead of in-modal OTP. */
+  onCheckoutRegistrationSessionExpired?: () => boolean;
 };
 
 function otpCodeToDigitArray(code: string): string[] {
@@ -140,6 +142,7 @@ export function useAuthFlow({
   initialIdentifier = "",
   createAccountResume = null,
   onAbort,
+  onCheckoutRegistrationSessionExpired,
   surface = "standalone",
 }: UseAuthFlowOptions) {
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
@@ -370,27 +373,6 @@ export function useAuthFlow({
   }, [resetState, surface]);
 
   useEffect(() => {
-    if (registrationSessionRefreshSeconds === null) {
-      return;
-    }
-
-    if (registrationSessionRefreshSeconds <= 0) {
-      window.location.reload();
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setRegistrationSessionRefreshSeconds((current) =>
-        current === null ? null : current - 1,
-      );
-    }, 1000);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [registrationSessionRefreshSeconds]);
-
-  useEffect(() => {
     if (!active || step !== "otp") return;
 
     setSecondsLeft(cooldownRef.current);
@@ -481,6 +463,55 @@ export function useAuthFlow({
     },
     [],
   );
+
+  const recoverRegistrationSession = useCallback(async () => {
+    setRegistrationSessionRefreshSeconds(null);
+    setCreateAccountFormError(undefined);
+    otpAcceptedForRegistrationRef.current = false;
+    setOtpVerified(false);
+    setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
+    setOtpError(undefined);
+
+    if (onCheckoutRegistrationSessionExpired?.()) {
+      return;
+    }
+
+    if (!otpTarget) {
+      setStep("sign-in");
+      return;
+    }
+
+    setStep("otp");
+    const result = await sendOtp(otpTarget);
+    if (!result.ok) {
+      setOtpError(result.error);
+      return;
+    }
+
+    setSecondsLeft(cooldownRef.current);
+    inputRefs.current[0]?.focus();
+  }, [onCheckoutRegistrationSessionExpired, otpTarget, sendOtp]);
+
+  useEffect(() => {
+    if (registrationSessionRefreshSeconds === null) {
+      return;
+    }
+
+    if (registrationSessionRefreshSeconds <= 0) {
+      void recoverRegistrationSession();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRegistrationSessionRefreshSeconds((current) =>
+        current === null ? null : current - 1,
+      );
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [recoverRegistrationSession, registrationSessionRefreshSeconds]);
 
   const handleContinue = useCallback(async () => {
     if (isSubmitting || otpBlockedForCountry) return;
