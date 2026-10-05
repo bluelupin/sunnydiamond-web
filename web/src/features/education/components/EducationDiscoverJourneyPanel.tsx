@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, TriangleAlert } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
@@ -27,6 +27,9 @@ import { getMagentoJewelleryProducts } from "@/services/magento/products/product
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
 import { diamondShapeIconByValue } from "../data/diamondShapeIcons";
 import {
+  DISCOVER_JOURNEY_NO_PRODUCTS_IN_CATEGORY_AND_RANGE_MESSAGE,
+  DISCOVER_JOURNEY_NO_PRODUCTS_IN_RANGE_MESSAGE,
+  DISCOVER_JOURNEY_NO_PRODUCTS_IN_SHAPE_CATEGORY_AND_RANGE_MESSAGE,
   DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
   resolveDiscoverJourneyStepLabels,
 } from "../data/discoverJourney";
@@ -82,8 +85,8 @@ const EducationDiscoverJourneyPanel = ({
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [categorySlug, setCategorySlug] = useState<JewelleryCategorySlug>("all");
   const [diamondShapeValue, setDiamondShapeValue] = useState(DIAMOND_SHAPE_OPTIONS[0]?.value ?? "");
-  const [hasProducts, setHasProducts] = useState(true);
-  const [isCheckingProducts, setIsCheckingProducts] = useState(false);
+  const [showAvailabilityError, setShowAvailabilityError] = useState(false);
+  const [isVerifyingAvailability, setIsVerifyingAvailability] = useState(false);
 
   const categories = useMemo(
     () => (navData?.categories ? mapMagentoCategoriesToPlpNav(navData.categories) : []),
@@ -107,15 +110,14 @@ const EducationDiscoverJourneyPanel = ({
   const minPercent = ((minPrice - facets.minPrice) / priceSpan) * 100;
   const maxPercent = ((maxPrice - facets.minPrice) / priceSpan) * 100;
   const priceSliderStep = getJewelleryPriceSliderStep(facets);
-  const canProceedFromPrice = hasProducts && !isCheckingProducts;
 
   useEffect(() => {
     if (!open) {
       setStep(1);
       setCategorySlug("all");
       setDiamondShapeValue(DIAMOND_SHAPE_OPTIONS[0]?.value ?? "");
-      setHasProducts(true);
-      setIsCheckingProducts(false);
+      setShowAvailabilityError(false);
+      setIsVerifyingAvailability(false);
       setMinInputFocused(false);
       setMaxInputFocused(false);
       return;
@@ -142,7 +144,6 @@ const EducationDiscoverJourneyPanel = ({
         setMaxPrice(nextFacets.maxPrice);
         setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
         setMaxInputValue(formatJewelleryPrice(nextFacets.maxPrice));
-        setHasProducts(data.totalCount > 0);
       } catch {
         if (cancelled) return;
         const fallback = createFallbackFacets();
@@ -151,7 +152,6 @@ const EducationDiscoverJourneyPanel = ({
         setMaxPrice(fallback.maxPrice);
         setMinInputValue(formatJewelleryPrice(fallback.minPrice));
         setMaxInputValue(formatJewelleryPrice(fallback.maxPrice));
-        setHasProducts(true);
       }
     })();
 
@@ -161,46 +161,22 @@ const EducationDiscoverJourneyPanel = ({
   }, [open]);
 
   useEffect(() => {
-    if (!open || step !== 1 || !hasPriceRange) return;
+    if (step === 1) {
+      setShowAvailabilityError(false);
+    }
+  }, [minPrice, maxPrice, step]);
 
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      setIsCheckingProducts(true);
+  useEffect(() => {
+    if (step === 2) {
+      setShowAvailabilityError(false);
+    }
+  }, [categorySlug, step]);
 
-      void (async () => {
-        try {
-          const data = await getMagentoJewelleryProducts({
-            page: 1,
-            pageSize: 1,
-            filters: {
-              ...createEmptyFilterState(),
-              minPrice,
-              maxPrice,
-            },
-            facets,
-            includeFacets: false,
-          });
-
-          if (!cancelled) {
-            setHasProducts(data.totalCount > 0);
-          }
-        } catch {
-          if (!cancelled) {
-            setHasProducts(true);
-          }
-        } finally {
-          if (!cancelled) {
-            setIsCheckingProducts(false);
-          }
-        }
-      })();
-    }, 280);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [open, step, minPrice, maxPrice, facets, hasPriceRange]);
+  useEffect(() => {
+    if (step === 3) {
+      setShowAvailabilityError(false);
+    }
+  }, [diamondShapeValue, step]);
 
   const updatePriceRange = (nextMin: number, nextMax: number) => {
     const normalized = normalizeJewelleryPriceRange(nextMin, nextMax, facets);
@@ -240,6 +216,54 @@ const EducationDiscoverJourneyPanel = ({
     setMaxInputFocused(false);
   };
 
+  const commitPriceRangeForProceed = () => {
+    const trimmedMin = minInputValue.replace(/,/g, "").trim();
+    const trimmedMax = maxInputValue.replace(/,/g, "").trim();
+    const nextMin =
+      trimmedMin === "" ? facets.minPrice : parseJewelleryPriceInput(minInputValue, facets.minPrice);
+    const nextMax =
+      trimmedMax === "" ? facets.maxPrice : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
+    const normalized = normalizeJewelleryPriceRange(nextMin, nextMax, facets);
+
+    setMinPrice(normalized.minPrice);
+    setMaxPrice(normalized.maxPrice);
+    setMinInputValue(formatJewelleryPrice(normalized.minPrice));
+    setMaxInputValue(formatJewelleryPrice(normalized.maxPrice));
+    setMinInputFocused(false);
+    setMaxInputFocused(false);
+
+    return normalized;
+  };
+
+  const verifyProductsAvailable = async (
+    range: { minPrice: number; maxPrice: number },
+    categoryUrlKey: string | null,
+    diamondShape = "",
+  ): Promise<boolean> => {
+    const data = await getMagentoJewelleryProducts({
+      page: 1,
+      pageSize: 1,
+      categoryUrlKey,
+      filters: {
+        ...createEmptyFilterState(),
+        minPrice: range.minPrice,
+        maxPrice: range.maxPrice,
+        diamondShape: diamondShape.trim(),
+      },
+      facets,
+      includeFacets: false,
+    });
+
+    return data.totalCount > 0;
+  };
+
+  const availabilityErrorMessage =
+    step === 3
+      ? DISCOVER_JOURNEY_NO_PRODUCTS_IN_SHAPE_CATEGORY_AND_RANGE_MESSAGE
+      : step === 2
+        ? DISCOVER_JOURNEY_NO_PRODUCTS_IN_CATEGORY_AND_RANGE_MESSAGE
+        : DISCOVER_JOURNEY_NO_PRODUCTS_IN_RANGE_MESSAGE;
+
   const handleBack = () => {
     if (step === 1) {
       onClose();
@@ -250,25 +274,105 @@ const EducationDiscoverJourneyPanel = ({
 
   const handlePrimaryAction = () => {
     if (step === 1) {
-      if (!canProceedFromPrice) return;
-      setStep(2);
+      if (isVerifyingAvailability || !hasPriceRange) {
+        return;
+      }
+
+      setIsVerifyingAvailability(true);
+      setShowAvailabilityError(false);
+
+      void (async () => {
+        try {
+          const range = commitPriceRangeForProceed();
+          const hasProducts = await verifyProductsAvailable(range, null);
+
+          if (!hasProducts) {
+            setShowAvailabilityError(true);
+            return;
+          }
+
+          setShowAvailabilityError(false);
+          setStep(2);
+        } catch {
+          setShowAvailabilityError(true);
+        } finally {
+          setIsVerifyingAvailability(false);
+        }
+      })();
+
       return;
     }
 
     if (step === 2) {
-      setStep(3);
+      if (isVerifyingAvailability) {
+        return;
+      }
+
+      setIsVerifyingAvailability(true);
+      setShowAvailabilityError(false);
+
+      void (async () => {
+        try {
+          const categoryUrlKey = selectedCategory?.urlKey ?? null;
+          const hasProducts = await verifyProductsAvailable(
+            { minPrice, maxPrice },
+            categoryUrlKey,
+          );
+
+          if (!hasProducts) {
+            setShowAvailabilityError(true);
+            return;
+          }
+
+          setShowAvailabilityError(false);
+          setStep(3);
+        } catch {
+          setShowAvailabilityError(true);
+        } finally {
+          setIsVerifyingAvailability(false);
+        }
+      })();
+
       return;
     }
 
-    const href = buildEducationJourneyHref({
-      categoryUrlKey: selectedCategory?.urlKey ?? null,
-      minPrice,
-      maxPrice,
-      diamondShapeLabel: selectedShape?.label ?? "",
-    });
+    if (isVerifyingAvailability) {
+      return;
+    }
 
-    onClose();
-    router.push(href);
+    setIsVerifyingAvailability(true);
+    setShowAvailabilityError(false);
+
+    void (async () => {
+      try {
+        const categoryUrlKey = selectedCategory?.urlKey ?? null;
+        const hasProducts = await verifyProductsAvailable(
+          { minPrice, maxPrice },
+          categoryUrlKey,
+          diamondShapeValue,
+        );
+
+        if (!hasProducts) {
+          setShowAvailabilityError(true);
+          return;
+        }
+
+        const href = buildEducationJourneyHref({
+          categoryUrlKey,
+          minPrice,
+          maxPrice,
+          diamondShapeLabel: selectedShape?.label ?? "",
+        });
+
+        setShowAvailabilityError(false);
+        onClose();
+        router.push(href);
+      } catch {
+        setShowAvailabilityError(true);
+      } finally {
+        setIsVerifyingAvailability(false);
+      }
+    })();
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -313,7 +417,7 @@ const EducationDiscoverJourneyPanel = ({
 
         <div
           className={cn(
-            "mx-auto flex w-full flex-col gap-6 pb-72 pt-6 md:px-2 px-4",
+            "mx-auto flex w-full flex-col gap-6 pb-6 pt-6 md:px-0 px-4",
             DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
           )}
         >
@@ -460,23 +564,16 @@ const EducationDiscoverJourneyPanel = ({
                       aria-pressed={isSelected}
                       className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
                     >
-                      <span
+                      <Icon
                         className={cn(
-                          "flex size-14 items-center justify-center rounded-full",
-                          isSelected ? "bg-gold300" : "bg-transparent",
+                          "size-6",
+                          isSelected ? "text-darkblack" : "text-gray600",
                         )}
-                      >
-                        <Icon
-                          className={cn(
-                            "size-10",
-                            isSelected ? "text-darkblack" : "text-gray600",
-                          )}
-                          aria-hidden
-                        />
-                      </span>
+                        aria-hidden
+                      />
                       <span
                         className={cn(
-                          "font-gill text-sm leading-110",
+                          "font-gill text-base leading-110",
                           isSelected
                             ? "font-semibold text-darkblack"
                             : "font-normal text-gray600",
@@ -506,24 +603,17 @@ const EducationDiscoverJourneyPanel = ({
                       aria-pressed={isSelected}
                       className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
                     >
+                      {Icon ? (
+                        <Icon
+                          className={cn(
+                            "size-6",
+                            isSelected ? "text-darkblack" : "text-gray600",
+                          )}
+                        />
+                      ) : null}
                       <span
                         className={cn(
-                          "flex size-14 items-center justify-center rounded-full",
-                          isSelected ? "bg-gold300" : "bg-transparent",
-                        )}
-                      >
-                        {Icon ? (
-                          <Icon
-                            className={cn(
-                              "size-10",
-                              isSelected ? "text-darkblack" : "text-gray600",
-                            )}
-                          />
-                        ) : null}
-                      </span>
-                      <span
-                        className={cn(
-                          "font-gill text-sm leading-110",
+                          "font-gill text-base leading-110",
                           isSelected
                             ? "font-semibold text-darkblack"
                             : "font-normal text-gray600",
@@ -540,7 +630,27 @@ const EducationDiscoverJourneyPanel = ({
         </div>
       </div>
 
-      <PanelFooter
+      {showAvailabilityError ? (
+        <div role="alert" className="md:mx-6 mx-4 shrink-0 bg-yellow100 px-4 md:h-12 h-10 flex items-center justify-start md:px-6 lg:px-6 md:mb-[15px] mb-[52px]">
+          <div
+            className={cn(
+              "mx-auto flex w-full flex-nowrap items-center gap-2",
+              DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
+            )}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="size-6 shrink-0 text-darkblack" >
+              <path d="M11.25 11.25C11.4489 11.25 11.6397 11.329 11.7803 11.4697C11.921 11.6103 12 11.8011 12 12V15.75C12 15.9489 12.079 16.1397 12.2197 16.2803C12.3603 16.421 12.5511 16.5 12.75 16.5" stroke="#0A0A0A" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M11.625 8.8125C12.1428 8.8125 12.5625 8.39277 12.5625 7.875C12.5625 7.35723 12.1428 6.9375 11.625 6.9375C11.1072 6.9375 10.6875 7.35723 10.6875 7.875C10.6875 8.39277 11.1072 8.8125 11.625 8.8125Z" fill="#0A0A0A" />
+              <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="#0A0A0A" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <p className="font-gill text-base font-normal leading-110 text-[#121212]">
+              {availabilityErrorMessage}
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      <PanelFooter showGradient={false}
         className="max-md:pb-[env(safe-area-inset-bottom,0px)]"
         contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 md:px-6 px-4"
       >
@@ -550,23 +660,21 @@ const EducationDiscoverJourneyPanel = ({
             DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
           )}
         >
-          {step === 1 && !hasProducts ? (
-            <div
-              role="status"
-              className="flex items-center gap-2 bg-yellow100 px-3 py-3 font-gill text-sm font-normal leading-110 text-darkblack"
-            >
-              <TriangleAlert className="size-4 shrink-0 text-yellow600" aria-hidden />
-              <span>No products found for this price range.</span>
-            </div>
-          ) : null}
-
           <button
             type="button"
             onClick={handlePrimaryAction}
-            disabled={step === 1 && !canProceedFromPrice}
+            disabled={
+              isVerifyingAvailability || (step === 1 && !hasPriceRange)
+            }
             className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:border-neutral300 disabled:bg-neutral300 disabled:text-white disabled:opacity-100"
           >
-            <span className="relative z-10">{step === 3 ? "View Products" : "Proceed"}</span>
+            <span className="relative z-10">
+              {isVerifyingAvailability
+                ? "Checking..."
+                : step === 3
+                  ? "View Products"
+                  : "Proceed"}
+            </span>
           </button>
         </div>
       </PanelFooter>
