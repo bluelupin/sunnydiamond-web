@@ -5,10 +5,10 @@ import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import FormFieldError from "@/shared/ui/FormFieldError";
-import { getMinSelectableDate, getMaxSelectableDate, sanitizePhoneInput, invalidFieldClassName } from "@/shared/utils/formValidation";
-import { isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
+import { sanitizePhoneInput, invalidFieldClassName } from "@/shared/utils/formValidation";
+import { getAppointmentBookingDateBounds, isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
 import { cn } from "@/shared/utils/cn";
-import { appointmentFieldKey, appointmentFieldKind, appointmentFieldOptions } from "../utils/appointmentGenericForm";
+import { APPOINTMENT_BOOKING_WINDOW, appointmentFieldKey, appointmentFieldKind, appointmentFieldOptions } from "../utils/appointmentGenericForm";
 
 type Props = {
   form: NormalizedGenericForm;
@@ -25,6 +25,7 @@ type Props = {
 const fieldClassName = "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-sm leading-110 text-darkblack placeholder:text-[#999999] outline-none";
 
 export default function AppointmentGenericFields({ form, values, codes, errors, disabled, now, onChange, onCodeChange, onBlur }: Props) {
+  const { minDate, maxDate } = getAppointmentBookingDateBounds(APPOINTMENT_BOOKING_WINDOW, now);
   const dateIndex = form.fields.findIndex((field) => appointmentFieldKind(field) === "date");
   const date = dateIndex < 0 ? "" : values[appointmentFieldKey(form.fields[dateIndex], dateIndex)] ?? "";
   return (
@@ -50,11 +51,11 @@ export default function AppointmentGenericFields({ form, values, codes, errors, 
                 <input {...inputProps} type="tel" inputMode="numeric" autoComplete="tel-national" onChange={(event) => change(sanitizePhoneInput(event.target.value, code))} className="min-w-0 flex-1 bg-transparent font-gill text-sm outline-none placeholder:text-[#999999]" />
               </div>
             ) : kind === "date" ? (
-              <AppointmentDateField id={id} value={value} onChange={change} onBlur={blur} minDate={getMinSelectableDate()} maxDate={getMaxSelectableDate()} placeholder={field.placeholder} hasError={Boolean(error)} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} />
+              <AppointmentDateField id={id} value={value} onChange={change} onBlur={blur} minDate={minDate} maxDate={maxDate} placeholder={field.placeholder} hasError={Boolean(error)} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} />
             ) : kind === "slot" ? (
               <div id={id} role="group" aria-label={label} aria-describedby={error ? `${id}-error` : undefined} className="grid grid-cols-2 gap-3">
                 {options.map((slot) => (
-                  <button key={slot} type="button" aria-pressed={value === slot} disabled={disabled || (dateIndex >= 0 && (!date || !isAppointmentTimeSlotAvailable(slot, date, now)))} onClick={() => { change(slot); blur(); }} className={cn("min-h-14 px-3 py-3 font-gill text-sm disabled:cursor-not-allowed disabled:opacity-40", value === slot ? "bg-gold300 text-darkblack" : "bg-[#F2F2F2] text-gray600")}>{slot}</button>
+                  <button key={slot} type="button" aria-pressed={value === slot} disabled={disabled || (dateIndex >= 0 && (!date || date < minDate || date > maxDate || !isAppointmentTimeSlotAvailable(slot, date, now, APPOINTMENT_BOOKING_WINDOW.minNoticeMinutes)))} onClick={() => { change(slot); blur(); }} className={cn("min-h-14 px-3 py-3 font-gill text-sm disabled:cursor-not-allowed disabled:opacity-40", value === slot ? "bg-gold300 text-darkblack" : "bg-[#F2F2F2] text-gray600")}>{slot}</button>
                 ))}
               </div>
             ) : kind === "select" ? (

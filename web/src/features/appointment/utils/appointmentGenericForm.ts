@@ -1,6 +1,8 @@
 import type { GenericSubmissionPayload, NormalizedGenericForm, NormalizedGenericFormField } from "@/services/forms/generic-form.types";
 import { validateOptionalDate, validateOptionalEmail, validatePhone, validateRequiredName } from "@/shared/utils/formValidation";
-import { isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
+import { getAppointmentBookingDateBounds, isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
+
+export const APPOINTMENT_BOOKING_WINDOW = { minNoticeMinutes: 120, maxDaysAhead: 30 };
 
 export function appointmentFieldKind(field: NormalizedGenericFormField) {
   const type = field.fieldType.toLowerCase().replace(/[\s_-]/g, "");
@@ -26,6 +28,7 @@ export function appointmentFieldOptions(field: NormalizedGenericFormField, form:
 
 export function appointmentFormErrors(form: NormalizedGenericForm, values: Record<string, string>, codes: Record<string, string>, now = new Date()) {
   const errors: Record<string, string> = {};
+  const { minDate, maxDate } = getAppointmentBookingDateBounds(APPOINTMENT_BOOKING_WINDOW, now);
   const dateIndex = form.fields.findIndex((field) => appointmentFieldKind(field) === "date");
   const date = dateIndex < 0 ? "" : values[appointmentFieldKey(form.fields[dateIndex], dateIndex)] ?? "";
   form.fields.forEach((field, index) => {
@@ -38,9 +41,12 @@ export function appointmentFormErrors(form: NormalizedGenericForm, values: Recor
       if (kind === "name") error = validateRequiredName(value).error;
       if (kind === "phone") error = validatePhone(value, codes[key] ?? "+91").error;
       if (kind === "email") error = validateOptionalEmail(value).error;
-      if (kind === "date") error = validateOptionalDate(value).error;
+      if (kind === "date") {
+        error = validateOptionalDate(value).error;
+        if (!error && (value < minDate || value > maxDate)) error = "Select a date within the next 30 days with at least 2 hours' notice";
+      }
       if ((kind === "select" || kind === "slot") && !appointmentFieldOptions(field, form).includes(value)) error = "Select an available option";
-      if (kind === "slot" && date && !isAppointmentTimeSlotAvailable(value, date, now)) error = "Select an available time slot";
+      if (kind === "slot" && date && !isAppointmentTimeSlotAvailable(value, date, now, APPOINTMENT_BOOKING_WINDOW.minNoticeMinutes)) error = "Select a time slot with at least 2 hours' notice";
     }
     if (error) errors[key] = error;
   });
