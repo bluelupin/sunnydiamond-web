@@ -316,9 +316,9 @@ function mapStoreVisitDetails(
 const GENERAL_STORE_VISIT_PRODUCT_ID = "store-visit";
 
 function inferAppointmentType(formTag: string): AppointmentFilterKey {
-  const normalized = formTag.toLowerCase();
+  const normalized = formTag.trim().toLowerCase();
 
-  if (normalized.includes("video")) {
+  if (normalized === "book-an-appointment" || normalized.includes("video")) {
     return "video_call";
   }
 
