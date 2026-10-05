@@ -30,7 +30,6 @@ import {
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
-import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderDetailItemCard } from "./ProfileOrderDetailItemCard";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
 import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
@@ -63,7 +62,6 @@ export function ProfileOrderDetailView({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
   const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
-  const [refundNote, setRefundNote] = useState<string | undefined>(undefined);
   const { cancelReasons, returnReasons } = useOrderActionReasons();
   const { isSubmitting, error, clearError, cancelOrder, returnOrder } = useOrderActions();
   const { download, downloadingNumber } = useOrderInvoiceDownload();
@@ -137,7 +135,6 @@ export function ProfileOrderDetailView({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setCancelReasonDialogOpen(false);
       setCancelSuccessDialogOpen(true);
 
@@ -166,7 +163,6 @@ export function ProfileOrderDetailView({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setReturnReasonDialogOpen(false);
       setReturnSuccessDialogOpen(true);
 
@@ -527,7 +523,6 @@ export function ProfileOrderDetailView({
         open={cancelSuccessDialogOpen}
         onOpenChange={setCancelSuccessDialogOpen}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
 
       <ProfileOrderReturnDialog
@@ -550,7 +545,6 @@ export function ProfileOrderDetailView({
         open={returnSuccessDialogOpen}
         onOpenChange={setReturnSuccessDialogOpen}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
     </div>
   );

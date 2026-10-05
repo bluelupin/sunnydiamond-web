@@ -171,10 +171,21 @@ const GIFT_CARD_DELIVERED_BADGE_VARIANT = {
   labelWeight: "font-normal",
 };
 
+function resolveStatusBadgeVariant(
+  category: OrderFilterKey,
+  subState: ProfileOrderSubState | undefined,
+  giftCardDelivered: boolean,
+) {
+  if (giftCardDelivered) return GIFT_CARD_DELIVERED_BADGE_VARIANT;
+  // Figma: "Cancellation In Progress" and "Refund In Progress" use the in-progress (yellow) pill.
+  if (subState) return STATUS_BADGE_VARIANTS.in_progress;
+  return STATUS_BADGE_VARIANTS[category];
+}
+
 /** Copy shown while Magento is still processing a cancellation/return. */
 const SUB_STATE_LABELS: Record<ProfileOrderSubState, string> = {
   cancellation_in_progress: profileTabsContent.orders.statusCancellationInProgress,
-  return_in_progress: profileTabsContent.orders.statusReturnInProgress,
+  return_in_progress: profileTabsContent.orders.statusRefundInProgress,
 };
 
 export function ProfileStatusBadge({
@@ -189,9 +200,7 @@ export function ProfileStatusBadge({
   /** Figma 4858:124118 — green delivered pill for gift card orders only. */
   giftCardDelivered?: boolean;
 }) {
-  const variant = giftCardDelivered
-    ? GIFT_CARD_DELIVERED_BADGE_VARIANT
-    : STATUS_BADGE_VARIANTS[category];
+  const variant = resolveStatusBadgeVariant(category, subState, giftCardDelivered);
   const { windows } = useUiPlatform();
   return (
     <span
@@ -219,9 +228,7 @@ export function ProfileOrderMobileStatusBadge({
   subState?: ProfileOrderSubState;
   giftCardDelivered?: boolean;
 }) {
-  const variant = giftCardDelivered
-    ? GIFT_CARD_DELIVERED_BADGE_VARIANT
-    : STATUS_BADGE_VARIANTS[category];
+  const variant = resolveStatusBadgeVariant(category, subState, giftCardDelivered);
   const { windows } = useUiPlatform();
   return (
     <span

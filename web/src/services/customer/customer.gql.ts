@@ -264,6 +264,9 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
               currency
             }
           }
+          payment_methods {
+            type
+          }
           ${SUNNY_ORDER_STATUS_FIELDS}
           ${SUNNY_ORDER_TRACKING_FIELDS}
         }

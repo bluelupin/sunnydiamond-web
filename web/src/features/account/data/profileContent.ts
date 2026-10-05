@@ -130,14 +130,14 @@ export const profileTabsContent = {
     returnDialog: {
       title: "Return Order?",
       description:
-        "Need help before returning? Contact our support team, we may be able to resolve your concern.",
+        "Return this order if it’s not the right fit. Pickup and refund updates will be available in your profile.",
       contactSupportLabel: "CONTACT SUPPORT",
       proceedLabel: "PROCEED TO RETURN",
     },
     returnReasonDialog: {
       title: "Return Order?",
       description:
-        "We're sorry the piece did not work out. Please share your reason so we can serve you better next time.",
+        "We’re sorry to see that you need to return your order. Please share your reason so we can serve you better next time.",
       reasonLabel: "Select Reason",
       reasons: [
         "Product was damaged",
@@ -187,6 +187,8 @@ export const profileTabsContent = {
     estimatedDeliveryLabel: "Estimated Delivery",
     estimatedDeliveryPlaceholder: "2 June 2026",
     estimatedDeliveryRangePlaceholder: "Within 5-7 business days",
+    estimatedRefundLabel: "Estimated Refund Time",
+    estimatedRefundWindowTemplate: "Within {window}",
     statusInProgress: "Order in Progress",
     statusCancelled: "Cancelled",
     statusRefundInProgress: "Refund In Progress",

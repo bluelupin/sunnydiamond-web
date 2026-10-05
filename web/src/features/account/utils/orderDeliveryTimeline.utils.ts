@@ -231,6 +231,11 @@ export function formatOrderStatusLabel(status: string, sunnyStatus?: string | nu
     return "Delivered";
   }
 
+  // A cancelled order is "Closed" in Magento once refunded; the customer sees "Cancelled".
+  if (sunnyStatus === "CANCELLED") {
+    return "Cancelled";
+  }
+
   const normalized = normalizeOrderStatus(status);
 
   if (!normalized) {

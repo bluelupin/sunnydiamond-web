@@ -25,7 +25,6 @@ import {
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
-import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderMobileThumbnails } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
@@ -99,7 +98,6 @@ export function ProfileOrderCard({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
   const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
-  const [refundNote, setRefundNote] = useState<string | undefined>(undefined);
   const [changedOrder, setChangedOrder] = useState<TrackedOrder | null>(null);
   const [localResolvedStatus, setLocalResolvedStatus] = useState<string | null>(null);
   const content = profileTabsContent.orders;
@@ -117,6 +115,10 @@ export function ProfileOrderCard({
     if (order.category === "delivered" || isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
+    // Cancelled COD orders carry no refund steps; never fall back to the delivery stepper.
+    if (order.category === "cancelled" && !order.timeline?.length) {
+      return [];
+    }
 
     return resolveProfileOrderTimelineSteps(
       resolvedStatus ?? localResolvedStatus ?? order.status,
@@ -130,10 +132,13 @@ export function ProfileOrderCard({
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
   const showDesktopContactUs = Boolean(order.showContactUs) || order.category === "delivered";
-  // Figma: Contact Us alone sits right-aligned at half width (delivered with no other action).
+  const hasOtherDesktopAction =
+    Boolean(order.showCancel) ||
+    (Boolean(order.showTrack) && order.category !== "delivered") ||
+    Boolean(order.showReturn);
+  // Figma: Contact Us alone sits right-aligned at half width.
   const contactUsAlignedRight =
-    giftCardDeliveredBadge ||
-    (order.category === "delivered" && !order.showReturn && !order.showCancel);
+    giftCardDeliveredBadge || (showDesktopContactUs && !hasOtherDesktopAction);
 
   const handleCopyOrderId = async () => {
     try {
@@ -192,7 +197,6 @@ export function ProfileOrderCard({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setChangedOrder(freshOrder);
       setCancelReasonDialogOpen(false);
       setCancelSuccessDialogOpen(true);
@@ -218,7 +222,6 @@ export function ProfileOrderCard({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setChangedOrder(freshOrder);
       setReturnReasonDialogOpen(false);
       setReturnSuccessDialogOpen(true);
@@ -467,7 +470,6 @@ export function ProfileOrderCard({
         open={cancelSuccessDialogOpen}
         onOpenChange={(open) => handleSuccessDialogChange(setCancelSuccessDialogOpen, open)}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
 
       <ProfileOrderReturnDialog
@@ -490,7 +492,6 @@ export function ProfileOrderCard({
         open={returnSuccessDialogOpen}
         onOpenChange={(open) => handleSuccessDialogChange(setReturnSuccessDialogOpen, open)}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
     </>
   );
