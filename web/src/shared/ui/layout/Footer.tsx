@@ -1,11 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
+import { isBookAppointmentLink, resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { FooterTrustBadgeSection } from "@/features/cms/components/common/TrustBadges";
@@ -14,6 +15,13 @@ import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPag
 import { cn } from "@/shared/utils/cn";
 import { isCheckoutRoute } from "@/shared/utils/navigation";
 import ResponsiveImage from "../ResponsiveImage";
+import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
+import { FeatureErrorBoundary } from "@/shared/ui/FeatureErrorBoundary";
+
+const BookAnAppointmentPanel = dynamic(
+  () => import("@/features/appointment/components/BookAnAppointmentPanel"),
+  { ssr: false, loading: () => null },
+);
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
   instagram: "/icons/social/instagram.svg",
@@ -101,6 +109,13 @@ function resolveShellSocialLinks(
 const Footer = ({ className }: { className?: string }) => {
   const pathName = usePathname() ?? "";
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
+  const isMobileHeader = useMobileHeaderLayout();
+  const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
+  const [appointmentPanelMounted, setAppointmentPanelMounted] = useState(false);
+  const openAppointmentPanel = useCallback(() => {
+    setAppointmentPanelMounted(true);
+    setAppointmentPanelOpen(true);
+  }, []);
   const { data: shellData } = useHomepageShell();
   const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
   const footerLinkGroups = useMemo(
@@ -174,16 +189,30 @@ const Footer = ({ className }: { className?: string }) => {
                     {column.title.toUpperCase()}
                   </Reveal>
                   <ul className="flex flex-col gap-3">
-                    {column.links.map((link) => (
-                      <Reveal as="li" direction="up" key={link.id} className="leading-[0px]">
-                        <Link
-                          href={link.url}
-                          className="font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta"
-                        >
-                          {link.label}
-                        </Link>
-                      </Reveal>
-                    ))}
+                    {column.links.map((link) => {
+                      const openInSidePanel =
+                        !isMobileHeader && isBookAppointmentLink(link);
+                      const linkClassName =
+                        "font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta";
+
+                      return (
+                        <Reveal as="li" direction="up" key={link.id} className="leading-[0px]">
+                          {openInSidePanel ? (
+                            <button
+                              type="button"
+                              onClick={openAppointmentPanel}
+                              className={cn(linkClassName, "text-left")}
+                            >
+                              {link.label}
+                            </button>
+                          ) : (
+                            <Link href={link.url} className={linkClassName}>
+                              {link.label}
+                            </Link>
+                          )}
+                        </Reveal>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}
@@ -242,6 +271,16 @@ const Footer = ({ className }: { className?: string }) => {
           </div>
         }
       </PageContainer>
+      {appointmentPanelMounted ? (
+        <FeatureErrorBoundary featureName="BookAnAppointmentPanel">
+          <BookAnAppointmentPanel
+            variant="modal"
+            open={appointmentPanelOpen}
+            onClose={() => setAppointmentPanelOpen(false)}
+            showBack={false}
+          />
+        </FeatureErrorBoundary>
+      ) : null}
     </footer>
   );
 };

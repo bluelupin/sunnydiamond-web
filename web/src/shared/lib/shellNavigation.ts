@@ -41,10 +41,14 @@ export type HomeSidebarNavSection = {
 
 const REMOVED_HEADER_NAV_LABELS = new Set(["collection"]);
 
-export function isBookAppointmentNavLink(link: HeaderNavLink): boolean {
+export function isBookAppointmentLink(link: { label: string; url: string }): boolean {
   const label = link.label.trim().toLowerCase();
   const url = link.url.replace(/\/$/, "") || "/";
   return label === "book an appointment" || url === "/book-an-appointment";
+}
+
+export function isBookAppointmentNavLink(link: HeaderNavLink): boolean {
+  return isBookAppointmentLink(link);
 }
 
 function filterHeaderLinks(links: readonly HeaderNavLink[]): HeaderNavLink[] {

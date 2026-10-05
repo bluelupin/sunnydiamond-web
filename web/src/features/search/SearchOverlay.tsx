@@ -4,12 +4,13 @@ import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type R
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+import { History } from "lucide-react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { cn } from "@/shared/utils/cn";
 import { MAX_SEARCH_LENGTH, searchResultsHref, type QuickSearchProduct, type SearchLink } from "./quickSearch";
+import { searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
 import { addRecentSearch, clearRecentSearches, readRecentSearches } from "./recentSearches";
 import { useQuickSearch, useSearchSuggestions } from "./useQuickSearch";
 
@@ -29,15 +30,22 @@ type SearchOverlayProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const rowClassName = "flex w-full items-center gap-3 px-4 py-3 text-left font-gill text-base font-light leading-110 text-darkblack md:px-6";
+const productRowClassName =
+  "flex w-full items-center gap-3 py-1 text-left font-gill text-sm font-normal leading-110 text-darkblack";
+
+const suggestionRowClassName = "flex w-full items-center gap-2 py-0 text-left";
 
 function LinkRow({ link }: { link: SearchLink }) {
-  return (
-    <span className="flex min-w-0 flex-1 items-baseline gap-2">
-      <span className="truncate">{link.label}</span>
-      {link.detail ? <span className="shrink-0 text-sm text-gray600">{link.detail}</span> : null}
-    </span>
-  );
+  if (link.detail) {
+    return (
+      <span className="flex min-w-0 flex-1 items-baseline gap-1">
+        <span className="truncate font-normal text-darkblack">{link.label}</span>
+        <span className="shrink-0 font-light text-neutral500">{link.detail}</span>
+      </span>
+    );
+  }
+
+  return <span className="min-w-0 flex-1 truncate font-light text-neutral500">{link.label}</span>;
 }
 
 function ProductRow({ product }: { product: QuickSearchProduct }) {
@@ -46,9 +54,9 @@ function ProductRow({ product }: { product: QuickSearchProduct }) {
       <span className="relative size-14 shrink-0 overflow-hidden bg-gray300">
         {product.image ? <Image src={product.image} alt="" fill sizes="56px" className="object-cover" /> : null}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="truncate">{product.name}</span>
-        <span className="text-sm font-semibold">
+      <span className="flex min-w-0 flex-1 flex-col gap-1 font-gill text-sm leading-110">
+        <span className="truncate font-normal text-darkblack">{product.name}</span>
+        <span className="font-normal text-darkblack">
           {product.fromPrice ? "From " : ""}₹ {formatJewelleryPrice(product.price)}
         </span>
       </span>
@@ -205,7 +213,11 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
         <DialogPrimitive.Overlay className="fixed inset-0 z-[60] bg-darkblack/40 motion-safe:animate-in motion-safe:fade-in-0" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="fixed inset-0 z-[61] flex flex-col bg-white md:inset-x-0 md:bottom-auto md:max-h-[85vh]"
+          className={cn(
+            "fixed inset-x-0 z-[61] flex min-h-0 flex-col bg-white motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-2",
+            searchOverlayFigmaSpec.panelTopClassName,
+            searchOverlayFigmaSpec.panelMaxHeightClassName,
+          )}
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -217,33 +229,39 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
           }}
         >
           <DialogPrimitive.Title className="sr-only">Search Sunny Diamonds</DialogPrimitive.Title>
-          <div className="mx-auto flex w-full max-w-1440 items-center gap-3 border-b border-neutral300 px-4 py-4 md:px-10 md:py-6">
-            <SearchIcon className="size-6 shrink-0 text-darkblack" />
-            <input
-              type="search"
-              value={text}
-              maxLength={MAX_SEARCH_LENGTH}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="Search rings, earrings, collections…"
-              role="combobox"
-              aria-label="Search"
-              aria-expanded={options.length > 0}
-              aria-controls={listId}
-              aria-autocomplete="list"
-              aria-activedescendant={activeOption?.id}
-              autoComplete="off"
-              enterKeyHint="search"
-              className="min-w-0 flex-1 bg-transparent font-gill text-lg font-normal leading-110 text-darkblack placeholder:font-light placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
-            />
-            <DialogPrimitive.Close className="shrink-0 p-1 text-darkblack" aria-label="Close search">
-              <X className="size-6" />
-            </DialogPrimitive.Close>
-          </div>
 
-          <div className="mx-auto w-full max-w-1440 flex-1 overflow-y-auto pb-6 md:px-4">
+          {/* Figma 4903:69973 — 1040 column: 40px below header rule, then search + 24px gap + suggestions */}
+          <div
+            className={cn(
+              searchOverlayFigmaSpec.contentTopPaddingClassName,
+              searchOverlayFigmaSpec.sectionGapClassName,
+              searchOverlayFigmaSpec.contentColumnClassName,
+            )}
+            style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
+          >
+            <div className={cn("w-full shrink-0", searchOverlayFigmaSpec.searchBarClassName)}>
+              <SearchIcon className="size-6 shrink-0 text-darkblack" />
+              <input
+                type="search"
+                value={text}
+                maxLength={MAX_SEARCH_LENGTH}
+                onChange={(event) => setText(event.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Search rings, earrings, collections…"
+                role="combobox"
+                aria-label="Search"
+                aria-expanded={options.length > 0}
+                aria-controls={listId}
+                aria-autocomplete="list"
+                aria-activedescendant={activeOption?.id}
+                autoComplete="off"
+                enterKeyHint="search"
+                className={searchOverlayFigmaSpec.searchInputClassName}
+              />
+            </div>
+
             {active && !result && loading ? (
-              <div className="flex flex-col gap-3 px-4 py-4 md:px-6" aria-hidden>
+              <div className={cn("flex flex-col", searchOverlayFigmaSpec.suggestionGapClassName)} aria-hidden>
                 {[0, 1, 2].map((row) => (
                   <div key={row} className="flex items-center gap-3">
                     <div className="size-14 animate-pulse bg-gray300" />
@@ -254,22 +272,35 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             ) : null}
 
             {active && result && !hasResults ? (
-              <p className="px-4 pt-6 font-gill text-base font-light leading-110 text-darkblack md:px-6" role="status">
+              <p className="font-gill text-sm font-light leading-110 text-darkblack" role="status">
                 No pieces match &ldquo;{result.query}&rdquo;.
               </p>
             ) : null}
             {active && failed && !result ? (
-              <p className="px-4 pt-6 font-gill text-base font-light text-darkblack md:px-6" role="status">
+              <p className="font-gill text-sm font-light leading-110 text-darkblack" role="status">
                 Search is not responding. Press Enter to see all results.
               </p>
             ) : null}
 
-            <div id={listId} role="listbox" aria-label="Search suggestions" className={cn(loading && result && "opacity-70")}>
-              {groups.map((group) =>
-                group.options.length ? (
-                  <div key={group.key} role="group" aria-labelledby={`${baseId}-${group.key}-title`} className="pt-4">
-                    <div className="flex items-center justify-between px-4 pb-2 md:px-6">
-                      <span id={`${baseId}-${group.key}-title`} className="font-gill text-sm uppercase leading-110 text-gray600">
+            <div id={listId} role="listbox" aria-label="Search suggestions" className={cn("w-full", loading && result && "opacity-70")}>
+              {groups
+                .filter((group) => group.options.length > 0)
+                .map((group, groupIndex) => (
+                  <div
+                    key={group.key}
+                    role="group"
+                    aria-labelledby={`${baseId}-${group.key}-title`}
+                    className={cn(
+                      "flex flex-col",
+                      searchOverlayFigmaSpec.suggestionGapClassName,
+                      groupIndex > 0 && "mt-6",
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        id={`${baseId}-${group.key}-title`}
+                        className="font-gill text-sm font-light leading-110 text-neutral500"
+                      >
                         {group.title}
                       </span>
                       {group.action}
@@ -277,30 +308,41 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                     {group.options.map((option) => {
                       optionIndex += 1;
                       const index = optionIndex;
+                      const isProduct = option.group === "products";
                       return (
                         <div
                           key={option.id}
                           id={option.id}
                           role="option"
                           aria-selected={index === activeIndex}
-                          className={cn(rowClassName, "cursor-pointer hover:bg-gray200", index === activeIndex && "bg-gray300")}
+                          className={cn(
+                            isProduct ? productRowClassName : suggestionRowClassName,
+                            "cursor-pointer rounded-sm font-gill text-sm leading-110 hover:bg-gray200",
+                            index === activeIndex && "bg-gray200",
+                          )}
                           onMouseEnter={() => setActiveIndex(index)}
                           onMouseDown={(event) => event.preventDefault()}
                           onClick={() => go(option.href, option.recent, option)}
                         >
+                          {!isProduct ? (
+                            group.key === "recent" ? (
+                              <History className="size-6 shrink-0 text-darkblack" strokeWidth={1.25} aria-hidden />
+                            ) : (
+                              <SearchIcon className="size-6 shrink-0 text-darkblack" />
+                            )
+                          ) : null}
                           {option.render}
                         </div>
                       );
                     })}
                   </div>
-                ) : null,
-              )}
+                ))}
             </div>
 
             {active && query ? (
               <button
                 type="button"
-                className="mx-4 mt-6 border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack md:mx-6"
+                className="self-start border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
                 onClick={() => go(searchResultsHref(query), query)}
               >
                 See all results for &ldquo;{query}&rdquo;

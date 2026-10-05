@@ -55,6 +55,11 @@ const JewelleryMegaMenu = dynamic(
 
 const SearchOverlay = dynamic(() => import("@/features/search/SearchOverlay"), { ssr: false, loading: () => null });
 
+const BookAnAppointmentPanel = dynamic(
+  () => import("@/features/appointment/components/BookAnAppointmentPanel"),
+  { ssr: false, loading: () => null },
+);
+
 const preloadJewelleryMegaMenu = () => {
   void import("@/shared/ui/layout/JewelleryMegaMenu");
 };
@@ -70,6 +75,16 @@ const Header = () => {
     setSearchMounted(true);
     setSearchOpen(true);
   };
+  const toggleSearch = () => {
+    setSearchMounted(true);
+    setSearchOpen((open) => !open);
+  };
+  const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
+  const [appointmentPanelMounted, setAppointmentPanelMounted] = useState(false);
+  const openAppointmentPanel = useCallback(() => {
+    setAppointmentPanelMounted(true);
+    setAppointmentPanelOpen(true);
+  }, []);
   const [profileNavOpen, setProfileNavOpen] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const [jewelleryMenuMounted, setJewelleryMenuMounted] = useState(false);
@@ -103,7 +118,7 @@ const Header = () => {
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
   const headerHidden = mobileMenuOpen || profileNavOpen;
-  const isHeaderScrollRevealEnabled = !headerHidden && !menuOpen;
+  const isHeaderScrollRevealEnabled = !headerHidden && !menuOpen && !searchOpen;
   const { isVisible: isHeaderScrollVisible, isPastTop: isHeaderPastTop } = useHeaderScrollReveal({
     enabled: isHeaderScrollRevealEnabled,
     useMainScrollContainer: isAuthPage,
@@ -205,16 +220,27 @@ const Header = () => {
     [canHoverNav, toggleJewelleryMenu],
   );
 
-  const textClass = isLightOverlay ? "text-white" : "text-darkblack";
-  const logoClass = isLightOverlay ? "text-white" : isAuthPage ? "text-darkblack" : "text-darkMagenta";
+  const useExpandedSearchHeader = searchOpen;
+  const textClass = useExpandedSearchHeader
+    ? "text-darkblack"
+    : isLightOverlay
+      ? "text-white"
+      : "text-darkblack";
+  const logoClass = useExpandedSearchHeader
+    ? "text-darkMagenta"
+    : isLightOverlay
+      ? "text-white"
+      : isAuthPage
+        ? "text-darkblack"
+        : "text-darkMagenta";
   const hoverClass = isLightOverlay ? "hover:text-linkGold" : "hover:text-linkGold";
   const navLinkClass = (active = false) =>
     cn(
       "inline-flex items-center font-gill uppercase transition-colors",
       "text-sm font-normal leading-[130%] tracking-[-0.02em]",
-      isLightOverlay
-        ? "md:landscape:text-sm md:landscape:font-semibold md:landscape:leading-110 md:landscape:tracking-normal"
-        : "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
+      useExpandedSearchHeader || !isLightOverlay
+        ? "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal"
+        : "md:landscape:text-sm md:landscape:font-semibold md:landscape:leading-110 md:landscape:tracking-normal",
       active ? "text-linkGold" : cn(textClass, hoverClass),
     );
 
@@ -242,17 +268,18 @@ const Header = () => {
       />
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50",
+          "fixed top-0 inset-x-0",
+          searchOpen ? "z-[62]" : "z-50",
           "motion-safe:transform-gpu motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out",
           headerHidden ? "pointer-events-none opacity-0" : "",
-          !headerHidden && !isHeaderShown ? "-translate-y-full" : "translate-y-0",
+          !headerHidden && !isHeaderShown && !searchOpen ? "-translate-y-full" : "translate-y-0",
         )}
         aria-hidden={headerHidden}
       >
         <div
           className={cn(
             "w-full max-md:pt-[env(safe-area-inset-top,0px)] md:max-desktop:portrait:pt-[env(safe-area-inset-top,0px)] md:landscape:pt-0",
-            headerSurfaceClass,
+            searchOpen ? "bg-white border-b border-neutral300" : headerSurfaceClass,
           )}
         >
           {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
@@ -269,10 +296,11 @@ const Header = () => {
               </button>
               <button
                 type="button"
-                className={cn(iconButtonClass, textClass, hoverClass)}
-                onClick={openSearch}
+                className={cn(iconButtonClass, textClass, hoverClass, searchOpen && "text-linkGold")}
+                onClick={toggleSearch}
                 aria-label="Search"
                 aria-haspopup="dialog"
+                aria-expanded={searchOpen}
               >
                 <SearchIcon className="size-6" />
               </button>
@@ -316,13 +344,19 @@ const Header = () => {
                   );
                 })}
                 {appointmentLink ? (
-                  <Link
-                    href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
-                    className={navLinkClass(isAppointmentActive)}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeJewelleryMenuNow();
+                      openAppointmentPanel();
+                    }}
+                    className={navLinkClass(isAppointmentActive || appointmentPanelOpen)}
                     aria-current={isAppointmentActive ? "page" : undefined}
+                    aria-haspopup="dialog"
+                    aria-expanded={appointmentPanelOpen}
                   >
                     {appointmentLink.label}
-                  </Link>
+                  </button>
                 ) : null}
               </nav>
             </div>
@@ -332,10 +366,16 @@ const Header = () => {
             <div className={cn("relative z-10 flex items-center gap-6 lg:gap-6", textClass)}>
               <button
                 type="button"
-                className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
-                onClick={openSearch}
+                className={cn(
+                  "!hidden md:landscape:!flex",
+                  iconButtonClass,
+                  hoverClass,
+                  searchOpen && "text-linkGold",
+                )}
+                onClick={toggleSearch}
                 aria-label="Search"
                 aria-haspopup="dialog"
+                aria-expanded={searchOpen}
               >
                 <SearchIcon className="size-6" />
               </button>
@@ -412,6 +452,17 @@ const Header = () => {
       {searchMounted ? (
         <FeatureErrorBoundary featureName="SearchOverlay">
           <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
+        </FeatureErrorBoundary>
+      ) : null}
+
+      {appointmentPanelMounted ? (
+        <FeatureErrorBoundary featureName="BookAnAppointmentPanel">
+          <BookAnAppointmentPanel
+            variant="modal"
+            open={appointmentPanelOpen}
+            onClose={() => setAppointmentPanelOpen(false)}
+            showBack={false}
+          />
         </FeatureErrorBoundary>
       ) : null}
     </>

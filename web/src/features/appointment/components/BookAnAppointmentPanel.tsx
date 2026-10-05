@@ -1,15 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
-import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
+import { getProductFormByTag } from "@/services/forms/product-form.service";
+import type { NormalizedProductForm } from "@/services/forms/product-form.types";
+
+const TRY_AT_HOME_FORM_TAG = "try-at-home-form";
 
 const labelClassName = "font-gill text-sm leading-110 text-darkblack";
 const fieldClassName =
@@ -33,6 +37,7 @@ const BookAnAppointmentPanel = ({
   showClose = true,
 }: BookAnAppointmentPanelProps) => {
   const { toast } = useToast();
+  const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
@@ -42,12 +47,40 @@ const BookAnAppointmentPanel = ({
   const [note, setNote] = useState("");
 
   const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note }),
-    [name, countryCode, phone, email, date, note],
+    () => ({ name, countryCode, phone, email, date, note, selectedSlot }),
+    [name, countryCode, phone, email, date, note, selectedSlot],
+  );
+
+  const validationOptions = useMemo(
+    () => ({ dateRequired: true, selectedSlotRequired: true }),
+    [],
   );
 
   const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
-    useAppointmentFormValidation(formValues);
+    useAppointmentFormValidation(formValues, validationOptions);
+
+  const panelActive = variant !== "modal" || open;
+
+  useEffect(() => {
+    if (!panelActive) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    void (async () => {
+      try {
+        const form = await getProductFormByTag(TRY_AT_HOME_FORM_TAG, controller.signal);
+        if (form) {
+          setCmsForm(form);
+        }
+      } catch {
+        // Match Try at Home: keep field defaults when CMS is unavailable.
+      }
+    })();
+
+    return () => controller.abort();
+  }, [panelActive]);
 
   const handleClear = () => {
     setName("");
@@ -133,6 +166,13 @@ const BookAnAppointmentPanel = ({
               labelClassName={labelClassName}
               fieldClassName={fieldClassName}
               selectedSlotStyle="gold"
+              namePlaceholder={cmsForm?.namePlaceholder}
+              phonePlaceholder={cmsForm?.phonePlaceholder}
+              emailPlaceholder={cmsForm?.emailPlaceholder ?? ""}
+              dateRequired
+              datePlaceholder="Select"
+              timeSlotRequired
+              notePlaceholder="I am looking for an engagement ring"
               noteTextareaClassName="font-gill text-sm leading-110"
             />
           </div>
@@ -148,11 +188,11 @@ const BookAnAppointmentPanel = ({
         <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
           Our representative will get in touch with you soon
         </p>
-        <PanelFooterDualActions>
+        <div className="flex w-full flex-col items-center gap-4 md:flex-row md:items-stretch md:gap-6">
           <button
             type="button"
             onClick={handleClear}
-            className="btn-border-slide flex h-14 min-w-0 flex-1 items-center justify-center border border-neutral300 font-gill text-sm uppercase leading-110 text-darkblack"
+            className="btn-border-slide order-2 flex h-14 w-full min-w-0 items-center justify-center border border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack md:order-1 md:flex-1 md:whitespace-nowrap"
           >
             Clear All
           </button>
@@ -160,11 +200,11 @@ const BookAnAppointmentPanel = ({
             type="button"
             onClick={handleSubmit}
             disabled={submitted && !isValid}
-            className="flex h-14 min-w-0 flex-1 items-center justify-center bg-darkblack font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="order-1 flex h-14 w-full max-w-[343px] min-w-0 items-center justify-center bg-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50 md:order-2 md:max-w-none md:flex-[1.35] md:whitespace-nowrap"
           >
-            Apply Filters
+            Book an Appointment
           </button>
-        </PanelFooterDualActions>
+        </div>
       </PanelFooter>
     </>
   );
