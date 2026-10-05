@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import CopyIcon from "@/assets/Icons/CopyIcon";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import {
@@ -15,7 +14,6 @@ import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
-import { buildProfileOrderDetailHref } from "../utils/profileOrderNavigation";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
 import { mapSunnyTrackingToTimeline } from "../utils/orderFlowSteps.mapper";
@@ -47,8 +45,6 @@ type ProfileOrderTrackModalBodyProps = {
   isLoading: boolean;
   error: string | null;
   trackedOrder: TrackedOrder | null;
-  orderDetailsHref: string;
-  onClose: () => void;
   onCopyTrackingId: () => void;
 };
 
@@ -60,8 +56,6 @@ function ProfileOrderTrackModalBody({
   isLoading,
   error,
   trackedOrder,
-  orderDetailsHref,
-  onClose,
   onCopyTrackingId,
 }: ProfileOrderTrackModalBodyProps) {
   const content = profileTabsContent.orders;
@@ -131,16 +125,6 @@ function ProfileOrderTrackModalBody({
           </ul>
         </div>
       ) : null}
-
-      <div className="flex justify-end border-t border-neutral300 pt-4">
-        <DetailTextLink
-          href={orderDetailsHref}
-          onClick={onClose}
-          className="text-sm uppercase"
-        >
-          {content.viewDetailsLabel}
-        </DetailTextLink>
-      </div>
     </div>
   );
 }
@@ -222,8 +206,6 @@ export function ProfileOrderTrackModal({
   const trackingId = resolveTrackingId(order, trackedOrder);
   const badgeLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
-  const orderDetailsHref = buildProfileOrderDetailHref(order.number);
-
   const handleClose = () => onOpenChange(false);
 
   const handleCopyTrackingId = async () => {
@@ -248,8 +230,6 @@ export function ProfileOrderTrackModal({
     isLoading,
     error,
     trackedOrder,
-    orderDetailsHref,
-    onClose: handleClose,
     onCopyTrackingId: () => void handleCopyTrackingId(),
   };
 

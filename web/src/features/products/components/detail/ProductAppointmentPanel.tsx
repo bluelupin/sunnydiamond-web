@@ -26,7 +26,11 @@ import {
 } from "@/features/products/utils/appointmentDuplicateBooking";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
-import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
+import {
+  countAdditionalVideoCallItemsForSlot,
+  type TryAtHomeBookingSummary,
+} from "@/features/products/utils/tryAtHomeBooking";
+import { getCustomerAppointments } from "@/services/customer/customer-appointments.client";
 import {
   createProductSubmission,
   getProductFormByTag,
@@ -68,7 +72,7 @@ type ProductAppointmentFormProps = {
   onClose: () => void;
   onSubmitSuccess: (message: string) => void;
   onSubmitError: (message: string) => void;
-  onVideoCallBooked?: (booking: TryAtHomeBookingSummary) => void;
+  onVideoCallBooked?: (booking: TryAtHomeBookingSummary, additionalItemsCount: number) => void;
   onDuplicateBooking?: () => void;
 };
 
@@ -334,7 +338,21 @@ const ProductAppointmentForm = ({
           );
 
           if (isScheduleVideoCall && onVideoCallBooked) {
-            onVideoCallBooked({ date, selectedSlot });
+            let moreItems = 0;
+            try {
+              const page = await getCustomerAppointments(1, 50);
+              if (page?.appointments?.length) {
+                moreItems = countAdditionalVideoCallItemsForSlot(page.appointments, {
+                  date,
+                  selectedSlot,
+                  currentProductId: product.id,
+                });
+              }
+            } catch {
+              moreItems = 0;
+            }
+
+            onVideoCallBooked({ date, selectedSlot }, moreItems);
             return;
           }
 
@@ -527,6 +545,12 @@ const ProductAppointmentPanel = ({
     wishlistMovedToastDurationMs,
   );
   const [videoBooking, setVideoBooking] = useState<TryAtHomeBookingSummary | null>(null);
+  const [videoAdditionalItemsCount, setVideoAdditionalItemsCount] = useState(0);
+
+  const handleVideoCallBooked = (booking: TryAtHomeBookingSummary, additionalItemsCount: number) => {
+    setVideoAdditionalItemsCount(additionalItemsCount);
+    setVideoBooking(booking);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -581,7 +605,9 @@ const ProductAppointmentPanel = ({
             product={product}
             productImage={productImage}
             booking={videoBooking}
+            additionalItemsCount={videoAdditionalItemsCount}
             successMessage="Video call scheduled"
+            minNoticeMinutes={VIDEO_CALL_BOOKING_WINDOW.minNoticeMinutes}
             onClose={handleClose}
             onViewBooking={() => {
               handleClose();
@@ -602,7 +628,7 @@ const ProductAppointmentPanel = ({
             onClose={handleClose}
             onSubmitSuccess={handleLegacySuccess}
             onSubmitError={showStatusToast}
-            onVideoCallBooked={setVideoBooking}
+            onVideoCallBooked={handleVideoCallBooked}
             onDuplicateBooking={handleDuplicateBooking}
           />
         )}

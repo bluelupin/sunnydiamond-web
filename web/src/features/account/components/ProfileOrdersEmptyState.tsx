@@ -18,7 +18,7 @@ type ProfileOrdersEmptyStateProps = {
 export function ProfileOrdersEmptyState({
   title = content.emptyTitle,
   descriptionPrimary = content.emptyDescriptionPrimary,
-  descriptionSecondary = content.emptyDescriptionSecondary,
+  descriptionSecondary,
 }: ProfileOrdersEmptyStateProps = {}) {
   return (
     <ProfileTabEmptyStateLayout>
@@ -30,7 +30,7 @@ export function ProfileOrdersEmptyState({
 
       <div className="flex w-full flex-col gap-2 font-gill text-base font-light leading-110 text-neutral500">
         <p>{descriptionPrimary}</p>
-        <p>{descriptionSecondary}</p>
+        {descriptionSecondary ? <p>{descriptionSecondary}</p> : null}
       </div>
 
       <div className="flex flex-col items-center gap-6">

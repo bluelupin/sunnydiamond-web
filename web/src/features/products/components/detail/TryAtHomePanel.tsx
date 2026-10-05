@@ -791,6 +791,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             product={product}
             productImage={productImage}
             booking={submittedBooking}
+            minNoticeMinutes={TRY_AT_HOME_BOOKING_WINDOW.minNoticeMinutes}
             additionalItemsCount={additionalItemsCount}
             onClose={handleClose}
             onViewBooking={handleViewBooking}

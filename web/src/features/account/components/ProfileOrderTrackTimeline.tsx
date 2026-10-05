@@ -2,7 +2,6 @@
 
 import { cn } from "@/shared/utils/cn";
 import type { ProfileTimelineStep } from "../types/profileUi.types";
-import { formatOrderDate } from "../utils/formatAccountData";
 import {
   getProfileTimelineStepDescription,
   isProfileTimelineStepActive,
@@ -22,14 +21,12 @@ export function ProfileOrderTrackTimeline({ steps, className }: ProfileOrderTrac
     <ol className={cn("flex flex-col", className)}>
       {steps.map((step, index) => {
         const isCompleted = step.status === "completed";
-        const isCurrent = step.status === "current";
         const isActive = isProfileTimelineStepActive(step.status);
         const isLast = index === steps.length - 1;
-        // Server copy always wins; the local map only fills in the current step.
-        const description =
-          step.description ??
-          (isCurrent ? getProfileTimelineStepDescription(step.label) : undefined);
-        const timestamp = isActive && step.timestamp ? formatOrderDate(step.timestamp) : undefined;
+        // Figma: each reached step shows its description text (server copy wins), never a date.
+        const description = isActive
+          ? (step.description ?? getProfileTimelineStepDescription(step.label))
+          : undefined;
 
         return (
           <li key={`${step.step}-${step.label}`} className="flex gap-4">
@@ -66,11 +63,6 @@ export function ProfileOrderTrackTimeline({ steps, className }: ProfileOrderTrac
               {description ? (
                 <p className="mt-1 font-gill text-base font-light leading-110 text-neutral500">
                   {description}
-                </p>
-              ) : null}
-              {timestamp ? (
-                <p className="mt-1 font-gill text-sm font-light leading-110 text-neutral500">
-                  {timestamp}
                 </p>
               ) : null}
             </div>

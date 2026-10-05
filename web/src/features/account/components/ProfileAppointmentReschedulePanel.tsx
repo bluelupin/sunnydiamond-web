@@ -277,7 +277,22 @@ export function ProfileAppointmentReschedulePanel({
     return true;
   }, [bookingWindow, date, hasTimeSlots, isSubmitting, selectedSlot]);
 
-  const canSave = canProceedToAddress && !hasAddressErrors;
+  const hasChanges = useMemo(() => {
+    if (!appointment) return false;
+    const initialPhone = splitStoredPhone(appointment.customerPhone);
+    return (
+      name.trim() !== (appointment.customerName ?? "").trim() ||
+      countryCode !== initialPhone.countryCode ||
+      phone.trim() !== initialPhone.phone.trim() ||
+      email.trim() !== (appointment.customerEmail ?? "").trim() ||
+      note.trim() !== (appointment.notes ?? "").trim() ||
+      date !== normalizeAppointmentDateInput(appointment.requestedDate) ||
+      (selectedSlot?.trim() ?? "") !== (appointment.bookingTime?.trim() ?? "") ||
+      isAddressChanged
+    );
+  }, [appointment, countryCode, date, email, isAddressChanged, name, note, phone, selectedSlot]);
+
+  const canSave = canProceedToAddress && !hasAddressErrors && hasChanges;
 
   const handleUseCurrentLocation = async () => {
     const detected = await detectAddress();

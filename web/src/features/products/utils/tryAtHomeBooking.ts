@@ -286,3 +286,57 @@ export function countAdditionalTryAtHomeItemsForSlot(
 
   return moreItems;
 }
+
+/**
+ * Count other video call products already booked for the same date + time
+ * (video calls have no address — same rule as Profile > Appointments clubbing).
+ * Used on the success screen: "Your booking has N more items".
+ */
+export function countAdditionalVideoCallItemsForSlot(
+  appointments: Parameters<typeof countAdditionalTryAtHomeItemsForSlot>[0],
+  slot: {
+    date: string;
+    selectedSlot: string | null;
+    /** Exclude the product just booked so the count is "more items", not total. */
+    currentProductId?: string;
+  },
+): number {
+  const targetDate = normalizeAppointmentDateInput(slot.date);
+  const targetTime = normalizeClubPart(slot.selectedSlot);
+  const currentProductId = slot.currentProductId?.trim() ?? "";
+
+  if (!targetDate || !targetTime) {
+    return 0;
+  }
+
+  let moreItems = 0;
+
+  for (const appointment of appointments) {
+    if (!appointment.formTag.trim().toLowerCase().includes("video")) continue;
+    if (isCancelledWorkflowStatus(appointment.workflowStatus)) continue;
+
+    const date = normalizeAppointmentDateInput(appointment.requestedDate);
+    const time = normalizeClubPart(appointment.selectedTimeSlot);
+
+    if (date !== targetDate || time !== targetTime) {
+      continue;
+    }
+
+    const products =
+      appointment.products.length > 0
+        ? appointment.products
+        : appointment.productId || appointment.productName
+          ? [{ productId: appointment.productId, productName: appointment.productName }]
+          : [];
+
+    for (const product of products) {
+      const productId = product.productId?.trim() ?? "";
+      if (currentProductId && productId && productId === currentProductId) {
+        continue;
+      }
+      moreItems += 1;
+    }
+  }
+
+  return moreItems;
+}

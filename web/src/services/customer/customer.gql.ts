@@ -223,7 +223,11 @@ const ORDER_ITEM_THUMBNAIL_FIELDS = `
 export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
   query MagentoCustomerOrders($pageSize: Int!, $currentPage: Int!) {
     customer {
-      orders(pageSize: $pageSize, currentPage: $currentPage) {
+      orders(
+        pageSize: $pageSize
+        currentPage: $currentPage
+        sort: { sort_field: CREATED_AT, sort_direction: DESC }
+      ) {
         total_count
         page_info {
           current_page

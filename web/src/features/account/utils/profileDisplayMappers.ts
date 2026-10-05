@@ -32,6 +32,7 @@ import {
 import {
   formatAppointmentDate,
   formatOrderDate,
+  isOrderDateBeforeToday,
 } from "./formatAccountData";
 import { parseOrderGiftMetadataFromComments } from "./orderGiftDetection.utils";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
@@ -175,9 +176,15 @@ export function formatRefundNote(
     : undefined;
 }
 
-export function formatReturnDeadlineNote(returnableTill: string | null | undefined): string {
+export function formatReturnDeadlineNote(
+  returnableTill: string | null | undefined,
+): string | undefined {
   if (!returnableTill) {
-    return ordersContent.returnDeadlineNote;
+    return undefined;
+  }
+
+  if (isOrderDateBeforeToday(returnableTill)) {
+    return ordersContent.returnWindowClosedNote;
   }
 
   return ordersContent.returnDeadlineNoteTemplate.replace(

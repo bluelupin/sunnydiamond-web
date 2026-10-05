@@ -86,11 +86,12 @@ export const profileTabsContent = {
     orderIdLabel: "Order ID:",
     placedOnLabel: "Placed On:",
     deliveryByLabel: "Delivery by:",
+    deliveredOnLabel: "Delivered On:",
     totalLabel: "Total Order Amount",
     viewDetailsLabel: "VIEW ORDER DETAILS",
     trackOrderLabel: "TRACK",
     trackDialog: {
-      title: "Track Order?",
+      title: "Track Order",
       trackingIdLabel: "Tracking ID:",
       shipmentUpdatesTitle: "Shipment Updates",
       trackingPlaceholder: "Tracking details will appear here once available.",
@@ -181,9 +182,8 @@ export const profileTabsContent = {
     downloadInvoiceLabel: "DOWNLOAD INVOICE",
     downloadingInvoiceLabel: "DOWNLOADING…",
     cancelNote: "Orders can only be cancelled before they are shipped.",
-    /** Fallback only — the real note comes from `returnDeadlineNoteTemplate`. */
-    returnDeadlineNote: "Orders can be returned till 30th September 2026",
     returnDeadlineNoteTemplate: "Orders can be returned till {date}",
+    returnWindowClosedNote: "Order return window has now closed",
     estimatedDeliveryLabel: "Estimated Delivery",
     estimatedDeliveryPlaceholder: "2 June 2026",
     estimatedDeliveryRangePlaceholder: "Within 5-7 business days",
@@ -196,11 +196,10 @@ export const profileTabsContent = {
     copyOrderIdSuccess: "Order ID copied",
     emptyTitle: "No Orders Yet",
     emptyDescriptionPrimary: "You haven't placed any orders yet.",
-    emptyDescriptionSecondary: "Discover timeless designs made to be treasured",
     emptyPrimaryCta: "START SHOPPING",
     emptyPrimaryCtaHref: "/jewellery",
     emptySecondaryCta: "BROWSE YOUR COLLECTION",
-    emptySecondaryCtaHref: "/#alankara",
+    emptySecondaryCtaHref: "/wishlist",
     emptyFilterMessage: "No orders match this filter.",
     emptyFilterStates: {
       delivered: {
@@ -233,6 +232,7 @@ export const profileTabsContent = {
       orderIdMetaLabel: "Order ID",
       placedOnMetaLabel: "Placed On",
       deliveryByMetaLabel: "Delivery by",
+      deliveredOnMetaLabel: "Delivered On",
       totalOrderValueLabel: "Total Order Value",
       orderAmountLabel: "Order Amount",
       orderDiscountLabel: "Order Discount",
@@ -283,8 +283,10 @@ export const profileTabsContent = {
   },
   wishlist: {
     emptyTitle: "Your Wishlist Is Empty",
-    emptyDescription:
-      "Your wishlist is waiting. Save the pieces you love and come back to them whenever you're ready.",
+    /** Figma line breaks: mobile after "and" (4215:62543), desktop after "come" (4215:62670). */
+    emptyDescriptionLead: "Your wishlist is waiting. Save the pieces you love and",
+    emptyDescriptionPivot: "come",
+    emptyDescriptionTail: "back to them whenever you're ready.",
     emptyPrimaryCta: "START EXPLORING",
     emptyPrimaryCtaHref: "/jewellery",
     emptySecondaryCta: "DISCOVER JEWELLERY",

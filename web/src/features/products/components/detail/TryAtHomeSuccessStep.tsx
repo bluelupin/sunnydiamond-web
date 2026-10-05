@@ -13,7 +13,6 @@ import {
   formatTryAtHomeBookingLabel,
   type TryAtHomeBookingSummary,
 } from "@/features/products/utils/tryAtHomeBooking";
-import { TRY_AT_HOME_BOOKING_WINDOW } from "@/shared/constants/appointmentForm";
 import { DetailDarkButton, DetailOutlineButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
@@ -25,6 +24,7 @@ type TryAtHomeSuccessStepProps = {
   booking: TryAtHomeBookingSummary;
   additionalItemsCount?: number;
   successMessage?: string;
+  minNoticeMinutes: number;
   onClose: () => void;
   onViewBooking: () => void;
   onContinueShopping: () => void;
@@ -36,6 +36,7 @@ const TryAtHomeSuccessStep = ({
   booking,
   additionalItemsCount = 0,
   successMessage = "Item added to your Try at Home booking!",
+  minNoticeMinutes,
   onClose,
   onViewBooking,
   onContinueShopping,
@@ -43,7 +44,7 @@ const TryAtHomeSuccessStep = ({
   const addItemsDeadline = formatTryAtHomeAddItemsDeadline(
     booking.date,
     booking.selectedSlot,
-    TRY_AT_HOME_BOOKING_WINDOW.minNoticeMinutes,
+    minNoticeMinutes,
   );
 
   return (

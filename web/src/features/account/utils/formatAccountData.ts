@@ -81,6 +81,17 @@ export function formatOrderDate(orderDate: string): string {
   return date.toLocaleDateString("en-IN", ORDER_DATE_DISPLAY);
 }
 
+/** True once the calendar day of `value` has fully passed; unreadable dates are never past. */
+export function isOrderDateBeforeToday(value: string, now = new Date()): boolean {
+  const date = parseOrderDateValue(value);
+  if (!date) {
+    return false;
+  }
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return date.getTime() < today.getTime();
+}
+
 export function formatOrderTotal(amount: number, currency: string): string {
   const formattedAmount = new Intl.NumberFormat("en-IN", {
     minimumFractionDigits: 2,
