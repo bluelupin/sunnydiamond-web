@@ -3,21 +3,11 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  CAREERS_SELECT_EMPTY_VALUE,
-  careersSelectTriggerClassName,
-} from "@/features/careers/components/shared/CareersSelectField";
 import { careersFormLabelClassName } from "@/features/careers/constants/careersApplicationForm";
 import { careersDarkCtaClassName } from "@/features/careers/constants/careersCtaStyles";
 import Reveal from "@/shared/Animation/Reveal";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { cn } from "@/shared/utils/cn";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import type { NormalizedGiftingGiftFinder } from "@/services/gifting/gifting-page.types";
 import { giftingPageContent } from "../data/content";
 import {
@@ -41,37 +31,36 @@ const GiftingDiscoverField = ({
   value,
   onChange,
   options,
-}: GiftingDiscoverFieldProps) => (
-  <div className="flex flex-col gap-2">
-    <label className={careersFormLabelClassName} htmlFor={id}>
-      {label}
-    </label>
-    <Select
-      value={value}
-      onValueChange={(next) => {
-        onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
-      }}
-    >
-      <SelectTrigger
-        id={id}
-        className={cn(
-          careersSelectTriggerClassName,
-          !value && "!text-[#999999]",
-        )}
-      >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="z-[80] max-h-[min(24rem,var(--radix-select-content-available-height))]">
-        <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
-        {options.map((option, index) => (
-          <SelectItem key={`${option.value}-${index}`} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
+}: GiftingDiscoverFieldProps) => {
+  const optionLabels = options.map((option) => option.label);
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? "";
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
+        <label className={careersFormLabelClassName} htmlFor={id}>
+          {label}
+        </label>
+        <InlineCustomSelect
+          id={id}
+          hideLabel
+          label={label}
+          value={selectedLabel}
+          options={optionLabels}
+          placeholder={placeholder}
+          onChange={(nextLabel) => {
+            const match = options.find((option) => option.label === nextLabel);
+            onChange(match?.value ?? "");
+          }}
+          triggerClassName="text-base font-normal"
+          placeholderClassName="font-normal text-gray600"
+          listClassName="mt-2 shadow-none"
+          optionClassName="text-base font-normal text-neutral500"
+        />
+      </div>
+    </div>
+  );
+};
 
 type GiftingDiscoverSectionProps = {
   giftFinder: NormalizedGiftingGiftFinder;
