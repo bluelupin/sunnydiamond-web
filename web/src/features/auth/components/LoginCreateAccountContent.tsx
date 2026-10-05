@@ -27,6 +27,7 @@ type LoginCreateAccountContentProps = {
   phoneError?: string;
   termsError?: string;
   formError?: string;
+  registrationSessionRefreshSeconds?: number | null;
   submitting: boolean;
   onFullNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
@@ -67,6 +68,7 @@ const LoginCreateAccountContent = ({
   phoneError,
   termsError,
   formError,
+  registrationSessionRefreshSeconds = null,
   submitting,
   onFullNameChange,
   onEmailChange,
@@ -79,8 +81,14 @@ const LoginCreateAccountContent = ({
   onCreateAccount,
   titleClassName,
 }: LoginCreateAccountContentProps) => {
+  const isRegistrationSessionRefreshing =
+    registrationSessionRefreshSeconds !== null && registrationSessionRefreshSeconds > 0;
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isRegistrationSessionRefreshing) {
+      return;
+    }
     onCreateAccount();
   };
 
@@ -244,14 +252,24 @@ const LoginCreateAccountContent = ({
         </div>
       </div>
 
-      {formError ? (
+      {isRegistrationSessionRefreshing ? (
+        <FormFieldError
+          id="create-account-form-error"
+          message={`Session Expired. Refreshing in ${registrationSessionRefreshSeconds} second${
+            registrationSessionRefreshSeconds === 1 ? "" : "s"
+          }...`}
+          className="motion-safe:animate-pulse"
+          role="status"
+          aria-live="polite"
+        />
+      ) : formError ? (
         <FormFieldError id="create-account-form-error" message={formError} />
       ) : null}
 
       <CartPrimaryButton
         type="submit"
         className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={submitting}
+        disabled={submitting || isRegistrationSessionRefreshing}
       >
         {submitting ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
       </CartPrimaryButton>

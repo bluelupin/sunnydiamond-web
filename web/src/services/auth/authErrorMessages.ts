@@ -3,8 +3,12 @@
  * storefront owns the wording. Anything not listed here is already a human
  * message and passes through untouched.
  */
+export const REGISTRATION_SESSION_EXPIRED_MESSAGE = "Session Expired";
+
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "Invalid or expired OTP.": "Incorrect code",
+  SESSION_EXPIRED: REGISTRATION_SESSION_EXPIRED_MESSAGE,
+  REGISTRATION_SESSION_EXPIRED: REGISTRATION_SESSION_EXPIRED_MESSAGE,
   EMAIL_ALREADY_IN_USE:
     "An account already exists with this email address. Sign in with your email instead; you can then verify your mobile number in Profile.",
   PHONE_ALREADY_IN_USE: "This mobile number is already linked to another account.",
@@ -23,4 +27,41 @@ export function mapAuthErrorMessage(message: string, fallback: string): string {
     return fallback;
   }
   return AUTH_ERROR_MESSAGES[trimmed] ?? trimmed;
+}
+
+const REGISTRATION_SESSION_EXPIRED_MAGENTO_CODES = new Set([
+  "Invalid or expired OTP.",
+  "SESSION_EXPIRED",
+  "REGISTRATION_SESSION_EXPIRED",
+]);
+
+/** Maps Magento errors when completing registration (create-account submit). */
+export function mapAuthErrorMessageForRegistrationComplete(
+  message: string,
+  fallback: string,
+): string {
+  const trimmed = message.trim();
+  if (REGISTRATION_SESSION_EXPIRED_MAGENTO_CODES.has(trimmed)) {
+    return REGISTRATION_SESSION_EXPIRED_MESSAGE;
+  }
+  return mapAuthErrorMessage(message, fallback);
+}
+
+/** True when create-account should show session-expired refresh UX (not OTP entry). */
+export function isRegistrationSessionExpiredError(message: string | undefined): boolean {
+  if (!message?.trim()) {
+    return false;
+  }
+  const trimmed = message.trim();
+  if (trimmed === REGISTRATION_SESSION_EXPIRED_MESSAGE) {
+    return true;
+  }
+  if (REGISTRATION_SESSION_EXPIRED_MAGENTO_CODES.has(trimmed)) {
+    return true;
+  }
+  // Legacy BFF mapping before registration-complete-specific errors.
+  if (trimmed === "Incorrect code") {
+    return true;
+  }
+  return false;
 }

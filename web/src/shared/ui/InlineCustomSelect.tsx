@@ -37,6 +37,7 @@ type InlineCustomSelectProps = {
   errorId?: string;
   hideLabel?: boolean;
   placeholderClassName?: string;
+  disabled?: boolean;
   /**
    * `inline` renders the list under the trigger (for modal sheets where body portals
    * cannot receive clicks). Default `portaled` matches Contact Us page behaviour.
@@ -96,6 +97,7 @@ const InlineCustomSelect = ({
   errorId,
   hideLabel = false,
   placeholderClassName,
+  disabled = false,
   listPlacement = "portaled",
 }: InlineCustomSelectProps) => {
   const isInlineList = listPlacement === "inline";
@@ -314,6 +316,7 @@ const InlineCustomSelect = ({
         ref={triggerRef}
         type="button"
         id={id}
+        disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listboxId : undefined}
@@ -322,11 +325,15 @@ const InlineCustomSelect = ({
         aria-invalid={invalid || undefined}
         aria-describedby={errorId}
         onClick={(event) => {
+          if (disabled) {
+            return;
+          }
           event.stopPropagation();
           setIsOpen((current) => !current);
         }}
         className={cn(
           "flex h-14 w-full items-center justify-between bg-[#F2F2F2] p-3 font-gill text-sm leading-110 outline-none",
+          disabled && "cursor-not-allowed opacity-60",
           "motion-safe:transition-[border-color,background-color] motion-safe:duration-200 motion-safe:ease-in-out",
           isOpen ? "border border-darkblack" : "border border-transparent",
           invalid && !isOpen && invalidFieldClassName,

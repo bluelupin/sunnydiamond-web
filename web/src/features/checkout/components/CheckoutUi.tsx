@@ -3,6 +3,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import {
   Select,
@@ -146,6 +147,8 @@ type CheckoutSelectFieldProps = {
   invalid?: boolean;
   disabled?: boolean;
   triggerClassName?: string;
+  /** Matches Gifting Discover `InlineCustomSelect` styling (checkout state field). */
+  variant?: "radix" | "inlineCustom";
 };
 
 export const CheckoutSelectField = ({
@@ -161,40 +164,77 @@ export const CheckoutSelectField = ({
   invalid,
   disabled = false,
   triggerClassName,
-}: CheckoutSelectFieldProps) => (
-  <div className="flex flex-col gap-2">
-    <CheckoutFieldLabel id={id} label={label} optional={optional} />
-    <Select
-      value={value}
-      disabled={disabled}
-      onValueChange={(nextValue) => {
-        onChange(nextValue);
-        onBlur?.();
-      }}
-    >
-      <SelectTrigger
-        id={id}
-        aria-invalid={invalid || undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className={cn(
-          "h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0",
-          invalid && invalidFieldClassName,
-          triggerClassName,
-        )}
+  variant = "radix",
+}: CheckoutSelectFieldProps) => {
+  if (variant === "inlineCustom") {
+    const optionLabels = options.map((option) => option.label);
+    const selectedLabel = options.find((option) => option.value === value)?.label ?? "";
+
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
+          <CheckoutFieldLabel id={id} label={label} optional={optional} />
+          <InlineCustomSelect
+            id={id}
+            hideLabel
+            label={label}
+            value={selectedLabel}
+            options={optionLabels}
+            placeholder={placeholder}
+            onChange={(nextLabel) => {
+              const match = options.find((option) => option.label === nextLabel);
+              onChange(match?.value ?? "");
+            }}
+            onBlur={onBlur}
+            invalid={invalid}
+            errorId={error ? `${id}-error` : undefined}
+            disabled={disabled}
+            triggerClassName={cn("text-base font-normal", triggerClassName)}
+            placeholderClassName="font-normal text-gray600"
+            listClassName="mt-2 shadow-none"
+            optionClassName="text-base font-normal text-neutral500"
+          />
+        </div>
+        <FormFieldError id={`${id}-error`} message={error} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <CheckoutFieldLabel id={id} label={label} optional={optional} />
+      <Select
+        value={value}
+        disabled={disabled}
+        onValueChange={(nextValue) => {
+          onChange(nextValue);
+          onBlur?.();
+        }}
       >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-    <FormFieldError id={`${id}-error`} message={error} />
-  </div>
-);
+        <SelectTrigger
+          id={id}
+          aria-invalid={invalid || undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className={cn(
+            "h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0",
+            invalid && invalidFieldClassName,
+            triggerClassName,
+          )}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormFieldError id={`${id}-error`} message={error} />
+    </div>
+  );
+};
 
 type CheckoutPhoneFieldProps = {
   id: string;

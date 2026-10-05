@@ -31,6 +31,10 @@ import {
 import { getLoginHrefForReturn, getPostSignupReturnUrl, sanitizeReturnUrl } from "../utils/authNavigation";
 import { setAuthLoginIdentifierKind } from "../utils/authLoginIdentifier";
 import type { AuthCreateAccountResume } from "../context/LoginModalContext";
+import {
+  isRegistrationSessionExpiredError,
+  REGISTRATION_SESSION_EXPIRED_MESSAGE,
+} from "@/services/auth/authErrorMessages";
 
 /**
  * Sign-in is passwordless: every identifier — mobile or email — leads to a
@@ -39,6 +43,7 @@ import type { AuthCreateAccountResume } from "../context/LoginModalContext";
 export type AuthFlowStep = "sign-in" | "otp" | "create-account";
 
 const RESEND_SECONDS = 60;
+const REGISTRATION_SESSION_REFRESH_SECONDS = 5;
 
 type UseAuthFlowOptions = {
   active: boolean;
@@ -113,6 +118,8 @@ export type AuthFlowContentProps = {
     termsError?: string;
     /** Failures that belong to no single field — an expired code, a rejected save. */
     formError?: string;
+    /** Countdown before a full page refresh after registration session expiry. */
+    registrationSessionRefreshSeconds?: number | null;
     submitting: boolean;
     onFullNameChange: (value: string) => void;
     onEmailChange: (value: string) => void;
@@ -172,6 +179,9 @@ export function useAuthFlow({
   const [phoneError, setPhoneError] = useState<string | undefined>();
   const [termsError, setTermsError] = useState<string | undefined>();
   const [createAccountFormError, setCreateAccountFormError] = useState<string | undefined>();
+  const [registrationSessionRefreshSeconds, setRegistrationSessionRefreshSeconds] = useState<
+    number | null
+  >(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const identifierInputRef = useRef<HTMLInputElement | null>(null);
@@ -264,6 +274,7 @@ export function useAuthFlow({
     setPhoneError(undefined);
     setTermsError(undefined);
     setCreateAccountFormError(undefined);
+    setRegistrationSessionRefreshSeconds(null);
     setIsSubmitting(false);
     hasLeftSignIn.current = false;
     otpAcceptedForRegistrationRef.current = false;
@@ -357,6 +368,27 @@ export function useAuthFlow({
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, [resetState, surface]);
+
+  useEffect(() => {
+    if (registrationSessionRefreshSeconds === null) {
+      return;
+    }
+
+    if (registrationSessionRefreshSeconds <= 0) {
+      window.location.reload();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRegistrationSessionRefreshSeconds((current) =>
+        current === null ? null : current - 1,
+      );
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [registrationSessionRefreshSeconds]);
 
   useEffect(() => {
     if (!active || step !== "otp") return;
@@ -630,6 +662,11 @@ export function useAuthFlow({
 
     if (!result.success) {
       setIsSubmitting(false);
+      if (isRegistrationSessionExpiredError(result.error)) {
+        setCreateAccountFormError(REGISTRATION_SESSION_EXPIRED_MESSAGE);
+        setRegistrationSessionRefreshSeconds(REGISTRATION_SESSION_REFRESH_SECONDS);
+        return;
+      }
       // Not setEmailError: on the email path that field is read-only, so an
       // expired-code message would land on an input the customer cannot act on.
       setCreateAccountFormError(result.error);
@@ -747,6 +784,7 @@ export function useAuthFlow({
       phoneError,
       termsError,
       formError: createAccountFormError,
+      registrationSessionRefreshSeconds,
       submitting: isSubmitting,
       onFullNameChange: (value) => {
         setFullName(value);

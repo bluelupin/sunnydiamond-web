@@ -4,7 +4,10 @@ import { validateOptionalEmail } from "@/shared/utils/formValidation";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import { MAGENTO_VERIFY_LOGIN_OTP_MUTATION } from "@/services/auth/auth.gql";
-import { mapAuthErrorMessage } from "@/services/auth/authErrorMessages";
+import {
+  mapAuthErrorMessage,
+  mapAuthErrorMessageForRegistrationComplete,
+} from "@/services/auth/authErrorMessages";
 import { setCustomerTokenCookie } from "@/services/auth/session";
 
 type OtpVerifyBody = {
@@ -98,10 +101,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, loggedIn: false, registrationRequired: false });
   } catch (error) {
+    const fallback = "OTP verification failed";
     const message =
       error instanceof MagentoGraphqlError
-        ? mapAuthErrorMessage(error.message, "OTP verification failed")
-        : "OTP verification failed";
+        ? isCompletingRegistration
+          ? mapAuthErrorMessageForRegistrationComplete(error.message, fallback)
+          : mapAuthErrorMessage(error.message, fallback)
+        : fallback;
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

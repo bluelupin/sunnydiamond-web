@@ -172,6 +172,7 @@ const CheckoutAddressFields = ({
     <CheckoutSelectField
       id={`${idPrefix}-state`}
       label="State"
+      variant="inlineCustom"
       value={form[fields.state] as string}
       onChange={(value) => onChange(fields.state, value)}
       onBlur={() => validation.markTouched(fields.state)}

@@ -133,15 +133,17 @@ const CheckoutOtpFields = ({
           </div>
         ))}
       </div>
-      <FormFieldError message={otpError ?? undefined} className="w-full" />
     </div>
-    {secondsLeft > 0 ? (
-      <p className="font-gill text-base font-light leading-110 text-darkblack">
-        {`Resend code in ${String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:${String(secondsLeft % 60).padStart(2, "0")}`}
-      </p>
-    ) : (
-      <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
-    )}
+    <div className="flex w-full flex-col gap-4">
+      <FormFieldError message={otpError ?? undefined} className="w-full" />
+      {secondsLeft > 0 ? (
+        <p className="font-gill text-base font-light leading-110 text-darkblack text-right w-full">
+          {`Resend code in ${String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:${String(secondsLeft % 60).padStart(2, "0")}`}
+        </p>
+      ) : (
+        <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
+      )}
+    </div>
   </div>
 );
 
