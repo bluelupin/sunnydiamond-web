@@ -25,9 +25,6 @@ import {
 import { canCancelAppointmentUntilOneMinuteBefore } from "@/features/products/utils/appointmentCancelDeadline";
 import {
   APPOINTMENT_COUNTRY_CODES,
-  STORE_VISIT_BOOKING_WINDOW,
-  TRY_AT_HOME_BOOKING_WINDOW,
-  VIDEO_CALL_BOOKING_WINDOW,
 } from "@/shared/constants/appointmentForm";
 import {
   formatAppointmentDate,
@@ -686,21 +683,10 @@ export function mapCustomerAppointmentToProfileUi(
   const workflowStatus = resolveAppointmentWorkflowStatus(appointment);
   const canModify = canModifyAppointment(workflowStatus);
   const rescheduleLimitReached = canModify && appointment.reschedulesLeft === 0;
-  const minNoticeMinutes = (
-    type === "try_at_home"
-      ? TRY_AT_HOME_BOOKING_WINDOW
-      : type === "video_call"
-        ? VIDEO_CALL_BOOKING_WINDOW
-        : STORE_VISIT_BOOKING_WINDOW
-  ).minNoticeMinutes;
   const canReschedule =
     canModify &&
     !rescheduleLimitReached &&
-    canModifyAppointmentBeforeDeadline(
-      appointment.requestedDate,
-      appointment.selectedTimeSlot,
-      minNoticeMinutes,
-    );
+    canModifyAppointmentBeforeDeadline(appointment.requestedDate);
   const canCancel =
     canModify &&
     canCancelAppointmentUntilOneMinuteBefore(
@@ -709,8 +695,6 @@ export function mapCustomerAppointmentToProfileUi(
     );
   const rescheduleDeadline = formatTryAtHomeRescheduleDeadline(
     appointment.requestedDate,
-    appointment.selectedTimeSlot,
-    minNoticeMinutes,
   );
   const isCancelled = workflowStatus.toLowerCase().includes("cancel");
   const cancelledOnNote =

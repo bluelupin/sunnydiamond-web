@@ -107,14 +107,15 @@ function getModifyDeadline(
   };
 }
 
+/** Rescheduling uses the original three-calendar-day cutoff. */
+export const APPOINTMENT_MODIFY_DEADLINE_DAYS = 3;
+
 export function canModifyAppointmentBeforeDeadline(
   requestedDate: string,
-  selectedSlot: string | null | undefined,
-  minNoticeMinutes: number,
   referenceDate = new Date(),
 ): boolean {
-  const modifyDeadline = getModifyDeadline(requestedDate, selectedSlot, minNoticeMinutes);
-  return modifyDeadline != null && referenceDate.getTime() < modifyDeadline.deadline.getTime();
+  const bookingDate = parseBookingDate(requestedDate);
+  return bookingDate != null && getDaysUntilAppointment(bookingDate, referenceDate) >= APPOINTMENT_MODIFY_DEADLINE_DAYS;
 }
 
 function formatDeadlineTime(date: Date): string {
@@ -182,9 +183,12 @@ export const formatTryAtHomeAddItemsDeadline = (
 /** Listing note: "Appointment can be rescheduled before {date}" (date only). */
 export const formatTryAtHomeRescheduleDeadline = (
   date: string,
-  selectedSlot: string | null | undefined,
-  minNoticeMinutes: number,
-): string => formatModifyDeadline(date, selectedSlot, minNoticeMinutes, false, false);
+): string => {
+  const deadline = parseBookingDate(date);
+  if (!deadline) return "";
+  deadline.setDate(deadline.getDate() - APPOINTMENT_MODIFY_DEADLINE_DAYS);
+  return deadline.toLocaleDateString("en-IN", BOOKING_DATE_PART_DISPLAY);
+};
 
 export type TryAtHomeSlotAddress = {
   addressLine1: string;

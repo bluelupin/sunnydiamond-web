@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import AppointmentGenericFields from "./AppointmentGenericFields";
 import { appointmentFieldKey, appointmentFieldKind, appointmentFormErrors, appointmentSubmission } from "../utils/appointmentGenericForm";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -33,6 +35,11 @@ const BookAnAppointmentPanel = ({
   showClose = true,
 }: BookAnAppointmentPanelProps) => {
   const { toast } = useToast();
+  const { status } = useAuth();
+  const panelActive = variant !== "modal" || open;
+  const { contact: profileContact } = useCustomerProfileContact(panelActive && status === "authenticated");
+  const appliedProfileRef = useRef(false);
+  const editedFieldsRef = useRef(new Set<string>());
   const [cmsForm, setCmsForm] = useState<NormalizedGenericForm | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [countryCodes, setCountryCodes] = useState<Record<string, string>>({});
@@ -45,7 +52,32 @@ const BookAnAppointmentPanel = ({
   const [now, setNow] = useState(() => new Date());
   const errors = cmsForm ? appointmentFormErrors(cmsForm, values, countryCodes, now) : {};
 
-  const panelActive = variant !== "modal" || open;
+  useEffect(() => {
+    if (!panelActive) {
+      appliedProfileRef.current = false;
+      return;
+    }
+    if (status !== "authenticated" || !cmsForm || !profileContact || appliedProfileRef.current) return;
+    appliedProfileRef.current = true;
+    const defaults: Record<string, string> = {};
+    const phoneCodes: Record<string, string> = {};
+    cmsForm.fields.forEach((field, index) => {
+      const key = appointmentFieldKey(field, index);
+      if (editedFieldsRef.current.has(key)) return;
+      const kind = appointmentFieldKind(field);
+      const value = kind === "name" ? profileContact.fullName : kind === "email" ? profileContact.email : kind === "phone" ? profileContact.phone : undefined;
+      if (value?.trim()) defaults[key] = value.trim();
+      if (kind === "phone" && value?.trim() && profileContact.countryCode?.trim()) phoneCodes[key] = profileContact.countryCode.trim();
+    });
+    setValues((current) => {
+      const updated = { ...current };
+      Object.entries(defaults).forEach(([key, value]) => {
+        if (!current[key]?.trim()) updated[key] = value;
+      });
+      return updated;
+    });
+    setCountryCodes((current) => ({ ...phoneCodes, ...current }));
+  }, [panelActive, status, cmsForm, profileContact]);
 
   useEffect(() => {
     if (!panelActive) {
@@ -76,6 +108,8 @@ const BookAnAppointmentPanel = ({
   }, [panelActive]);
 
   const handleClear = () => {
+    appliedProfileRef.current = true;
+    cmsForm?.fields.forEach((field, index) => editedFieldsRef.current.add(appointmentFieldKey(field, index)));
     setValues({});
     setCountryCodes({});
     setSubmitted(false);
@@ -157,15 +191,21 @@ const BookAnAppointmentPanel = ({
                 errors={Object.fromEntries(Object.entries(errors).filter(([key]) => submitted || touched[key]))}
                 disabled={isSubmitting} now={now}
                 onBlur={(key) => setTouched((current) => ({ ...current, [key]: true }))}
-                onCodeChange={(key, code) => setCountryCodes((current) => ({ ...current, [key]: code }))}
-                onChange={(key, value) => setValues((current) => {
+                onCodeChange={(key, code) => {
+                  editedFieldsRef.current.add(key);
+                  setCountryCodes((current) => ({ ...current, [key]: code }));
+                }}
+                onChange={(key, value) => {
+                  editedFieldsRef.current.add(key);
+                  setValues((current) => {
                   const updated = { ...current, [key]: value };
                   const field = cmsForm.fields.find((item, index) => appointmentFieldKey(item, index) === key);
                   if (field && appointmentFieldKind(field) === "date") cmsForm.fields.forEach((item, index) => {
                     if (appointmentFieldKind(item) === "slot") updated[appointmentFieldKey(item, index)] = "";
                   });
                   return updated;
-                })}
+                  });
+                }}
               />
             )}
           </div>
