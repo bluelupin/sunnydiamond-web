@@ -213,7 +213,6 @@ const CheckoutPage = () => {
   const formValidation = useCheckoutFormValidation(form, {
     // A signed-in customer's contact field is the order email, never a number.
     emailOnly: contactEmailOnly || isAuthenticated,
-    requireDeliveryPhone: contactEmailOnly && (!isAuthenticated || !hasDeliveryAddressAvailable),
   });
   const paymentValidation = useCheckoutPaymentValidation(
     payment,
@@ -947,9 +946,19 @@ const CheckoutPage = () => {
           ? "Continuing..."
           : "Saving address..."
         : "Continue to Payment";
-  // Keep the CTA clickable when address is missing so the click can show a toast
-  // (a disabled button gives no feedback and feels broken).
-  const ctaDisabled = submitting || isSavingAddresses || isUpdating;
+
+  const guestContactOtpRequired =
+    !isAuthenticated &&
+    (isCheckoutEmailContact(form.phoneOrEmail) ? emailOtpLoginEnabled : otpLoginEnabled);
+  const guestContactVerificationComplete = !guestContactOtpRequired || phoneVerified;
+
+  const ctaStepReady =
+    step === "payment"
+      ? noPaymentNeeded || paymentValidation.isValid
+      : formValidation.isValid && guestContactVerificationComplete;
+
+  const ctaDisabled =
+    submitting || isSavingAddresses || isUpdating || !ctaStepReady;
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {

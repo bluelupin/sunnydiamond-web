@@ -14,7 +14,7 @@ import {
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import FormFieldError from "@/shared/ui/FormFieldError";
-import OverlaySelectField from "@/shared/ui/OverlaySelectField";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
@@ -179,14 +179,22 @@ const MetalEngravingPanel = ({
                 </div>
 
                 {requiresFont ? (
-                  <OverlaySelectField
-                    id="engraving-font"
-                    label="Font*"
-                    value={font}
-                    onChange={setFont}
-                    options={availableFonts}
-                    placeholder="Select"
-                  />
+                  <div className="flex flex-col gap-2">
+                    <p className="font-gill text-base leading-normal tracking-normal text-darkblack">Font*</p>
+                    <InlineCustomSelect
+                      id="engraving-font"
+                      label="Font*"
+                      labelClassName="sr-only"
+                      value={font}
+                      onChange={setFont}
+                      options={availableFonts}
+                      placeholder="Select"
+                      triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+                      placeholderClassName="font-normal text-gray600"
+                      listClassName="bg-aboutInactive"
+                      optionClassName="text-base"
+                    />
+                  </div>
                 ) : null}
 
                 <div className="flex flex-wrap items-center gap-2">

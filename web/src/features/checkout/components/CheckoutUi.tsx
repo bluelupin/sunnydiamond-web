@@ -147,7 +147,7 @@ type CheckoutSelectFieldProps = {
   invalid?: boolean;
   disabled?: boolean;
   triggerClassName?: string;
-  /** Matches Gifting Discover `InlineCustomSelect` styling (checkout state field). */
+  /** `inlineCustom` — portaled `InlineCustomSelect` (PDP Size pattern) for long state lists. */
   variant?: "radix" | "inlineCustom";
 };
 
@@ -159,7 +159,7 @@ export const CheckoutSelectField = ({
   onChange,
   onBlur,
   options,
-  placeholder = "-select-",
+  placeholder = "Select",
   error,
   invalid,
   disabled = false,
@@ -172,29 +172,30 @@ export const CheckoutSelectField = ({
 
     return (
       <div className="flex flex-col gap-2">
-        <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
-          <CheckoutFieldLabel id={id} label={label} optional={optional} />
-          <InlineCustomSelect
-            id={id}
-            hideLabel
-            label={label}
-            value={selectedLabel}
-            options={optionLabels}
-            placeholder={placeholder}
-            onChange={(nextLabel) => {
-              const match = options.find((option) => option.label === nextLabel);
-              onChange(match?.value ?? "");
-            }}
-            onBlur={onBlur}
-            invalid={invalid}
-            errorId={error ? `${id}-error` : undefined}
-            disabled={disabled}
-            triggerClassName={cn("text-base font-normal", triggerClassName)}
-            placeholderClassName="font-normal text-gray600"
-            listClassName="mt-2 shadow-none"
-            optionClassName="text-base font-normal text-neutral500"
-          />
-        </div>
+        <CheckoutFieldLabel id={id} label={label} optional={optional} />
+        <InlineCustomSelect
+          id={id}
+          hideLabel
+          label={label}
+          value={selectedLabel}
+          options={optionLabels}
+          placeholder={placeholder}
+          onChange={(nextLabel) => {
+            const match = options.find((option) => option.label === nextLabel);
+            onChange(match?.value ?? "");
+          }}
+          onBlur={onBlur}
+          invalid={invalid}
+          errorId={error ? `${id}-error` : undefined}
+          disabled={disabled}
+          triggerClassName={cn(
+            "rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack",
+            triggerClassName,
+          )}
+          placeholderClassName="font-normal text-gray600"
+          listClassName="bg-aboutInactive"
+          optionClassName="text-base"
+        />
         <FormFieldError id={`${id}-error`} message={error} />
       </div>
     );

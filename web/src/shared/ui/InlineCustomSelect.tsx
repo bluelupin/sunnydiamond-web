@@ -108,6 +108,8 @@ const InlineCustomSelect = ({
   const [shouldRenderList, setShouldRenderList] = useState(false);
   const [isListVisible, setIsListVisible] = useState(false);
   const [listPosition, setListPosition] = useState<ListPosition | null>(null);
+  const [inlineListOpenUpward, setInlineListOpenUpward] = useState(false);
+  const [inlineListMaxHeight, setInlineListMaxHeight] = useState(LIST_MAX_HEIGHT_PX);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -115,7 +117,7 @@ const InlineCustomSelect = ({
   const listboxId = `${id}-listbox`;
   const valueId = `${id}-value`;
 
-  const updateListPosition = useCallback(() => {
+  const updateListLayout = useCallback(() => {
     const trigger = triggerRef.current;
     if (!trigger) {
       return;
@@ -130,30 +132,32 @@ const InlineCustomSelect = ({
       LIST_MAX_HEIGHT_PX,
       Math.max(availableSpace - LIST_GAP_PX, 112),
     );
-    const top = openUpward
-      ? rect.top - LIST_GAP_PX - maxHeight
-      : rect.bottom + LIST_GAP_PX;
 
-    setListPosition({
-      top,
-      left: rect.left,
-      width: rect.width,
-      maxHeight,
-    });
-  }, []);
+    setInlineListOpenUpward(openUpward);
+    setInlineListMaxHeight(maxHeight);
+
+    if (!isInlineList) {
+      const top = openUpward
+        ? rect.top - LIST_GAP_PX - maxHeight
+        : rect.bottom + LIST_GAP_PX;
+
+      setListPosition({
+        top,
+        left: rect.left,
+        width: rect.width,
+        maxHeight,
+      });
+    }
+  }, [isInlineList]);
 
   useEffect(() => {
     if (isOpen) {
       setShouldRenderList(true);
-      if (!isInlineList) {
-        updateListPosition();
-      }
+      updateListLayout();
 
       const frame = window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          if (!isInlineList) {
-            updateListPosition();
-          }
+          updateListLayout();
           setIsListVisible(true);
         });
       });
@@ -175,17 +179,17 @@ const InlineCustomSelect = ({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isInlineList, isOpen, updateListPosition]);
+  }, [isInlineList, isOpen, updateListLayout]);
 
   useEffect(() => {
-    if (!isOpen || isInlineList) {
+    if (!isOpen) {
       return;
     }
 
-    updateListPosition();
+    updateListLayout();
 
     const handleLayoutChange = () => {
-      updateListPosition();
+      updateListLayout();
     };
 
     window.addEventListener("resize", handleLayoutChange);
@@ -195,7 +199,7 @@ const InlineCustomSelect = ({
       window.removeEventListener("resize", handleLayoutChange);
       window.removeEventListener("scroll", handleLayoutChange, true);
     };
-  }, [isInlineList, isOpen, updateListPosition]);
+  }, [isOpen, updateListLayout]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -249,7 +253,7 @@ const InlineCustomSelect = ({
         aria-hidden={!isOpen}
         style={
           isInlineList
-            ? { maxHeight: LIST_MAX_HEIGHT_PX }
+            ? { maxHeight: inlineListMaxHeight }
             : {
                 position: "fixed",
                 top: listPosition!.top,
@@ -270,13 +274,19 @@ const InlineCustomSelect = ({
         className={cn(
           "verticleMobileScrollbar flex flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
           "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
-          "motion-safe:origin-top",
           isInlineList
-            ? "absolute left-0 top-[calc(100%+4px)] z-[80] w-full"
-            : "z-[100] fixed",
+            ? cn(
+                "absolute left-0 z-[80] w-full",
+                inlineListOpenUpward
+                  ? "bottom-[calc(100%-20px)] motion-safe:origin-bottom"
+                  : "top-[calc(100%+4px)] motion-safe:origin-top",
+              )
+            : cn("z-[100] fixed motion-safe:origin-top"),
           isListVisible
             ? "motion-safe:translate-y-0 motion-safe:opacity-100"
-            : "motion-safe:-translate-y-1 motion-safe:opacity-0",
+            : inlineListOpenUpward
+              ? "motion-safe:translate-y-1 motion-safe:opacity-0"
+              : "motion-safe:-translate-y-1 motion-safe:opacity-0",
           isOpen ? "pointer-events-auto" : "pointer-events-none",
           listClassName,
         )}

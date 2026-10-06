@@ -42,7 +42,7 @@ const OverlaySelectField = ({
   onChange,
   onBlur,
   options,
-  placeholder = "-select-",
+  placeholder = "Select",
   labelClassName = appointmentLabelClassName,
   triggerClassName,
   invalid = false,
