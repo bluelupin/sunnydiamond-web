@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
@@ -13,12 +14,49 @@ type ProfileOrderItemRowProps = {
   price?: string;
 };
 
+/** Figma order listing — `Size: 14 | White Gold | Engraving: DIYA` on one line. */
+function ProfileOrderItemAttributeLine({ item }: { item: ProfileOrderItemUi }) {
+  const segments: ReactNode[] = [];
+
+  if (item.size) {
+    segments.push(<span key="size">Size: {item.size}</span>);
+  }
+
+  if (item.metal) {
+    segments.push(<span key="metal">{item.metal}</span>);
+  }
+
+  if (item.engraving) {
+    segments.push(
+      <span key="engraving">
+        Engraving: {item.engraving}
+        {item.engravingFont ? ` (${item.engravingFont})` : null}
+      </span>,
+    );
+  }
+
+  if (segments.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 font-gill text-sm font-light leading-110 text-darkblack">
+      {segments.map((segment, index) => (
+        <Fragment key={index}>
+          {index > 0 ? <ProfileMetaDivider className="h-4" /> : null}
+          {segment}
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
 export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
   const badgeLabel = item.isGift ? "Gift" : item.isBespoke ? "Bespoke" : null;
   const isGiftCardItem = Boolean(item.subtitle?.trim());
 
   return (
-    <div className="relative border border-aboutInactive bg-white p-4">
+    <div className="relative overflow-visible border border-aboutInactive bg-white p-4 lg:p-6">
       {badgeLabel ? <ProfileOrderItemBadge label={badgeLabel} /> : null}
 
       <div className="flex items-center justify-between gap-6">
@@ -72,20 +110,7 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
               </p>
             ) : null}
 
-            {item.size || item.metal ? (
-              <div className="flex items-center gap-2 font-gill text-sm font-light leading-110 text-darkblack">
-                {item.size ? <span>Size: {item.size}</span> : null}
-                {item.size && item.metal ? <ProfileMetaDivider className="h-4" /> : null}
-                {item.metal ? <span>{item.metal}</span> : null}
-              </div>
-            ) : null}
-
-            {item.engraving ? (
-              <p className="font-gill text-sm font-light leading-110 text-darkblack">
-                Engraving: “{item.engraving}”
-                {item.engravingFont ? ` (${item.engravingFont})` : null}
-              </p>
-            ) : null}
+            <ProfileOrderItemAttributeLine item={item} />
 
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">

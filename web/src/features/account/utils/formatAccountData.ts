@@ -81,6 +81,27 @@ export function formatOrderDate(orderDate: string): string {
   return date.toLocaleDateString("en-IN", ORDER_DATE_DISPLAY);
 }
 
+/** Figma mobile order meta — e.g. "28 Oct 2026". */
+export function formatOrderDateMobileMeta(orderDate: string): string {
+  const trimmed = orderDate.trim();
+
+  if (!trimmed) {
+    return orderDate;
+  }
+
+  const date = parseOrderDateValue(trimmed);
+
+  if (!date) {
+    return trimmed;
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 /** True once the calendar day of `value` has fully passed; unreadable dates are never past. */
 export function isOrderDateBeforeToday(value: string, now = new Date()): boolean {
   const date = parseOrderDateValue(value);

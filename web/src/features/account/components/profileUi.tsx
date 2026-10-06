@@ -248,10 +248,19 @@ export function ProfileOrderCardDivider() {
 }
 
 /** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
-export function ProfileOrderItemBadge({ label }: { label: string }) {
+export function ProfileOrderItemBadge({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
   return (
     <span
-      className="absolute -left-px -top-px bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 text-darkblack"
+      className={cn(
+        "absolute -left-px -top-px bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 text-darkblack",
+        className,
+      )}
     >
       {label}
     </span>

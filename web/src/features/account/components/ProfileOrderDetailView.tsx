@@ -22,7 +22,11 @@ import { useOrderActionReasons } from "../hooks/useOrderActionReasons";
 import { useOrderActions } from "../hooks/useOrderActions";
 import { useOrderInvoiceDownload } from "../hooks/useOrderInvoiceDownload";
 import type { ProfileOrderDetailUi } from "../types/profileUi.types";
-import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
+import {
+  formatOrderDate,
+  formatOrderDateMobileMeta,
+  formatOrderTotal,
+} from "../utils/formatAccountData";
 import {
   DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
   isDigitalGiftCardContactUsOnlyOrder,
@@ -30,7 +34,7 @@ import {
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
-import { ProfileOrderDetailItemCard } from "./ProfileOrderDetailItemCard";
+import { ProfileOrderDetailItemsSection } from "./ProfileOrderDetailItemsSection";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
 import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
 import { ProfileOrderCancelSuccessDialog } from "./ProfileOrderCancelSuccessDialog";
@@ -232,17 +236,17 @@ export function ProfileOrderDetailView({
 
           <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
 
-          <div className="flex min-w-0 flex-1 flex-col justify-between text-center font-gill text-base leading-110 text-darkblack">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 text-center font-gill text-base leading-110 text-darkblack">
             <span className="font-light">{detailContent.placedOnMetaLabel}</span>
-            <span className="font-normal">{formatOrderDate(order.orderDate)}</span>
+            <span className="font-normal">{formatOrderDateMobileMeta(order.orderDate)}</span>
           </div>
 
           {order.deliveryBy ? (
             <>
               <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
-              <div className="flex min-w-0 flex-1 flex-col justify-between text-center font-gill text-base leading-110 text-darkblack">
+              <div className="flex min-w-0 flex-1 flex-col gap-2 text-center font-gill text-base leading-110 text-darkblack">
                 <span className="font-light">{deliveryMetaValueLabel}</span>
-                <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
+                <span className="font-normal">{formatOrderDateMobileMeta(order.deliveryBy)}</span>
               </div>
             </>
           ) : null}
@@ -280,10 +284,8 @@ export function ProfileOrderDetailView({
         </div>
 
         {order.items.length > 0 ? (
-          <div className="flex flex-col gap-6">
-            {order.items.map((item) => (
-              <ProfileOrderDetailItemCard key={item.id} item={item} />
-            ))}
+          <div className="flex flex-col gap-6 overflow-visible">
+            <ProfileOrderDetailItemsSection items={order.items} />
           </div>
         ) : null}
       </div>

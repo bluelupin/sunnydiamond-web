@@ -35,21 +35,22 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
   return (
     <div className="flex gap-2 lg:hidden">
       {thumbnails.map((item) => (
-        <div
-          key={item.id}
-          className={cn(
-            "relative shrink-0 overflow-hidden bg-white",
-            item.subtitle?.trim() ? "h-[100px] w-[120px]" : "size-[100px]",
-          )}
-        >
+        <div key={item.id} className="relative shrink-0">
           {item.isGift ? <ProfileOrderItemBadge label="Gift" /> : null}
-          {item.productUrlKey ? (
-            <Link href={`/product/${item.productUrlKey}`} className="block size-full">
+          <div
+            className={cn(
+              "overflow-hidden bg-white",
+              item.subtitle?.trim() ? "h-[100px] w-[120px]" : "size-[100px]",
+            )}
+          >
+            {item.productUrlKey ? (
+              <Link href={`/product/${item.productUrlKey}`} className="relative block size-full">
+                <ProfileOrderThumbnailImage item={item} />
+              </Link>
+            ) : (
               <ProfileOrderThumbnailImage item={item} />
-            </Link>
-          ) : (
-            <ProfileOrderThumbnailImage item={item} />
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>

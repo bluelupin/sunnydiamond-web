@@ -13,10 +13,55 @@ import { ProfileMetaDivider, ProfileOrderItemBadge } from "./profileUi";
 
 type ProfileOrderDetailItemCardProps = {
   item: ProfileOrderDetailItemUi;
+  /** Product row inside a multi-item gift card — no outer card, badge, or gift footer. */
+  embedded?: boolean;
 };
 
-export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardProps) {
+export function ProfileOrderDetailGiftFooter({ giftNote }: { giftNote?: string }) {
   const content = profileTabsContent.orders.detail;
+
+  return (
+    <>
+      <div className="mt-4 h-px w-full bg-neutral300 lg:mt-0" />
+
+      <div className="mt-4 flex flex-col gap-4 bg-gray300 p-3 lg:mt-4 lg:bg-gray200 lg:p-4">
+        <div className="flex items-center gap-2">
+          <div className="relative h-[50px] w-[52px] shrink-0 overflow-hidden lg:size-[58px]">
+            <Image
+              src={giftingContent.bagHero.single}
+              alt={giftingContent.bagHero.alt}
+              width={60}
+              height={72}
+              className="object-contain"
+            />
+          </div>
+          <p className="font-gill text-base font-normal leading-110 text-darkblack">
+            {content.complementaryGiftBagLabel}
+          </p>
+        </div>
+
+        {giftNote ? (
+          <>
+            <div className="h-px w-full bg-aboutInactive lg:bg-neutral300" />
+            <div className="flex flex-col gap-2">
+              <p className="font-gill text-base font-normal leading-110 text-darkblack">
+                {content.giftNoteLabel}
+              </p>
+              <p className="font-gill text-base font-light leading-110 text-neutral500 lg:text-sm lg:text-darkblack">
+                {giftNote}
+              </p>
+            </div>
+          </>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
+export function ProfileOrderDetailItemCard({
+  item,
+  embedded = false,
+}: ProfileOrderDetailItemCardProps) {
   const badgeLabel = item.isGift ? "Gift" : item.isBespoke ? "Bespoke" : null;
   const isGiftCardItem = Boolean(item.subtitle?.trim());
   const lineTotal = item.unitPrice * item.quantity;
@@ -82,15 +127,8 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
     />
   );
 
-  return (
-    <div
-      className={cn(
-        "relative bg-white p-4 lg:p-6",
-        item.isBespoke && "border border-aboutInactive lg:border-neutral300",
-      )}
-    >
-      {badgeLabel ? <ProfileOrderItemBadge label={badgeLabel} /> : null}
-
+  const productContent = (
+    <>
       {item.isBespoke ? (
         <div className="flex items-center gap-6 lg:hidden">
           <div className="relative h-[63px] w-[71px] shrink-0 overflow-hidden bg-white">
@@ -103,7 +141,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-start gap-2 lg:hidden">
           <div
             className={cn(
               "relative shrink-0 overflow-hidden bg-white",
@@ -113,11 +151,15 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
             {imageElement}
           </div>
           <div className={cn("min-w-0 flex flex-1 flex-col", isGiftCardItem ? "gap-3" : "gap-2")}>
-            {nameElement}
-            {subtitleElement}
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex flex-col gap-2">
+                {nameElement}
+                {subtitleElement}
+              </div>
+              <div className="shrink-0">{priceElement}</div>
+            </div>
             {attributesElement}
             {engravingElement}
-            {priceElement}
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
                 Qty: {item.quantity}
@@ -155,42 +197,31 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
           <div className="shrink-0">{priceElement}</div>
         </div>
       </div>
+    </>
+  );
 
-      {item.isGift ? (
+  if (embedded) {
+    return productContent;
+  }
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-visible bg-white p-4 lg:p-6",
+        item.isBespoke && "border border-aboutInactive lg:border-neutral300",
+      )}
+    >
+      {badgeLabel ? (
         <>
-          <div className="mt-4 h-px w-full bg-neutral300 lg:mt-0" />
-
-          <div className="mt-4 flex flex-col gap-4 bg-gray300 p-3 lg:mt-4 lg:bg-gray200 lg:p-4">
-            <div className="flex items-center gap-2">
-              <div className="relative h-[50px] w-[52px] shrink-0 overflow-hidden lg:size-[58px]">
-                <Image
-                  src={giftingContent.bagHero.single}
-                  alt={giftingContent.bagHero.alt}
-                  width={60}
-                  height={72}
-                  className="object-contain"
-                />
-              </div>
-              <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                {content.complementaryGiftBagLabel}
-              </p>
-            </div>
-
-            {item.giftNote ? (
-              <>
-                <div className="h-px w-full bg-aboutInactive lg:bg-neutral300" />
-                <div className="flex flex-col gap-2">
-                  <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                    {content.giftNoteLabel}
-                  </p>
-                  <p className="font-gill text-base font-light leading-110 text-neutral500 lg:text-sm lg:text-darkblack">
-                    {item.giftNote}
-                  </p>
-                </div>
-              </>
-            ) : null}
-          </div>
+          <span className="mb-2 inline-block bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 text-darkblack lg:hidden">
+            {badgeLabel}
+          </span>
+          <ProfileOrderItemBadge label={badgeLabel} className="hidden lg:block" />
         </>
+      ) : null}
+      {productContent}
+      {item.giftNote?.trim() ? (
+        <ProfileOrderDetailGiftFooter giftNote={item.giftNote.trim()} />
       ) : null}
     </div>
   );

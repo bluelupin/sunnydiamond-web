@@ -493,7 +493,7 @@ function mapOrderItems(
       metal: display.metal,
       engraving: display.engraving,
       engravingFont: display.engravingFont,
-      isGift: display.isGift,
+      isGift: item.isGift || display.isGift,
       isBespoke: display.isBespoke,
       useIconPlaceholder: !imageUrl,
       quantity: item.quantity,
