@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { useMobileDrawerMaxHeight } from "@/shared/hooks/use-mobile-drawer-max-height";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { useLoginModal } from "../context/LoginModalContext";
 import { useAuthFlow } from "../hooks/useAuthFlow";
@@ -24,6 +25,7 @@ const LoginModal = () => {
     invokeCheckoutRegistrationSessionExpired,
   } = useLoginModal();
   const { showMobileShell } = useResponsiveOverlayShell(isLoginModalOpen, LOGIN_MODAL_MOBILE_QUERY);
+  const mobileDrawerMaxHeight = useMobileDrawerMaxHeight(isLoginModalOpen, showMobileShell);
 
   const { step, contentProps } = useAuthFlow({
     active: isLoginModalOpen,
@@ -56,10 +58,12 @@ const LoginModal = () => {
         open={isLoginModalOpen}
         onOpenChange={handleOpenChange}
         shouldScaleBackground={false}
+        repositionInputs={false}
       >
         <DrawerContent
           overlayClassName={LOGIN_MODAL_OVERLAY_CLASS}
           className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
+          style={mobileDrawerMaxHeight ? { maxHeight: mobileDrawerMaxHeight } : undefined}
         >
           <DrawerTitle className="sr-only">{modalLabel}</DrawerTitle>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:px-6">
