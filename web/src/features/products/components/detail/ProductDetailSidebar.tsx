@@ -69,6 +69,60 @@ const TryAtHomePanel = dynamic(() => import("./TryAtHomePanel"), { ssr: false })
 const PersonaliseProductPanel = dynamic(() => import("./PersonaliseProductPanel"), { ssr: false });
 const PriceBreakupPanel = dynamic(() => import("./PriceBreakupPanel"), { ssr: false });
 
+/** Login reloads the page, so the panel to reopen travels in the return URL. */
+const PENDING_PANEL_QUERY_KEY = "openPanel";
+
+type PendingHereForYouPanel = "video-call" | "try-at-home";
+
+function readPendingHereForYouPanelFromUrl(): PendingHereForYouPanel | null {
+  if (typeof window === "undefined") return null;
+  const value = new URLSearchParams(window.location.search).get(PENDING_PANEL_QUERY_KEY);
+  return value === "video-call" || value === "try-at-home" ? value : null;
+}
+
+/**
+ * The sidebar is sticky and taller than the viewport on md+, so one window scroll can leave the
+ * section where it was; keep scrolling by the remaining offset until it is centred.
+ */
+function scrollHereForYouSectionIntoView(): void {
+  const section = document.getElementById(PDP_HERE_FOR_YOU_ANCHOR);
+  if (!section) return;
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const rect = section.getBoundingClientRect();
+    const offset = rect.top - (window.innerHeight - rect.height) / 2;
+    if (Math.abs(offset) < 2) return;
+
+    const previousScrollY = window.scrollY;
+    window.scrollBy({ top: offset, left: 0, behavior: "instant" });
+    if (window.scrollY === previousScrollY) return;
+  }
+}
+
+/** After the login reload, gallery images and CMS blocks keep growing the page; re-centre as they land. */
+function keepHereForYouSectionInView(durationMs: number): void {
+  scrollHereForYouSectionIntoView();
+
+  const observer = new ResizeObserver(() => scrollHereForYouSectionIntoView());
+  observer.observe(document.body);
+
+  const userScrollEvents = ["wheel", "touchmove", "keydown"] as const;
+  const stop = () => {
+    observer.disconnect();
+    window.clearTimeout(timeoutId);
+    userScrollEvents.forEach((type) => window.removeEventListener(type, stop));
+  };
+  const timeoutId = window.setTimeout(stop, durationMs);
+  userScrollEvents.forEach((type) => window.addEventListener(type, stop, { passive: true }));
+}
+
+function clearPendingHereForYouPanelFromUrl(): void {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(PENDING_PANEL_QUERY_KEY)) return;
+  url.searchParams.delete(PENDING_PANEL_QUERY_KEY);
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
 type ProductDetailSidebarProps = {
   product: Product;
   /** Variant-aware product used for price/image panels (falls back to `product`). */
@@ -157,16 +211,15 @@ const ProductDetailSidebar = ({
   const showBenefitsStrip = strip.items.length > 0 && strip.title.trim().length > 0;
   const showStripTnc = strip.tnc.label.trim().length > 0 && strip.tnc.href.trim().length > 0;
   const showFindYourSizeLink = findYourSizeLabel.trim().length > 0;
-  const [pendingHereForYouPanel, setPendingHereForYouPanel] = useState<
-    "video-call" | "try-at-home" | null
-  >(null);
+  const [pendingHereForYouPanel, setPendingHereForYouPanel] =
+    useState<PendingHereForYouPanel | null>(readPendingHereForYouPanelFromUrl);
 
   const openHereForYouPanel = useCallback(
     (action: HereForYouPanelAction) => {
       if (action === "video-call" || action === "try-at-home") {
         if (status !== "authenticated") {
           setPendingHereForYouPanel(action);
-          openLoginModal({ returnUrl: pathname });
+          openLoginModal({ returnUrl: `${pathname}?${PENDING_PANEL_QUERY_KEY}=${action}` });
           return;
         }
 
@@ -190,12 +243,17 @@ const ProductDetailSidebar = ({
       return;
     }
 
+    if (readPendingHereForYouPanelFromUrl()) {
+      keepHereForYouSectionInView(3000);
+    }
+
     if (pendingHereForYouPanel === "video-call") {
       setIsVideoCallOpen(true);
     } else {
       setIsTryAtHomeOpen(true);
     }
     setPendingHereForYouPanel(null);
+    clearPendingHereForYouPanelFromUrl();
   }, [pendingHereForYouPanel, status]);
 
   const renderHereForYouButton = (button: NormalizedProductDisplayCardButton, index: number) => {

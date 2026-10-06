@@ -35,12 +35,22 @@ import { ProfileEmailVerifiedBadge, ProfileFieldInfoTooltip } from "./profileUi"
 import {
   getAppointmentContactLocks,
   getAuthLoginIdentifierKind,
+  type AuthLoginIdentifierKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 
 type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
 };
+
+/** Sessions started before the sign-in method was saved fall back to the only verified identifier. */
+function resolveLoginIdentifierKind(customer: AuthCustomer): AuthLoginIdentifierKind | null {
+  const stored = getAuthLoginIdentifierKind();
+  if (stored) return stored;
+  if (customer.emailVerified && !customer.phoneVerified) return "email";
+  if (customer.phoneVerified && !customer.emailVerified) return "phone";
+  return null;
+}
 
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
@@ -127,10 +137,11 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const phoneChanged = phone !== initialPhone || (Boolean(phone) && phoneCountryCode !== initialCountryCode);
   const hasChanges = nameChanged || phoneChanged;
   const phoneE164 = formatLoginPhoneForMagento(phoneCountryCode, phone);
-  const { phoneLocked } = getAppointmentContactLocks(getAuthLoginIdentifierKind());
-  const phoneInfoTooltip = phoneLocked
-    ? content.phoneRegisteredTooltip
-    : content.phoneInfo;
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(resolveLoginIdentifierKind(customer));
+  // The phone OTP info tooltip is not in Figma; only the sign-in lock tooltip is shown.
+  // const phoneInfoTooltip = phoneLocked
+  //   ? content.phoneRegisteredTooltip
+  //   : content.phoneInfo;
 
   const handleCancel = () => {
     setFullName(initialFullName);
@@ -292,16 +303,32 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="profile-email" className={appointmentLabelClassName}>
-                {content.fields.email}
-              </label>
+              {emailLocked ? (
+                <div className="flex items-center gap-2">
+                  <label htmlFor="profile-email" className={appointmentLabelClassName}>
+                    {content.fields.email}
+                  </label>
+                  <ProfileFieldInfoTooltip
+                    message={content.phoneRegisteredTooltip}
+                    ariaLabel="Email information"
+                  />
+                </div>
+              ) : (
+                <label htmlFor="profile-email" className={appointmentLabelClassName}>
+                  {content.fields.email}
+                </label>
+              )}
               <div className="flex h-14 w-full items-center justify-between bg-aboutInactive p-3">
                 <input
                   id="profile-email"
                   type="email"
                   value={initialEmail}
                   readOnly
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
+                  aria-readonly={emailLocked || undefined}
+                  className={cn(
+                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none",
+                    emailLocked && "cursor-not-allowed opacity-70",
+                  )}
                 />
                 {!isEmailVerifiable ? null : customer.emailVerified ? (
                   <ProfileEmailVerifiedBadge label={content.verifiedLabel} />
@@ -321,10 +348,16 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                 <label htmlFor="profile-phone" className={appointmentLabelClassName}>
                   {content.fields.phone}
                 </label>
-                <ProfileFieldInfoTooltip
+                {/* <ProfileFieldInfoTooltip
                   message={phoneInfoTooltip}
                   ariaLabel="Phone number information"
-                />
+                /> */}
+                {phoneLocked ? (
+                  <ProfileFieldInfoTooltip
+                    message={content.phoneRegisteredTooltip}
+                    ariaLabel="Phone number information"
+                  />
+                ) : null}
               </div>
               <div className={cn(appointmentFieldClassName, "flex items-center gap-2")}>
                 <PhoneCountryCodeSelect
@@ -335,6 +368,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                     setPhoneCountryCode(code);
                     setPhone((current) => sanitizePhoneInput(current, code));
                   }}
+                  disabled={phoneLocked}
                 />
                 <input
                   id="profile-phone"
@@ -344,7 +378,12 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, phoneCountryCode))}
                   placeholder={content.phonePlaceholder}
                   autoComplete="tel-national"
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
+                  readOnly={phoneLocked}
+                  aria-readonly={phoneLocked || undefined}
+                  className={cn(
+                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]",
+                    phoneLocked && "cursor-not-allowed opacity-70",
+                  )}
                 />
                 {/* Only a number proven with a code signs in; offer the code for one typed in without it. */}
                 {otpLoginEnabled && phone && !phoneChanged ? (

@@ -341,7 +341,8 @@ const AppointmentContactFields = ({
                       aria-disabled={!isSlotAvailable || undefined}
                       onClick={() => {
                         if (!isSlotAvailable) return;
-                        onSelectedSlotChange(isSelected ? null : slot);
+                        // Single-select: re-clicking the chosen slot keeps it selected.
+                        if (!isSelected) onSelectedSlotChange(slot);
                         markTouched("selectedSlot");
                       }}
                       className={cn(
