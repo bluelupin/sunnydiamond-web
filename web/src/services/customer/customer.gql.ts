@@ -183,6 +183,9 @@ const SUNNY_ORDER_STATUS_FIELDS = ORDER_FLOW_FIELDS_ENABLED
     ${SUNNY_REFUND_STATUS_FIELDS}
   }
   gift_mode
+  gift_message {
+    message
+  }
 `
   : "";
 

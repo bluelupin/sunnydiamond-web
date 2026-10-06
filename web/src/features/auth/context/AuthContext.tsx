@@ -25,6 +25,8 @@ export type AuthCustomer = {
   phoneVerified?: boolean;
   /** Whether the account email was proven to be theirs (phone sign-ups start unverified). */
   emailVerified?: boolean;
+  /** Account creation method from Magento (`sd_signup_method`); drives profile field locks. */
+  signupMethod?: string;
 };
 
 type AuthStatus = "loading" | "guest" | "authenticated";

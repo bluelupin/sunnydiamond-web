@@ -27,12 +27,7 @@ function ProfileOrderItemAttributeLine({ item }: { item: ProfileOrderItemUi }) {
   }
 
   if (item.engraving) {
-    segments.push(
-      <span key="engraving">
-        Engraving: {item.engraving}
-        {item.engravingFont ? ` (${item.engravingFont})` : null}
-      </span>,
-    );
+    segments.push(<span key="engraving">Engraving: {item.engraving}</span>);
   }
 
   if (segments.length === 0) {

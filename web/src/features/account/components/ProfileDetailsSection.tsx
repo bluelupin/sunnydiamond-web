@@ -34,7 +34,6 @@ import { ProfileDeleteAccountSuccessDialog } from "./ProfileDeleteAccountSuccess
 import { ProfileEmailVerifiedBadge, ProfileFieldInfoTooltip } from "./profileUi";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
   type AuthLoginIdentifierKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import { TooltipProvider } from "@/shared/ui/tooltip";
@@ -43,12 +42,10 @@ type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
 };
 
-/** Sessions started before the sign-in method was saved fall back to the only verified identifier. */
-function resolveLoginIdentifierKind(customer: AuthCustomer): AuthLoginIdentifierKind | null {
-  const stored = getAuthLoginIdentifierKind();
-  if (stored) return stored;
-  if (customer.emailVerified && !customer.phoneVerified) return "email";
-  if (customer.phoneVerified && !customer.emailVerified) return "phone";
+function signupMethodToContactLockKind(customer: AuthCustomer): AuthLoginIdentifierKind | null {
+  const method = customer.signupMethod?.trim().toLowerCase();
+  if (method === "phone") return "phone";
+  if (method === "email") return "email";
   return null;
 }
 
@@ -137,7 +134,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const phoneChanged = phone !== initialPhone || (Boolean(phone) && phoneCountryCode !== initialCountryCode);
   const hasChanges = nameChanged || phoneChanged;
   const phoneE164 = formatLoginPhoneForMagento(phoneCountryCode, phone);
-  const { phoneLocked, emailLocked } = getAppointmentContactLocks(resolveLoginIdentifierKind(customer));
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(signupMethodToContactLockKind(customer));
   // The phone OTP info tooltip is not in Figma; only the sign-in lock tooltip is shown.
   // const phoneInfoTooltip = phoneLocked
   //   ? content.phoneRegisteredTooltip

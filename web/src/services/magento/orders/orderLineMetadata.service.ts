@@ -23,6 +23,33 @@ type MagentoOrderDetailResponse = {
 
 const STOREFRONT_LINE_METADATA_MARKER = "Storefront line options:";
 
+/** GROUPED cart notes live on the cart — copy onto gift lines for order comments. */
+export function enrichCartLinesWithGroupedGiftNote(items: CartLineItem[]): CartLineItem[] {
+  const sharedNote = items.map((item) => item.gifting?.note?.trim()).find(Boolean);
+  if (!sharedNote) {
+    return items;
+  }
+
+  return items.map((item) => {
+    if (!item.gifting && !item.options.isGift) {
+      return item;
+    }
+    if (item.gifting?.note?.trim()) {
+      return item;
+    }
+
+    const wrapMode = item.gifting?.wrapMode ?? "single";
+    return {
+      ...item,
+      gifting: {
+        ...(item.gifting ?? {}),
+        wrapMode,
+        note: sharedNote,
+      },
+    };
+  });
+}
+
 function formatLineMetadataComment(items: CartLineItem[]): string {
   const lines = items.map((item) => {
     const parts: string[] = [];

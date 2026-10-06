@@ -21,18 +21,15 @@ export function ProfileOrderDetailGiftFooter({ giftNote }: { giftNote?: string }
   const content = profileTabsContent.orders.detail;
 
   return (
-    <>
-      <div className="mt-4 h-px w-full bg-neutral300 lg:mt-0" />
-
-      <div className="mt-4 flex flex-col gap-4 bg-gray300 p-3 lg:mt-4 lg:bg-gray200 lg:p-4">
+    <div className="mt-5 flex flex-col gap-5 bg-gray300 p-5 lg:bg-gray200">
         <div className="flex items-center gap-2">
-          <div className="relative h-[50px] w-[52px] shrink-0 overflow-hidden lg:size-[58px]">
+          <div className="relative flex h-[50px] w-[52px] shrink-0 items-center justify-center lg:size-[58px]">
             <Image
               src={giftingContent.bagHero.single}
               alt={giftingContent.bagHero.alt}
-              width={60}
-              height={72}
-              className="object-contain"
+              width={58}
+              height={58}
+              className="size-full object-contain object-bottom"
             />
           </div>
           <p className="font-gill text-base font-normal leading-110 text-darkblack">
@@ -53,8 +50,7 @@ export function ProfileOrderDetailGiftFooter({ giftNote }: { giftNote?: string }
             </div>
           </>
         ) : null}
-      </div>
-    </>
+    </div>
   );
 }
 
@@ -100,13 +96,6 @@ export function ProfileOrderDetailItemCard({
       </div>
     ) : null;
 
-  const engravingElement = item.engraving ? (
-    <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-neutral500">
-      Engraving: “{item.engraving}”
-      {item.engravingFont ? ` (${item.engravingFont})` : null}
-    </p>
-  ) : null;
-
   const priceElement = (
     <p className="font-gill text-base font-normal leading-110 text-darkblack lg:leading-normal lg:tracking-[0.16px]">
       {formatOrderTotal(lineTotal, item.currency)}
@@ -137,7 +126,6 @@ export function ProfileOrderDetailItemCard({
           <div className="min-w-0 flex flex-col gap-2">
             {nameElement}
             {attributesElement}
-            {engravingElement}
           </div>
         </div>
       ) : (
@@ -159,7 +147,6 @@ export function ProfileOrderDetailItemCard({
               <div className="shrink-0">{priceElement}</div>
             </div>
             {attributesElement}
-            {engravingElement}
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
                 Qty: {item.quantity}
@@ -185,7 +172,6 @@ export function ProfileOrderDetailItemCard({
               {nameElement}
               {subtitleElement}
               {attributesElement}
-              {engravingElement}
               {item.quantity > 1 ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500">
                   Qty: {item.quantity}

@@ -96,6 +96,7 @@ export type MagentoSunnyOrderFields = {
     returnable_till?: string | null;
   } | null;
   gift_mode?: SunnyGiftMode | null;
+  gift_message?: { message?: string | null } | null;
 };
 
 type MagentoOrderItem = {
@@ -377,6 +378,7 @@ export function mapSunnyOrderFields(order: MagentoSunnyOrderFields): TrackedOrde
         }
       : null,
     giftMode: order.gift_mode ?? null,
+    giftMessage: order.gift_message?.message?.trim() || null,
   };
 }
 

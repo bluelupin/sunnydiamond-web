@@ -1,4 +1,5 @@
 import type { CustomerOrderItemOption } from "@/services/customer/customer-account.types";
+import type { SunnyGiftMode } from "@/services/customer/order-tracking.types";
 
 function normalizeKey(text: string): string {
   return text.trim().toLowerCase();
@@ -123,6 +124,41 @@ export function parseGiftMarkedProductNamesFromComments(comments: string[]): Set
 
 export function parseGiftNotesFromComments(comments: string[]): Map<string, string> {
   return parseOrderGiftMetadataFromComments(comments).giftNotes;
+}
+
+type OrderGiftNoteSource = {
+  giftMode: SunnyGiftMode | null;
+  giftMessage: string | null;
+};
+
+type OrderLineGiftNoteSource = {
+  isGift: boolean;
+  giftMessage: string | null;
+  productName: string;
+  productSku?: string | null;
+};
+
+/** Mirrors cart GROUPED vs SEPARATE — line note, comment metadata, then shared order note. */
+export function resolveOrderItemGiftNote(
+  item: OrderLineGiftNoteSource,
+  order: OrderGiftNoteSource,
+  metadata: OrderGiftMetadata | undefined,
+): string | undefined {
+  const fromLine = item.giftMessage?.trim();
+  if (fromLine) {
+    return fromLine;
+  }
+
+  const fromComments = getOrderItemGiftNote(metadata, item.productName, item.productSku);
+  if (fromComments) {
+    return fromComments;
+  }
+
+  if (!item.isGift || order.giftMode === "SEPARATE") {
+    return undefined;
+  }
+
+  return order.giftMessage?.trim() || undefined;
 }
 
 export function getOrderItemGiftNote(

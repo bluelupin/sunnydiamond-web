@@ -103,6 +103,8 @@ export type TrackedOrderSunnyFields = {
   sunnyRefund: TrackedOrderRefundStatus | null;
   sunnyDelivery: TrackedOrderDelivery | null;
   giftMode: SunnyGiftMode | null;
+  /** GROUPED gifting — shared note lives on the order when line `gift_message` is empty. */
+  giftMessage: string | null;
 };
 
 export type TrackedOrderItemSunnyFields = {

@@ -17,6 +17,7 @@ import {
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
+import { buildProfileOrderDetailHref } from "@/features/account/utils/profileOrderNavigation";
 import { getExpectedDeliveryDate } from "../types/checkout.types";
 
 type CheckoutSuccessViewProps = {
@@ -71,9 +72,9 @@ const SuccessCtaSection = ({
   orderNumber?: string | null;
   mobile?: boolean;
 }) => {
-  const trackingHref = orderNumber
-    ? `/order-tracking?order=${encodeURIComponent(orderNumber)}`
-    : "/order-tracking";
+  const trackingHref = orderNumber?.trim()
+    ? buildProfileOrderDetailHref(orderNumber)
+    : "/profile?section=orders";
 
   return (
     <div className={cn("flex w-full flex-col items-center gap-4", className)}>

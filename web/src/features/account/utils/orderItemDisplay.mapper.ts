@@ -69,10 +69,10 @@ export function mapCustomerOrderItemToDisplayFields(
   const size = options.find((option) => isSizeLabel(option.label))?.value.trim();
   const metalRaw = findOptionValue(options, ["metal color", "metal", "color"]);
   const metal = metalRaw ? formatMetalColorLabel(metalRaw) || metalRaw : undefined;
-  const engraving = item.enteredOptions
-    .find((option) => isEngravingTextLabel(normalizeKey(option.label)))
+  const engraving = options
+    .find((option) => classifyCustomOptionLabel(option.label) === "engravingText")
     ?.value.trim();
-  const engravingFont = item.selectedOptions
+  const engravingFont = options
     .find((option) => classifyCustomOptionLabel(option.label) === "engravingFont")
     ?.value.trim();
 

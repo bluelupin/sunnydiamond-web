@@ -63,6 +63,7 @@ import {
   setCartGiftOptions,
 } from "@/services/magento/cart/cart.service";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
+import { enrichCartLinesWithGroupedGiftNote } from "@/services/magento/orders/orderLineMetadata.service";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import {
   collectRazorpayPayment,
@@ -343,7 +344,7 @@ const CheckoutPage = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderNumber: input.orderNumber,
-            items: input.orderItems,
+            items: enrichCartLinesWithGroupedGiftNote(input.orderItems),
           }),
         });
       } catch {
@@ -814,7 +815,9 @@ const CheckoutPage = () => {
           // Re-sync the full gifting state onto the Magento cart so the order
           // carries it even when a mark was never saved through the panel.
           try {
-            const giftMode = submittedItems.some((item) => item.gifting?.wrapMode === "separate")
+            const giftSourceItems =
+              cartWithShipping.items.length > 0 ? cartWithShipping.items : submittedItems;
+            const giftMode = giftSourceItems.some((item) => item.gifting?.wrapMode === "separate")
               ? "separate"
               : "single";
             await setCartGiftOptions(
@@ -823,9 +826,9 @@ const CheckoutPage = () => {
                 mode: giftMode,
                 groupedNote:
                   giftMode === "single"
-                    ? submittedItems.find((item) => item.gifting?.note)?.gifting?.note
+                    ? giftSourceItems.find((item) => item.gifting?.note?.trim())?.gifting?.note?.trim()
                     : undefined,
-                items: submittedItems.map((item) => ({
+                items: giftSourceItems.map((item) => ({
                   lineItemId: item.id,
                   isGift: Boolean(item.gifting || item.options.isGift),
                   note: giftMode === "separate" ? item.gifting?.note : undefined,

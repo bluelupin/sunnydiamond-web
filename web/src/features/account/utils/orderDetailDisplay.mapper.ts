@@ -7,8 +7,8 @@ import type {
 } from "../types/profileUi.types";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
 import {
-  getOrderItemGiftNote,
   parseOrderGiftMetadataFromComments,
+  resolveOrderItemGiftNote,
 } from "./orderGiftDetection.utils";
 import {
   buildOrderDeliveryTimelineFromStatus,
@@ -105,9 +105,16 @@ function mapDetailItems(
     const sku = item.productSku?.trim();
     const imageUrl = resolveOrderItemImageUrl(item.thumbnailUrl, sku, imageBySku);
     const subtitle = giftCardSubtitleForSku(sku);
-    // GraphQL gift fields win; the REST comment chain still carries engraving notes.
-    const giftNote =
-      item.giftMessage ?? getOrderItemGiftNote(giftMetadata, item.productName, item.productSku);
+    const giftNote = resolveOrderItemGiftNote(
+      {
+        isGift: item.isGift || display.isGift,
+        giftMessage: item.giftMessage,
+        productName: item.productName,
+        productSku: item.productSku,
+      },
+      { giftMode: order.giftMode, giftMessage: order.giftMessage },
+      giftMetadata,
+    );
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
