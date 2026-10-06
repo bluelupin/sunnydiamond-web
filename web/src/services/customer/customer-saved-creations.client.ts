@@ -70,6 +70,19 @@ export async function saveCustomerCreationClient(
   return (await response.json()) as SaveCustomerCreationResult;
 }
 
+/** Push guest-local creation document ids to the server after sign-in. */
+export async function syncCustomerSavedCreations(creationDocumentIds: string[]): Promise<void> {
+  const ids = [
+    ...new Set(creationDocumentIds.map((id) => id.trim()).filter(Boolean)),
+  ];
+
+  if (ids.length === 0) {
+    return;
+  }
+
+  await Promise.all(ids.map((id) => saveCustomerCreationClient(id)));
+}
+
 export async function deleteCustomerSavedCreationClient(
   documentId: string,
   signal?: AbortSignal,

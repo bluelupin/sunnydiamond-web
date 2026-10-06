@@ -107,6 +107,14 @@ export const bespokeFeaturedStoryModalFigmaSpec = {
   saveInspirationLabel: "Save as Inspiration",
 } as const;
 
+export const savedInspirationToastContent = {
+  savedMessage: "Inspiration Saved",
+  alreadySavedMessage: "Already saved",
+  viewLabel: "VIEW",
+} as const;
+
+export const savedInspirationToastDurationMs = 4000;
+
 /** Figma — Past Creations full-screen masonry gallery */
 export const bespokePastCreationsFigmaSpec = {
   columnGap: 8,

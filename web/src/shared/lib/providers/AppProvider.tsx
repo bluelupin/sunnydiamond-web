@@ -9,6 +9,7 @@ import { CartUIProvider } from '@/features/cart/context/CartUIContext';
 import GiftingOptionsPanel from '@/features/cart/components/GiftingOptionsPanel';
 import GuestCheckoutModal from '@/features/cart/components/GuestCheckoutModal';
 import { FeatureErrorBoundary } from '@/shared/ui/FeatureErrorBoundary';
+import { SavedInspirationsProvider } from '@/features/bespoke/context/SavedInspirationsContext';
 import { WishlistProvider } from '@/features/wishlist/context/WishlistContext';
 import { LoginModalProvider } from '@/features/auth/context/LoginModalContext';
 import LoginModal from '@/features/auth/components/LoginModal';
@@ -45,6 +46,7 @@ export default function AppProvider({
             <CartUIProvider>
               <LoginModalProvider>
                 <WishlistProvider>
+                  <SavedInspirationsProvider>
                   <FeatureErrorBoundary featureName="GiftingGiftCardFlowRoot">
                     <GiftingGiftCardFlowRoot>
                       <PageLoadingProvider>
@@ -64,6 +66,7 @@ export default function AppProvider({
                   <FeatureErrorBoundary featureName="LoginModal">
                     <LoginModal />
                   </FeatureErrorBoundary>
+                  </SavedInspirationsProvider>
                 </WishlistProvider>
               </LoginModalProvider>
             </CartUIProvider>

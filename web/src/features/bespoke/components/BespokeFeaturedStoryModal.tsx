@@ -9,7 +9,6 @@ import {
   type TransitionEvent,
 } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
@@ -18,8 +17,7 @@ import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { getLoginHrefForReturn } from "@/features/auth/utils/authNavigation";
-import { saveCustomerCreationClient } from "@/services/customer/customer-saved-creations.client";
+import { useSavedInspirations } from "@/features/bespoke/context/SavedInspirationsContext";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 
@@ -263,9 +261,9 @@ const FeaturedStoryModalPanel = ({
   onClose,
   onShowStatusToast,
 }: FeaturedStoryModalPanelProps) => {
-  const router = useRouter();
   const { toast } = useToast();
   const { status } = useAuth();
+  const { saveInspiration } = useSavedInspirations();
   const [activeImageIndex, setActiveImageIndex] = useState(initialImageIndex);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -292,17 +290,12 @@ const FeaturedStoryModalPanel = ({
       return;
     }
 
-    if (status !== "authenticated") {
-      onClose();
-      router.push(getLoginHrefForReturn("/bespoke-jewellery"));
-      return;
-    }
-
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const result = await saveCustomerCreationClient(creationDocumentId);
-      onShowStatusToast(result.alreadySaved ? "Already saved" : "Inspiration Saved");
+      await saveInspiration(creationDocumentId, {
+        onStatusMessage: onShowStatusToast,
+      });
       onClose();
     } catch (error) {
       toast({

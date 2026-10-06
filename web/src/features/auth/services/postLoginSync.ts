@@ -1,8 +1,13 @@
 import { getGuestCartId, setGuestCartId } from "@/services/magento/cart/cartSession";
 import {
+  clearGuestSavedInspirationsStorage,
+  readGuestSavedInspirationsFromStorage,
+} from "@/features/bespoke/utils/guestSavedInspirationsStorage";
+import {
   clearGuestWishlistStorage,
   readGuestWishlistFromStorage,
 } from "@/features/wishlist/utils/guestWishlistStorage";
+import { syncCustomerSavedCreations } from "@/services/customer/customer-saved-creations.client";
 import { syncCustomerAddressFromLatestOrder } from "@/services/customer/customer-account.client";
 import { syncCustomerWishlist } from "@/services/customer/customer-wishlist.client";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
@@ -51,6 +56,16 @@ async function syncWishlistAfterLogin(): Promise<void> {
   clearGuestWishlistStorage();
 }
 
+async function syncSavedInspirationsAfterLogin(): Promise<void> {
+  const localIds = readGuestSavedInspirationsFromStorage();
+  if (localIds.length === 0) {
+    return;
+  }
+
+  await syncCustomerSavedCreations(localIds);
+  clearGuestSavedInspirationsStorage();
+}
+
 /** Backfill address book from the latest order when guest checkout was not persisted. */
 async function syncGuestCheckoutAddressAfterLogin(): Promise<void> {
   await syncCustomerAddressFromLatestOrder();
@@ -63,17 +78,21 @@ async function syncGuestCheckoutAddressAfterLogin(): Promise<void> {
 export async function runPostLoginSync(): Promise<{
   cartMerged: boolean;
   wishlistPushed: boolean;
+  savedInspirationsPushed: boolean;
   addressSynced: boolean;
 }> {
-  const [cartResult, wishlistResult, addressResult] = await Promise.allSettled([
-    mergeGuestCart(),
-    syncWishlistAfterLogin(),
-    syncGuestCheckoutAddressAfterLogin(),
-  ]);
+  const [cartResult, wishlistResult, savedInspirationsResult, addressResult] =
+    await Promise.allSettled([
+      mergeGuestCart(),
+      syncWishlistAfterLogin(),
+      syncSavedInspirationsAfterLogin(),
+      syncGuestCheckoutAddressAfterLogin(),
+    ]);
 
   return {
     cartMerged: cartResult.status === "fulfilled",
     wishlistPushed: wishlistResult.status === "fulfilled",
+    savedInspirationsPushed: savedInspirationsResult.status === "fulfilled",
     addressSynced: addressResult.status === "fulfilled",
   };
 }
