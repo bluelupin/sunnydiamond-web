@@ -99,7 +99,7 @@ export function ProfileOrderReturnReasonDialog({
                   checked={selectedReason?.code === reason.code}
                   onChange={() => setSelectedCode(reason.code)}
                   disabled={isSubmitting}
-                  className="size-6 shrink-0 accent-darkblack"
+                  className="size-6 shrink-0 accent-gold500"
                 />
                 <span className="font-light">{reason.label}</span>
               </label>
