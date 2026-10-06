@@ -18,6 +18,8 @@ export type AuthMeResponse = {
     phoneVerified: boolean;
     /** Whether the account email was proven to be theirs (phone sign-ups start unverified). */
     emailVerified: boolean;
+    /** Original creation method; unknown for untracked accounts. */
+    signupMethod: string;
   } | null;
   /** Present when customer is null — useful in Network tab while debugging auth. */
   reason?: string;
@@ -66,6 +68,7 @@ export async function GET() {
         custom_attributes?: Array<{ code: string; value?: string | null }> | null;
         sd_mobile_verified?: boolean | null;
         sd_email_verified?: boolean | null;
+        sd_signup_method?: string | null;
       };
     }>({
       query: MAGENTO_CUSTOMER_ME_QUERY,
@@ -108,6 +111,7 @@ export async function GET() {
             ?.value || null,
         phoneVerified: customer.sd_mobile_verified === true,
         emailVerified: customer.sd_email_verified === true,
+        signupMethod: customer.sd_signup_method || "unknown",
       },
     } satisfies AuthMeResponse);
   } catch (error) {
