@@ -7,6 +7,7 @@ import { MAGENTO_VERIFY_LOGIN_OTP_MUTATION } from "@/services/auth/auth.gql";
 import {
   mapAuthErrorMessage,
   mapAuthErrorMessageForRegistrationComplete,
+  REGISTRATION_SESSION_EXPIRED_MESSAGE,
 } from "@/services/auth/authErrorMessages";
 import { setCustomerTokenCookie } from "@/services/auth/session";
 
@@ -86,15 +87,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (registration_required) {
-      return NextResponse.json({ ok: true, loggedIn: false, registrationRequired: true });
+      // First OTP verify for a new customer — send them to create-account.
+      if (!isCompletingRegistration) {
+        return NextResponse.json({ ok: true, loggedIn: false, registrationRequired: true });
+      }
+      // Create-account submit still pending — treat as expired registration session.
+      return NextResponse.json(
+        { error: REGISTRATION_SESSION_EXPIRED_MESSAGE },
+        { status: 400 },
+      );
     }
 
     if (isCompletingRegistration) {
       return NextResponse.json(
-        {
-          error:
-            "We could not create your account in Magento. Please request a new OTP and try again.",
-        },
+        { error: REGISTRATION_SESSION_EXPIRED_MESSAGE },
         { status: 400 },
       );
     }
@@ -107,7 +113,9 @@ export async function POST(request: NextRequest) {
         ? isCompletingRegistration
           ? mapAuthErrorMessageForRegistrationComplete(error.message, fallback)
           : mapAuthErrorMessage(error.message, fallback)
-        : fallback;
+        : isCompletingRegistration
+          ? REGISTRATION_SESSION_EXPIRED_MESSAGE
+          : fallback;
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

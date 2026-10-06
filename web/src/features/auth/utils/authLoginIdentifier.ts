@@ -5,7 +5,7 @@ const STORAGE_KEY = "sunny-auth-login-identifier-kind";
 export function setAuthLoginIdentifierKind(kind: AuthLoginIdentifierKind): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(STORAGE_KEY, kind);
+    window.localStorage.setItem(STORAGE_KEY, kind);
   } catch {
     // ignore quota / private mode
   }
@@ -14,7 +14,7 @@ export function setAuthLoginIdentifierKind(kind: AuthLoginIdentifierKind): void 
 export function getAuthLoginIdentifierKind(): AuthLoginIdentifierKind | null {
   if (typeof window === "undefined") return null;
   try {
-    const value = window.sessionStorage.getItem(STORAGE_KEY);
+    const value = window.localStorage.getItem(STORAGE_KEY);
     if (value === "email" || value === "phone") return value;
   } catch {
     // ignore
@@ -25,7 +25,7 @@ export function getAuthLoginIdentifierKind(): AuthLoginIdentifierKind | null {
 export function clearAuthLoginIdentifierKind(): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(STORAGE_KEY);
   } catch {
     // ignore
   }

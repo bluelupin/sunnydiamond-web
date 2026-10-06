@@ -1,5 +1,6 @@
 "use client";
 
+import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
 import { cn } from "@/shared/utils/cn";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
@@ -15,7 +16,7 @@ const StepConnectorLine = ({ className }: { className?: string }) => (
 );
 
 export type EducationDiscoverStepsListProps = {
-  steps: string[];
+  steps: NormalizedEducationDiscoverStep[];
   /** 0-based index of the active step in multi-step flows. Omit for static display. */
   activeStepIndex?: number;
   className?: string;
@@ -42,7 +43,7 @@ const EducationDiscoverStepsList = ({
 
           return (
             <div
-              key={`${step}-${index}`}
+              key={`${step.title}-${index}`}
               className={cn(
                 "relative z-10 flex h-[26px] w-4 shrink-0 items-center justify-center rounded-full border-[0.4px] p-1",
                 isActive || isComplete
@@ -71,13 +72,13 @@ const EducationDiscoverStepsList = ({
 
           return (
             <li
-              key={step}
+              key={`${step.title}-${index}`}
               className={cn(
                 isActive || isComplete ? "text-darkblack" : "text-darkblack",
                 isActive && "font-normal",
               )}
             >
-              {step}
+              {step.title}
             </li>
           );
         })}

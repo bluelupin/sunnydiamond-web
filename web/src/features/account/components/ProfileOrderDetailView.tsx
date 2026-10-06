@@ -30,7 +30,6 @@ import {
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
-import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderDetailItemCard } from "./ProfileOrderDetailItemCard";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
 import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
@@ -63,7 +62,6 @@ export function ProfileOrderDetailView({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
   const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
-  const [refundNote, setRefundNote] = useState<string | undefined>(undefined);
   const { cancelReasons, returnReasons } = useOrderActionReasons();
   const { isSubmitting, error, clearError, cancelOrder, returnOrder } = useOrderActions();
   const { download, downloadingNumber } = useOrderInvoiceDownload();
@@ -137,7 +135,6 @@ export function ProfileOrderDetailView({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setCancelReasonDialogOpen(false);
       setCancelSuccessDialogOpen(true);
 
@@ -166,7 +163,6 @@ export function ProfileOrderDetailView({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setReturnReasonDialogOpen(false);
       setReturnSuccessDialogOpen(true);
 
@@ -182,10 +178,14 @@ export function ProfileOrderDetailView({
   const hasDiscount = priceBreakdown.orderDiscount > 0;
   const hasShipping = typeof priceBreakdown.shipping === "number";
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
-  const deliveredGiftCard =
-    order.category === "delivered" && isGiftCardProfileOrder(order);
+  const isDelivered = order.category === "delivered";
+  const showReturnDeadlineNote = isDelivered && !isGiftCardProfileOrder(order);
+  const deliveryMetaValueLabel = isDelivered
+    ? detailContent.deliveredOnMetaLabel
+    : detailContent.deliveryByMetaLabel;
   const timelineSteps = useMemo(() => {
-    if (deliveredGiftCard || isActiveDigitalGiftCardOrder(order)) {
+    // Figma: delivered order details carry no progress tracker.
+    if (order.category === "delivered" || isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
 
@@ -194,7 +194,7 @@ export function ProfileOrderDetailView({
       order.timeline,
       order.timelineFromServer ? order.timeline : null,
     );
-  }, [deliveredGiftCard, order]);
+  }, [order]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -242,7 +242,7 @@ export function ProfileOrderDetailView({
             <>
               <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
               <div className="flex min-w-0 flex-1 flex-col justify-between text-center font-gill text-base leading-110 text-darkblack">
-                <span className="font-light">{detailContent.deliveryByMetaLabel}</span>
+                <span className="font-light">{deliveryMetaValueLabel}</span>
                 <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
               </div>
             </>
@@ -272,7 +272,9 @@ export function ProfileOrderDetailView({
 
           {order.deliveryBy ? (
             <span className="font-gill text-base leading-110 text-darkblack">
-              <span className="font-light">{content.deliveryByLabel} </span>
+              <span className="font-light">
+                {isDelivered ? content.deliveredOnLabel : content.deliveryByLabel}{" "}
+              </span>
               <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
             </span>
           ) : null}
@@ -490,7 +492,7 @@ export function ProfileOrderDetailView({
               ) : null}
             </div>
 
-          {order.showCancelNote && order.footnote ? (
+          {(order.showCancelNote || showReturnDeadlineNote) && order.footnote ? (
             <div className="flex items-center gap-2">
               <InformationIcon className="size-6 shrink-0 text-darkblack" />
               <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
@@ -521,7 +523,6 @@ export function ProfileOrderDetailView({
         open={cancelSuccessDialogOpen}
         onOpenChange={setCancelSuccessDialogOpen}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
 
       <ProfileOrderReturnDialog
@@ -544,7 +545,6 @@ export function ProfileOrderDetailView({
         open={returnSuccessDialogOpen}
         onOpenChange={setReturnSuccessDialogOpen}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
     </div>
   );

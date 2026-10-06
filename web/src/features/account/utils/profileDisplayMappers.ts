@@ -25,13 +25,11 @@ import {
 import { canCancelAppointmentUntilOneMinuteBefore } from "@/features/products/utils/appointmentCancelDeadline";
 import {
   APPOINTMENT_COUNTRY_CODES,
-  STORE_VISIT_BOOKING_WINDOW,
-  TRY_AT_HOME_BOOKING_WINDOW,
-  VIDEO_CALL_BOOKING_WINDOW,
 } from "@/shared/constants/appointmentForm";
 import {
   formatAppointmentDate,
   formatOrderDate,
+  isOrderDateBeforeToday,
 } from "./formatAccountData";
 import { parseOrderGiftMetadataFromComments } from "./orderGiftDetection.utils";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
@@ -152,6 +150,29 @@ export function resolveRefundEstimateValue(
   return refund?.estimatedWindowLabel.trim() || placeholder;
 }
 
+/** Magento payment method codes that collect the money at the door. */
+const COD_PAYMENT_TYPES = new Set(["cashondelivery", "cod"]);
+
+function isCashOnDeliveryPayment(paymentTypes: string[] | undefined): boolean {
+  return (paymentTypes ?? []).some((type) => COD_PAYMENT_TYPES.has(type.trim().toLowerCase()));
+}
+
+/** Figma cancelled card: "Within 5-7 business days" — Magento sends the bare window. */
+function resolveCancellationRefundEstimate(refund: TrackedOrderRefundStatus | null): string {
+  if (refund?.estimatedCompletionDate) {
+    return formatOrderDate(refund.estimatedCompletionDate);
+  }
+
+  const window = refund?.estimatedWindowLabel.trim();
+  if (!window) {
+    return ordersContent.estimatedDeliveryRangePlaceholder;
+  }
+
+  return /^within\b/i.test(window)
+    ? window
+    : ordersContent.estimatedRefundWindowTemplate.replace("{window}", window);
+}
+
 /** Refund line on the cancel/return success dialogs — omitted when the server sends no refund. */
 export function formatRefundNote(
   refund: TrackedOrderRefundStatus | null | undefined,
@@ -175,9 +196,15 @@ export function formatRefundNote(
     : undefined;
 }
 
-export function formatReturnDeadlineNote(returnableTill: string | null | undefined): string {
+export function formatReturnDeadlineNote(
+  returnableTill: string | null | undefined,
+): string | undefined {
   if (!returnableTill) {
-    return ordersContent.returnDeadlineNote;
+    return undefined;
+  }
+
+  if (isOrderDateBeforeToday(returnableTill)) {
+    return ordersContent.returnWindowClosedNote;
   }
 
   return ordersContent.returnDeadlineNoteTemplate.replace(
@@ -309,9 +336,9 @@ function mapStoreVisitDetails(
 const GENERAL_STORE_VISIT_PRODUCT_ID = "store-visit";
 
 function inferAppointmentType(formTag: string): AppointmentFilterKey {
-  const normalized = formTag.toLowerCase();
+  const normalized = formTag.trim().toLowerCase();
 
-  if (normalized.includes("video")) {
+  if (normalized === "book-an-appointment" || normalized.includes("video")) {
     return "video_call";
   }
 
@@ -515,6 +542,15 @@ export function mapCustomerOrderToProfileUi(
           : undefined,
   };
 
+  // Figma: a cancelled COD order was never paid, so there is no refund stepper.
+  if (category === "cancelled" && isCashOnDeliveryPayment(order.paymentTypes)) {
+    return {
+      ...base,
+      showDownloadInvoice: false,
+      showContactUs: true,
+    };
+  }
+
   if (category === "returned" || category === "cancelled") {
     const refundTimeline = resolveRefundTimeline(
       order,
@@ -523,15 +559,18 @@ export function mapCustomerOrderToProfileUi(
 
     return {
       ...base,
+      // Figma: a returned order card offers Contact Us, not Track.
+      ...(category === "returned" ? { showTrack: false } : {}),
       showDownloadInvoice: false,
-      showContactUs: category === "cancelled",
-      estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-      estimatedDeliveryValue: resolveRefundEstimateValue(
-        order.sunnyRefund,
-        category === "returned"
-          ? ordersContent.estimatedDeliveryPlaceholder
-          : ordersContent.estimatedDeliveryRangePlaceholder,
-      ),
+      showContactUs: true,
+      estimatedDeliveryLabel:
+        category === "cancelled"
+          ? ordersContent.estimatedRefundLabel
+          : ordersContent.estimatedDeliveryLabel,
+      estimatedDeliveryValue:
+        category === "cancelled"
+          ? resolveCancellationRefundEstimate(order.sunnyRefund)
+          : resolveRefundEstimateValue(order.sunnyRefund, ordersContent.estimatedDeliveryPlaceholder),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
@@ -644,21 +683,10 @@ export function mapCustomerAppointmentToProfileUi(
   const workflowStatus = resolveAppointmentWorkflowStatus(appointment);
   const canModify = canModifyAppointment(workflowStatus);
   const rescheduleLimitReached = canModify && appointment.reschedulesLeft === 0;
-  const minNoticeMinutes = (
-    type === "try_at_home"
-      ? TRY_AT_HOME_BOOKING_WINDOW
-      : type === "video_call"
-        ? VIDEO_CALL_BOOKING_WINDOW
-        : STORE_VISIT_BOOKING_WINDOW
-  ).minNoticeMinutes;
   const canReschedule =
     canModify &&
     !rescheduleLimitReached &&
-    canModifyAppointmentBeforeDeadline(
-      appointment.requestedDate,
-      appointment.selectedTimeSlot,
-      minNoticeMinutes,
-    );
+    canModifyAppointmentBeforeDeadline(appointment.requestedDate);
   const canCancel =
     canModify &&
     canCancelAppointmentUntilOneMinuteBefore(
@@ -667,8 +695,6 @@ export function mapCustomerAppointmentToProfileUi(
     );
   const rescheduleDeadline = formatTryAtHomeRescheduleDeadline(
     appointment.requestedDate,
-    appointment.selectedTimeSlot,
-    minNoticeMinutes,
   );
   const isCancelled = workflowStatus.toLowerCase().includes("cancel");
   const cancelledOnNote =

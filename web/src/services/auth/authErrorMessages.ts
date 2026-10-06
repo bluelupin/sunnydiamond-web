@@ -63,5 +63,12 @@ export function isRegistrationSessionExpiredError(message: string | undefined): 
   if (trimmed === "Incorrect code") {
     return true;
   }
+  if (
+    trimmed === "We could not create your account. Please try again."
+    || trimmed
+      === "We could not create your account in Magento. Please request a new OTP and try again."
+  ) {
+    return true;
+  }
   return false;
 }

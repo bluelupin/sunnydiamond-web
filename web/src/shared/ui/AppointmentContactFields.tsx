@@ -13,6 +13,7 @@ import {
   appointmentTimeSlotUnselectedClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import OverlaySelectField from "@/shared/ui/OverlaySelectField";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
@@ -64,6 +65,8 @@ type AppointmentContactFieldsProps = {
   purposeOptions?: readonly string[];
   purposeLabel?: string;
   purposePlaceholder?: string;
+  /** Book store visit panel — `InlineCustomSelect` instead of overlay Radix select. */
+  purposeInlineCustomSelect?: boolean;
   nameLabel?: string;
   namePlaceholder?: string;
   phoneLabel?: string;
@@ -123,6 +126,7 @@ const AppointmentContactFields = ({
   purposeOptions = [],
   purposeLabel = "Purpose of Visit",
   purposePlaceholder = "-select-",
+  purposeInlineCustomSelect = false,
   nameLabel = "Your Name*",
   namePlaceholder,
   phoneLabel = "Phone No.*",
@@ -341,7 +345,8 @@ const AppointmentContactFields = ({
                       aria-disabled={!isSlotAvailable || undefined}
                       onClick={() => {
                         if (!isSlotAvailable) return;
-                        onSelectedSlotChange(isSelected ? null : slot);
+                        // Single-select: re-clicking the chosen slot keeps it selected.
+                        if (!isSelected) onSelectedSlotChange(slot);
                         markTouched("selectedSlot");
                       }}
                       className={cn(
@@ -374,20 +379,44 @@ const AppointmentContactFields = ({
       ) : null}
 
       {showPurpose && onPurposeChange && purposeOptions.length > 0 ? (
-        <OverlaySelectField
-          id={`${idPrefix}-purpose`}
-          label={purposeLabel}
-          value={purpose}
-          options={purposeOptions}
-          placeholder={purposePlaceholder}
-          onChange={onPurposeChange}
-          onBlur={() => markTouched("purpose")}
-          labelClassName={labelClassName}
-          invalid={showError("purpose")}
-          errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
-          error={showError("purpose") ? errors.purpose : undefined}
-          disabled={detailsReadOnly}
-        />
+        purposeInlineCustomSelect ? (
+          <div className="flex flex-col gap-2">
+            <InlineCustomSelect
+              id={`${idPrefix}-purpose`}
+              label={purposeLabel}
+              value={purpose}
+              options={purposeOptions}
+              placeholder={purposePlaceholder}
+              onChange={onPurposeChange}
+              onBlur={() => markTouched("purpose")}
+              labelClassName={labelClassName}
+              triggerClassName={fieldClassName}
+              invalid={showError("purpose")}
+              errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
+              listPlacement="inline"
+              disabled={detailsReadOnly}
+            />
+            <FormFieldError
+              id={`${idPrefix}-purpose-error`}
+              message={showError("purpose") ? errors.purpose : undefined}
+            />
+          </div>
+        ) : (
+          <OverlaySelectField
+            id={`${idPrefix}-purpose`}
+            label={purposeLabel}
+            value={purpose}
+            options={purposeOptions}
+            placeholder={purposePlaceholder}
+            onChange={onPurposeChange}
+            onBlur={() => markTouched("purpose")}
+            labelClassName={labelClassName}
+            invalid={showError("purpose")}
+            errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
+            error={showError("purpose") ? errors.purpose : undefined}
+            disabled={detailsReadOnly}
+          />
+        )
       ) : null}
 
       {showContactDetails ? (

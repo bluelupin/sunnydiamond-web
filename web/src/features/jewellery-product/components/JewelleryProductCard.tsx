@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type TransitionEvent,
+} from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
@@ -24,6 +31,12 @@ function preloadImage(url: string): Promise<void> {
     img.src = url;
   });
 }
+
+const plpLifestyleFadeClassName =
+  "motion-safe:transition-opacity motion-safe:duration-[350ms] motion-safe:ease-in-out";
+
+const plpLifestyleChromeFadeClassName =
+  "motion-safe:transition-[opacity,color] motion-safe:duration-[350ms] motion-safe:ease-in-out";
 
 export interface JewelleryProductCardProps {
   title: string;
@@ -54,7 +67,7 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
       "flex w-full flex-col items-center text-center leading-110",
       "md:gap-3 gap-2 lg:text-xl md:text-lg sm:text-base text-sm",
       "text-darkblack",
-      "motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out",
+      plpLifestyleChromeFadeClassName,
       className,
     )}
   >
@@ -126,9 +139,44 @@ const JewelleryProductCard = ({
 
   const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
   const displayedWishlisted = optimisticWishlisted ?? isWishlisted;
-  const canCrossfade = Boolean(lifestyleImage) && hoverImageReady;
-  const showLifestyleOverlay = isHoverActive && Boolean(lifestyleImage);
-  const showLifestyleChrome = showLifestyleOverlay;
+  const hoverImageLoaded = Boolean(lifestyleImage) && hoverImageReady;
+  const isHoveringLifestyle = isHoverActive && Boolean(lifestyleImage);
+  const shouldRevealLifestyle = isHoveringLifestyle && hoverImageLoaded;
+  const [lifestyleLayerMounted, setLifestyleLayerMounted] = useState(false);
+  const [lifestyleLayerOpaque, setLifestyleLayerOpaque] = useState(false);
+  const shouldRevealLifestyleRef = useRef(shouldRevealLifestyle);
+
+  shouldRevealLifestyleRef.current = shouldRevealLifestyle;
+
+  useLayoutEffect(() => {
+    if (shouldRevealLifestyle) {
+      setLifestyleLayerMounted(true);
+      setLifestyleLayerOpaque(false);
+      const frame = requestAnimationFrame(() => {
+        setLifestyleLayerOpaque(true);
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    setLifestyleLayerOpaque(false);
+  }, [shouldRevealLifestyle]);
+
+  const handleLifestyleFadeTransitionEnd = useCallback((event: TransitionEvent<HTMLDivElement>) => {
+    if (event.currentTarget !== event.target || event.propertyName !== "opacity") {
+      return;
+    }
+
+    if (!shouldRevealLifestyleRef.current && !lifestyleLayerOpaque) {
+      setLifestyleLayerMounted(false);
+    }
+  }, [lifestyleLayerOpaque]);
+
+  /**
+   * Hide product shot only while the model is showing or fading in (z-10 covers z-[5] on hover out).
+   * Restores the PLP image immediately on leave so we do not wait for the model fade-out.
+   */
+  const hidePrimaryProductShot =
+    lifestyleLayerMounted && (shouldRevealLifestyle || lifestyleLayerOpaque);
 
   useEffect(() => {
     setOptimisticWishlisted(null);
@@ -172,22 +220,26 @@ const JewelleryProductCard = ({
       onPointerLeave={handlePointerLeave}
       onFocus={lifestyleImage ? prefetchHoverImage : undefined}
     >
-      {lifestyleImage && (loadHoverImage || showLifestyleOverlay) ? (
-        <OptimizedImage
-          src={lifestyleImage}
-          alt=""
-          width={PLP_CARD_IMAGE_WIDTH}
-          height={PLP_CARD_IMAGE_WIDTH}
-          sizes="(max-width: 768px) 50vw, 33vw"
-          quality={PLP_CARD_IMAGE_QUALITY}
+      {lifestyleImage && (loadHoverImage || lifestyleLayerMounted) ? (
+        <div
+          aria-hidden
+          onTransitionEnd={handleLifestyleFadeTransitionEnd}
           className={cn(
-            "pointer-events-none absolute inset-0 z-0 h-full w-full object-cover",
-            "motion-safe:transition-opacity motion-safe:ease-in-out motion-safe:duration-[400ms]",
-            showLifestyleOverlay
-              ? "opacity-100 motion-safe:delay-150"
-              : "opacity-0",
+            "pointer-events-none absolute inset-0 z-[5] h-full w-full",
+            plpLifestyleFadeClassName,
+            lifestyleLayerOpaque ? "opacity-100" : "opacity-0",
           )}
-        />
+        >
+          <OptimizedImage
+            src={lifestyleImage}
+            alt=""
+            width={PLP_CARD_IMAGE_WIDTH}
+            height={PLP_CARD_IMAGE_WIDTH}
+            sizes="(max-width: 768px) 50vw, 33vw"
+            quality={PLP_CARD_IMAGE_QUALITY}
+            className="size-full object-cover"
+          />
+        </div>
       ) : null}
 
       <div
@@ -200,12 +252,7 @@ const JewelleryProductCard = ({
           src={primaryImage}
           alt={title}
           priority={priorityImage}
-          imageClassName={cn(
-            "motion-safe:transition-opacity motion-safe:ease-out",
-            showLifestyleOverlay &&
-            canCrossfade &&
-            "motion-safe:duration-[250ms] opacity-0",
-          )}
+          imageClassName={cn(hidePrimaryProductShot && "opacity-0")}
         />
       </div>
 
@@ -219,8 +266,8 @@ const JewelleryProductCard = ({
           className={cn(
             "pointer-events-none absolute inset-x-0 bottom-0 h-[min(52%,220px)] md:h-[min(48%,260px)]",
             "bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0",
-            "motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out",
-            showLifestyleChrome && "opacity-100",
+            plpLifestyleFadeClassName,
+            lifestyleLayerOpaque ? "opacity-100" : "opacity-0",
           )}
         />
         <div
@@ -237,7 +284,7 @@ const JewelleryProductCard = ({
             title={title}
             price={price}
             href={href}
-            className={cn(showLifestyleOverlay && "text-white")}
+            className={cn(shouldRevealLifestyle && lifestyleLayerOpaque && "text-white")}
           />
         </div>
       </div>
@@ -269,11 +316,10 @@ const JewelleryProductCard = ({
             xmlns="http://www.w3.org/2000/svg"
             className={cn(
               "h-6 w-6 md:h-8 md:w-8",
-              "motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out",
               displayedWishlisted
                 ? "fill-[#AB863B] text-linkGold"
-                : showLifestyleOverlay
-                  ? "fill-none text-white"
+                : shouldRevealLifestyle && lifestyleLayerOpaque
+                  ? "fill-none text-darkblack"
                   : "fill-none text-darkblack",
             )}
           >

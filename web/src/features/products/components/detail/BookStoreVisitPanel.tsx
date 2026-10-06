@@ -410,7 +410,7 @@ const BookStoreVisitPanel = ({
           setPhonePlaceholder(form.phonePlaceholder);
         }
         if (form.emailLabel) {
-          setEmailLabel(form.emailLabel);
+          setEmailLabel(form.emailLabel.replace(/[\s*]+$/, "").trim() || "Email");
         }
         if (form.emailPlaceholder) {
           setEmailPlaceholder(form.emailPlaceholder);
@@ -1027,6 +1027,7 @@ const BookingFormStep = ({
 
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
+      emailRequired: false,
       validatePurpose: purposeRequired,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
@@ -1097,6 +1098,7 @@ const BookingFormStep = ({
                 namePlaceholder={namePlaceholder}
                 phoneLabel={phoneLabel}
                 phonePlaceholder={phonePlaceholder}
+                emailRequired={false}
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}
@@ -1105,6 +1107,7 @@ const BookingFormStep = ({
                 timeSlotRequired={hasTimeSlots}
                 purposeLabel={purposeLabel}
                 purposePlaceholder={purposePlaceholder}
+                purposeInlineCustomSelect
                 noteLabel={notesLabel}
                 notePlaceholder={notesPlaceholder}
                 phoneLocked={phoneLocked}

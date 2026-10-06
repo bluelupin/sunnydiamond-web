@@ -56,7 +56,7 @@ import {
   careersOutlineCtaClassName,
 } from "@/features/careers/constants/careersCtaStyles";
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
-import CareersSelectField from "./CareersSelectField";
+import CareersInlineSelectField from "./CareersInlineSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
 import CareersResumeFileChip from "./CareersResumeFileChip";
 import CareersSkillsSearch from "./CareersSkillsSearch";
@@ -709,7 +709,7 @@ const CareersApplicationForm = () => {
                   displayFormat="dd/mm/yyyy"
                 />
               </FormField>
-              <CareersSelectField
+              <CareersInlineSelectField
                 id="careers-gender"
                 label={fields.genderLabel}
                 value={gender}
@@ -717,6 +717,7 @@ const CareersApplicationForm = () => {
                 onBlur={() => markTouched("gender")}
                 options={applicationForm.genderOptions}
                 placeholder="Select Gender"
+                labelClassName={careersFormLabelClassName}
                 error={showError("gender") ? errors.gender : undefined}
               />
             </div>
@@ -790,7 +791,7 @@ const CareersApplicationForm = () => {
             Work Experience
           </h2>
           <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
-            <CareersSelectField
+            <CareersInlineSelectField
               id="careers-relevant-experience"
               label={fields.relevantExperienceLabel}
               value={relevantExperience}
@@ -798,6 +799,7 @@ const CareersApplicationForm = () => {
               onBlur={() => markTouched("relevantExperience")}
               options={applicationForm.workExperienceOptions}
               placeholder="Select Relevant Experience"
+              labelClassName={careersFormLabelClassName}
               error={showError("relevantExperience") ? errors.relevantExperience : undefined}
             />
             <FormField htmlFor="careers-current-company" label={fields.currentCompanyLabel}>
@@ -858,13 +860,14 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-            <CareersSelectField
+            <CareersInlineSelectField
               id="careers-notice-period"
               label={fields.noticePeriodLabel}
               value={noticePeriod}
               onChange={setNoticePeriod}
               options={applicationForm.noticePeriodOptions}
               placeholder="Select Notice Period"
+              labelClassName={careersFormLabelClassName}
             />
           </div>
         </section>

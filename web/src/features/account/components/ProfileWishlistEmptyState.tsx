@@ -20,7 +20,11 @@ export function ProfileWishlistEmptyState() {
             {content.emptyTitle}
           </h3>
           <p className="w-full font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
-            {content.emptyDescription}
+            {content.emptyDescriptionLead}{" "}
+            <br className="lg:hidden" />
+            {content.emptyDescriptionPivot}{" "}
+            <br className="hidden lg:inline" />
+            {content.emptyDescriptionTail}
           </p>
         </div>
 

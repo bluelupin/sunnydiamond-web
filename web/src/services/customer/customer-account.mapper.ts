@@ -51,6 +51,7 @@ type MagentoCustomerOrder = {
   total?: {
     grand_total?: MagentoMoney | null;
   } | null;
+  payment_methods?: { type?: string | null }[] | null;
 } & MagentoSunnyOrderFields;
 
 export type MagentoCustomerOrdersResponse = {
@@ -150,6 +151,9 @@ function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
     }),
     grandTotal: order.total?.grand_total?.value ?? 0,
     currency: order.total?.grand_total?.currency ?? "INR",
+    paymentTypes: (order.payment_methods ?? [])
+      .map((method) => method.type?.trim() ?? "")
+      .filter(Boolean),
     ...mapSunnyOrderFields(order),
   };
 }

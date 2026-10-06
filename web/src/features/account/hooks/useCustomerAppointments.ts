@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { getCustomerAppointments } from "@/services/customer/customer-appointments.client";
 import type { CustomerAppointmentsPage } from "@/services/customer/customer-appointments.types";
 
@@ -17,9 +18,16 @@ export function useCustomerAppointments(
   enabled = true,
   pageSize = 20,
 ): UseCustomerAppointmentsResult {
+  const { status, customer } = useAuth();
+  const customerId = customer?.id;
+  const phone = customer?.phone;
+  const phoneVerified = customer?.phoneVerified;
+  const email = customer?.email;
+  const emailVerified = customer?.emailVerified;
+  const canLoad = enabled && status === "authenticated" && customerId != null;
   const [page, setPage] = useState(1);
   const [data, setData] = useState<CustomerAppointmentsPage | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(enabled));
+  const [isLoading, setIsLoading] = useState(canLoad);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -28,17 +36,19 @@ export function useCustomerAppointments(
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
-      setData(null);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
     const controller = new AbortController();
     let cancelled = false;
 
     void (async () => {
+      // Schedule state updates after the effect; cleanup can cancel a superseded load.
+      await Promise.resolve();
+      if (cancelled) return;
+      if (!canLoad) {
+        setData(null);
+        setIsLoading(false);
+        setError(null);
+        return;
+      }
       setIsLoading(true);
       setError(null);
 
@@ -70,7 +80,9 @@ export function useCustomerAppointments(
       cancelled = true;
       controller.abort();
     };
-  }, [enabled, page, pageSize, refreshKey]);
+    // Scalar identity fields trigger a reload after verification without reloading
+    // merely because auth refresh returned a new customer object.
+  }, [canLoad, customerId, phone, phoneVerified, email, emailVerified, page, pageSize, refreshKey]);
 
   return { data, isLoading, error, page, setPage, refresh };
 }

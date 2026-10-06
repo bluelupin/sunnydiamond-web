@@ -25,7 +25,7 @@ const DiscoverContent = ({
     >
       {heading}
     </h2>
-    <p className="lg:mb-10 mb-8 font-gill font-light leading-110 lg:text-xl md:text-lg text-base lg:text-neutral500 text-darkblack">
+    <p className="max-w-[531px] lg:mb-10 mb-8 font-gill font-light leading-110 lg:text-xl md:text-lg text-base lg:text-neutral500 text-darkblack">
       {subheading}
     </p>
     {steps.length > 0 ? (

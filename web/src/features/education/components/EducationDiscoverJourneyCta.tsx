@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
 import EducationDiscoverJourneyPanel from "./EducationDiscoverJourneyPanel";
 
 type EducationDiscoverJourneyCtaProps = {
   label: string;
-  steps?: string[];
+  steps?: NormalizedEducationDiscoverStep[];
 };
 
 const EducationDiscoverJourneyCta = ({ label, steps = [] }: EducationDiscoverJourneyCtaProps) => {

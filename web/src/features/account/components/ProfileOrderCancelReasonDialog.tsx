@@ -58,7 +58,7 @@ function ProfileOrderCancelReasonDialogBody({
       </p>
 
       <div className="flex flex-col gap-4">
-        <p className="font-larken text-xl font-light leading-110 text-darkblack">
+        <p className="font-gill text-xl font-normal leading-110 text-darkblack">
           {dialog.reasonLabel}
         </p>
         <div className="flex flex-col gap-4">

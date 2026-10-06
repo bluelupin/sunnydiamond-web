@@ -16,15 +16,12 @@ type ProfileOrderReturnSuccessDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderNumber: string;
-  /** Refund ETA from the return mutation — absent until the refund is scheduled. */
-  refundNote?: string;
 };
 
 export function ProfileOrderReturnSuccessDialog({
   open,
   onOpenChange,
   orderNumber,
-  refundNote,
 }: ProfileOrderReturnSuccessDialogProps) {
   const { toast } = useToast();
   const content = profileTabsContent.orders;
@@ -69,11 +66,6 @@ export function ProfileOrderReturnSuccessDialog({
             <p className="font-gill text-base font-light leading-110 text-neutral500">
               {dialog.description}
             </p>
-            {refundNote ? (
-              <p className="font-gill text-base font-light leading-110 text-neutral500">
-                {refundNote}
-              </p>
-            ) : null}
           </div>
 
           <span className="inline-flex items-center gap-1 font-gill text-base leading-110 text-darkblack">

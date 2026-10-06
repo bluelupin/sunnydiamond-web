@@ -16,7 +16,6 @@ import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import { useOrderActionReasons } from "../hooks/useOrderActionReasons";
 import { useOrderActions } from "../hooks/useOrderActions";
-import { useOrderInvoiceDownload } from "../hooks/useOrderInvoiceDownload";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
 import {
@@ -26,7 +25,6 @@ import {
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
 } from "../utils/orderDeliveryTimeline.utils";
-import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderMobileThumbnails } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
@@ -100,15 +98,11 @@ export function ProfileOrderCard({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
   const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
-  const [refundNote, setRefundNote] = useState<string | undefined>(undefined);
   const [changedOrder, setChangedOrder] = useState<TrackedOrder | null>(null);
   const [localResolvedStatus, setLocalResolvedStatus] = useState<string | null>(null);
   const content = profileTabsContent.orders;
   const { cancelReasons, returnReasons } = useOrderActionReasons();
   const { isSubmitting, error, clearError, cancelOrder, returnOrder } = useOrderActions();
-  const { download, downloadingNumber } = useOrderInvoiceDownload();
-  const isDownloadingInvoice = downloadingNumber === order.number;
-  const invoiceDisabled = Boolean(order.invoiceDisabled) || isDownloadingInvoice;
   const giftCardDeliveredBadge =
     order.category === "delivered" && isGiftCardProfileOrder(order);
 
@@ -117,7 +111,12 @@ export function ProfileOrderCard({
   }, [order.id, order.status]);
 
   const timelineSteps = useMemo(() => {
-    if (giftCardDeliveredBadge || isActiveDigitalGiftCardOrder(order)) {
+    // Figma: delivered order cards carry no progress tracker.
+    if (order.category === "delivered" || isActiveDigitalGiftCardOrder(order)) {
+      return [];
+    }
+    // Cancelled COD orders carry no refund steps; never fall back to the delivery stepper.
+    if (order.category === "cancelled" && !order.timeline?.length) {
       return [];
     }
 
@@ -126,17 +125,20 @@ export function ProfileOrderCard({
       order.timeline,
       order.timelineFromServer ? order.timeline : null,
     );
-  }, [
-    giftCardDeliveredBadge,
-    order,
-    resolvedStatus,
-    localResolvedStatus,
-  ]);
+  }, [order, resolvedStatus, localResolvedStatus]);
 
   const mobileDeliveryMeta = getMobileDeliveryMeta(order);
   const mobileStatusLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
+  const showDesktopContactUs = Boolean(order.showContactUs) || order.category === "delivered";
+  const hasOtherDesktopAction =
+    Boolean(order.showCancel) ||
+    (Boolean(order.showTrack) && order.category !== "delivered") ||
+    Boolean(order.showReturn);
+  // Figma: Contact Us alone sits right-aligned at half width.
+  const contactUsAlignedRight =
+    giftCardDeliveredBadge || (showDesktopContactUs && !hasOtherDesktopAction);
 
   const handleCopyOrderId = async () => {
     try {
@@ -150,18 +152,6 @@ export function ProfileOrderCard({
         description: "Please copy the order ID manually.",
       });
     }
-  };
-
-  const handleDownloadInvoice = () => {
-    if (order.isDummyPreview) {
-      toast({
-        title: "Preview order",
-        description: "Invoice download is not available for preview gift card orders.",
-      });
-      return;
-    }
-
-    void download(order.number);
   };
 
   const handleReturnOrder = () => {
@@ -207,7 +197,6 @@ export function ProfileOrderCard({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setChangedOrder(freshOrder);
       setCancelReasonDialogOpen(false);
       setCancelSuccessDialogOpen(true);
@@ -233,7 +222,6 @@ export function ProfileOrderCard({
         ...(payload.comments ? { comment: payload.comments } : {}),
       });
 
-      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
       setChangedOrder(freshOrder);
       setReturnReasonDialogOpen(false);
       setReturnSuccessDialogOpen(true);
@@ -332,7 +320,7 @@ export function ProfileOrderCard({
               label={order.statusLabel}
               category={order.category}
               subState={order.subState}
-              giftCardDelivered={giftCardDeliveredBadge}
+              giftCardDelivered={order.category === "delivered"}
             />
 
             <div className="flex items-center justify-between">
@@ -360,7 +348,11 @@ export function ProfileOrderCard({
 
               {order.deliveryBy ? (
                 <span className="font-gill text-base leading-110 text-darkblack">
-                  <span className="font-light">{content.deliveryByLabel} </span>
+                  <span className="font-light">
+                    {order.category === "delivered"
+                      ? content.deliveredOnLabel
+                      : content.deliveryByLabel}{" "}
+                  </span>
                   <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
                 </span>
               ) : null}
@@ -380,25 +372,6 @@ export function ProfileOrderCard({
               {order.items.map((item) => (
                 <ProfileOrderItemRow key={item.id} item={item} />
               ))}
-            </div>
-          ) : null}
-
-          {/* A paid digital card stays "in progress" (Magento has no delivered step for it) but has an invoice. */}
-          {order.showDownloadInvoice &&
-          (order.category !== "in_progress" ||
-            (isActiveDigitalGiftCardOrder(order) && order.invoiceDisabled === false)) ? (
-            <div className="flex justify-end">
-              <DetailTextLink
-                onClick={invoiceDisabled ? undefined : handleDownloadInvoice}
-                className={cn(
-                  "text-sm uppercase",
-                  invoiceDisabled && "pointer-events-none opacity-50",
-                )}
-              >
-                {isDownloadingInvoice
-                  ? content.downloadingInvoiceLabel
-                  : content.downloadInvoiceLabel}
-              </DetailTextLink>
             </div>
           ) : null}
 
@@ -428,14 +401,14 @@ export function ProfileOrderCard({
               </DetailDarkButton>
             </div>
           ) : (
-            <div className={cn("flex gap-6", giftCardDeliveredBadge && "justify-end")}>
+            <div className={cn("flex gap-6", contactUsAlignedRight && "justify-end")}>
               {order.showCancel ? (
                 <DetailOutlineButton type="button" className="flex-1" onClick={handleCancelOrder}>
                   {content.cancelOrderLabel}
                 </DetailOutlineButton>
               ) : null}
 
-              {order.showTrack && !giftCardDeliveredBadge ? (
+              {order.showTrack && order.category !== "delivered" ? (
                 <DetailDarkButton type="button" className="flex-1" onClick={handleTrackOrder}>
                   {content.trackOrderLabel}
                 </DetailDarkButton>
@@ -447,11 +420,11 @@ export function ProfileOrderCard({
                 </DetailOutlineButton>
               ) : null}
 
-              {order.showContactUs ? (
+              {showDesktopContactUs ? (
                 <DetailDarkButton
                   type="button"
                   className={
-                    giftCardDeliveredBadge ? DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS : "flex-1"
+                    contactUsAlignedRight ? DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS : "flex-1"
                   }
                   onClick={handleContactSupport}
                 >
@@ -497,7 +470,6 @@ export function ProfileOrderCard({
         open={cancelSuccessDialogOpen}
         onOpenChange={(open) => handleSuccessDialogChange(setCancelSuccessDialogOpen, open)}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
 
       <ProfileOrderReturnDialog
@@ -520,7 +492,6 @@ export function ProfileOrderCard({
         open={returnSuccessDialogOpen}
         onOpenChange={(open) => handleSuccessDialogChange(setReturnSuccessDialogOpen, open)}
         orderNumber={order.number}
-        refundNote={refundNote}
       />
     </>
   );

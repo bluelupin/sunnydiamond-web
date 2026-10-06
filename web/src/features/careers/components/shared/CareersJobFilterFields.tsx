@@ -1,8 +1,9 @@
 "use client";
 
-import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
-import CareersSelectField from "./CareersSelectField";
+import CareersInlineSelectField from "./CareersInlineSelectField";
+
+const CAREERS_FILTER_PLACEHOLDER = "Select";
 
 type FilterFieldProps = {
   id: string;
@@ -14,15 +15,13 @@ type FilterFieldProps = {
 
 const FilterField = ({ id, label, value, options, onChange }: FilterFieldProps) => {
   return (
-    <CareersSelectField
+    <CareersInlineSelectField
       id={id}
       label={label}
       value={value}
       options={options}
+      placeholder={CAREERS_FILTER_PLACEHOLDER}
       onChange={onChange}
-      labelClassName={appointmentLabelClassName}
-      // Figma: unselected "Select" is muted grey (not darkblack selected text).
-      triggerClassName={!value ? "text-gray600 [&>span]:text-gray600" : undefined}
     />
   );
 };

@@ -107,14 +107,15 @@ function getModifyDeadline(
   };
 }
 
+/** Rescheduling uses the original three-calendar-day cutoff. */
+export const APPOINTMENT_MODIFY_DEADLINE_DAYS = 3;
+
 export function canModifyAppointmentBeforeDeadline(
   requestedDate: string,
-  selectedSlot: string | null | undefined,
-  minNoticeMinutes: number,
   referenceDate = new Date(),
 ): boolean {
-  const modifyDeadline = getModifyDeadline(requestedDate, selectedSlot, minNoticeMinutes);
-  return modifyDeadline != null && referenceDate.getTime() < modifyDeadline.deadline.getTime();
+  const bookingDate = parseBookingDate(requestedDate);
+  return bookingDate != null && getDaysUntilAppointment(bookingDate, referenceDate) >= APPOINTMENT_MODIFY_DEADLINE_DAYS;
 }
 
 function formatDeadlineTime(date: Date): string {
@@ -182,9 +183,12 @@ export const formatTryAtHomeAddItemsDeadline = (
 /** Listing note: "Appointment can be rescheduled before {date}" (date only). */
 export const formatTryAtHomeRescheduleDeadline = (
   date: string,
-  selectedSlot: string | null | undefined,
-  minNoticeMinutes: number,
-): string => formatModifyDeadline(date, selectedSlot, minNoticeMinutes, false, false);
+): string => {
+  const deadline = parseBookingDate(date);
+  if (!deadline) return "";
+  deadline.setDate(deadline.getDate() - APPOINTMENT_MODIFY_DEADLINE_DAYS);
+  return deadline.toLocaleDateString("en-IN", BOOKING_DATE_PART_DISPLAY);
+};
 
 export type TryAtHomeSlotAddress = {
   addressLine1: string;
@@ -265,6 +269,60 @@ export function countAdditionalTryAtHomeItemsForSlot(
     ].join("|");
 
     if (date !== targetDate || time !== targetTime || address !== targetAddress) {
+      continue;
+    }
+
+    const products =
+      appointment.products.length > 0
+        ? appointment.products
+        : appointment.productId || appointment.productName
+          ? [{ productId: appointment.productId, productName: appointment.productName }]
+          : [];
+
+    for (const product of products) {
+      const productId = product.productId?.trim() ?? "";
+      if (currentProductId && productId && productId === currentProductId) {
+        continue;
+      }
+      moreItems += 1;
+    }
+  }
+
+  return moreItems;
+}
+
+/**
+ * Count other video call products already booked for the same date + time
+ * (video calls have no address — same rule as Profile > Appointments clubbing).
+ * Used on the success screen: "Your booking has N more items".
+ */
+export function countAdditionalVideoCallItemsForSlot(
+  appointments: Parameters<typeof countAdditionalTryAtHomeItemsForSlot>[0],
+  slot: {
+    date: string;
+    selectedSlot: string | null;
+    /** Exclude the product just booked so the count is "more items", not total. */
+    currentProductId?: string;
+  },
+): number {
+  const targetDate = normalizeAppointmentDateInput(slot.date);
+  const targetTime = normalizeClubPart(slot.selectedSlot);
+  const currentProductId = slot.currentProductId?.trim() ?? "";
+
+  if (!targetDate || !targetTime) {
+    return 0;
+  }
+
+  let moreItems = 0;
+
+  for (const appointment of appointments) {
+    if (!appointment.formTag.trim().toLowerCase().includes("video")) continue;
+    if (isCancelledWorkflowStatus(appointment.workflowStatus)) continue;
+
+    const date = normalizeAppointmentDateInput(appointment.requestedDate);
+    const time = normalizeClubPart(appointment.selectedTimeSlot);
+
+    if (date !== targetDate || time !== targetTime) {
       continue;
     }
 

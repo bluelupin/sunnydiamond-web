@@ -28,6 +28,8 @@ export type CustomerOrder = {
   currency: string;
   /** Order comment messages (used to detect gift-marked line items). */
   commentMessages?: string[];
+  /** Magento payment method codes, e.g. "cashondelivery". */
+  paymentTypes?: string[];
 } & TrackedOrderSunnyFields;
 
 export type CustomerOrdersPage = {

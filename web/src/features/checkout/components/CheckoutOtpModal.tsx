@@ -134,7 +134,7 @@ const CheckoutOtpFields = ({
         ))}
       </div>
     </div>
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex items-center justify-between w-full gap-1">
       <FormFieldError message={otpError ?? undefined} className="w-full" />
       {secondsLeft > 0 ? (
         <p className="font-gill text-base font-light leading-110 text-darkblack text-right w-full">

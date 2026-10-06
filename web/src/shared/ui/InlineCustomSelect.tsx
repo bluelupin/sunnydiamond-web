@@ -43,6 +43,8 @@ type InlineCustomSelectProps = {
    * cannot receive clicks). Default `portaled` matches Contact Us page behaviour.
    */
   listPlacement?: "portaled" | "inline";
+  /** When true, the placeholder row clears the value (filter dropdowns). */
+  allowClearSelection?: boolean;
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
@@ -99,6 +101,7 @@ const InlineCustomSelect = ({
   placeholderClassName,
   disabled = false,
   listPlacement = "portaled",
+  allowClearSelection = false,
 }: InlineCustomSelectProps) => {
   const isInlineList = listPlacement === "inline";
   const [isOpen, setIsOpen] = useState(false);
@@ -229,6 +232,12 @@ const InlineCustomSelect = ({
     onBlur?.();
   };
 
+  const clearSelection = () => {
+    onChange("");
+    setIsOpen(false);
+    onBlur?.();
+  };
+
   const listbox =
     shouldRenderList && (isInlineList || listPosition) ? (
       <div
@@ -272,6 +281,28 @@ const InlineCustomSelect = ({
           listClassName,
         )}
       >
+        {allowClearSelection ? (
+          <button
+            type="button"
+            role="option"
+            aria-selected={!value}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              clearSelection();
+            }}
+            className={cn(
+              "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110",
+              "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
+              !value
+                ? "bg-[#DECAA0] font-normal text-darkblack"
+                : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
+              optionClassName,
+            )}
+          >
+            {placeholder}
+          </button>
+        ) : null}
         {options.map((option) => {
           const selected = value === option;
 

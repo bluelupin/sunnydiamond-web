@@ -36,7 +36,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await getOpenCustomerAppointments(customer.id, customer.email);
+    const data = await getOpenCustomerAppointments(
+      customer.id,
+      customer.email,
+      undefined,
+      customer.phone,
+    );
     return NextResponse.json({ data });
   } catch (error) {
     if (error instanceof CustomerAppointmentsApiError) {

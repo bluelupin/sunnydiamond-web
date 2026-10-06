@@ -1,3 +1,4 @@
+import { REGISTRATION_SESSION_EXPIRED_MESSAGE } from "@/services/auth/authErrorMessages";
 import { splitProfileFullName } from "@/shared/utils/customerName";
 
 /**
@@ -214,9 +215,10 @@ export async function createCustomerAccount(input: {
   });
 
   if (!ok || !data?.ok || data.registrationRequired) {
+    const apiError = (data?.error as string | undefined)?.trim();
     return {
       success: false,
-      error: (data?.error as string) ?? "We could not create your account. Please try again.",
+      error: apiError || REGISTRATION_SESSION_EXPIRED_MESSAGE,
     };
   }
 

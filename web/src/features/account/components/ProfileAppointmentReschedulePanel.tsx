@@ -277,7 +277,22 @@ export function ProfileAppointmentReschedulePanel({
     return true;
   }, [bookingWindow, date, hasTimeSlots, isSubmitting, selectedSlot]);
 
-  const canSave = canProceedToAddress && !hasAddressErrors;
+  const hasChanges = useMemo(() => {
+    if (!appointment) return false;
+    const initialPhone = splitStoredPhone(appointment.customerPhone);
+    return (
+      name.trim() !== (appointment.customerName ?? "").trim() ||
+      countryCode !== initialPhone.countryCode ||
+      phone.trim() !== initialPhone.phone.trim() ||
+      email.trim() !== (appointment.customerEmail ?? "").trim() ||
+      note.trim() !== (appointment.notes ?? "").trim() ||
+      date !== normalizeAppointmentDateInput(appointment.requestedDate) ||
+      (selectedSlot?.trim() ?? "") !== (appointment.bookingTime?.trim() ?? "") ||
+      isAddressChanged
+    );
+  }, [appointment, countryCode, date, email, isAddressChanged, name, note, phone, selectedSlot]);
+
+  const canSave = canProceedToAddress && !hasAddressErrors && hasChanges;
 
   const handleUseCurrentLocation = async () => {
     const detected = await detectAddress();
@@ -359,25 +374,31 @@ export function ProfileAppointmentReschedulePanel({
         const customerEmail = email.trim();
         const requestDetails = note.trim();
 
-        await rescheduleCustomerAppointment(appointment.id, {
-          requestedDate: date,
-          selectedTimeSlot: selectedSlot ?? "",
-          ...(customerName ? { customerName } : {}),
-          ...(customerPhone ? { customerPhone } : {}),
-          ...(customerEmail ? { customerEmail } : {}),
-          ...(requestDetails ? { requestDetails } : {}),
-          ...(isAddressChanged
-            ? {
-                address: {
-                  addressLine1: addressLine1.trim(),
-                  pincode: pincode.trim(),
-                  city: city.trim(),
-                  ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
-                  ...(addressState.trim() ? { state: addressState.trim() } : {}),
-                },
-              }
-            : {}),
-        });
+        // Video calls are rescheduled atomically by the CMS appointment group.
+        const appointmentIds = appointment.type === 'video_call'
+          ? [appointment.id]
+          : [...new Set([appointment.id, ...(appointment.clubbedAppointmentIds ?? [])])];
+        for (const appointmentId of appointmentIds) {
+          await rescheduleCustomerAppointment(appointmentId, {
+            requestedDate: date,
+            selectedTimeSlot: selectedSlot ?? "",
+            ...(customerName ? { customerName } : {}),
+            ...(customerPhone ? { customerPhone } : {}),
+            ...(customerEmail ? { customerEmail } : {}),
+            ...(requestDetails ? { requestDetails } : {}),
+            ...(isAddressChanged
+              ? {
+                  address: {
+                    addressLine1: addressLine1.trim(),
+                    pincode: pincode.trim(),
+                    city: city.trim(),
+                    ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
+                    ...(addressState.trim() ? { state: addressState.trim() } : {}),
+                  },
+                }
+              : {}),
+          });
+        }
         onRescheduled();
         onClose();
       } catch (error) {

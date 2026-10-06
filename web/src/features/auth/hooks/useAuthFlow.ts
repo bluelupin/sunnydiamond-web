@@ -31,10 +31,9 @@ import {
 import { getLoginHrefForReturn, getPostSignupReturnUrl, sanitizeReturnUrl } from "../utils/authNavigation";
 import { setAuthLoginIdentifierKind } from "../utils/authLoginIdentifier";
 import type { AuthCreateAccountResume } from "../context/LoginModalContext";
-import {
-  isRegistrationSessionExpiredError,
-  REGISTRATION_SESSION_EXPIRED_MESSAGE,
-} from "@/services/auth/authErrorMessages";
+import { isRegistrationSessionExpiredError } from "@/services/auth/authErrorMessages";
+import { isGuestCheckoutPlaceholderEmail } from "@/services/magento/cart/checkoutAddress.mapper";
+import { useToast } from "@/shared/hooks/use-toast";
 
 /**
  * Sign-in is passwordless: every identifier — mobile or email — leads to a
@@ -53,6 +52,8 @@ type UseAuthFlowOptions = {
   onComplete: (returnUrl: string) => void;
   onAbort: () => void;
   surface?: "modal" | "standalone";
+  /** Guest checkout create-account: reopen checkout OTP instead of in-modal OTP. */
+  onCheckoutRegistrationSessionExpired?: () => boolean;
 };
 
 function otpCodeToDigitArray(code: string): string[] {
@@ -140,9 +141,11 @@ export function useAuthFlow({
   initialIdentifier = "",
   createAccountResume = null,
   onAbort,
+  onCheckoutRegistrationSessionExpired,
   surface = "standalone",
 }: UseAuthFlowOptions) {
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
+  const { toast } = useToast();
   const flags = useAuthFeatures();
   const showGoogle = flags.googleLoginEnabled && isGoogleSignInConfigured();
   const showApple = flags.appleLoginEnabled && isAppleSignInConfigured();
@@ -193,6 +196,7 @@ export function useAuthFlow({
   const resumeAppliedKeyRef = useRef<string | null>(null);
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
+  const registrationSessionToastRef = useRef<ReturnType<typeof toast> | null>(null);
 
   /**
    * Each step states its own precondition, so neither can be rendered — even for
@@ -275,6 +279,8 @@ export function useAuthFlow({
     setTermsError(undefined);
     setCreateAccountFormError(undefined);
     setRegistrationSessionRefreshSeconds(null);
+    registrationSessionToastRef.current?.dismiss();
+    registrationSessionToastRef.current = null;
     setIsSubmitting(false);
     hasLeftSignIn.current = false;
     otpAcceptedForRegistrationRef.current = false;
@@ -333,8 +339,10 @@ export function useAuthFlow({
       setCountryCode(cc);
       setVerifiedCountryCode(cc);
       setIdentifier(phoneDisplay ?? target.phone.replace(/\D/g, ""));
-      if (seededEmail) {
+      if (seededEmail && !isGuestCheckoutPlaceholderEmail(seededEmail)) {
         setEmail(seededEmail);
+      } else {
+        setEmail("");
       }
     }
 
@@ -368,27 +376,6 @@ export function useAuthFlow({
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, [resetState, surface]);
-
-  useEffect(() => {
-    if (registrationSessionRefreshSeconds === null) {
-      return;
-    }
-
-    if (registrationSessionRefreshSeconds <= 0) {
-      window.location.reload();
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setRegistrationSessionRefreshSeconds((current) =>
-        current === null ? null : current - 1,
-      );
-    }, 1000);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [registrationSessionRefreshSeconds]);
 
   useEffect(() => {
     if (!active || step !== "otp") return;
@@ -481,6 +468,76 @@ export function useAuthFlow({
     },
     [],
   );
+
+  const recoverRegistrationSession = useCallback(async () => {
+    setRegistrationSessionRefreshSeconds(null);
+    setCreateAccountFormError(undefined);
+    otpAcceptedForRegistrationRef.current = false;
+    setOtpVerified(false);
+    setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
+    setOtpError(undefined);
+
+    if (onCheckoutRegistrationSessionExpired?.()) {
+      return;
+    }
+
+    if (!otpTarget) {
+      setStep("sign-in");
+      return;
+    }
+
+    setStep("otp");
+    const result = await sendOtp(otpTarget);
+    if (!result.ok) {
+      setOtpError(result.error);
+      return;
+    }
+
+    setSecondsLeft(cooldownRef.current);
+    inputRefs.current[0]?.focus();
+  }, [onCheckoutRegistrationSessionExpired, otpTarget, sendOtp]);
+
+  useEffect(() => {
+    if (registrationSessionRefreshSeconds === null) {
+      registrationSessionToastRef.current?.dismiss();
+      registrationSessionToastRef.current = null;
+      return;
+    }
+
+    if (registrationSessionRefreshSeconds <= 0) {
+      registrationSessionToastRef.current?.dismiss();
+      registrationSessionToastRef.current = null;
+      void recoverRegistrationSession();
+      return;
+    }
+
+    const seconds = registrationSessionRefreshSeconds;
+    const description = `Returning to verification in ${seconds} second${
+      seconds === 1 ? "" : "s"
+    }...`;
+
+    if (!registrationSessionToastRef.current) {
+      registrationSessionToastRef.current = toast({
+        title: "Session expired",
+        description,
+      });
+    } else {
+      registrationSessionToastRef.current.update({
+        title: "Session expired",
+        description,
+      });
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRegistrationSessionRefreshSeconds((current) =>
+        current === null ? null : current - 1,
+      );
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [recoverRegistrationSession, registrationSessionRefreshSeconds, toast]);
 
   const handleContinue = useCallback(async () => {
     if (isSubmitting || otpBlockedForCountry) return;
@@ -663,7 +720,7 @@ export function useAuthFlow({
     if (!result.success) {
       setIsSubmitting(false);
       if (isRegistrationSessionExpiredError(result.error)) {
-        setCreateAccountFormError(REGISTRATION_SESSION_EXPIRED_MESSAGE);
+        setCreateAccountFormError(undefined);
         setRegistrationSessionRefreshSeconds(REGISTRATION_SESSION_REFRESH_SECONDS);
         return;
       }

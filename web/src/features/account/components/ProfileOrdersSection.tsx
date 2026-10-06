@@ -78,7 +78,7 @@ const ProfileOrdersSection = () => {
 
   const { data, isLoading, isLoadingMore, error, hasMore, loadMore, refresh } =
     useCustomerOrders(true);
-  const [activeFilter, setActiveFilter] = useState<OrderFilterKey>("in_progress");
+  const [activeFilter, setActiveFilter] = useState<OrderFilterKey | null>(null);
   const [resolvedStatuses, setResolvedStatuses] = useState<Record<string, string>>({});
   const [orderOverrides, setOrderOverrides] = useState<Record<string, ProfileOrderOverride>>({});
 
@@ -152,7 +152,8 @@ const ProfileOrdersSection = () => {
   }, [apiOrders]);
 
   const filteredOrders = useMemo(
-    () => orders.filter((order) => order.category === activeFilter),
+    () =>
+      activeFilter ? orders.filter((order) => order.category === activeFilter) : orders,
     [orders, activeFilter],
   );
 
@@ -256,7 +257,7 @@ const ProfileOrdersSection = () => {
       </div>
 
       {filteredOrders.length === 0 ? (
-        isOrderFilterEmptyStateKey(activeFilter) ? (
+        activeFilter && isOrderFilterEmptyStateKey(activeFilter) ? (
           <ProfileOrdersEmptyState
             title={content.emptyFilterStates[activeFilter].title}
             descriptionPrimary={content.emptyFilterStates[activeFilter].descriptionPrimary}

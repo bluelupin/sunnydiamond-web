@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import CopyIcon from "@/assets/Icons/CopyIcon";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -18,37 +19,33 @@ type ProfileOrderCancelSuccessDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderNumber: string;
-  /** Refund ETA from the cancellation mutation — absent for unpaid orders. */
-  refundNote?: string;
 };
 
 type ProfileOrderCancelSuccessDialogBodyProps = {
   dialog: (typeof profileTabsContent.orders)["cancelSuccessDialog"];
   content: typeof profileTabsContent.orders;
   orderNumber: string;
-  refundNote?: string;
   onCopyOrderId: () => void;
+  title?: ReactNode;
 };
 
 function ProfileOrderCancelSuccessDialogBody({
   dialog,
   content,
   orderNumber,
-  refundNote,
   onCopyOrderId,
+  title,
 }: ProfileOrderCancelSuccessDialogBodyProps) {
   return (
     <>
-      <p className="font-gill text-base font-light leading-110 text-neutral500">
-        {dialog.description}
-      </p>
-      {refundNote ? (
-        <p className="font-gill text-base font-light leading-110 text-neutral500">
-          {refundNote}
+      <div className="flex w-full flex-col gap-4">
+        {title}
+        <p className="font-gill text-base font-light leading-110 text-darkblack">
+          {dialog.description}
         </p>
-      ) : null}
+      </div>
 
-      <span className="inline-flex items-center gap-1 font-gill text-base leading-110 text-darkblack">
+      <span className="flex w-full items-center justify-center gap-1 font-gill text-base leading-110 text-darkblack">
         <span className="font-light">{content.orderIdLabel}</span>
         <span className="font-normal">{orderNumber}</span>
         <button
@@ -69,7 +66,6 @@ export function ProfileOrderCancelSuccessDialog({
   open,
   onOpenChange,
   orderNumber,
-  refundNote,
 }: ProfileOrderCancelSuccessDialogProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -94,7 +90,6 @@ export function ProfileOrderCancelSuccessDialog({
     dialog,
     content,
     orderNumber,
-    refundNote,
     onCopyOrderId: () => void handleCopyOrderId(),
   };
 
@@ -130,9 +125,7 @@ export function ProfileOrderCancelSuccessDialog({
                 <img src={SUCCESS_ICON_SRC} alt="" className="block size-full max-w-none" />
               </span>
 
-              <div className="flex w-full flex-col gap-4">
-                <ProfileOrderCancelSuccessDialogBody {...bodyProps} />
-              </div>
+              <ProfileOrderCancelSuccessDialogBody {...bodyProps} />
             </div>
           </div>
         </SheetContent>
@@ -160,12 +153,14 @@ export function ProfileOrderCancelSuccessDialog({
             <img src={SUCCESS_ICON_SRC} alt="" className="block size-full max-w-none" />
           </span>
 
-          <div className="flex w-full flex-col gap-4">
-            <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
-              {dialog.title}
-            </DialogTitle>
-            <ProfileOrderCancelSuccessDialogBody {...bodyProps} />
-          </div>
+          <ProfileOrderCancelSuccessDialogBody
+            {...bodyProps}
+            title={
+              <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
+                {dialog.title}
+              </DialogTitle>
+            }
+          />
         </div>
       </DialogContent>
     </Dialog>

@@ -154,6 +154,8 @@ function mapOrderActionReasons(reasons: MagentoOrderReason[] | null | undefined)
 export async function fetchOrderActionReasons(): Promise<OrderActionReasons> {
   const data = await magentoGraphqlFetch<SunnyOrderReasonsResponse>({
     query: SUNNY_ORDER_REASONS_QUERY,
+    // TEMP: no cache while reasons are updated in Magento — remove before go-live.
+    cache: "no-store",
   });
 
   return {

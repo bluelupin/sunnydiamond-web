@@ -245,12 +245,17 @@ export type NormalizedEducationFaqSection = {
   items: NormalizedEducationFaqItem[];
 };
 
+export type NormalizedEducationDiscoverStep = {
+  title: string;
+  description: string;
+};
+
 export type NormalizedEducationCtaBanner = {
   heading: string;
   subheading: string;
   ctaLabel?: string;
   ctaHref?: string;
-  steps: string[];
+  steps: NormalizedEducationDiscoverStep[];
   imageDesktopUrl: string;
   imageMobileUrl: string;
   imageAlt: string;

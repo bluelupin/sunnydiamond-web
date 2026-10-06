@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { fetchOrderActionReasons } from "@/services/customer/order-actions.service";
 
-/** Reason lists come from admin config — hourly refresh is plenty. */
-export const revalidate = 3600;
+/** Reason lists come from admin config. TEMP: caching off while reasons are updated in Magento — restore 3600 before go-live. */
+export const revalidate = 0;
 
 export async function GET() {
   try {
