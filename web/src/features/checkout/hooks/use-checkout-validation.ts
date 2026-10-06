@@ -25,16 +25,15 @@ export const useCheckoutFormValidation = (
   // Destructured to scalars so the memos below are not invalidated by a fresh
   // options object on every render.
   const emailOnly = contactOptions?.emailOnly ?? false;
-  const requireDeliveryPhone = contactOptions?.requireDeliveryPhone ?? false;
 
   const errors = useMemo(
-    () => getCheckoutFormErrors(values, INDIAN_STATES, { emailOnly, requireDeliveryPhone }),
-    [emailOnly, requireDeliveryPhone, values],
+    () => getCheckoutFormErrors(values, INDIAN_STATES, { emailOnly }),
+    [emailOnly, values],
   );
 
   const isValid = useMemo(
-    () => isCheckoutFormValid(values, INDIAN_STATES, { emailOnly, requireDeliveryPhone }),
-    [emailOnly, requireDeliveryPhone, values],
+    () => isCheckoutFormValid(values, INDIAN_STATES, { emailOnly }),
+    [emailOnly, values],
   );
 
   const markTouched = useCallback((field: CheckoutFormField) => {
@@ -51,11 +50,11 @@ export const useCheckoutFormValidation = (
     (onValid: () => void) => {
       setSubmitted(true);
 
-      if (isCheckoutFormValid(values, INDIAN_STATES, { emailOnly, requireDeliveryPhone })) {
+      if (isCheckoutFormValid(values, INDIAN_STATES, { emailOnly })) {
         onValid();
       }
     },
-    [emailOnly, requireDeliveryPhone, values],
+    [emailOnly, values],
   );
 
   const resetValidation = useCallback(() => {

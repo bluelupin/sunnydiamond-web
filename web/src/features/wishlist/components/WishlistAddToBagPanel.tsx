@@ -324,7 +324,7 @@ const WishlistAddToBagPanel = ({
                     labelClassName="sr-only"
                     value={ringSize}
                     options={sizeLabels}
-                    placeholder="-select-"
+                    placeholder="Select"
                     onChange={(value) => {
                       setRingSize(value);
                       if (value) {

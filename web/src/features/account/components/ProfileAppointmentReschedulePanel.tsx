@@ -131,8 +131,8 @@ function RescheduleStoreVisitCard({
   const store = useMemo<BookStoreVisitStore>(() => {
     const matched = storeVisit.showroomDocumentId
       ? resolveBookStoreVisitStores([], editorialShowrooms ?? []).find(
-          (entry) => entry.documentId === storeVisit.showroomDocumentId,
-        )
+        (entry) => entry.documentId === storeVisit.showroomDocumentId,
+      )
       : undefined;
 
     return (
@@ -252,12 +252,12 @@ export function ProfileAppointmentReschedulePanel({
     () =>
       isAddressChanged
         ? {
-            addressLine1: validateAddressLine1(addressLine1).error,
-            addressLine2: validateOptionalAddressLine2(addressLine2).error,
-            pincode: validateIndianPincode(pincode).error,
-            city: validateCity(city).error,
-            state: validateIndianState(addressState, stateOptions).error,
-          }
+          addressLine1: validateAddressLine1(addressLine1).error,
+          addressLine2: validateOptionalAddressLine2(addressLine2).error,
+          pincode: validateIndianPincode(pincode).error,
+          city: validateCity(city).error,
+          state: validateIndianState(addressState, stateOptions).error,
+        }
         : {},
     [addressLine1, addressLine2, addressState, city, isAddressChanged, pincode, stateOptions],
   );
@@ -388,14 +388,14 @@ export function ProfileAppointmentReschedulePanel({
             ...(requestDetails ? { requestDetails } : {}),
             ...(isAddressChanged
               ? {
-                  address: {
-                    addressLine1: addressLine1.trim(),
-                    pincode: pincode.trim(),
-                    city: city.trim(),
-                    ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
-                    ...(addressState.trim() ? { state: addressState.trim() } : {}),
-                  },
-                }
+                address: {
+                  addressLine1: addressLine1.trim(),
+                  pincode: pincode.trim(),
+                  city: city.trim(),
+                  ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
+                  ...(addressState.trim() ? { state: addressState.trim() } : {}),
+                },
+              }
               : {}),
           });
         }
@@ -678,7 +678,7 @@ export function ProfileAppointmentReschedulePanel({
                     label={cmsForm?.stateLabel ?? "State"}
                     value={addressState}
                     options={stateOptions}
-                    placeholder={cmsForm?.statePlaceholder ?? "-select-"}
+                    placeholder={cmsForm?.statePlaceholder ?? "Select"}
                     onChange={setAddressState}
                     onBlur={() => markAddressTouched("state")}
                     labelClassName={appointmentLabelClassName}

@@ -125,7 +125,7 @@ const AppointmentContactFields = ({
   showPurpose = false,
   purposeOptions = [],
   purposeLabel = "Purpose of Visit",
-  purposePlaceholder = "-select-",
+  purposePlaceholder = "Select",
   purposeInlineCustomSelect = false,
   nameLabel = "Your Name*",
   namePlaceholder,

@@ -90,38 +90,38 @@ const ProductDetailHeroBanner = ({
     <section
       ref={sectionRef}
       aria-label="Lifestyle showcase"
-      className="grid h-361 w-full overflow-hidden md:h-600 lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
+      className="grid h-[400px] w-full overflow-hidden md:h-[500px] lg:h-[600px] [&>*]:col-start-1 [&>*]:row-start-1"
     >
-        <Image
-          src={imageSrc}
-          alt={alt}
-          width={1440}
-          height={800}
-          priority={false}
-          className="h-full w-full object-cover object-top"
-          sizes="100vw"
-        />
+      <Image
+        src={imageSrc}
+        alt={alt}
+        width={1440}
+        height={800}
+        priority={false}
+        className="h-full w-full object-cover object-top"
+        sizes="100vw"
+      />
 
-        {showVideo ? (
-          <video
-            key={videoSrc}
-            ref={videoRef}
-            className="h-full w-full object-cover object-top"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            poster={imageSrc}
-            aria-hidden
-            tabIndex={-1}
-            onCanPlay={handleVideoCanPlay}
-            onError={handleVideoError}
-          >
-            {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
-            <source src={videoSrc} type={videoMimeType} />
-          </video>
-        ) : null}
+      {showVideo ? (
+        <video
+          key={videoSrc}
+          ref={videoRef}
+          className="h-full w-full object-cover object-top"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          poster={imageSrc}
+          aria-hidden
+          tabIndex={-1}
+          onCanPlay={handleVideoCanPlay}
+          onError={handleVideoError}
+        >
+          {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
+          <source src={videoSrc} type={videoMimeType} />
+        </video>
+      ) : null}
     </section>
   );
 };

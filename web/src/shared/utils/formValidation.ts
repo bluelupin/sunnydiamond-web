@@ -431,12 +431,7 @@ export const shouldShowFieldError = (touched: boolean, submitted: boolean, error
 export type CheckoutContactOptions = {
   /** Mirrors the sign-in field: with SMS off there is no phone identity to accept. */
   emailOnly?: boolean;
-  /**
-   * Make the delivery phone mandatory. Set for guests whose contact field is an email:
-   * that leaves no other number on the order, and Magento would take the placeholder.
-   * Not set for signed-in customers — their number comes from the saved Magento address,
-   * which this form only mirrors, so rejecting it would block a field they cannot edit.
-   */
+  /** @deprecated Shipping phone is always required; kept for call-site compatibility. */
   requireDeliveryPhone?: boolean;
   /** Dial code used when the contact field holds a phone number. */
   countryCode?: string;
@@ -573,12 +568,8 @@ const getAddressBlockErrors = (
       pincode: validateIndianPincode(values.pincode).error,
       city: validateCity(values.city).error,
       state: validateIndianState(values.state, states).error,
-      // Magento demands a telephone on every address, so an empty one is sent as
-      // "0000000000". When the contact field is an email there is no other number
-      // on the order at all, and a courier has no way to reach the customer.
-      shippingPhone: options?.requireDeliveryPhone
-        ? validatePhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error
-        : validateOptionalPhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error,
+      // Magento demands a telephone on every shipping address; checkout always collects it.
+      shippingPhone: validatePhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error,
     };
   }
 
