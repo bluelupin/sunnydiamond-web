@@ -18,6 +18,10 @@ export function appointmentFieldKind(field: NormalizedGenericFormField) {
   return "text";
 }
 
+/** Appointment email is optional independently of older CMS field settings. */
+export const appointmentFieldRequired = (form: NormalizedGenericForm, field: NormalizedGenericFormField) =>
+  form.formTag === "book-an-appointment" && appointmentFieldKind(field) === "email" ? false : field.isRequired;
+
 export const appointmentFieldKey = (field: NormalizedGenericFormField, index: number) =>
   field.id ?? `field-${index}`;
 
@@ -36,7 +40,7 @@ export function appointmentFormErrors(form: NormalizedGenericForm, values: Recor
     const value = (values[key] ?? "").trim();
     const kind = appointmentFieldKind(field);
     let error: string | undefined;
-    if (field.isRequired && (!value || (kind === "checkbox" && value !== "true"))) error = "This field is required";
+    if (appointmentFieldRequired(form, field) && (!value || (kind === "checkbox" && value !== "true"))) error = "This field is required";
     else if (value) {
       if (kind === "name") error = validateRequiredName(value).error;
       if (kind === "phone") error = validatePhone(value, codes[key] ?? "+91").error;

@@ -331,3 +331,47 @@ test('guest and signed-in store visits submit without email through the browser 
     assert.equal(calls.length, 4);
   } finally { global.fetch = originalFetch; }
 });
+
+test('guest and signed-in general appointments use trusted submission with server-owned identity', async () => {
+  let customerId = null;
+  let identityCalls = 0;
+  const route = load('src/app/api/generic-submissions/route.ts', {
+    'next/server': { NextResponse: { json: (data, init) => Response.json(data, init) } },
+    '@/api/config': { getStrapiApiToken: () => 'server-token', getStrapiBaseUrl: () => 'https://cms.example.com' },
+    '@/api/endpoints': { STRAPI_ENDPOINTS: { genericSubmissions: 'api/generic-submissions' } },
+    '@/services/http/clientIp': { cmsForwardedIpHeaders: () => ({}) },
+    '@/services/auth/getSessionMagentoCustomerId': { getSessionMagentoCustomerId: async () => { identityCalls++; return customerId; } },
+  });
+  const service = load('src/services/forms/generic-form.service.ts', {
+    react: { cache: fn => fn }, '@/api/fetchClient': {}, '@/api/endpoints': {}, './generic-form.mapper': {},
+  });
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (url, options) => {
+    if (url === '/api/generic-submissions') {
+      return route.POST(new Request('https://example.com' + url, { method: 'POST', body: options.body }));
+    }
+    calls.push({ url, options, body: JSON.parse(options.body) });
+    return Response.json({ data: { documentId: 'booking' } });
+  };
+  try {
+    for (const id of [null, 7]) {
+      customerId = id;
+      await service.createGenericSubmission({ formTag: 'book-an-appointment', name: 'Customer', phone: '+919876543210', email: undefined, magentoCustomerId: 99 });
+      const { url, options, body } = calls.at(-1);
+      assert.equal(url, 'https://cms.example.com/api/generic-submissions/appointments/submit');
+      assert.equal(options.headers.Authorization, 'Bearer server-token');
+      assert.equal(Object.hasOwn(body.data, 'email'), false);
+      assert.equal(body.data.magentoCustomerId, id ?? undefined);
+      assert.equal(options.cache, 'no-store');
+    }
+    await route.POST(new Request('https://example.com/api/generic-submissions', { method: 'POST', body: JSON.stringify({ formTag: 'book-an-appointment', phone: '+919876543210', magentoCustomerId: 99 }) }));
+    assert.equal(calls.at(-1).body.magentoCustomerId, 7);
+    assert.equal(identityCalls, 3);
+    await service.createGenericSubmission({ formTag: 'contact-us', name: 'Customer', phone: '+919876543210', magentoCustomerId: 99 });
+    assert.equal(calls.at(-1).url, 'https://cms.example.com/api/generic-submissions');
+    assert.equal(calls.at(-1).options.headers.Authorization, undefined);
+    assert.equal(calls.at(-1).body.data.magentoCustomerId, undefined);
+    assert.equal(identityCalls, 3);
+  } finally { global.fetch = originalFetch; }
+});

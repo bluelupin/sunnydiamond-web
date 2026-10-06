@@ -8,7 +8,7 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import { sanitizePhoneInput, invalidFieldClassName } from "@/shared/utils/formValidation";
 import { getAppointmentBookingDateBounds, isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
 import { cn } from "@/shared/utils/cn";
-import { APPOINTMENT_BOOKING_WINDOW, appointmentFieldKey, appointmentFieldKind, appointmentFieldOptions } from "../utils/appointmentGenericForm";
+import { APPOINTMENT_BOOKING_WINDOW, appointmentFieldKey, appointmentFieldKind, appointmentFieldOptions, appointmentFieldRequired } from "../utils/appointmentGenericForm";
 
 type Props = {
   form: NormalizedGenericForm;
@@ -38,10 +38,12 @@ export default function AppointmentGenericFields({ form, values, codes, errors, 
         const code = codes[key] ?? "+91";
         const error = errors[key];
         const options = appointmentFieldOptions(field, form);
-        const label = field.isRequired && !field.label.endsWith("*") ? `${field.label}*` : field.label;
+        const required = appointmentFieldRequired(form, field);
+        const baseLabel = kind === "email" && !required ? field.label.replace(/[\s*]+$/, "").trim() : field.label;
+        const label = required && !baseLabel.endsWith("*") ? `${baseLabel}*` : baseLabel;
         const change = (next: string) => onChange(key, next);
         const blur = () => onBlur(key);
-        const inputProps = { id, value, onBlur: blur, placeholder: field.placeholder, "aria-required": field.isRequired, "aria-invalid": Boolean(error), "aria-describedby": error ? `${id}-error` : undefined, className: cn(fieldClassName, error && invalidFieldClassName) };
+        const inputProps = { id, value, onBlur: blur, placeholder: field.placeholder, "aria-required": required, "aria-invalid": Boolean(error), "aria-describedby": error ? `${id}-error` : undefined, className: cn(fieldClassName, error && invalidFieldClassName) };
         return (
           <div key={key} className="flex flex-col gap-2">
             <label htmlFor={id} className="font-gill text-sm leading-110 text-darkblack">{label}</label>

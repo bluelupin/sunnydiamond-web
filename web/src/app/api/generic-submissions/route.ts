@@ -1,19 +1,10 @@
 import { NextResponse } from "next/server";
-import { getStrapiBaseUrl } from "@/api/config";
+import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
+import { getStrapiApiToken, getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
 import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 
-/**
- * Browser → same-origin BFF → Strapi `POST /api/generic-submissions`.
- *
- * Thin collection proxy for generic forms (contact, store-locator Book a Visit).
- * - Do not attach Magento Bearer — collection create rejects Magento JWT (401).
- * - Strip `magentoCustomerId` — not a collection attribute (400 Invalid key).
- *
- * PDP Visit Us → My Appointments uses `store-visit` via
- * `/api/product-submissions/submit` (not this route).
- * Try at Home / Video Call also use product-submissions (not this route).
- */
+/** Generic enquiries stay public; appointments use the trusted CMS server endpoint. */
 
 function stripMagentoCustomerId(body: unknown): unknown {
   if (!body || typeof body !== "object") {
@@ -43,7 +34,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.genericSubmissions}`;
+  const forwarded = stripMagentoCustomerId(body);
+  const record = forwarded && typeof forwarded === "object" ? forwarded as Record<string, unknown> : undefined;
+  const data = record?.data && typeof record.data === "object" && !Array.isArray(record.data)
+    ? record.data as Record<string, unknown> : record;
+  const isAppointment = typeof data?.formTag === "string" && data.formTag.trim() === "book-an-appointment";
+  if (isAppointment && data) {
+    const customerId = await getSessionMagentoCustomerId(request);
+    if (customerId != null) data.magentoCustomerId = customerId;
+  }
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.genericSubmissions}${isAppointment ? "/appointments/submit" : ""}`;
 
   try {
     const response = await fetch(url, {
@@ -51,9 +51,10 @@ export async function POST(request: Request) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...(isAppointment ? { Authorization: `Bearer ${getStrapiApiToken()}` } : {}),
         ...cmsForwardedIpHeaders(request),
       },
-      body: JSON.stringify(stripMagentoCustomerId(body)),
+      body: JSON.stringify(forwarded),
       cache: "no-store",
     });
 
