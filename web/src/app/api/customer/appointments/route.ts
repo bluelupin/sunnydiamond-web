@@ -25,6 +25,8 @@ export async function GET(request: Request) {
       customer.email,
       page,
       pageSize,
+      undefined,
+      customer.phone,
     );
     return NextResponse.json(appointments);
   } catch (error) {

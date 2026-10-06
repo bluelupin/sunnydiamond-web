@@ -206,7 +206,7 @@ function enrichAppointmentsWithShowrooms(
 
 /**
  * Strapi customer appointments — CMS API token as Bearer + magentoCustomerId.
- * Call only from server (BFF). Customer ID and verified email must come from the Magento session.
+ * Call only from server (BFF). Customer ID, verified email, and verified phone must come from the Magento session.
  */
 export async function fetchCustomerAppointments(
   magentoCustomerId: number,
@@ -214,12 +214,15 @@ export async function fetchCustomerAppointments(
   page = 1,
   pageSize = 20,
   signal?: AbortSignal,
+  magentoCustomerPhone?: string,
 ): Promise<CustomerAppointmentsPage> {
   const safePage = Math.max(1, page);
   const safePageSize = Math.min(100, Math.max(1, pageSize));
+  const phone = magentoCustomerPhone?.trim();
   const params = new URLSearchParams({
     magentoCustomerId: String(magentoCustomerId),
     ...(magentoCustomerEmail ? { magentoCustomerEmail } : {}),
+    ...(phone ? { magentoCustomerPhone: phone } : {}),
     page: String(safePage),
     pageSize: String(safePageSize),
   });
@@ -375,10 +378,13 @@ export async function getOpenCustomerAppointments(
   magentoCustomerId: number,
   magentoCustomerEmail: string,
   signal?: AbortSignal,
+  magentoCustomerPhone?: string,
 ): Promise<CustomerOpenAppointment[]> {
+  const phone = magentoCustomerPhone?.trim();
   const params = new URLSearchParams({
     magentoCustomerId: String(magentoCustomerId),
     ...(magentoCustomerEmail ? { magentoCustomerEmail } : {}),
+    ...(phone ? { magentoCustomerPhone: phone } : {}),
   });
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/open?${params.toString()}`;
   const response = await fetch(url, {
