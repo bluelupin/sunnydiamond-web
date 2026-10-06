@@ -16,6 +16,7 @@ import type {
   NormalizedEducationCertificateSection,
   NormalizedEducationCertification,
   NormalizedEducationCtaBanner,
+  NormalizedEducationDiscoverStep,
   NormalizedEducationFaqItem,
   NormalizedEducationFaqSection,
   NormalizedEducationFourCsIntro,
@@ -198,11 +199,14 @@ const mapFaqSection = (
 
 const mapDiscoverSteps = (
   steps?: StrapiEducationDiscoverSection["steps"],
-): string[] =>
+): NormalizedEducationDiscoverStep[] =>
   (steps ?? [])
     .filter((step) => resolveSectionActive(step.isActive, step.showField))
-    .map((step) => cleanText(step.title))
-    .filter((title): title is string => Boolean(title));
+    .map((step) => ({
+      title: cleanText(step.title) ?? "",
+      description: cleanText(step.description) ?? "",
+    }))
+    .filter((step): step is NormalizedEducationDiscoverStep => Boolean(step.title));
 
 const mapDiscoverSection = (
   section?: StrapiEducationDiscoverSection | null,

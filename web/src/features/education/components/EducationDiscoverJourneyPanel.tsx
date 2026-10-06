@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -21,25 +21,30 @@ import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatP
 import { mapMagentoCategoriesToPlpNav } from "@/features/jewellery-product/utils/plpCategoryNav";
 import { DIAMOND_SHAPE_OPTIONS } from "@/features/jewellery-product/utils/diamondShapeListing";
 import type { JewelleryCategory, JewelleryCategorySlug } from "@/features/jewellery-product/types";
-import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import type {
+  JewelleryFilterFacetOption,
+  JewelleryFilterFacets,
+} from "@/types/magento/jewelleryListing";
 import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
-import { diamondShapeIconByValue } from "../data/diamondShapeIcons";
+import { resolveDiscoverJourneyDiamondShapeIcon } from "../data/diamondShapeIcons";
 import {
   DISCOVER_JOURNEY_NO_PRODUCTS_IN_CATEGORY_AND_RANGE_MESSAGE,
   DISCOVER_JOURNEY_NO_PRODUCTS_IN_RANGE_MESSAGE,
   DISCOVER_JOURNEY_NO_PRODUCTS_IN_SHAPE_CATEGORY_AND_RANGE_MESSAGE,
   DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
-  resolveDiscoverJourneyStepLabels,
+  resolveDiscoverJourneyDiamondShapeOptions,
+  resolveDiscoverJourneySteps,
 } from "../data/discoverJourney";
+import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
 import { buildEducationJourneyHref } from "../utils/educationJourneyRoutes";
 import EducationDiscoverJourneyStepper from "./EducationDiscoverJourneyStepper";
 
 type EducationDiscoverJourneyPanelProps = {
   open: boolean;
   onClose: () => void;
-  steps?: string[];
+  steps?: NormalizedEducationDiscoverStep[];
 };
 
 type JourneyStep = 1 | 2 | 3;
@@ -73,7 +78,7 @@ const EducationDiscoverJourneyPanel = ({
   const { data: navData } = useMagentoJewelleryNav();
   const { showMobileShell } = useResponsiveOverlayShell(open, EDUCATION_JOURNEY_MOBILE_QUERY);
 
-  const journeySteps = useMemo(() => resolveDiscoverJourneyStepLabels(steps), [steps]);
+  const journeySteps = useMemo(() => resolveDiscoverJourneySteps(steps), [steps]);
 
   const [step, setStep] = useState<JourneyStep>(1);
   const [facets, setFacets] = useState<JewelleryFilterFacets>(createFallbackFacets);
@@ -84,9 +89,20 @@ const EducationDiscoverJourneyPanel = ({
   const [minInputFocused, setMinInputFocused] = useState(false);
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [categorySlug, setCategorySlug] = useState<JewelleryCategorySlug>("all");
-  const [diamondShapeValue, setDiamondShapeValue] = useState(DIAMOND_SHAPE_OPTIONS[0]?.value ?? "");
+  const [diamondShapeValue, setDiamondShapeValue] = useState("");
+  const [discoverJourneyDiamondShapeOptions, setDiscoverJourneyDiamondShapeOptions] = useState<
+    readonly JewelleryFilterFacetOption[]
+  >([]);
   const [showAvailabilityError, setShowAvailabilityError] = useState(false);
   const [isVerifyingAvailability, setIsVerifyingAvailability] = useState(false);
+  const [isCheckingStep2Category, setIsCheckingStep2Category] = useState(false);
+  const [step2CategoryHasProducts, setStep2CategoryHasProducts] = useState<boolean | null>(
+    null,
+  );
+  const [isCheckingStep3Shape, setIsCheckingStep3Shape] = useState(false);
+  const [step3ShapeHasProducts, setStep3ShapeHasProducts] = useState<boolean | null>(null);
+  const step2CategoryVerifyRequestRef = useRef(0);
+  const step3ShapeVerifyRequestRef = useRef(0);
 
   const categories = useMemo(
     () => (navData?.categories ? mapMagentoCategoriesToPlpNav(navData.categories) : []),
@@ -98,11 +114,18 @@ const EducationDiscoverJourneyPanel = ({
     [categories, categorySlug],
   );
 
+  const diamondShapeOptions = useMemo(
+    () =>
+      discoverJourneyDiamondShapeOptions.length > 0
+        ? discoverJourneyDiamondShapeOptions
+        : DIAMOND_SHAPE_OPTIONS,
+    [discoverJourneyDiamondShapeOptions],
+  );
+
   const selectedShape = useMemo(
     () =>
-      DIAMOND_SHAPE_OPTIONS.find((option) => option.value === diamondShapeValue) ??
-      DIAMOND_SHAPE_OPTIONS[0],
-    [diamondShapeValue],
+      diamondShapeOptions.find((option) => option.value === diamondShapeValue) ?? null,
+    [diamondShapeOptions, diamondShapeValue],
   );
 
   const hasPriceRange = facets.maxPrice > facets.minPrice;
@@ -115,9 +138,14 @@ const EducationDiscoverJourneyPanel = ({
     if (!open) {
       setStep(1);
       setCategorySlug("all");
-      setDiamondShapeValue(DIAMOND_SHAPE_OPTIONS[0]?.value ?? "");
+      setDiamondShapeValue("");
+      setDiscoverJourneyDiamondShapeOptions([]);
       setShowAvailabilityError(false);
       setIsVerifyingAvailability(false);
+      setIsCheckingStep2Category(false);
+      setStep2CategoryHasProducts(null);
+      setIsCheckingStep3Shape(false);
+      setStep3ShapeHasProducts(null);
       setMinInputFocused(false);
       setMaxInputFocused(false);
       return;
@@ -144,6 +172,9 @@ const EducationDiscoverJourneyPanel = ({
         setMaxPrice(nextFacets.maxPrice);
         setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
         setMaxInputValue(formatJewelleryPrice(nextFacets.maxPrice));
+        setDiscoverJourneyDiamondShapeOptions(
+          resolveDiscoverJourneyDiamondShapeOptions(data.facets.diamondShapes),
+        );
       } catch {
         if (cancelled) return;
         const fallback = createFallbackFacets();
@@ -152,6 +183,7 @@ const EducationDiscoverJourneyPanel = ({
         setMaxPrice(fallback.maxPrice);
         setMinInputValue(formatJewelleryPrice(fallback.minPrice));
         setMaxInputValue(formatJewelleryPrice(fallback.maxPrice));
+        setDiscoverJourneyDiamondShapeOptions(resolveDiscoverJourneyDiamondShapeOptions([]));
       }
     })();
 
@@ -167,16 +199,24 @@ const EducationDiscoverJourneyPanel = ({
   }, [minPrice, maxPrice, step]);
 
   useEffect(() => {
-    if (step === 2) {
-      setShowAvailabilityError(false);
+    if (step !== 2) {
+      step2CategoryVerifyRequestRef.current += 1;
+      setIsCheckingStep2Category(false);
+      setStep2CategoryHasProducts(null);
     }
-  }, [categorySlug, step]);
+  }, [step]);
 
   useEffect(() => {
-    if (step === 3) {
-      setShowAvailabilityError(false);
+    if (step !== 3) {
+      step3ShapeVerifyRequestRef.current += 1;
+      setIsCheckingStep3Shape(false);
+      setStep3ShapeHasProducts(null);
+      return;
     }
-  }, [diamondShapeValue, step]);
+
+    setDiamondShapeValue("");
+    setShowAvailabilityError(false);
+  }, [step]);
 
   const updatePriceRange = (nextMin: number, nextMax: number) => {
     const normalized = normalizeJewelleryPriceRange(nextMin, nextMax, facets);
@@ -264,11 +304,113 @@ const EducationDiscoverJourneyPanel = ({
         ? DISCOVER_JOURNEY_NO_PRODUCTS_IN_CATEGORY_AND_RANGE_MESSAGE
         : DISCOVER_JOURNEY_NO_PRODUCTS_IN_RANGE_MESSAGE;
 
+  useEffect(() => {
+    if (step !== 2) {
+      return;
+    }
+
+    const category = categories.find((item) => item.slug === categorySlug);
+    const categoryUrlKey = category?.urlKey ?? null;
+    const requestId = step2CategoryVerifyRequestRef.current + 1;
+    step2CategoryVerifyRequestRef.current = requestId;
+
+    setIsCheckingStep2Category(true);
+    setStep2CategoryHasProducts(null);
+    setShowAvailabilityError(false);
+
+    void (async () => {
+      try {
+        const hasProducts = await verifyProductsAvailable(
+          { minPrice, maxPrice },
+          categoryUrlKey,
+        );
+
+        if (requestId !== step2CategoryVerifyRequestRef.current) {
+          return;
+        }
+
+        setStep2CategoryHasProducts(hasProducts);
+        setShowAvailabilityError(!hasProducts);
+      } catch {
+        if (requestId !== step2CategoryVerifyRequestRef.current) {
+          return;
+        }
+
+        setStep2CategoryHasProducts(false);
+        setShowAvailabilityError(true);
+      } finally {
+        if (requestId === step2CategoryVerifyRequestRef.current) {
+          setIsCheckingStep2Category(false);
+        }
+      }
+    })();
+  }, [step, categorySlug, minPrice, maxPrice, categories]);
+
+  useEffect(() => {
+    if (step !== 3) {
+      return;
+    }
+
+    const trimmedShape = diamondShapeValue.trim();
+    if (!trimmedShape) {
+      setIsCheckingStep3Shape(false);
+      setStep3ShapeHasProducts(null);
+      setShowAvailabilityError(false);
+      return;
+    }
+
+    const categoryUrlKey = selectedCategory?.urlKey ?? null;
+    const requestId = step3ShapeVerifyRequestRef.current + 1;
+    step3ShapeVerifyRequestRef.current = requestId;
+
+    setIsCheckingStep3Shape(true);
+    setStep3ShapeHasProducts(null);
+    setShowAvailabilityError(false);
+
+    void (async () => {
+      try {
+        const hasProducts = await verifyProductsAvailable(
+          { minPrice, maxPrice },
+          categoryUrlKey,
+          trimmedShape,
+        );
+
+        if (requestId !== step3ShapeVerifyRequestRef.current) {
+          return;
+        }
+
+        setStep3ShapeHasProducts(hasProducts);
+        setShowAvailabilityError(!hasProducts);
+      } catch {
+        if (requestId !== step3ShapeVerifyRequestRef.current) {
+          return;
+        }
+
+        setStep3ShapeHasProducts(false);
+        setShowAvailabilityError(true);
+      } finally {
+        if (requestId === step3ShapeVerifyRequestRef.current) {
+          setIsCheckingStep3Shape(false);
+        }
+      }
+    })();
+  }, [step, diamondShapeValue, minPrice, maxPrice, selectedCategory?.urlKey]);
+
   const handleBack = () => {
     if (step === 1) {
       onClose();
       return;
     }
+
+    if (step === 2) {
+      step2CategoryVerifyRequestRef.current += 1;
+    }
+
+    if (step === 3) {
+      step3ShapeVerifyRequestRef.current += 1;
+      setShowAvailabilityError(false);
+    }
+
     setStep((current) => (current === 3 ? 2 : 1));
   };
 
@@ -304,75 +446,30 @@ const EducationDiscoverJourneyPanel = ({
     }
 
     if (step === 2) {
-      if (isVerifyingAvailability) {
+      if (isCheckingStep2Category || step2CategoryHasProducts !== true) {
         return;
       }
 
-      setIsVerifyingAvailability(true);
       setShowAvailabilityError(false);
-
-      void (async () => {
-        try {
-          const categoryUrlKey = selectedCategory?.urlKey ?? null;
-          const hasProducts = await verifyProductsAvailable(
-            { minPrice, maxPrice },
-            categoryUrlKey,
-          );
-
-          if (!hasProducts) {
-            setShowAvailabilityError(true);
-            return;
-          }
-
-          setShowAvailabilityError(false);
-          setStep(3);
-        } catch {
-          setShowAvailabilityError(true);
-        } finally {
-          setIsVerifyingAvailability(false);
-        }
-      })();
-
+      setStep(3);
       return;
     }
 
-    if (isVerifyingAvailability) {
+    if (isCheckingStep3Shape || step3ShapeHasProducts !== true || !selectedShape) {
       return;
     }
 
-    setIsVerifyingAvailability(true);
+    const categoryUrlKey = selectedCategory?.urlKey ?? null;
+    const href = buildEducationJourneyHref({
+      categoryUrlKey,
+      minPrice,
+      maxPrice,
+      diamondShapeLabel: selectedShape.label,
+    });
+
     setShowAvailabilityError(false);
-
-    void (async () => {
-      try {
-        const categoryUrlKey = selectedCategory?.urlKey ?? null;
-        const hasProducts = await verifyProductsAvailable(
-          { minPrice, maxPrice },
-          categoryUrlKey,
-          diamondShapeValue,
-        );
-
-        if (!hasProducts) {
-          setShowAvailabilityError(true);
-          return;
-        }
-
-        const href = buildEducationJourneyHref({
-          categoryUrlKey,
-          minPrice,
-          maxPrice,
-          diamondShapeLabel: selectedShape?.label ?? "",
-        });
-
-        setShowAvailabilityError(false);
-        onClose();
-        router.push(href);
-      } catch {
-        setShowAvailabilityError(true);
-      } finally {
-        setIsVerifyingAvailability(false);
-      }
-    })();
+    onClose();
+    router.push(href);
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -406,10 +503,6 @@ const EducationDiscoverJourneyPanel = ({
               aria-label="Close discover journey panel"
             />
           </div>
-          {/* <div
-            className={cn("mx-auto mt-6 h-px w-full bg-neutral300", DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS)}
-            aria-hidden
-          /> */}
           <div className={cn("mx-auto mt-6 w-full", DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS)}>
             <EducationDiscoverJourneyStepper steps={journeySteps} activeStep={step} />
           </div>
@@ -591,9 +684,9 @@ const EducationDiscoverJourneyPanel = ({
           {step === 3 ? (
             <section className="flex flex-col gap-4">
               <div className="grid grid-cols-4 gap-x-3 gap-y-6">
-                {DIAMOND_SHAPE_OPTIONS.map((option) => {
+                {diamondShapeOptions.map((option) => {
                   const isSelected = option.value === diamondShapeValue;
-                  const Icon = diamondShapeIconByValue[option.value];
+                  const Icon = resolveDiscoverJourneyDiamondShapeIcon(option);
 
                   return (
                     <button
@@ -609,6 +702,7 @@ const EducationDiscoverJourneyPanel = ({
                             "size-6",
                             isSelected ? "text-darkblack" : "text-gray600",
                           )}
+                          aria-hidden
                         />
                       ) : null}
                       <span
@@ -664,12 +758,19 @@ const EducationDiscoverJourneyPanel = ({
             type="button"
             onClick={handlePrimaryAction}
             disabled={
-              isVerifyingAvailability || (step === 1 && !hasPriceRange)
+              isVerifyingAvailability ||
+              (step === 1 && !hasPriceRange) ||
+              (step === 2 &&
+                (isCheckingStep2Category || step2CategoryHasProducts !== true)) ||
+              (step === 3 &&
+                (isCheckingStep3Shape ||
+                  step3ShapeHasProducts !== true ||
+                  !diamondShapeValue.trim()))
             }
-            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:border-neutral300 disabled:bg-neutral300 disabled:text-white disabled:opacity-100"
+            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="relative z-10">
-              {isVerifyingAvailability
+              {isVerifyingAvailability && step === 1
                 ? "Checking..."
                 : step === 3
                   ? "View Products"
