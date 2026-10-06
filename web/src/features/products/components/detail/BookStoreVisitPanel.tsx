@@ -1107,6 +1107,7 @@ const BookingFormStep = ({
                 timeSlotRequired={hasTimeSlots}
                 purposeLabel={purposeLabel}
                 purposePlaceholder={purposePlaceholder}
+                purposeInlineCustomSelect
                 noteLabel={notesLabel}
                 notePlaceholder={notesPlaceholder}
                 phoneLocked={phoneLocked}
