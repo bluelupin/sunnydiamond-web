@@ -176,7 +176,6 @@ export function ProfileOrderDetailView({
 
   const { priceBreakdown } = order;
   const hasDiscount = priceBreakdown.orderDiscount > 0;
-  const hasShipping = typeof priceBreakdown.shipping === "number";
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
   const isDelivered = order.category === "delivered";
   const showReturnDeadlineNote = isDelivered && !isGiftCardProfileOrder(order);
@@ -380,21 +379,6 @@ export function ProfileOrderDetailView({
                   <span className="font-light">Gift Card (••••{priceBreakdown.giftCard.last4})</span>
                   <span className="font-normal">
                     -{formatOrderTotal(priceBreakdown.giftCard.amount, priceBreakdown.currency)}
-                  </span>
-                </div>
-              ) : null}
-
-              {hasShipping ? (
-                <div className="flex items-center justify-between">
-                  <span className="font-light">
-                    {priceBreakdown.shippingMethod
-                      ? `${detailContent.shippingLabel} (${priceBreakdown.shippingMethod})`
-                      : detailContent.shippingLabel}
-                  </span>
-                  <span className="font-normal">
-                    {priceBreakdown.shipping === 0
-                      ? detailContent.shippingFreeLabel
-                      : formatOrderTotal(priceBreakdown.shipping!, priceBreakdown.currency)}
                   </span>
                 </div>
               ) : null}

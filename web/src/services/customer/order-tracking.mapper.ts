@@ -129,10 +129,86 @@ type MagentoOrderShipment = {
   tracking?: MagentoShipmentTracking[] | null;
 };
 
+type MagentoOrderPaymentAdditionalData = {
+  name?: string | null;
+  value?: string | null;
+};
+
 type MagentoOrderPaymentMethod = {
   name?: string | null;
   type?: string | null;
+  additional_data?: MagentoOrderPaymentAdditionalData[] | null;
 };
+
+const PAYMENT_GATEWAY_NAME_PATTERN =
+  /razorpay|paypal|braintree|payflow|payment_services|hosted_fields/i;
+
+/** Magento-provided titles first, then source codes/values from `additional_data`. */
+const PAYMENT_MODE_TITLE_ADDITIONAL_KEYS = [
+  "payment_source_title",
+  "method_title",
+  "payment_method_title",
+  "title",
+] as const;
+
+const PAYMENT_MODE_SOURCE_ADDITIONAL_KEYS = [
+  "payment_source",
+  "payment_mode",
+  "checkout_payment_method",
+  "payment_method",
+  "method",
+  "source",
+] as const;
+
+function isPaymentGatewayLabel(value: string): boolean {
+  return PAYMENT_GATEWAY_NAME_PATTERN.test(value.trim());
+}
+
+function paymentAdditionalDataValue(
+  additionalData: MagentoOrderPaymentAdditionalData[] | null | undefined,
+  key: string,
+): string | null {
+  const entry = additionalData?.find(
+    (item) => item.name?.trim().toLowerCase() === key,
+  );
+  const value = entry?.value?.trim();
+  return value || null;
+}
+
+function resolveOrderPaymentDisplayName(method: MagentoOrderPaymentMethod): string | null {
+  for (const key of PAYMENT_MODE_TITLE_ADDITIONAL_KEYS) {
+    const value = paymentAdditionalDataValue(method.additional_data, key);
+    if (value && !isPaymentGatewayLabel(value)) {
+      return value;
+    }
+  }
+
+  for (const key of PAYMENT_MODE_SOURCE_ADDITIONAL_KEYS) {
+    const value = paymentAdditionalDataValue(method.additional_data, key);
+    if (value && !isPaymentGatewayLabel(value)) {
+      return value;
+    }
+  }
+
+  for (const entry of method.additional_data ?? []) {
+    const value = entry.value?.trim();
+    if (value && !isPaymentGatewayLabel(value)) {
+      return value;
+    }
+  }
+
+  const name = method.name?.trim();
+  if (name && !isPaymentGatewayLabel(name)) {
+    return name;
+  }
+
+  const type = method.type?.trim();
+  if (type && !isPaymentGatewayLabel(type)) {
+    return type;
+  }
+
+  return null;
+}
 
 type MagentoOrderComment = {
   message?: string | null;
@@ -418,11 +494,18 @@ function mapMagentoPaymentMethods(
   methods: MagentoOrderPaymentMethod[] | null | undefined,
 ): TrackedOrderPaymentMethod[] {
   return (methods ?? [])
-    .filter((method) => method.name?.trim())
-    .map((method) => ({
-      name: method.name!.trim(),
-      type: method.type?.trim() || "unknown",
-    }));
+    .map((method) => {
+      const name = resolveOrderPaymentDisplayName(method);
+      if (!name) {
+        return null;
+      }
+
+      return {
+        name,
+        type: method.type?.trim() || "unknown",
+      };
+    })
+    .filter((method): method is TrackedOrderPaymentMethod => method != null);
 }
 
 export function mapMagentoOrderDetail(order: MagentoCustomerOrderDetail): TrackedOrder | null {
