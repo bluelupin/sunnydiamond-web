@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import PolicyText from "./PolicyText";
 import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import Link from "next/link";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -214,8 +215,8 @@ function PolicyAccordionItem({
                 : "gap-6 text-base font-normal",
             )}
           >
-            {section.intro ? <p className="whitespace-pre-line">{section.intro}</p> : null}
-            {section.body ? <p className="whitespace-pre-line">{section.body}</p> : null}
+            {section.intro ? <p className="whitespace-pre-line"><PolicyText text={section.intro} /></p> : null}
+            {section.body ? <p className="whitespace-pre-line"><PolicyText text={section.body} /></p> : null}
             {section.listItems?.length ? (
               <ol
                 className={cn(
@@ -225,7 +226,7 @@ function PolicyAccordionItem({
               >
                 {section.listItems.map((item, index) => (
                   <li key={index} className="list-decimal">
-                    {item}
+                    <PolicyText text={item} />
                   </li>
                 ))}
               </ol>
