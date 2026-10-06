@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import { CartDivider, CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
@@ -12,7 +13,7 @@ import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { isGuestCheckoutPlaceholderEmail } from "@/services/magento/cart/checkoutAddress.mapper";
-import type { CreateAccountSecondaryField } from "../utils/authValidation";
+import { isCreateAccountReady, type CreateAccountSecondaryField } from "../utils/authValidation";
 
 type LoginCreateAccountContentProps = {
   fullName: string;
@@ -87,9 +88,22 @@ const LoginCreateAccountContent = ({
   const emailFieldValue =
     email && !isGuestCheckoutPlaceholderEmail(email) ? email : "";
 
+  const createAccountFormReady = useMemo(
+    () =>
+      isCreateAccountReady({
+        fullName,
+        termsAccepted,
+        secondaryField: missingIdentifier,
+        email: missingIdentifier === "email" ? emailFieldValue : "",
+        phone: missingIdentifier === "phone" ? phone : "",
+        countryCode: countryCode || DEFAULT_COUNTRY_CODE,
+      }),
+    [countryCode, emailFieldValue, fullName, missingIdentifier, phone, termsAccepted],
+  );
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isRegistrationSessionRefreshing) {
+    if (isRegistrationSessionRefreshing || !createAccountFormReady) {
       return;
     }
     onCreateAccount();
@@ -262,7 +276,7 @@ const LoginCreateAccountContent = ({
       <CartPrimaryButton
         type="submit"
         className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={submitting || isRegistrationSessionRefreshing}
+        disabled={submitting || isRegistrationSessionRefreshing || !createAccountFormReady}
       >
         {submitting ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
       </CartPrimaryButton>

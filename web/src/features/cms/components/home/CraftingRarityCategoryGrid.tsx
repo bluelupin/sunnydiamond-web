@@ -9,6 +9,10 @@ import { cn } from "@/shared/utils/cn";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import { buildJewelleryHref, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
+import {
+  CategoryGridSkeleton,
+} from "@/features/cms/components/home/CraftingRarityCategoryGridSkeleton";
+
 const IMAGE_QUALITY = 75;
 const hoverTransitionClassName =
   "motion-safe:transition-[padding,opacity,color] motion-safe:duration-500 motion-safe:ease-in-out";
@@ -184,14 +188,6 @@ type CraftingRarityCategoryGridProps = {
   isLoading?: boolean;
 };
 
-const CategoryGridSkeleton = () => (
-  <div className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8">
-    {[0, 1, 2, 3].map((index) => (
-      <div key={index} className="aspect-square animate-pulse bg-gray200" aria-hidden />
-    ))}
-  </div>
-);
-
 const CraftingRarityCategoryGrid = ({
   categories,
   isLoading = false,
@@ -207,19 +203,18 @@ const CraftingRarityCategoryGrid = ({
   }
 
   return (
-    <LazyInView
-      className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8"
-      fallback={<CategoryGridSkeleton />}
-    >
-      {visibleCategories.map((category) => (
-        <Reveal
-          direction="up"
-          key={category?.id ?? category?.slug ?? category?.title}
-          className="aspect-square w-full xl:h-[424px] lg:h-[380px] md:h-[250px] h-[226px]"
-        >
-          <CraftingRarityCategoryCard category={category} />
-        </Reveal>
-      ))}
+    <LazyInView fallback={<CategoryGridSkeleton />}>
+      <section className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8">
+        {visibleCategories.map((category) => (
+          <Reveal
+            direction="up"
+            key={category?.id ?? category?.slug ?? category?.title}
+            className="aspect-square w-full xl:h-[424px] lg:h-[380px] md:h-[250px] h-[226px]"
+          >
+            <CraftingRarityCategoryCard category={category} />
+          </Reveal>
+        ))}
+      </section>
     </LazyInView>
   );
 };

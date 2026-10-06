@@ -23,16 +23,15 @@ export function ProfileOrdersEmptyState({
   return (
     <ProfileTabEmptyStateLayout>
       <DiamondIcon className="lg:size-16 size-12 text-gold500" aria-hidden />
-
-      <h3 className="w-full font-larken lg:text-32 md:text-3xl text-2xl font-light leading-110 text-darkblack">
-        {title}
-      </h3>
-
-      <div className="flex w-full flex-col gap-2 font-gill text-base font-light leading-110 text-neutral500">
-        <p>{descriptionPrimary}</p>
-        {descriptionSecondary ? <p>{descriptionSecondary}</p> : null}
+      <div className="flex w-full flex-col md:gap-4 gap-3 text-center">
+        <h3 className="w-full font-larken lg:text-32 md:text-3xl text-2xl font-light leading-110 text-darkblack">
+          {title}
+        </h3>
+        <div className="flex w-full flex-col gap-2 font-gill text-base font-light leading-110 text-neutral500">
+          <p>{descriptionPrimary}</p>
+          {descriptionSecondary ? <p>{descriptionSecondary}</p> : null}
+        </div>
       </div>
-
       <div className="flex flex-col items-center gap-6">
         <CartPrimaryLink href={content.emptyPrimaryCtaHref} className="w-full max-w-xs sm:w-auto">
           {content.emptyPrimaryCta}

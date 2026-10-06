@@ -1,3 +1,5 @@
+import { CategoryGridSkeleton } from "@/features/cms/components/home/CraftingRarityCategoryGridSkeleton";
+
 const HomePageRouteSkeleton = () => (
   <>
     <section
@@ -24,11 +26,7 @@ const HomePageRouteSkeleton = () => (
           <div className="h-10 w-64 animate-pulse rounded bg-gray200" />
         </div>
       </div>
-      <div className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8">
-        {[0, 1, 2, 3].map((index) => (
-          <div key={index} className="aspect-square animate-pulse bg-gray200" />
-        ))}
-      </div>
+      <CategoryGridSkeleton />
     </section>
   </>
 );
