@@ -114,10 +114,11 @@ export function isOrderDateBeforeToday(value: string, now = new Date()): boolean
 }
 
 export function formatOrderTotal(amount: number, currency: string): string {
+  const roundedAmount = Math.round(amount);
   const formattedAmount = new Intl.NumberFormat("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(roundedAmount);
 
   if (currency === "INR") {
     return `₹${formattedAmount}`;
@@ -126,9 +127,9 @@ export function formatOrderTotal(amount: number, currency: string): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(roundedAmount);
 }
 
 export function formatAddressLines(lines: string[]): string {
