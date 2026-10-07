@@ -40,6 +40,7 @@ const BookAnAppointmentPanel = ({
   const { contact: profileContact } = useCustomerProfileContact(panelActive && status === "authenticated");
   const appliedProfileRef = useRef(false);
   const editedFieldsRef = useRef(new Set<string>());
+  const [prefillResetCount, setPrefillResetCount] = useState(0);
   const [cmsForm, setCmsForm] = useState<NormalizedGenericForm | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [countryCodes, setCountryCodes] = useState<Record<string, string>>({});
@@ -77,7 +78,7 @@ const BookAnAppointmentPanel = ({
       return updated;
     });
     setCountryCodes((current) => ({ ...phoneCodes, ...current }));
-  }, [panelActive, status, cmsForm, profileContact]);
+  }, [panelActive, status, cmsForm, profileContact, prefillResetCount]);
 
   useEffect(() => {
     if (!panelActive) {
@@ -129,7 +130,15 @@ const BookAnAppointmentPanel = ({
         title: "Appointment requested",
         description: "Our representative will get in touch with you soon.",
       });
-      handleClear();
+      // A successful submission starts a fresh form with the customer's profile details.
+      // Clear All intentionally suppresses autofill, so use a separate reset here.
+      editedFieldsRef.current.clear();
+      appliedProfileRef.current = false;
+      setValues({});
+      setCountryCodes({});
+      setSubmitted(false);
+      setTouched({});
+      setPrefillResetCount((count) => count + 1);
       onClose?.();
     } catch (error) {
       toast({ title: "Unable to request appointment", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
