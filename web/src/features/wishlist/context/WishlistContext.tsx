@@ -37,6 +37,8 @@ type WishlistMutationOptions = {
 
 interface WishlistContextType {
   wishlistedIds: string[];
+  /** False until guest storage or the authenticated customer wishlist has been loaded. */
+  isWishlistReady: boolean;
   totalItems: number;
   isWishlisted: (productSku: string) => boolean;
   toggleWishlist: (productSku: string) => void;
@@ -51,6 +53,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const { openLoginModal } = useLoginModal();
   const pathname = usePathname() ?? "/";
   const [wishlistedIds, setWishlistedIds] = useState<string[]>([]);
+  const [isWishlistReady, setIsWishlistReady] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const wishlistedIdsRef = useRef(wishlistedIds);
   const syncRequestIdRef = useRef(0);
@@ -168,6 +171,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
     if (status === "guest") {
       setWishlistedIds(readGuestWishlistFromStorage());
+      setIsWishlistReady(true);
       return;
     }
 
@@ -175,6 +179,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    setIsWishlistReady(false);
     const requestId = ++syncRequestIdRef.current;
     const syncStartedAt = Date.now();
 
@@ -192,7 +197,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         clearGuestWishlistStorage();
       })
       .catch(() => {
+        if (requestId !== syncRequestIdRef.current) {
+          return;
+        }
         setWishlistedIds([]);
+      })
+      .finally(() => {
+        if (requestId === syncRequestIdRef.current) {
+          setIsWishlistReady(true);
+        }
       });
   }, [hasLoaded, status]);
 
@@ -366,13 +379,14 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       wishlistedIds,
+      isWishlistReady,
       totalItems: wishlistedIds.length,
       isWishlisted,
       toggleWishlist,
       addToWishlist,
       removeFromWishlist,
     }),
-    [addToWishlist, isWishlisted, removeFromWishlist, status, toggleWishlist, wishlistedIds],
+    [addToWishlist, isWishlistReady, isWishlisted, removeFromWishlist, toggleWishlist, wishlistedIds],
   );
 
   return (
