@@ -1,4 +1,7 @@
+"use client";
+
 import { getProfileAvatarInitial } from "../utils/formatAccountData";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 
 type ProfileAvatarProps = {
@@ -7,6 +10,7 @@ type ProfileAvatarProps = {
 };
 
 export function ProfileAvatar({ firstName, className }: ProfileAvatarProps) {
+  const { windows } = useUiPlatform();
   const initial = getProfileAvatarInitial(firstName);
 
   return (
@@ -17,7 +21,12 @@ export function ProfileAvatar({ firstName, className }: ProfileAvatarProps) {
       )}
       aria-label={`${firstName.trim() || "Profile"} avatar`}
     >
-      <span className="font-gill text-[28px] font-normal leading-none text-darkblack md:text-[40px]">
+      <span
+        className={cn(
+          "block font-gill text-[28px] font-normal leading-none text-darkblack md:text-[40px]",
+          !windows && "translate-y-0.5",
+        )}
+      >
         {initial}
       </span>
     </div>

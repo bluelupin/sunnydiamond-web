@@ -70,13 +70,9 @@ const ProfileHeroSection = ({ firstName, backgroundImage }: ProfileHeroSectionPr
       </div>
 
       <div
-        className="absolute left-1/2 z-10 flex -translate-x-1/2 flex-col items-center max-md:top-[191px] md:top-[255px]"
+        className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2"
       >
-        <div
-          className="flex items-center justify-center max-md:h-[85px] max-md:w-20 md:h-[130px] md:w-[122px]"
-        >
-          <ProfileAvatar firstName={firstName} />
-        </div>
+        <ProfileAvatar firstName={firstName} />
       </div>
     </section>
   );
