@@ -148,8 +148,8 @@ const STATUS_BADGE_VARIANTS: Record<
     labelWeight: "font-normal",
   },
   delivered: {
-    background: "bg-gray300",
-    dot: "bg-gray600",
+    background: "bg-[#C7EFD3]",
+    dot: "bg-green600",
     labelWeight: "font-light",
   },
   cancelled: {

@@ -306,14 +306,6 @@ export function ProfileOrderCard({
           <DetailDarkButton type="button" className="w-full" onClick={handleViewDetails}>
             {content.viewDetailsLabel}
           </DetailDarkButton>
-
-          {order.showContactUs &&
-          !isDigitalGiftCardContactOnly &&
-          order.category !== "cancelled" ? (
-            <DetailDarkButton type="button" className="w-full" onClick={handleContactSupport}>
-              {content.contactUsLabel}
-            </DetailDarkButton>
-          ) : null}
         </div>
 
         <div className="hidden flex-col gap-6 lg:flex">
