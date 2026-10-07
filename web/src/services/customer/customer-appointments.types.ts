@@ -12,6 +12,9 @@ export type CustomerAppointmentShowroom = {
 export type CustomerAppointmentProduct = {
   documentId: string;
   productId: string | null;
+  productSku?: string | null;
+  metalColour?: string | null;
+  metalPurity?: string | null;
   productName: string | null;
   requestedDate: string;
   selectedTimeSlot: string;
@@ -24,6 +27,9 @@ export type CustomerAppointment = {
   formTag: string;
   productName: string | null;
   productId: string | null;
+  productSku?: string | null;
+  metalColour?: string | null;
+  metalPurity?: string | null;
   products: CustomerAppointmentProduct[];
   customerName: string;
   customerPhone: string;
@@ -57,12 +63,16 @@ export type CustomerOpenAppointment = {
   selectedTimeSlot: string;
   showroomCity: string | null;
   productIds: string[];
+  products?: { productId: string; productSku?: string | null; metalColour?: string | null; metalPurity?: string | null }[];
 };
 
 export type AddPieceToCustomerAppointmentInput = {
   productId: string;
   productName: string;
   productPath: string;
+  productSku?: string | null;
+  metalColour?: string | null;
+  metalPurity?: string | null;
 };
 
 export type AddPieceToCustomerAppointmentResult = {
@@ -94,6 +104,9 @@ export type StrapiCustomerAppointmentShowroom = {
 export type StrapiCustomerAppointmentProduct = {
   documentId?: string | null;
   productId?: string | number | null;
+  productSku?: string | null;
+  metalColour?: string | null;
+  metalPurity?: string | null;
   productName?: string | null;
   requestedDate?: string | null;
   selectedTimeSlot?: string | null;
@@ -106,6 +119,9 @@ export type StrapiCustomerAppointment = {
   formTag?: string | null;
   productName?: string | null;
   productId?: string | number | null;
+  productSku?: string | null;
+  metalColour?: string | null;
+  metalPurity?: string | null;
   products?: StrapiCustomerAppointmentProduct[] | null;
   customerName?: string | null;
   customerPhone?: string | null;

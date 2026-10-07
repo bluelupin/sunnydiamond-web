@@ -1,5 +1,6 @@
 "use client";
 
+import type { Product } from "@/features/products/data/products";
 import { useState } from "react";
 import BookStoreVisitPanel from "./BookStoreVisitPanel";
 import { DetailTextLink } from "./shared";
@@ -12,6 +13,7 @@ type ProductDetailVisitUsSectionProps = {
   visitUs: NormalizedVisitUsSection;
   productName?: string;
   productId?: string;
+  submissionProduct?: Product;
   variant?: "pdp" | "contact";
 };
 
@@ -19,6 +21,7 @@ const ProductDetailVisitUsSection = ({
   visitUs,
   productName,
   productId,
+  submissionProduct,
   variant = "pdp",
 }: ProductDetailVisitUsSectionProps) => {
   const [isBookVisitOpen, setIsBookVisitOpen] = useState(false);
@@ -141,6 +144,7 @@ const ProductDetailVisitUsSection = ({
         submissionFormTag={bookVisitFormTag}
         productName={productName}
         productId={productId}
+      submissionProduct={submissionProduct}
       />
     </>
   );

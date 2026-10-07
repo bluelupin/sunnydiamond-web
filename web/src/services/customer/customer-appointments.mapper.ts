@@ -269,6 +269,9 @@ function mapAppointmentProduct(
   return {
     documentId,
     productId: cleanText(product.productId) || null,
+    productSku: cleanText(product.productSku) || null,
+    metalColour: cleanText(product.metalColour) || null,
+    metalPurity: cleanText(product.metalPurity) || null,
     productName: cleanText(product.productName) || null,
     requestedDate: cleanText(product.requestedDate) || fallback.requestedDate,
     selectedTimeSlot: cleanText(product.selectedTimeSlot) || fallback.selectedTimeSlot,
@@ -317,7 +320,9 @@ export function mapCustomerAppointment(
             {
               documentId,
               productId,
-              productName,
+              productSku: cleanText(normalized.productSku) || null,
+              metalColour: cleanText(normalized.metalColour) || null,
+              metalPurity: cleanText(normalized.metalPurity) || null,              productName,
               requestedDate,
               selectedTimeSlot,
               workflowStatus,
@@ -331,6 +336,9 @@ export function mapCustomerAppointment(
     formTag: cleanText(normalized.formTag),
     productName: productName || products[0]?.productName || null,
     productId: productId || products[0]?.productId || null,
+    productSku: cleanText(normalized.productSku) || products[0]?.productSku || null,
+    metalColour: cleanText(normalized.metalColour) || products[0]?.metalColour || null,
+    metalPurity: cleanText(normalized.metalPurity) || products[0]?.metalPurity || null,
     products,
     customerName:
       cleanText(normalized.customerName) ||

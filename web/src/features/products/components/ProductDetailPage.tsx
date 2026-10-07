@@ -157,6 +157,7 @@ const ProductDetailPageBody = ({
         heroBannerVideo={heroBannerVideo}
         productName={product.name}
         productId={product.id}
+        submissionProduct={displayProduct}
         moreForYou={moreForYou}
         productDisplay={productDisplay}
         alankaraPrefetch={alankaraPrefetch}

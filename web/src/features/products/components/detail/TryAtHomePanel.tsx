@@ -30,6 +30,7 @@ import {
   DUPLICATE_APPOINTMENT_VIEW_LABEL,
   hasDuplicateAppointmentBooking,
 } from "@/features/products/utils/appointmentDuplicateBooking";
+import { getProductSubmissionVariant } from "@/features/products/utils/productSubmissionVariant";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
@@ -662,6 +663,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         (await hasDuplicateAppointmentBooking({
           kind: "try_at_home",
           productId: product.id,
+          ...getProductSubmissionVariant(product),
           date: booking.date,
           selectedSlot: booking.selectedSlot,
           address: {
@@ -688,6 +690,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         formTag: cmsForm?.formTag ?? TRY_AT_HOME_FORM_TAG,
         productName: product.name,
         productId: product.id,
+        ...getProductSubmissionVariant(product),
         customerName: details.name.trim(),
         customerPhone: `${details.countryCode} ${details.phone}`.trim(),
         customerEmail: details.email.trim() || undefined,

@@ -84,6 +84,9 @@ export type ProductSubmissionPayload = {
   /** Left out for the store visit form, along with productId. */
   productName?: string;
   productId?: string;
+  productSku?: string;
+  metalColour?: string;
+  metalPurity?: string;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;

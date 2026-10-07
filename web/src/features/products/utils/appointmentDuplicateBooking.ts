@@ -13,6 +13,7 @@ type AppointmentBookingKind = "store_visit" | "video_call" | "try_at_home";
 export type AppointmentDuplicateCandidate = {
   kind: AppointmentBookingKind;
   productId: string;
+  productSku?: string;
   date: string;
   selectedSlot: string | null;
   /** Try at Home only. */
@@ -53,18 +54,18 @@ function hasActiveProduct(appointment: CustomerAppointment, productId: string): 
   if (appointment.products.length > 0) {
     return appointment.products.some(
       (product) =>
-        normalizePart(product.productId) === productId && !isCancelled(product.workflowStatus),
+        (product.productSku || product.productId)?.trim() === productId && !isCancelled(product.workflowStatus),
     );
   }
 
-  return normalizePart(appointment.productId) === productId;
+  return (appointment.productSku || appointment.productId)?.trim() === productId;
 }
 
 function findDuplicateAppointmentBooking(
   appointments: CustomerAppointment[],
   candidate: AppointmentDuplicateCandidate,
 ): CustomerAppointment | null {
-  const productId = normalizePart(candidate.productId);
+  const productId = (candidate.productSku || candidate.productId).trim();
   const date = normalizeAppointmentDateInput(candidate.date);
   const slot = normalizePart(candidate.selectedSlot);
 

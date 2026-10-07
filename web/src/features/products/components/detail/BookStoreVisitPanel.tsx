@@ -1,5 +1,7 @@
 "use client";
 
+import type { Product } from "@/features/products/data/products";
+import { getProductSubmissionVariant } from "@/features/products/utils/productSubmissionVariant";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -105,6 +107,7 @@ type BookStoreVisitPanelProps = {
   submissionFormTag?: string;
   productName?: string;
   productId?: string;
+  submissionProduct?: Product;
   /** Opens straight on the booking form for this store (must be in `initialStores`). */
   initialStoreId?: string;
   /** Store locator State 4: showrooms within the radius of a PIN with no text match. */
@@ -134,6 +137,7 @@ const BookStoreVisitPanel = ({
   submissionFormTag,
   productName,
   productId,
+  submissionProduct,
   initialStoreId,
   nearbyStores,
 }: BookStoreVisitPanelProps) => {
@@ -537,6 +541,7 @@ const BookStoreVisitPanel = ({
         (await hasDuplicateAppointmentBooking({
           kind: "store_visit",
           productId: bookedProductId,
+          ...(submissionProduct ? getProductSubmissionVariant(submissionProduct) : {}),
           date,
           selectedSlot,
           showroomId: preferredShowroom,
@@ -561,7 +566,9 @@ const BookStoreVisitPanel = ({
 
       await createProductSubmission({
         formTag: resolvedFormTag,
-        ...(isStoreVisitFormTag(resolvedFormTag)
+        ...(submissionProduct
+          ? { productId: submissionProduct.id, productName: submissionProduct.name, ...getProductSubmissionVariant(submissionProduct) }
+          : isStoreVisitFormTag(resolvedFormTag)
           ? {}
           : {
               productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,

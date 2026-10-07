@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { Product } from "@/features/products/data/products";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
@@ -27,6 +28,7 @@ type ProductDetailBelowFoldLazyProps = {
   heroBannerVideo?: string;
   productName: string;
   productId: string;
+  submissionProduct?: Product;
   moreForYou: MoreForYouCarouselItem[];
   productDisplay: NormalizedProductDisplayPage;
   alankaraPrefetch?: PrefetchedAlankaraCollection | null;
@@ -37,6 +39,7 @@ const ProductDetailBelowFoldLazy = ({
   heroBannerVideo,
   productName,
   productId,
+  submissionProduct,
   moreForYou,
   productDisplay,
   alankaraPrefetch,
@@ -62,6 +65,7 @@ const ProductDetailBelowFoldLazy = ({
       visitUs={productDisplay.visitUs}
       productName={productName}
       productId={productId}
+      submissionProduct={submissionProduct}
     />
   </>
 );

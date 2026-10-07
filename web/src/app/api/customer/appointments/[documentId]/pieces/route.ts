@@ -15,6 +15,9 @@ type AddPieceBody = {
   productId?: unknown;
   productName?: unknown;
   productPath?: unknown;
+  productSku?: unknown;
+  metalColour?: unknown;
+  metalPurity?: unknown;
 };
 
 const MAX_FIELD_LENGTH = 200;
@@ -50,7 +53,14 @@ function toAddPieceInput(body: AddPieceBody): AddPieceToCustomerAppointmentInput
     return null;
   }
 
-  return { productId, productName, productPath };
+  const variant: Pick<AddPieceToCustomerAppointmentInput, "productSku" | "metalColour" | "metalPurity"> = {};
+  for (const field of ["productSku", "metalColour", "metalPurity"] as const) {
+    const value = body[field];
+    if (value == null || value === "") continue;
+    if (typeof value !== "string" || value.trim().length > (field === "productSku" ? 64 : 100) || /[\u0000-\u001f\u007f]/.test(value)) return null;
+    if (value.trim()) variant[field] = value.trim();
+  }
+  return { productId, productName, productPath, ...variant };
 }
 
 /**

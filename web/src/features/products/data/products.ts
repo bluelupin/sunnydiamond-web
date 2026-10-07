@@ -46,6 +46,9 @@ export type ProductConfigurable = {
 
 export interface Product {
   id: string;
+  productSku?: string | null;
+  metalColour?: string | null;
+  metalPurity?: string | null;
   urlKey: string;
   name: string;
   price: number;

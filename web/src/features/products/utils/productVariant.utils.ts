@@ -167,6 +167,9 @@ export function applySelectedMetalVariant(
 
   return {
     ...product,
+    productSku: variant.sku,
+    metalColour: variant.attributes[getConfigurableMetalOption(product)?.attributeCode ?? METAL_ATTRIBUTE_CODE]?.trim(),
+    metalPurity: purity,
     price: variant.price,
     originalPrice: variant.originalPrice,
     image: hasVariantImagery ? variant.image : product.image,

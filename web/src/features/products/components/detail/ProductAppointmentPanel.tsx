@@ -24,6 +24,7 @@ import {
   DUPLICATE_APPOINTMENT_VIEW_LABEL,
   hasDuplicateAppointmentBooking,
 } from "@/features/products/utils/appointmentDuplicateBooking";
+import { getProductSubmissionVariant } from "@/features/products/utils/productSubmissionVariant";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
 import {
@@ -307,6 +308,7 @@ const ProductAppointmentForm = ({
             (await hasDuplicateAppointmentBooking({
               kind: "video_call",
               productId: product.id,
+              ...getProductSubmissionVariant(product),
               date,
               selectedSlot,
             }))
@@ -319,6 +321,7 @@ const ProductAppointmentForm = ({
             formTag,
             productName: product.name,
             productId: product.id,
+            ...getProductSubmissionVariant(product),
             customerName: name.trim(),
             customerPhone: `${countryCode} ${phone}`.trim(),
             customerEmail: email.trim() || undefined,
