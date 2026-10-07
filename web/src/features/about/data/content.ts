@@ -110,6 +110,12 @@ export const aboutCraftingRarityFigmaSpec = {
   },
 } as const;
 
+/** Figma 6382:37828 — All directors listing page */
+export const allDirectorsPageContent = {
+  title: "The Strength behind Sunny Diamonds",
+  readMoreLabel: "Read More",
+} as const;
+
 /** Figma Component 228 — team card hover overlay; caption Figma 692:27464 */
 export const aboutFacesFigmaSpec = {
   card: {

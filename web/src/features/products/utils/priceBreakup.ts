@@ -19,8 +19,7 @@ export function buildPriceBreakup(
   const metal = components.metalPrice;
   const stone = components.diamondPrice + components.gemstonePrice;
   const makingCharges = components.makingCharge;
-  const subtotal =
-    components.metalPrice + components.diamondPrice + components.makingCharge;
+  const subtotal = components.metalPrice + stone + components.makingCharge;
   const gst = subtotal * (components.gstRate / 100);
   const total = subtotal + gst;
   const discount =

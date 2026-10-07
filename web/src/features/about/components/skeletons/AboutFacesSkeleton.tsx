@@ -1,4 +1,8 @@
 import { Skeleton } from "@/shared/ui/skeleton";
+import { cn } from "@/shared/utils/cn";
+
+const faceSkeletonClassName =
+  "h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:h-full md:w-[400px] lg:h-[600px] lg:flex-1 lg:min-w-0 lg:basis-0";
 
 const AboutFacesSkeleton = () => (
   <section aria-busy="true" aria-label="Loading team section" className="bg-white pb-16 md:pb-20 lg:pb-104">
@@ -7,10 +11,19 @@ const AboutFacesSkeleton = () => (
       <Skeleton className="h-5 w-full max-w-lg rounded-md bg-gray200" aria-hidden />
     </div>
     <div className="pl-4 lg:pl-0">
-      <div className="flex gap-2 overflow-hidden md:h-[600px] md:gap-1 lg:h-[600px]">
-        <Skeleton className="h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:h-full md:w-[400px] md:flex-1" aria-hidden />
-        <Skeleton className="hidden h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:block md:h-full md:w-[400px] md:flex-1" aria-hidden />
-        <Skeleton className="hidden h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:block md:h-full md:flex-1 lg:w-[400px]" aria-hidden />
+      <div className="flex gap-2 overflow-hidden md:h-[450px] md:gap-1 lg:hidden">
+        <Skeleton className={faceSkeletonClassName} aria-hidden />
+        <Skeleton className={cn("hidden md:block", faceSkeletonClassName)} aria-hidden />
+        <Skeleton className={cn("hidden md:block", faceSkeletonClassName)} aria-hidden />
+      </div>
+      <div className="hidden flex-col gap-1 lg:flex">
+        {[0, 1].map((row) => (
+          <div key={row} className="flex h-[600px] gap-1">
+            {[0, 1, 2].map((col) => (
+              <Skeleton key={col} className={faceSkeletonClassName} aria-hidden />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   </section>

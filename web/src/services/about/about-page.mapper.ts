@@ -226,12 +226,15 @@ const mapTeamMember = (
   const name = cleanText(member.name);
   const role = cleanText(member.role);
   const image = mapResponsiveImage(member.image);
+  const bioRaw = member.bio?.trim();
+  const bio = bioRaw && isUsableDescription(bioRaw) ? bioRaw : undefined;
 
   if (!name) return null;
 
   return {
     name,
     role: role && isUsableDescription(role) ? role : "",
+    ...(bio ? { bio } : {}),
     image: image ?? null,
   };
 };

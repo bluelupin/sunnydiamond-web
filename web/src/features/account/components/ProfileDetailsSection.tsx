@@ -278,7 +278,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
         onVerify={handleEmailVerified}
       />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col md:gap-10 gap-6">
         <div className="flex flex-col gap-6">
           <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
             {content.sectionTitle}

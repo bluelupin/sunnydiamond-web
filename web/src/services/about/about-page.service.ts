@@ -20,7 +20,9 @@ const ABOUT_PAGE_POPULATE_QUERY =
   "&populate[craftMosaicSection][populate][tile][populate][image][populate][desktopImage]=true" +
   "&populate[craftMosaicSection][populate][tile][populate][image][populate][mobileImage]=true" +
   "&populate[legacySection][populate][legacyImageBlock][populate][image][populate][desktopImage]=true" +
-  "&populate[legacySection][populate][legacyImageBlock][populate][image][populate][mobileImage]=true";
+  "&populate[legacySection][populate][legacyImageBlock][populate][image][populate][mobileImage]=true" +
+  "&populate[teamSection][populate][teamMember][populate][image][populate][desktopImage]=true" +
+  "&populate[teamSection][populate][teamMember][populate][image][populate][mobileImage]=true";
 
 export const getAboutPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedAboutPage> => {

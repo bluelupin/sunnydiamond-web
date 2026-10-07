@@ -196,6 +196,8 @@ export type NormalizedAboutLegacy = {
 export type NormalizedTeamMember = {
   name: string;
   role: string;
+  /** CKEditor HTML from CMS — render inside `.editor-content`. */
+  bio?: string;
   image?: NormalizedResponsiveImage | null;
 };
 
