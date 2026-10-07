@@ -140,23 +140,87 @@ export function getProfileTimelineStepDescription(label: string): string | undef
   ];
 }
 
+type GiftCardVariantSubtitle = "Digital Card" | "Physical Card";
+
 /** Magento gift card products (SunnyDiamonds_GiftCard::SKU_*) and the label shown under their name. */
-const GIFT_CARD_SUBTITLE_BY_SKU: Record<string, string> = {
+const GIFT_CARD_SUBTITLE_BY_SKU: Record<string, GiftCardVariantSubtitle> = {
   "sd-gift-card-digital": "Digital Card",
   "sd-gift-card-physical": "Physical Card",
 };
 
-export function giftCardSubtitleForSku(sku?: string | null): string | undefined {
-  return sku ? GIFT_CARD_SUBTITLE_BY_SKU[sku.trim().toLowerCase()] : undefined;
+function normalizeGiftCardLookupText(text: string): string {
+  return text.trim().toLowerCase().replace(/_/g, "-");
+}
+
+function isGiftCardProductText(text: string): boolean {
+  const normalized = normalizeGiftCardLookupText(text);
+  return (
+    /\bgift[\s-]?card\b/.test(normalized) ||
+    normalized.includes("gift-card") ||
+    /^sd-gift-card/.test(normalized)
+  );
+}
+
+function inferGiftCardVariantFromText(text: string): GiftCardVariantSubtitle | undefined {
+  if (!isGiftCardProductText(text)) {
+    return undefined;
+  }
+
+  const normalized = normalizeGiftCardLookupText(text);
+  if (/\bdigital\b/.test(normalized)) {
+    return "Digital Card";
+  }
+  if (/\bphysical\b/.test(normalized)) {
+    return "Physical Card";
+  }
+
+  return undefined;
+}
+
+function giftCardSubtitleFromSku(sku: string): GiftCardVariantSubtitle | undefined {
+  const skuKey = sku.trim().toLowerCase();
+  const exact = GIFT_CARD_SUBTITLE_BY_SKU[skuKey];
+  if (exact) {
+    return exact;
+  }
+
+  const normalized = normalizeGiftCardLookupText(sku);
+  for (const key of Object.keys(GIFT_CARD_SUBTITLE_BY_SKU) as Array<
+    keyof typeof GIFT_CARD_SUBTITLE_BY_SKU
+  >) {
+    if (normalized === key || normalized.includes(key)) {
+      return GIFT_CARD_SUBTITLE_BY_SKU[key];
+    }
+  }
+
+  return inferGiftCardVariantFromText(normalized);
+}
+
+export function giftCardSubtitleForSku(
+  sku?: string | null,
+  productName?: string | null,
+): string | undefined {
+  if (sku?.trim()) {
+    const fromSku = giftCardSubtitleFromSku(sku);
+    if (fromSku) {
+      return fromSku;
+    }
+  }
+
+  if (productName?.trim()) {
+    return inferGiftCardVariantFromText(productName);
+  }
+
+  return undefined;
 }
 
 /** Keep the gift card variant in its subtitle instead of repeating it in the product title. */
 export function giftCardNameForSku(name: string, sku?: string | null): string {
-  if (!giftCardSubtitleForSku(sku)) {
+  if (!giftCardSubtitleForSku(sku, name)) {
     return name;
   }
 
-  return name.replace(/\s*\((?:digital|physical)\)\s*$/i, "").trim();
+  return "Gift Card";
 }
 
 function isGiftCardSubtitle(subtitle?: string): boolean {

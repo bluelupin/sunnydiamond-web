@@ -104,7 +104,7 @@ function mapDetailItems(
     const display = mapCustomerOrderItemToDisplayFields(mapperInput, giftMetadata);
     const sku = item.productSku?.trim();
     const imageUrl = resolveOrderItemImageUrl(item.thumbnailUrl, sku, imageBySku);
-    const subtitle = giftCardSubtitleForSku(sku);
+    const subtitle = giftCardSubtitleForSku(sku, item.productName);
     const giftNote = resolveOrderItemGiftNote(
       {
         isGift: item.isGift || display.isGift,

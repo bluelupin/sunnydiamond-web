@@ -482,7 +482,7 @@ function mapOrderItems(
   return order.items.map((item, index) => {
     const display = mapCustomerOrderItemToDisplayFields(item, giftMetadata);
     const imageUrl = resolveOrderItemImageUrl(item.imageUrl, item.productSku, imageBySku);
-    const subtitle = giftCardSubtitleForSku(item.productSku);
+    const subtitle = giftCardSubtitleForSku(item.productSku, item.productName);
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,

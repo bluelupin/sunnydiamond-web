@@ -130,7 +130,12 @@ export function ProfileOrderDetailItemCard({
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-2 lg:hidden">
+        <div
+          className={cn(
+            "flex gap-2 lg:hidden",
+            isGiftCardItem ? "items-center" : "items-start",
+          )}
+        >
           <div
             className={cn(
               "relative shrink-0 overflow-hidden bg-white",
@@ -139,11 +144,16 @@ export function ProfileOrderDetailItemCard({
           >
             {imageElement}
           </div>
-          <div className={cn("min-w-0 flex flex-1 flex-col", isGiftCardItem ? "gap-3" : "gap-2")}>
+          <div
+            className={cn(
+              "min-w-0 flex flex-1 flex-col",
+              isGiftCardItem ? "gap-[10.5px]" : "gap-2",
+            )}
+          >
             {nameElement}
             {subtitleElement}
             {attributesElement}
-            {priceElement}
+            {!isGiftCardItem ? priceElement : null}
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
                 Qty: {item.quantity}
@@ -191,6 +201,7 @@ export function ProfileOrderDetailItemCard({
     <div
       className={cn(
         "relative overflow-visible bg-white p-4 lg:p-6",
+        isGiftCardItem && "bg-transparent p-0 lg:bg-white lg:p-6",
         item.isBespoke && "border border-aboutInactive lg:border-neutral300",
       )}
     >

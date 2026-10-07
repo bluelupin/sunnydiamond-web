@@ -78,7 +78,10 @@ const OrderDetailView = ({
   // Digital gift cards are emailed, so they have no delivery steps.
   const isDigitalGiftCard =
     order.items.length > 0 &&
-    order.items.every((item) => giftCardSubtitleForSku(item.productSku) === "Digital Card");
+    order.items.every(
+      (item) =>
+        giftCardSubtitleForSku(item.productSku, item.productName) === "Digital Card",
+    );
   const deliveryTimeline = isDigitalGiftCard ? [] : buildOrderDeliveryTimelineFromStatus(order.status);
 
   return (

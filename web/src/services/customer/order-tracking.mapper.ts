@@ -161,10 +161,6 @@ const PAYMENT_MODE_SOURCE_ADDITIONAL_KEYS = [
   "source",
 ] as const;
 
-function isPaymentGatewayLabel(value: string): boolean {
-  return PAYMENT_GATEWAY_NAME_PATTERN.test(value.trim());
-}
-
 function paymentAdditionalDataValue(
   additionalData: MagentoOrderPaymentAdditionalData[] | null | undefined,
   key: string,
@@ -174,6 +170,187 @@ function paymentAdditionalDataValue(
   );
   const value = entry?.value?.trim();
   return value || null;
+}
+
+function paymentAdditionalDataValueLoose(
+  additionalData: MagentoOrderPaymentAdditionalData[] | null | undefined,
+  keyHint: string,
+): string | null {
+  const exact = paymentAdditionalDataValue(additionalData, keyHint);
+  if (exact) {
+    return exact;
+  }
+
+  const hint = keyHint.toLowerCase();
+  const entry = additionalData?.find((item) => {
+    const name = item.name?.trim().toLowerCase() ?? "";
+    return name.endsWith(`_${hint}`) || name.includes(hint);
+  });
+  const value = entry?.value?.trim();
+  return value || null;
+}
+
+function isPaymentTechnicalValue(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return true;
+  }
+
+  if (/^pay_[a-z0-9]+$/i.test(trimmed)) {
+    return true;
+  }
+
+  if (/^order_[a-z0-9]+$/i.test(trimmed)) {
+    return true;
+  }
+
+  return trimmed.length > 80;
+}
+
+function extractKnownPaymentModeFromText(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const [token, label] of Object.entries(KNOWN_PAYMENT_MODE_LABELS)) {
+    const pattern = new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
+    if (pattern.test(lower)) {
+      return label;
+    }
+  }
+
+  if (/\bdebit card\b/.test(lower)) {
+    return "Debit Card";
+  }
+
+  if (/\bcredit card\b/.test(lower)) {
+    return "Credit Card";
+  }
+
+  if (/\bnet banking\b/.test(lower)) {
+    return "Net Banking";
+  }
+
+  return null;
+}
+
+function isPaymentGatewayLabel(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return true;
+  }
+
+  if (extractKnownPaymentModeFromText(trimmed)) {
+    return false;
+  }
+
+  if (PAYMENT_GATEWAY_NAME_PATTERN.test(trimmed)) {
+    return true;
+  }
+
+  const lower = trimmed.toLowerCase();
+  return lower === "razorpay" || lower === "paypal" || lower === "braintree";
+}
+
+const KNOWN_PAYMENT_MODE_LABELS: Record<string, string> = {
+  cashondelivery: "Cash on Delivery",
+  cod: "Cash on Delivery",
+  upi: "UPI",
+  card: "Credit Card",
+  credit: "Credit Card",
+  debit: "Debit Card",
+  cc: "Credit Card",
+  netbanking: "Net Banking",
+  nb: "Net Banking",
+  wallet: "Wallet",
+  emi: "EMI",
+};
+
+const PAYMENT_MODE_METHOD_ADDITIONAL_KEYS = [
+  "method",
+  "payment_method",
+  "razorpay_payment_method",
+  "razorpay_method",
+] as const;
+
+function humanizeKnownPaymentMode(value: string): string | null {
+  const token = value.trim().toLowerCase().replace(/\s+/g, "_");
+  if (!token) {
+    return null;
+  }
+
+  if (KNOWN_PAYMENT_MODE_LABELS[token]) {
+    return KNOWN_PAYMENT_MODE_LABELS[token];
+  }
+
+  if (token.includes("upi") || token.includes("vpa")) {
+    return "UPI";
+  }
+
+  if (token.includes("netbank")) {
+    return "Net Banking";
+  }
+
+  if (token.includes("debit")) {
+    return "Debit Card";
+  }
+
+  if (token.includes("credit") || token === "card") {
+    return "Credit Card";
+  }
+
+  return null;
+}
+
+function resolvePaymentModeFromAdditionalData(
+  additionalData: MagentoOrderPaymentAdditionalData[] | null | undefined,
+): string | null {
+  for (const key of PAYMENT_MODE_METHOD_ADDITIONAL_KEYS) {
+    const value = paymentAdditionalDataValueLoose(additionalData, key);
+    if (!value || isPaymentTechnicalValue(value)) {
+      continue;
+    }
+
+    const known = humanizeKnownPaymentMode(value);
+    if (known) {
+      return known;
+    }
+  }
+
+  for (const entry of additionalData ?? []) {
+    const rawName = entry.name?.trim() ?? "";
+    const rawValue = entry.value?.trim() ?? "";
+    if (!rawValue || isPaymentTechnicalValue(rawValue)) {
+      continue;
+    }
+
+    const nameLower = rawName.toLowerCase();
+    if (nameLower.includes("vpa") || rawValue.includes("@")) {
+      return "UPI";
+    }
+
+    if (
+      nameLower.includes("method") ||
+      nameLower.includes("source") ||
+      nameLower.includes("mode") ||
+      nameLower.includes("wallet") ||
+      nameLower.includes("bank")
+    ) {
+      const known = humanizeKnownPaymentMode(rawValue);
+      if (known) {
+        return known;
+      }
+
+      const extracted = extractKnownPaymentModeFromText(rawValue);
+      if (extracted) {
+        return extracted;
+      }
+    }
+
+    const knownValue = humanizeKnownPaymentMode(rawValue);
+    if (knownValue && !isPaymentGatewayLabel(rawValue)) {
+      return knownValue;
+    }
+  }
+
+  return null;
 }
 
 function resolveOrderPaymentDisplayName(method: MagentoOrderPaymentMethod): string | null {
@@ -187,28 +364,95 @@ function resolveOrderPaymentDisplayName(method: MagentoOrderPaymentMethod): stri
   for (const key of PAYMENT_MODE_SOURCE_ADDITIONAL_KEYS) {
     const value = paymentAdditionalDataValue(method.additional_data, key);
     if (value && !isPaymentGatewayLabel(value)) {
-      return value;
+      const known = humanizeKnownPaymentMode(value);
+      return known ?? value;
     }
+  }
+
+  const fromAdditional = resolvePaymentModeFromAdditionalData(method.additional_data);
+  if (fromAdditional) {
+    return fromAdditional;
   }
 
   for (const entry of method.additional_data ?? []) {
     const value = entry.value?.trim();
-    if (value && !isPaymentGatewayLabel(value)) {
-      return value;
+    if (!value || isPaymentTechnicalValue(value) || isPaymentGatewayLabel(value)) {
+      continue;
+    }
+
+    const known = humanizeKnownPaymentMode(value);
+    if (known) {
+      return known;
+    }
+
+    const extracted = extractKnownPaymentModeFromText(value);
+    if (extracted) {
+      return extracted;
     }
   }
 
   const name = method.name?.trim();
-  if (name && !isPaymentGatewayLabel(name)) {
+  if (name) {
+    const fromName = extractKnownPaymentModeFromText(name);
+    if (fromName) {
+      return fromName;
+    }
+
+    if (!isPaymentGatewayLabel(name)) {
+      return name;
+    }
+  }
+
+  const type = method.type?.trim();
+  if (type) {
+    const knownFromType = humanizeKnownPaymentMode(type);
+    if (knownFromType) {
+      return knownFromType;
+    }
+
+    const typeSuffix = type.match(/(?:^|[_-])(upi|card|netbanking|wallet|emi|cod)(?:$|[_-])/i);
+    if (typeSuffix) {
+      const knownFromSuffix = humanizeKnownPaymentMode(typeSuffix[1]);
+      if (knownFromSuffix) {
+        return knownFromSuffix;
+      }
+    }
+
+    if (!isPaymentGatewayLabel(type)) {
+      return type;
+    }
+  }
+
+  return null;
+}
+
+function formatMagentoPaymentTypeFallback(type: string): string {
+  return type
+    .trim()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/** Last resort: Magento sent a payment row but no customer-facing title could be resolved. */
+function resolveOrderPaymentMethodFallbackLabel(
+  method: MagentoOrderPaymentMethod,
+): string | null {
+  const name = method.name?.trim();
+  if (name) {
     return name;
   }
 
   const type = method.type?.trim();
-  if (type && !isPaymentGatewayLabel(type)) {
-    return type;
+  if (!type) {
+    return null;
   }
 
-  return null;
+  const knownFromType = humanizeKnownPaymentMode(type);
+  if (knownFromType) {
+    return knownFromType;
+  }
+
+  return formatMagentoPaymentTypeFallback(type);
 }
 
 type MagentoOrderComment = {
@@ -497,7 +741,10 @@ function mapMagentoPaymentMethods(
 ): TrackedOrderPaymentMethod[] {
   return (methods ?? [])
     .map((method) => {
-      const name = resolveOrderPaymentDisplayName(method);
+      const name =
+        resolveOrderPaymentDisplayName(method) ??
+        extractKnownPaymentModeFromText(method.name?.trim() ?? "") ??
+        resolveOrderPaymentMethodFallbackLabel(method);
       if (!name) {
         return null;
       }

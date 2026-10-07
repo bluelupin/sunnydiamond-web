@@ -42,13 +42,19 @@ import { ProfileOrderReturnDialog } from "./ProfileOrderReturnDialog";
 import { ProfileOrderReturnReasonDialog } from "./ProfileOrderReturnReasonDialog";
 import { ProfileOrderReturnSuccessDialog } from "./ProfileOrderReturnSuccessDialog";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
-import { ProfileMetaDivider } from "./profileUi";
+import { ProfileMetaDivider, ProfileOrderMobileStatusBadge } from "./profileUi";
 
 type ProfileOrderDetailViewProps = {
   order: ProfileOrderDetailUi;
   onBack: () => void;
   onOrderChanged?: (order: TrackedOrder) => void;
 };
+
+/** Figma mobile order meta — Gill Sans 16px: labels Light (300), values Regular (400). */
+const PROFILE_ORDER_DETAIL_MOBILE_META_COLUMN_CLASS =
+  "flex min-w-0 flex-1 flex-col gap-2 text-center font-gill text-[16px] leading-110 text-darkblack";
+const PROFILE_ORDER_DETAIL_MOBILE_META_LABEL_CLASS = "whitespace-nowrap font-light";
+const PROFILE_ORDER_DETAIL_MOBILE_META_VALUE_CLASS = "whitespace-nowrap font-normal";
 
 export function ProfileOrderDetailView({
   order,
@@ -186,6 +192,10 @@ export function ProfileOrderDetailView({
   const deliveryMetaValueLabel = isDelivered
     ? detailContent.deliveredOnMetaLabel
     : detailContent.deliveryByMetaLabel;
+  const giftCardDeliveredBadge =
+    order.category === "delivered" && isGiftCardProfileOrder(order);
+  const mobileStatusLabel =
+    order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
   const timelineSteps = useMemo(() => {
     // Figma: delivered order details carry no progress tracker.
     if (order.category === "delivered" || isActiveDigitalGiftCardOrder(order)) {
@@ -234,12 +244,25 @@ export function ProfileOrderDetailView({
 
       <div className="h-px w-full bg-neutral300 lg:hidden" aria-hidden />
 
-      <div className="flex flex-col gap-6 bg-gray300 p-4 lg:p-6">
-        <div className="flex items-stretch gap-4 lg:hidden">
-          <div className="flex min-w-0 flex-1 flex-col gap-2 text-center font-gill text-base leading-110 text-darkblack">
-            <span className="font-light">{detailContent.orderIdMetaLabel}</span>
+      <div className="flex flex-col gap-4 bg-gray300 p-4 lg:gap-6 lg:p-6">
+        {!isGiftCardProfileOrder(order) ? (
+          <div className="lg:hidden">
+            <ProfileOrderMobileStatusBadge
+              label={mobileStatusLabel}
+              category={order.category}
+              subState={order.subState}
+              giftCardDelivered={giftCardDeliveredBadge}
+            />
+          </div>
+        ) : null}
+
+        <div className="flex items-stretch gap-2 lg:hidden">
+          <div className={PROFILE_ORDER_DETAIL_MOBILE_META_COLUMN_CLASS}>
+            <span className={PROFILE_ORDER_DETAIL_MOBILE_META_LABEL_CLASS}>
+              {detailContent.orderIdMetaLabel}
+            </span>
             <span className="inline-flex items-center justify-center gap-1.5">
-              <span className="font-normal">{order.number}</span>
+              <span className={PROFILE_ORDER_DETAIL_MOBILE_META_VALUE_CLASS}>{order.number}</span>
               <button
                 type="button"
                 onClick={() => void handleCopyOrderId()}
@@ -253,17 +276,25 @@ export function ProfileOrderDetailView({
 
           <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
 
-          <div className="flex min-w-0 flex-1 flex-col gap-2 text-center font-gill text-base leading-110 text-darkblack">
-            <span className="font-light">{detailContent.placedOnMetaLabel}</span>
-            <span className="font-normal">{formatOrderDateMobileMeta(order.orderDate)}</span>
+          <div className={PROFILE_ORDER_DETAIL_MOBILE_META_COLUMN_CLASS}>
+            <span className={PROFILE_ORDER_DETAIL_MOBILE_META_LABEL_CLASS}>
+              {detailContent.placedOnMetaLabel}
+            </span>
+            <span className={PROFILE_ORDER_DETAIL_MOBILE_META_VALUE_CLASS}>
+              {formatOrderDateMobileMeta(order.orderDate)}
+            </span>
           </div>
 
           {order.deliveryBy ? (
             <>
               <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
-              <div className="flex min-w-0 flex-1 flex-col gap-2 text-center font-gill text-base leading-110 text-darkblack">
-                <span className="font-light">{deliveryMetaValueLabel}</span>
-                <span className="font-normal">{formatOrderDateMobileMeta(order.deliveryBy)}</span>
+              <div className={PROFILE_ORDER_DETAIL_MOBILE_META_COLUMN_CLASS}>
+                <span className={PROFILE_ORDER_DETAIL_MOBILE_META_LABEL_CLASS}>
+                  {deliveryMetaValueLabel}
+                </span>
+                <span className={PROFILE_ORDER_DETAIL_MOBILE_META_VALUE_CLASS}>
+                  {formatOrderDateMobileMeta(order.deliveryBy)}
+                </span>
               </div>
             </>
           ) : null}
@@ -301,7 +332,7 @@ export function ProfileOrderDetailView({
         </div>
 
         {order.items.length > 0 ? (
-          <div className="flex flex-col gap-6 overflow-visible">
+          <div className="flex flex-col overflow-visible">
             <ProfileOrderDetailItemsSection items={order.items} />
           </div>
         ) : null}
@@ -402,12 +433,14 @@ export function ProfileOrderDetailView({
                 </div>
               ) : null}
 
-              <div className="flex items-center justify-between">
-                <span className="font-light">{detailContent.taxLabel}</span>
-                <span className="font-normal">
-                  {formatOrderTotal(priceBreakdown.tax, priceBreakdown.currency)}
-                </span>
-              </div>
+              {!isGiftCardProfileOrder(order) ? (
+                <div className="flex items-center justify-between">
+                  <span className="font-light">{detailContent.taxLabel}</span>
+                  <span className="font-normal">
+                    {formatOrderTotal(priceBreakdown.tax, priceBreakdown.currency)}
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             <div className="h-px w-full bg-neutral300" />
