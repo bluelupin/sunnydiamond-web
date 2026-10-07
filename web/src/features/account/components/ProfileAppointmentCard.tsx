@@ -361,10 +361,10 @@ export function ProfileAppointmentCard({
       </div>
 
       {!isStoreVisit && appointment.products.length > 0 ? (
-        <ProductGallery products={appointment.products} />
-      ) : (
-        null
-      )}
+        <div className="pt-8">
+          <ProductGallery products={appointment.products} />
+        </div>
+      ) : null}
 
       <ProfileAppointmentPersonalDetails
         title={content.personalDetailsTitle}
