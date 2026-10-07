@@ -22,11 +22,11 @@ const hideScrollbarStyle: CSSProperties = {
 const DESKTOP_FACES_PER_ROW = 3;
 
 const horizontalRowClassName =
-  "flex w-full snap-x snap-mandatory gap-2 overflow-x-auto pl-4 md:h-[450px] lg:gap-1 lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden";
+  "flex w-full snap-x snap-mandatory gap-2 overflow-x-auto pl-4 md:h-[600px] lg:gap-1 lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden";
 
 const memberFigureClassName = cn(
   "group relative shrink-0 snap-start overflow-hidden",
-  "lg:h-[600px] h-[450px] w-[343px] md:h-full lg:w-auto lg:min-w-0 lg:basis-0 lg:flex-1",
+  "lg:h-[600px] h-[600px] w-[343px] md:h-full lg:w-auto lg:min-w-0 lg:basis-0 lg:flex-1",
   "lg:hover:grow-[1.2] transition-[flex-grow] duration-500 ease-in-out",
 );
 

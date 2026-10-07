@@ -22,7 +22,7 @@ const AllDirectorsMemberRow = ({ member, imageOnRight }: AllDirectorsMemberRowPr
   const bioIsRichHtml = member.bio ? isDirectorBioHtml(member.bio) : false;
 
   const imageBlock = (
-    <div className="relative h-[450px] w-full shrink-0 overflow-hidden bg-gray200 lg:h-[600px] lg:max-w-[478px]">
+    <div className="relative w-full shrink-0 overflow-hidden bg-gray200 lg:h-[600px] h-[600px] lg:max-w-[478px]">
       {member.image ? (
         <ResponsiveImage
           desktopSrc={member.image.desktopUrl}
