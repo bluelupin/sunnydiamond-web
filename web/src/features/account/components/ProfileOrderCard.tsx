@@ -307,7 +307,9 @@ export function ProfileOrderCard({
             {content.viewDetailsLabel}
           </DetailDarkButton>
 
-          {order.showContactUs && !isDigitalGiftCardContactOnly ? (
+          {order.showContactUs &&
+          !isDigitalGiftCardContactOnly &&
+          order.category !== "cancelled" ? (
             <DetailDarkButton type="button" className="w-full" onClick={handleContactSupport}>
               {content.contactUsLabel}
             </DetailDarkButton>

@@ -199,6 +199,23 @@ export function ProfileOrderDetailView({
     );
   }, [order]);
 
+  const detailActionCount =
+    Number(order.showDownloadInvoice) +
+    Number(order.showCancel) +
+    Number(order.showReturn) +
+    Number(order.showContactUs);
+  const singleDetailAction = detailActionCount === 1;
+  const detailActionRowClassName = cn(
+    "flex flex-col gap-4 lg:flex-row lg:gap-6",
+    singleDetailAction && "lg:justify-end",
+  );
+  const detailMultiActionButtonClassName =
+    "h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:flex-1";
+  const detailSingleActionButtonClassName = cn(
+    DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
+    "disabled:cursor-not-allowed disabled:opacity-50",
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center lg:gap-3 gap-2">
@@ -429,15 +446,19 @@ export function ProfileOrderDetailView({
         </div>
       ) : (order.showCancel || order.showReturn || order.showDownloadInvoice || order.showContactUs) ? (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+            <div className={detailActionRowClassName}>
               {order.showDownloadInvoice ? (
                 <DetailDarkButton
                   type="button"
-                  className={cn(
-                    "order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1",
-                    isActiveDigitalGiftCardOrder(order) &&
-                      "lg:ml-auto lg:w-[414px] lg:max-w-[414px] lg:flex-none",
-                  )}
+                  className={
+                    singleDetailAction
+                      ? detailSingleActionButtonClassName
+                      : cn(
+                          "order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1",
+                          isActiveDigitalGiftCardOrder(order) &&
+                            "lg:ml-auto lg:w-[414px] lg:max-w-[414px] lg:flex-none",
+                        )
+                  }
                   onClick={handleDownloadInvoice}
                   disabled={invoiceDisabled}
                 >
@@ -450,7 +471,11 @@ export function ProfileOrderDetailView({
               {order.showCancel ? (
                 <DetailOutlineButton
                   type="button"
-                  className="order-2 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                  className={
+                    singleDetailAction
+                      ? detailSingleActionButtonClassName
+                      : cn(detailMultiActionButtonClassName, "order-2 lg:order-1")
+                  }
                   onClick={handleCancelOrder}
                 >
                   {content.cancelOrderLabel}
@@ -460,7 +485,11 @@ export function ProfileOrderDetailView({
               {order.showReturn ? (
                 <DetailOutlineButton
                   type="button"
-                  className="order-3 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                  className={
+                    singleDetailAction
+                      ? detailSingleActionButtonClassName
+                      : cn(detailMultiActionButtonClassName, "order-3 lg:order-1")
+                  }
                   onClick={handleReturnOrder}
                 >
                   {content.returnOrderLabel}
@@ -470,7 +499,11 @@ export function ProfileOrderDetailView({
               {order.showContactUs ? (
                 <DetailDarkButton
                   type="button"
-                  className="h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:flex-1"
+                  className={
+                    singleDetailAction
+                      ? detailSingleActionButtonClassName
+                      : detailMultiActionButtonClassName
+                  }
                   onClick={handleContactSupport}
                 >
                   {content.contactUsLabel}

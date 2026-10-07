@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import FormRadioOption from "@/shared/ui/FormRadioOption";
 
 type ProfileOrderCancelReasonDialogProps = {
   open: boolean;
@@ -63,21 +64,16 @@ function ProfileOrderCancelReasonDialogBody({
         </p>
         <div className="flex flex-col gap-4">
           {reasons.map((reason) => (
-            <label
+            <FormRadioOption
               key={reason.code}
-              className="flex items-center gap-2 font-gill text-base leading-110 text-darkblack"
-            >
-              <input
-                type="radio"
-                name="cancel-order-reason"
-                value={reason.code}
-                checked={selectedReason?.code === reason.code}
-                onChange={() => onSelectReason(reason.code)}
-                disabled={isSubmitting}
-                className="size-6 shrink-0 accent-darkblack"
-              />
-              <span className="font-light">{reason.label}</span>
-            </label>
+              name="cancel-order-reason"
+              value={reason.code}
+              label={reason.label}
+              checked={selectedReason?.code === reason.code}
+              disabled={isSubmitting}
+              onSelect={onSelectReason}
+              labelClassName="text-darkblack"
+            />
           ))}
         </div>
       </div>
