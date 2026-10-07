@@ -37,3 +37,11 @@ export function cleanSearchQuery(value: string | null | undefined): string {
 export function searchResultsHref(query: string): string {
   return `/search?q=${encodeURIComponent(cleanSearchQuery(query))}`;
 }
+
+/** Figma typeahead — recent/popular rows while the shopper types. */
+export function searchTermMatchesInput(label: string, query: string): boolean {
+  const normalizedLabel = label.trim().toLowerCase();
+  const normalizedQuery = cleanSearchQuery(query).toLowerCase();
+  if (!normalizedLabel || !normalizedQuery) return false;
+  return normalizedLabel.includes(normalizedQuery);
+}

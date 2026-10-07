@@ -52,7 +52,7 @@ export function useQuickSearch(rawQuery: string) {
   };
 }
 
-/** Popular searches for the empty state; fetched once per page load when the overlay first opens. */
+/** Popular terms for typeahead; fetched once per page load when the overlay first opens. */
 let suggestionsPromise: Promise<SearchSuggestions> | null = null;
 
 export function useSearchSuggestions(enabled: boolean) {

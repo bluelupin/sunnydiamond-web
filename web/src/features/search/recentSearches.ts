@@ -4,7 +4,11 @@ const MAX_RECENT = 4;
 export function readRecentSearches(): string[] {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string").slice(0, MAX_RECENT) : [];
+    return Array.isArray(parsed)
+      ? parsed
+          .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+          .slice(0, MAX_RECENT)
+      : [];
   } catch {
     return [];
   }
