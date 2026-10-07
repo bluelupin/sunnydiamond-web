@@ -11,6 +11,7 @@ import {
 } from "@/shared/ui/dialog";
 import { profileTabsContent } from "../data/profileContent";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import FormRadioOption from "@/shared/ui/FormRadioOption";
 
 type ProfileOrderReturnReasonDialogProps = {
   open: boolean;
@@ -88,21 +89,16 @@ export function ProfileOrderReturnReasonDialog({
           </p>
           <div className="flex flex-col gap-4">
             {reasons.map((reason) => (
-              <label
+              <FormRadioOption
                 key={reason.code}
-                className="flex items-center gap-2 font-gill text-base leading-110 text-darkblack"
-              >
-                <input
-                  type="radio"
-                  name="return-order-reason"
-                  value={reason.code}
-                  checked={selectedReason?.code === reason.code}
-                  onChange={() => setSelectedCode(reason.code)}
-                  disabled={isSubmitting}
-                  className="size-6 shrink-0 accent-gold500"
-                />
-                <span className="font-light">{reason.label}</span>
-              </label>
+                name="return-order-reason"
+                value={reason.code}
+                label={reason.label}
+                checked={selectedReason?.code === reason.code}
+                disabled={isSubmitting}
+                onSelect={setSelectedCode}
+                labelClassName="text-darkblack"
+              />
             ))}
           </div>
         </div>

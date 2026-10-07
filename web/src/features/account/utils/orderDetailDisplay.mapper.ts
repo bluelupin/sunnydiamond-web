@@ -201,13 +201,15 @@ export function mapTrackedOrderToProfileDetailUi(
       ...base,
       showDownloadInvoice: false,
       showContactUs: category === "cancelled",
-      estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-      estimatedDeliveryValue: resolveRefundEstimateValue(
-        order.sunnyRefund,
-        category === "returned"
-          ? ordersContent.estimatedDeliveryPlaceholder
-          : ordersContent.estimatedDeliveryRangePlaceholder,
-      ),
+      ...(category === "cancelled"
+        ? {
+            estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
+            estimatedDeliveryValue: resolveRefundEstimateValue(
+              order.sunnyRefund,
+              ordersContent.estimatedDeliveryRangePlaceholder,
+            ),
+          }
+        : {}),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
