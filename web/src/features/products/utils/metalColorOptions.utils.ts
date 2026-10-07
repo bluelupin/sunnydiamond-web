@@ -25,6 +25,17 @@ export function formatMetalColorLabel(value: string): string {
     .join(" ");
 }
 
+/**
+ * Configurable child line SKUs from Magento orders: `{numericParent}-{metalSlug}`.
+ * Same slug family as PDP/cart `options.metal` (e.g. yellow-gold → Yellow Gold via formatMetalColorLabel).
+ */
+export function metalSlugFromOrderProductSku(sku: string | null | undefined): string | undefined {
+  const normalized = sku?.trim().toLowerCase();
+  if (!normalized) return undefined;
+  const match = normalized.match(/^\d+-([a-z0-9]+(?:-[a-z0-9]+)*)$/);
+  return match?.[1];
+}
+
 function normalizeMetalColorKey(value: string): string {
   return value.trim().toLowerCase().replace(/[_\s]+/g, "-");
 }

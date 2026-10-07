@@ -1,4 +1,7 @@
-import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
+import {
+  formatMetalColorLabel,
+  metalSlugFromOrderProductSku,
+} from "@/features/products/utils/metalColorOptions.utils";
 import { classifyCustomOptionLabel } from "@/services/magento/products/productCustomOptions.mapper";
 import type {
   CustomerOrderItem,
@@ -67,7 +70,9 @@ export function mapCustomerOrderItemToDisplayFields(
 ) {
   const options = getAllOptions(item);
   const size = options.find((option) => isSizeLabel(option.label))?.value.trim();
-  const metalRaw = findOptionValue(options, ["metal color", "metal", "color"]);
+  const metalRaw =
+    findOptionValue(options, ["metal color", "metal", "color"]) ??
+    metalSlugFromOrderProductSku(item.productSku);
   const metal = metalRaw ? formatMetalColorLabel(metalRaw) || metalRaw : undefined;
   const engraving = options
     .find((option) => classifyCustomOptionLabel(option.label) === "engravingText")

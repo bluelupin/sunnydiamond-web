@@ -119,13 +119,14 @@ export function ProfileOrderDetailItemCard({
   const productContent = (
     <>
       {item.isBespoke ? (
-        <div className="flex items-center gap-6 lg:hidden">
+        <div className="flex items-start gap-2 lg:hidden">
           <div className="relative h-[63px] w-[71px] shrink-0 overflow-hidden bg-white">
             {imageElement}
           </div>
-          <div className="min-w-0 flex flex-col gap-2">
+          <div className="min-w-0 flex flex-1 flex-col gap-2">
             {nameElement}
             {attributesElement}
+            {priceElement}
           </div>
         </div>
       ) : (
@@ -139,14 +140,10 @@ export function ProfileOrderDetailItemCard({
             {imageElement}
           </div>
           <div className={cn("min-w-0 flex flex-1 flex-col", isGiftCardItem ? "gap-3" : "gap-2")}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex flex-col gap-2">
-                {nameElement}
-                {subtitleElement}
-              </div>
-              <div className="shrink-0">{priceElement}</div>
-            </div>
+            {nameElement}
+            {subtitleElement}
             {attributesElement}
+            {priceElement}
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
                 Qty: {item.quantity}
@@ -207,7 +204,10 @@ export function ProfileOrderDetailItemCard({
       ) : null}
       {productContent}
       {item.giftNote?.trim() ? (
-        <ProfileOrderDetailGiftFooter giftNote={item.giftNote.trim()} />
+        <>
+          <div className="mt-4 h-px w-full bg-aboutInactive lg:hidden" aria-hidden />
+          <ProfileOrderDetailGiftFooter giftNote={item.giftNote.trim()} />
+        </>
       ) : null}
     </div>
   );
