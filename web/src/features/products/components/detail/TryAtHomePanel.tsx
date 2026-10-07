@@ -19,6 +19,7 @@ import {
 } from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import OverlaySelectField from "@/shared/ui/OverlaySelectField";
+import { matchTryAtHomeStateSelectOption } from "@/features/products/data/tryAtHomeContent";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
@@ -304,13 +305,6 @@ type TryAtHomeAddressStepProps = {
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
-/** Prefilled/detected values may differ in case from the CMS options (e.g. "uttar pradesh" vs "Uttar Pradesh"). */
-const matchSelectOption = (value: string, options: readonly string[]): string => {
-  const normalized = value.trim().toLowerCase();
-  if (!normalized) return "";
-  return options.find((option) => option.toLowerCase() === normalized) ?? "";
-};
-
 const TryAtHomeAddressStep = ({
   form,
   formTitle,
@@ -333,7 +327,7 @@ const TryAtHomeAddressStep = ({
   const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
   const stateOptions = useMemo(() => form?.stateFieldOptions ?? [], [form?.stateFieldOptions]);
-  const selectedState = matchSelectOption(state, stateOptions);
+  const selectedState = matchTryAtHomeStateSelectOption(state, stateOptions);
 
   const defaultShippingAddress = useMemo(() => {
     if (addresses.length === 0) {

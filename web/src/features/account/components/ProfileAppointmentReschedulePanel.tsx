@@ -56,7 +56,10 @@ import {
   validateBookingWindowDate,
   validateOptionalAddressLine2,
 } from "@/shared/utils/formValidation";
-import { getTryAtHomeStateSelectOptions } from "@/features/products/data/tryAtHomeContent";
+import {
+  getTryAtHomeStateSelectOptions,
+  matchTryAtHomeStateSelectOption,
+} from "@/features/products/data/tryAtHomeContent";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 
@@ -229,13 +232,24 @@ export function ProfileAppointmentReschedulePanel({
   const { errors, markTouched, showError, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
+  const cmsStateOptionSource = useMemo(() => {
+    if (!cmsForm) {
+      return undefined;
+    }
+
+    return cmsForm.stateFieldOptions.length > 0
+      ? cmsForm.stateFieldOptions
+      : cmsForm.stateOptions;
+  }, [cmsForm]);
+
   const stateOptions = useMemo(
-    () =>
-      getTryAtHomeStateSelectOptions(
-        cmsForm?.stateOptions,
-        addressState || address?.state,
-      ),
-    [address?.state, addressState, cmsForm?.stateOptions],
+    () => getTryAtHomeStateSelectOptions(cmsStateOptionSource, address?.state),
+    [address?.state, cmsStateOptionSource],
+  );
+
+  const selectedAddressState = useMemo(
+    () => matchTryAtHomeStateSelectOption(addressState, stateOptions),
+    [addressState, stateOptions],
   );
 
   const isAddressChanged =
@@ -256,10 +270,10 @@ export function ProfileAppointmentReschedulePanel({
           addressLine2: validateOptionalAddressLine2(addressLine2).error,
           pincode: validateIndianPincode(pincode).error,
           city: validateCity(city).error,
-          state: validateIndianState(addressState, stateOptions).error,
+          state: validateIndianState(selectedAddressState, stateOptions).error,
         }
         : {},
-    [addressLine1, addressLine2, addressState, city, isAddressChanged, pincode, stateOptions],
+    [addressLine1, addressLine2, city, isAddressChanged, pincode, selectedAddressState, stateOptions],
   );
 
   const hasAddressErrors = Object.values(addressErrors).some(Boolean);
@@ -326,7 +340,8 @@ export function ProfileAppointmentReschedulePanel({
     setAddressLine2(appointment.appointmentAddress?.addressLine2 ?? "");
     setPincode(appointment.appointmentAddress?.pincode ?? "");
     setCity(appointment.appointmentAddress?.city ?? "");
-    setAddressState(appointment.appointmentAddress?.state ?? "");
+    const rawState = appointment.appointmentAddress?.state?.trim() ?? "";
+    setAddressState(rawState);
     setTouchedAddressFields(new Set());
     setFormError(null);
     setIsSubmitting(false);
@@ -393,7 +408,9 @@ export function ProfileAppointmentReschedulePanel({
                   pincode: pincode.trim(),
                   city: city.trim(),
                   ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
-                  ...(addressState.trim() ? { state: addressState.trim() } : {}),
+                  ...(selectedAddressState.trim()
+                    ? { state: selectedAddressState.trim() }
+                    : {}),
                 },
               }
               : {}),
@@ -676,7 +693,7 @@ export function ProfileAppointmentReschedulePanel({
                   <OverlaySelectField
                     id="reschedule-appointment-state"
                     label={cmsForm?.stateLabel ?? "State"}
-                    value={addressState}
+                    value={selectedAddressState}
                     options={stateOptions}
                     placeholder={cmsForm?.statePlaceholder ?? "Select"}
                     onChange={setAddressState}

@@ -37,6 +37,19 @@ export const TRY_AT_HOME_INDIAN_STATES = [
   "Puducherry",
 ] as const;
 
+/** Prefilled values may differ in case from CMS options (e.g. "uttar pradesh" vs "Uttar Pradesh"). */
+export function matchTryAtHomeStateSelectOption(
+  value: string,
+  options: readonly string[],
+): string {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return "";
+  }
+
+  return options.find((option) => option.toLowerCase() === normalized) ?? "";
+}
+
 /** Full state/UT list for address forms; CMS entries are merged in but never replace this list. */
 export function getTryAtHomeStateSelectOptions(
   cmsStateOptions?: readonly string[] | null,
