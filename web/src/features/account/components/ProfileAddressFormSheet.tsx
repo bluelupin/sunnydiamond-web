@@ -117,6 +117,8 @@ export function ProfileAddressFormSheet({
     return visibleErrors;
   }, [form]);
 
+  const canSubmit = useMemo(() => !Object.values(errors).some(Boolean), [errors]);
+
   const showError = (field: ProfileAddressFormField) =>
     shouldShowFieldError(Boolean(touched[field]), submitted, errors[field]);
 
@@ -322,7 +324,7 @@ export function ProfileAddressFormSheet({
         <DetailDarkButton
           type="submit"
           className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={isSaving}
+          disabled={isSaving || !canSubmit}
         >
           {isSaving ? addressContent.savingLabel : addressContent.saveLabel}
         </DetailDarkButton>
