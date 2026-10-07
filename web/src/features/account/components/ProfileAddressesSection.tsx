@@ -198,6 +198,7 @@ const ProfileAddressesSection = () => {
 
       setDeleteUid(null);
     } catch {
+      setDeleteUid(null);
       // Errors surface via FormFieldError from useCustomerAddresses.
     }
   };
