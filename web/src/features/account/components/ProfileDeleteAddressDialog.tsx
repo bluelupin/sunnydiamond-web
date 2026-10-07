@@ -99,6 +99,7 @@ export function ProfileDeleteAddressDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         hideCloseButton
+        overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
         className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
       >
         <div className="flex flex-col gap-6">
