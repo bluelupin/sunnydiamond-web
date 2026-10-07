@@ -554,7 +554,7 @@ export function ProfileAppointmentReschedulePanel({
                   detailsReadOnly
                   showDate
                   showTimeSlots
-                  selectedSlotStyle={isStoreVisit ? "gold" : "dark"}
+                  selectedSlotStyle="gold"
                   showPurpose={Boolean(storeVisitPurpose)}
                   purpose={storeVisitPurpose}
                   purposeOptions={storeVisitPurpose ? [storeVisitPurpose] : []}

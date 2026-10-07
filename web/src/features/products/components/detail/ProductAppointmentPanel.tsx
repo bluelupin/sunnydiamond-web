@@ -447,7 +447,7 @@ const ProductAppointmentForm = ({
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
               bookingWindow={isScheduleVideoCall ? VIDEO_CALL_BOOKING_WINDOW : undefined}
-              selectedSlotStyle={isScheduleVideoCall ? "gold" : "dark"}
+              selectedSlotStyle="gold"
             />
 
             {allowImageUpload ? (
