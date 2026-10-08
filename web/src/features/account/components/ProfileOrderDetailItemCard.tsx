@@ -132,14 +132,14 @@ export function ProfileOrderDetailItemCard({
       ) : (
         <div
           className={cn(
-            "flex gap-2 lg:hidden",
-            isGiftCardItem ? "items-center" : "items-start",
+            "flex lg:hidden",
+            isGiftCardItem ? "items-center gap-[22px]" : "items-start gap-2",
           )}
         >
           <div
             className={cn(
               "relative shrink-0 overflow-hidden bg-white",
-              isGiftCardItem ? "h-[84px] w-[120px]" : "h-[84px] w-[112px]",
+              isGiftCardItem ? "h-[62px] w-[99px]" : "h-[84px] w-[112px]",
             )}
           >
             {imageElement}
@@ -201,7 +201,6 @@ export function ProfileOrderDetailItemCard({
     <div
       className={cn(
         "relative overflow-visible bg-white p-4 lg:p-6",
-        isGiftCardItem && "bg-transparent p-0 lg:bg-white lg:p-6",
         item.isBespoke && "border border-aboutInactive lg:border-neutral300",
       )}
     >

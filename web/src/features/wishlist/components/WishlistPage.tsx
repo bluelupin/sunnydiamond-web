@@ -18,7 +18,7 @@ import { WishlistPageGridSkeleton } from "./skeletons/WishlistPageSkeleton";
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 
 const WishlistPage = () => {
-  const { wishlistedIds, toggleWishlist, removeFromWishlist } = useWishlist();
+  const { wishlistedIds, isWishlistReady, toggleWishlist, removeFromWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
   const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
   const [visibleCount, setVisibleCount] = useState(WISHLIST_VISIBLE_CAP);
@@ -28,8 +28,25 @@ const WishlistPage = () => {
   const visibleProducts = wishlistProducts.slice(0, visibleCount);
   const hasMore = visibleCount < wishlistProducts.length;
   const showPagination = wishlistProducts.length > WISHLIST_VISIBLE_CAP;
-  const showEmptyState = !isLoading && !error && wishlistProducts.length === 0;
   const showLoadError = !isLoading && Boolean(error) && wishlistedIds.length > 0;
+  const showEmptyState =
+    isWishlistReady &&
+    !isLoading &&
+    !error &&
+    wishlistProducts.length === 0 &&
+    wishlistedIds.length === 0;
+  const showListingSkeleton =
+    wishlistProducts.length === 0 && !showLoadError && (!isWishlistReady || isLoading);
+  const headingProductCount =
+    wishlistProducts.length > 0
+      ? wishlistProducts.length
+      : showListingSkeleton
+        ? wishlistedIds.length
+        : 0;
+  const skeletonCardCount = Math.min(
+    Math.max(wishlistedIds.length, 1),
+    WISHLIST_VISIBLE_CAP,
+  );
   const needsFooterMargin =
     wishlistProducts.length > 0 && !showPagination && !showEmptyState && !showLoadError;
 
@@ -53,29 +70,6 @@ const WishlistPage = () => {
     }
   };
 
-  if (isLoading && wishlistProducts.length === 0 && wishlistedIds.length > 0) {
-    const skeletonCardCount = Math.min(wishlistedIds.length, WISHLIST_VISIBLE_CAP);
-
-    return (
-      <section className="min-h-screen pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
-        <WishlistHeading
-          productCount={wishlistedIds.length}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
-        <div className="bg-gray200">
-          <WishlistPageGridSkeleton cardCount={skeletonCardCount} />
-        </div>
-        <WishlistAddToBagPanel
-          open={Boolean(addToBagProduct)}
-          product={addToBagProduct}
-          onClose={() => setAddToBagProduct(null)}
-          onAddToBag={handlePanelAddToBag}
-        />
-      </section>
-    );
-  }
-
   return (
     <section
       className={cn(
@@ -84,7 +78,7 @@ const WishlistPage = () => {
       )}
     >
       <WishlistHeading
-        productCount={wishlistProducts.length}
+        productCount={headingProductCount}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         hideTitle={showEmptyState}
@@ -97,7 +91,9 @@ const WishlistPage = () => {
           showEmptyState && "lg:mb-0 lg:bg-white",
         )}
       >
-        {showLoadError ? (
+        {showListingSkeleton ? (
+          <WishlistPageGridSkeleton cardCount={skeletonCardCount} />
+        ) : showLoadError ? (
           <div className="mx-auto w-full max-w-1440 px-4 py-6 md:px-8 md:py-10 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
             <p className="text-center font-gill text-base font-light leading-110 text-neutral500" role="alert">
               {wishlistPageContent.loadErrorMessage}

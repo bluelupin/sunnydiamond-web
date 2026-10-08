@@ -11,7 +11,7 @@ type AccountAvatarIconProps = {
 
 /** Header account avatar with first-name initial. */
 export function AccountAvatarIcon({ firstName, className }: AccountAvatarIconProps) {
-  const { windows } = useUiPlatform();
+  const { platform } = useUiPlatform();
   const initial = getProfileAvatarInitial(firstName);
 
   return (
@@ -22,7 +22,14 @@ export function AccountAvatarIcon({ firstName, className }: AccountAvatarIconPro
       )}
       aria-hidden
     >
-      <span className={cn("block leading-none", !windows && "translate-y-0.5")}>{initial}</span>
+      <span
+        className={cn(
+          "grid size-full place-items-center leading-none",
+          platform === "other" && "translate-y-0.5",
+        )}
+      >
+        {initial}
+      </span>
     </div>
   );
 }

@@ -28,12 +28,15 @@ const ProfileWishlistSection = () => {
   const visibleProducts = wishlistProducts.slice(0, visibleCount);
   const hasMore = visibleCount < wishlistProducts.length;
   const showPagination = wishlistProducts.length > WISHLIST_VISIBLE_CAP;
-  const showEmptyState =
-    isWishlistReady && !isLoading && !error && wishlistProducts.length === 0;
   const showLoadError = !isLoading && Boolean(error) && wishlistedIds.length > 0;
-  const showListingSkeleton =
+  const showEmptyState =
+    isWishlistReady &&
+    !isLoading &&
+    !error &&
     wishlistProducts.length === 0 &&
-    (!isWishlistReady || (isLoading && wishlistedIds.length > 0));
+    wishlistedIds.length === 0;
+  const showListingSkeleton =
+    wishlistProducts.length === 0 && !showLoadError && (!isWishlistReady || isLoading);
 
   const handleOpenAddToBag = (product: JewelleryListingProduct) => {
     prefetchWishlistProductDetail(product.urlKey);
