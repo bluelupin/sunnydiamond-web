@@ -24,7 +24,23 @@ export const normalizeLoginPhoneDigits = (value: string, countryCode: string): s
   return value.replace(/\D/g, "");
 };
 
-export const isEmailIdentifier = (value: string): boolean => value.trim().includes("@");
+// @ always selects email. Standalone symbols must not select mobile or be stripped.
+export const isEmailIdentifier = (value: string): boolean => {
+  const trimmed = value.trim();
+  return /[@\p{L}._]/u.test(trimmed) || (trimmed.length > 0 && !/\d/.test(trimmed));
+};
+
+/** Cap mobile entry without blocking an @ or letters that switch the field to email. */
+export const limitLoginIdentifier = (value: string, countryCode: string, emailOnly = false): string => {
+  if (emailOnly || isEmailIdentifier(value)) return value;
+  const maxDigits = countryCode === "+44" ? 11 : countryCode === "+91" || countryCode === "+1" ? 10 : 15;
+  // Preserve malformed characters for validation rather than silently accepting the digits.
+  if (!/^\+?[\d\s()-]*$/.test(value.trim())) return value.slice(0, maxDigits);
+  const national = value.trim().startsWith(countryCode)
+    ? value.trim().slice(countryCode.length)
+    : value;
+  return normalizeLoginPhoneDigits(national, countryCode).slice(0, maxDigits);
+};
 
 export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: string): string => {
   const national = nationalDigits.replace(/\D/g, "");
@@ -51,19 +67,21 @@ export const validateLoginIdentifier = (
 ): FieldValidation => {
   const trimmed = value.trim();
 
-  if (options?.emailOnly) {
-    return validateRequiredEmail(trimmed);
+  if (options?.emailOnly || isEmailIdentifier(trimmed)) {
+    const result = validateRequiredEmail(trimmed);
+    return result.valid ? result : { valid: false, error: "Please enter a valid email" };
   }
 
   if (!trimmed) {
     return { valid: false, error: "Phone number or email is required" };
   }
 
-  if (isEmailIdentifier(trimmed)) {
-    return validateRequiredEmail(trimmed);
+  // Reject unexpected characters instead of silently stripping them into a valid number.
+  if (!/^\+?[\d\s()-]+$/.test(trimmed)) {
+    return { valid: false, error: "Please enter a valid phone number" };
   }
 
-  return validatePhone(trimmed, countryCode);
+  return validatePhone(normalizeLoginPhoneDigits(trimmed, countryCode), countryCode);
 };
 
 export const isLoginIdentifierReadyForOtp = (

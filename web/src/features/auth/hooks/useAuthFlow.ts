@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
-import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   createCustomerAccount,
   requestLoginOtp,
@@ -408,26 +407,21 @@ export function useAuthFlow({
 
   const handleIdentifierChange = useCallback(
     (value: string) => {
-      // Digits are legitimate email input in email-only mode — never phone-format them.
-      const nextValue =
-        emailOnly || /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, countryCode);
-      setIdentifier(nextValue);
+      // Preserve partial emails and malformed numbers so validation can explain the error.
+      setIdentifier(value);
       setIdentifierError(undefined);
       setSmsSendFailed(false);
     },
-    [countryCode, emailOnly],
+    [],
   );
 
   const handleCountryCodeChange = useCallback(
     (value: string) => {
       setCountryCode(value);
-      if (!isEmailIdentifier(identifier)) {
-        setIdentifier(sanitizePhoneInput(identifier, value));
-      }
       setIdentifierError(undefined);
       setSmsSendFailed(false);
     },
-    [identifier],
+    [],
   );
 
   const handleUseEmailInstead = useCallback(() => {

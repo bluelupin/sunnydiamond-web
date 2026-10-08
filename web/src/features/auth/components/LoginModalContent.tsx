@@ -9,7 +9,6 @@ import {
 } from "@/features/cart/components/CartFlowUi";
 import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
 import LoginIdentifierField from "./LoginIdentifierField";
-import { isLoginIdentifierReadyForOtp } from "../utils/authValidation";
 
 const socialButtonClassName =
   "inline-flex h-14 w-full items-center justify-center gap-2 border border-neutral300 px-7 font-gill text-sm uppercase leading-none text-darkblack btn-border-slide";
@@ -82,10 +81,8 @@ const LoginModalContent = ({
   onClose,
   titleClassName,
 }: LoginModalContentProps) => {
-  const canContinue =
-    !noSignInMethod
-    && !otpBlockedForCountry
-    && isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly });
+  // Allow invalid input through to handleContinue so it can display the validation error.
+  const canContinue = !noSignInMethod && !otpBlockedForCountry && !submitting;
   const showSocial = showGoogle || showApple;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
