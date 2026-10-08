@@ -224,13 +224,13 @@ const ProductAppointmentForm = ({
             isScheduleVideoCall ? formatRequiredFieldLabel(form.dateLabel) : form.dateLabel,
           );
         }
-        if (form.notesLabel && !isScheduleVideoCall && !isPersonalise) {
+        if (form.notesLabel && !isScheduleVideoCall) {
           setNotesLabel(form.notesLabel);
         }
-        if (form.notesPlaceholder && !isPersonalise) {
+        if (form.notesPlaceholder) {
           setNotesPlaceholder(form.notesPlaceholder);
         }
-        if (!isPersonalise) {
+        if (!isScheduleVideoCall) {
           setNotesRequired(form.notesRequired);
         }
         setAllowImageUpload(form.allowImageUpload);
