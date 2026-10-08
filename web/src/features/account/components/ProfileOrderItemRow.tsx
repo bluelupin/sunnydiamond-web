@@ -78,7 +78,7 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
           </div>
 
           <div className={cn("min-w-0 flex flex-col", isGiftCardItem ? "gap-3" : "gap-2")}>
-            {item.productUrlKey ? (
+            {item.productUrlKey && !isGiftCardItem ? (
               <Link
                 href={`/product/${item.productUrlKey}`}
                 className={cn(

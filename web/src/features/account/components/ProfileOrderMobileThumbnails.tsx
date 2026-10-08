@@ -43,7 +43,7 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
               item.subtitle?.trim() ? "h-[100px] w-[120px]" : "size-[100px]",
             )}
           >
-            {item.productUrlKey ? (
+            {item.productUrlKey && !item.subtitle?.trim() ? (
               <Link href={`/product/${item.productUrlKey}`} className="relative block size-full">
                 <ProfileOrderThumbnailImage item={item} />
               </Link>

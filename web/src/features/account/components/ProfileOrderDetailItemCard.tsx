@@ -62,7 +62,7 @@ export function ProfileOrderDetailItemCard({
   const isGiftCardItem = Boolean(item.subtitle?.trim());
   const lineTotal = item.unitPrice * item.quantity;
 
-  const nameElement = item.productUrlKey ? (
+  const nameElement = item.productUrlKey && !isGiftCardItem ? (
     <Link
       href={`/product/${item.productUrlKey}`}
       className={cn(
