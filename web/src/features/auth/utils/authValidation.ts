@@ -143,16 +143,30 @@ export type CreateAccountFormErrors = {
   terms?: string;
 };
 
+/** Registration phone stays a phone field even when malformed text is pasted. */
+export const limitRegistrationPhone = (value: string, countryCode: string): string => {
+  const maxDigits = countryCode === "+44" ? 11 : countryCode === "+91" || countryCode === "+1" ? 10 : 15 - countryCode.replace(/\D/g, "").length;
+  return value.slice(0, maxDigits);
+};
+
+export const validateRegistrationPhone = (value: string, countryCode: string): FieldValidation => {
+  if (!value.trim()) return { valid: true };
+  if (!/^\d+$/.test(value.trim()) || value.trim().length > 15 - countryCode.replace(/\D/g, "").length) {
+    return { valid: false, error: "Please enter a valid phone number" };
+  }
+  return validatePhone(value, countryCode);
+};
+
 export const validateCreateAccountForm = (
   values: CreateAccountFormValues,
 ): { valid: boolean; errors: CreateAccountFormErrors } => {
   const nameValidation = validateRequiredName(values.fullName);
   const emailValidation =
-    values.secondaryField === "email" ? validateRequiredEmail(values.email) : { valid: true as const };
+    values.secondaryField === "email" ? validateLoginIdentifier(values.email, values.countryCode, { emailOnly: true }) : { valid: true as const };
   // Signing up by email makes the email the identity; the mobile number is optional.
   const phoneValidation =
     values.secondaryField === "phone" && values.phone.trim()
-      ? validatePhone(values.phone, values.countryCode)
+      ? validateRegistrationPhone(values.phone, values.countryCode)
       : { valid: true as const };
 
   const errors: CreateAccountFormErrors = {
