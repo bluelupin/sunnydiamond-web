@@ -135,9 +135,38 @@ export function getProfileTimelineCompletedThroughIndex(steps: ProfileTimelineSt
 }
 
 export function getProfileTimelineStepDescription(label: string): string | undefined {
-  return ORDER_DELIVERY_STEP_DESCRIPTIONS[
-    label as keyof typeof ORDER_DELIVERY_STEP_DESCRIPTIONS
-  ];
+  const direct =
+    ORDER_DELIVERY_STEP_DESCRIPTIONS[
+      label as keyof typeof ORDER_DELIVERY_STEP_DESCRIPTIONS
+    ];
+  if (direct) {
+    return direct;
+  }
+
+  const matchedLabel = ORDER_DELIVERY_TIMELINE_LABELS.find(
+    (timelineLabel) => normalizeOrderStatus(timelineLabel) === normalizeOrderStatus(label),
+  );
+  if (!matchedLabel) {
+    return undefined;
+  }
+
+  return ORDER_DELIVERY_STEP_DESCRIPTIONS[matchedLabel];
+}
+
+/** Subtitle under the current step only — server copy wins, else local fallback. */
+export function resolveProfileTimelineStepDescription(
+  step: ProfileTimelineStep,
+): string | undefined {
+  if (step.status !== "current") {
+    return undefined;
+  }
+
+  const fromServer = step.description?.trim();
+  if (fromServer) {
+    return fromServer;
+  }
+
+  return getProfileTimelineStepDescription(step.label);
 }
 
 type GiftCardVariantSubtitle = "Digital Card" | "Physical Card";

@@ -708,6 +708,9 @@ export function mapCustomerAppointmentToProfileUi(
 
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,
+    ...(appointment.appointmentGroupId
+      ? { appointmentGroupId: appointment.appointmentGroupId }
+      : {}),
     formTag: appointment.formTag,
     type,
     typeLabel,

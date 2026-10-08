@@ -22,7 +22,7 @@ const AllDirectorsMemberRow = ({ member, imageOnRight }: AllDirectorsMemberRowPr
   const bioIsRichHtml = member.bio ? isDirectorBioHtml(member.bio) : false;
 
   const imageBlock = (
-    <div className="relative w-full shrink-0 overflow-hidden bg-gray200 lg:h-[600px] h-[600px] lg:max-w-[478px]">
+    <div className="relative w-full shrink-0 overflow-hidden bg-gray200 lg:h-[600px] md:h-[600px] h-[426px] lg:max-w-[478px]">
       {member.image ? (
         <ResponsiveImage
           desktopSrc={member.image.desktopUrl}
@@ -39,7 +39,7 @@ const AllDirectorsMemberRow = ({ member, imageOnRight }: AllDirectorsMemberRowPr
   );
 
   const copyBlock = (
-    <div className="flex min-w-0 flex-1 flex-col gap-6 lg:gap-10">
+    <div className="flex min-w-0 flex-1 flex-col gap-8 lg:gap-10">
       <div className="flex flex-col items-start gap-2 text-left leading-110">
         <h2 className="font-larken text-2xl font-light text-darkblack md:text-3xl lg:text-32">
           {member.name}
@@ -65,7 +65,7 @@ const AllDirectorsMemberRow = ({ member, imageOnRight }: AllDirectorsMemberRowPr
   return (
     <article
       className={cn(
-        "flex w-full flex-col gap-8 lg:flex-row lg:items-center lg:gap-10",
+        "flex w-full flex-col lg:flex-row lg:items-center lg:gap-10 md:gap-8 gap-4",
         imageOnRight && "lg:flex-row-reverse",
       )}
     >

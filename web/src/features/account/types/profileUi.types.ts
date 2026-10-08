@@ -174,6 +174,8 @@ export type ProfileAppointmentUi = {
   cancelledOnNote?: string;
   /** When clubbed, cancel/reschedule applies to all underlying appointment ids. */
   clubbedAppointmentIds?: string[];
+  /** CMS group for multi-piece bookings — used to merge notes across rows. */
+  appointmentGroupId?: string;
 };
 
 export type ProfileBespokeItemUi = {

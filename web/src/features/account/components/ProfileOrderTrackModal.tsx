@@ -245,7 +245,7 @@ export function ProfileOrderTrackModal({
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
                 <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
-                  {trackDialog.title}
+                  {trackDialog.title.replace(/\?$/, "")}
                 </SheetTitle>
                 <button
                   type="button"

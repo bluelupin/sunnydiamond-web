@@ -3,8 +3,8 @@
 import { cn } from "@/shared/utils/cn";
 import type { ProfileTimelineStep } from "../types/profileUi.types";
 import {
-  getProfileTimelineStepDescription,
   isProfileTimelineStepActive,
+  resolveProfileTimelineStepDescription,
 } from "../utils/orderDeliveryTimeline.utils";
 
 type ProfileOrderTrackTimelineProps = {
@@ -23,10 +23,7 @@ export function ProfileOrderTrackTimeline({ steps, className }: ProfileOrderTrac
         const isCompleted = step.status === "completed";
         const isActive = isProfileTimelineStepActive(step.status);
         const isLast = index === steps.length - 1;
-        // Figma: each reached step shows its description text (server copy wins), never a date.
-        const description = isActive
-          ? (step.description ?? getProfileTimelineStepDescription(step.label))
-          : undefined;
+        const description = resolveProfileTimelineStepDescription(step);
 
         return (
           <li key={`${step.step}-${step.label}`} className="flex gap-4">
