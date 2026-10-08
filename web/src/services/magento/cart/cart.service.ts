@@ -156,11 +156,6 @@ function mapServerCustomOptionsByUid(
   return byUid;
 }
 
-function isCustomerCartRequiredError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
-  return message.includes("customerCart") || message.includes("CustomerCart");
-}
-
 export async function fetchCustomerCart(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
@@ -176,33 +171,26 @@ export async function fetchCustomerCart(
   return mapGuestCartState(cart, lineMetadata);
 }
 
-async function tryEnsureCustomerCartId(signal?: AbortSignal): Promise<string | null> {
-  try {
-    const data = await magentoGraphqlFetch<{ customerCart: { id: string } }>({
-      query: MAGENTO_CUSTOMER_CART_QUERY,
-      signal,
-      cache: "no-store",
-    });
-
-    const cartId = data.customerCart?.id?.trim();
-    if (!cartId) {
-      return null;
-    }
-
-    setGuestCartId(cartId);
-    return cartId;
-  } catch {
-    return null;
-  }
-}
-
 export async function ensureCustomerCartId(signal?: AbortSignal): Promise<string> {
-  const cartId = await tryEnsureCustomerCartId(signal);
+  const data = await magentoGraphqlFetch<{ customerCart: { id: string } }>({
+    query: MAGENTO_CUSTOMER_CART_QUERY,
+    signal,
+    cache: "no-store",
+  });
+  const cartId = data.customerCart?.id?.trim();
   if (!cartId) {
     throw new Error("Failed to resolve customer cart");
   }
-
+  setGuestCartId(cartId);
   return cartId;
+}
+
+/** Auth must be resolved by the caller before choosing a cart. */
+export async function ensureCartId(
+  isAuthenticated: boolean,
+  signal?: AbortSignal,
+): Promise<string> {
+  return isAuthenticated ? ensureCustomerCartId(signal) : ensureGuestCartId(signal);
 }
 
 export async function createGuestCart(signal?: AbortSignal): Promise<string> {
@@ -226,52 +214,51 @@ export async function fetchGuestCart(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  try {
-    const data = await magentoGraphqlFetch<MagentoCartResponse>({
-      query: MAGENTO_GET_CART_QUERY,
-      variables: { cartId },
-      signal,
-      cache: "no-store",
-    });
+  const data = await magentoGraphqlFetch<MagentoCartResponse>({
+    query: MAGENTO_GET_CART_QUERY,
+    variables: { cartId },
+    signal,
+    cache: "no-store",
+  });
+  return mapGuestCartState(assertCart(data.cart), lineMetadata);
+}
 
-    return mapGuestCartState(assertCart(data.cart), lineMetadata);
-  } catch (error) {
-    if (isCustomerCartRequiredError(error)) {
-      return fetchCustomerCart(lineMetadata, signal);
-    }
-
-    throw error;
-  }
+function fetchCartForSession(
+  cartId: string,
+  lineMetadata: StoredCartLineMetadata,
+  isAuthenticated: boolean,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  return isAuthenticated
+    ? fetchCustomerCart(lineMetadata, signal)
+    : fetchGuestCart(cartId, lineMetadata, signal);
 }
 
 export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
   const existingCartId = getGuestCartId();
   if (existingCartId) {
     try {
-      await magentoGraphqlFetch<MagentoCartResponse>({
+      const data = await magentoGraphqlFetch<MagentoCartResponse>({
         query: MAGENTO_GET_CART_QUERY,
         variables: { cartId: existingCartId },
         signal,
         cache: "no-store",
       });
+      assertCart(data.cart);
       return existingCartId;
     } catch (error) {
-      if (isCustomerCartRequiredError(error)) {
-        const customerCartId = await tryEnsureCustomerCartId(signal);
-        if (customerCartId) {
-          return customerCartId;
-        }
+      // Only discard a cart Magento confirms is missing, inactive or inaccessible.
+      // A network failure or cancellation must not replace the shopper's cart.
+      const unavailable = error instanceof MagentoGraphqlError && (
+        /could not find a cart|cart.*(?:isn't|is not|not) active|current user cannot perform|customerCart/i.test(error.message)
+        || error.errors.some((entry) => entry.extensions?.category === "graphql-authorization")
+      );
+      if (!unavailable || signal?.aborted) {
+        throw error;
       }
-
       clearGuestCartId();
     }
   }
-
-  const customerCartId = await tryEnsureCustomerCartId(signal);
-  if (customerCartId) {
-    return customerCartId;
-  }
-
   return createGuestCart(signal);
 }
 
@@ -359,10 +346,11 @@ export async function syncGuestCartLineOptions(
   cartId: string,
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
+  isAuthenticated = false,
 ): Promise<GuestCartState> {
   let metadata = lineMetadata;
   let metadataChanged = false;
-  let state = await fetchGuestCart(cartId, metadata, signal);
+  let state = await fetchCartForSession(cartId, metadata, isAuthenticated, signal);
   // Lines whose sync the server refused — the server-stored value stands.
   const refused = new Set<string>();
 
@@ -470,6 +458,7 @@ export async function syncGuestCartLineOption(
   lineMetadata: StoredCartLineMetadata,
   serverOptions?: CartLineServerCustomOptions,
   signal?: AbortSignal,
+  isAuthenticated = false,
 ): Promise<GuestCartState> {
   const syncOptions = buildMagentoCartItemSyncOptions({
     lineOptions: metadata.options,
@@ -483,7 +472,7 @@ export async function syncGuestCartLineOption(
 
   // A no-op update still rotates the cart item uid — skip the mutation entirely.
   if (serverOptions && syncOptionsMatchServer(syncOptions, serverOptions)) {
-    return fetchGuestCart(cartId, lineMetadata, signal);
+    return fetchCartForSession(cartId, lineMetadata, isAuthenticated, signal);
   }
 
   const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({
@@ -834,22 +823,16 @@ export async function selectFirstAvailableGuestShippingMethod(
 export async function fetchActiveCartState(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
+  isAuthenticated = false,
 ): Promise<GuestCartState> {
+  if (isAuthenticated) {
+    return fetchCustomerCart(lineMetadata, signal);
+  }
   const cartId = getGuestCartId();
-
   if (!cartId) {
     throw new Error("Magento cart was not available");
   }
-
-  try {
-    return await fetchGuestCart(cartId, lineMetadata, signal);
-  } catch (error) {
-    if (isCustomerCartRequiredError(error)) {
-      return fetchCustomerCart(lineMetadata, signal);
-    }
-
-    throw error;
-  }
+  return fetchGuestCart(cartId, lineMetadata, signal);
 }
 
 export async function prepareCheckoutForPayment(
@@ -860,10 +843,10 @@ export async function prepareCheckoutForPayment(
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
   const addressedState = await applyCheckoutAddresses(cartId, form, lineMetadata, options, signal);
-  const syncedState = await syncGuestCartLineOptions(cartId, lineMetadata, signal);
+  const syncedState = await syncGuestCartLineOptions(cartId, lineMetadata, signal, options.isAuthenticated);
   await selectFirstAvailableGuestShippingMethod(cartId, syncedState, lineMetadata, signal);
 
-  return fetchActiveCartState(lineMetadata, signal);
+  return fetchActiveCartState(lineMetadata, signal, options.isAuthenticated);
 }
 
 export async function prepareGuestCheckoutForPayment(
@@ -981,8 +964,9 @@ export async function completeGuestCheckout(
   paymentMethod: CheckoutPaymentData["method"],
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
+  isAuthenticated = false,
 ): Promise<GuestCheckoutResult> {
-  const cartState = await fetchGuestCart(cartId, lineMetadata, signal);
+  const cartState = await fetchCartForSession(cartId, lineMetadata, isAuthenticated, signal);
   const paymentCode = resolveMagentoPaymentCode(
     paymentMethod,
     cartState.totals.paymentMethods,
@@ -1013,7 +997,7 @@ export async function completeGuestCheckout(
   // Options before payment: a real sync rotates item uids, and doing it after
   // setPaymentMethodOnCart would leave a selected payment on a cart state the
   // shopper never confirmed if the sync stalls.
-  await syncGuestCartLineOptions(cartId, lineMetadata, signal);
+  await syncGuestCartLineOptions(cartId, lineMetadata, signal, isAuthenticated);
   await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
   const order = await placeGuestOrder(cartId, signal);
 
