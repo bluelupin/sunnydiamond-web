@@ -1,12 +1,35 @@
 import { resolveFooterLinkHref } from "@/features/cms/utils/policyCertificationsRoutes";
 
+export type HeaderNavCta = {
+  id?: string | number;
+  label: string;
+  url: string;
+  targetType?: string | null;
+  openInNewTab?: boolean;
+};
+
+/** Mega-menu card on a header nav item (e.g. World of Sunny). Title from CMS is ignored — use `cta.label`. */
+export type HeaderNavCard = {
+  id: string | number;
+  isActive?: boolean;
+  cta: HeaderNavCta;
+  image: {
+    id?: string | number;
+    desktopImageUrl?: string;
+    mobileImageUrl?: string;
+    alt?: string;
+  };
+};
+
 export type HeaderNavLink = {
   id?: string | number;
   label: string;
   url: string;
+  targetType?: string | null;
   isActive?: boolean | null;
   showField?: boolean | null;
   sortOrder?: number | null;
+  cards?: HeaderNavCard[];
 };
 
 export type FooterLink = {
@@ -65,6 +88,8 @@ function filterHeaderLinks(links: readonly HeaderNavLink[]): HeaderNavLink[] {
       id: link.id,
       label: link.label.trim(),
       url: link.url.trim(),
+      targetType: link.targetType,
+      cards: link.cards?.length ? link.cards : undefined,
     }));
 }
 

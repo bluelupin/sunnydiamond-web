@@ -1,7 +1,7 @@
 /** Loose Strapi DTO shapes for homepage custom endpoints (CMS field names). */
 
 import type { HomepageSeo } from "@/types/homepage/seo";
-import type { FooterLinkGroup, HeaderNavLink } from "@/shared/lib/shellNavigation";
+import type { FooterLinkGroup } from "@/shared/lib/shellNavigation";
 
 export type StrapiHomepageCta = {
   id?: number;
@@ -58,8 +58,27 @@ export type StrapiSidebarNavigationItem = {
   sortOrder?: number | null;
 };
 
+export type StrapiHeaderNavCard = {
+  id?: number;
+  title?: string | null;
+  isActive?: boolean | null;
+  cta?: StrapiHomepageCta | null;
+  image?: StrapiResponsiveImageBlock | null;
+};
+
+export type StrapiHeaderNavLink = {
+  id?: number;
+  label?: string | null;
+  url?: string | null;
+  targetType?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
+  sortOrder?: number | null;
+  cards?: StrapiHeaderNavCard[] | null;
+};
+
 export type StrapiGlobalShell = {
-  headerNavigationLinks?: HeaderNavLink[] | null;
+  headerNavigationLinks?: StrapiHeaderNavLink[] | null;
   sidebarNavigation?: StrapiSidebarNavigationItem[] | null;
   footerLinkGroups?: FooterLinkGroup[] | null;
   footerCopyright?: string | null;
