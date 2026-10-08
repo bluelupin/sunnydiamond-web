@@ -871,7 +871,7 @@ const CareersApplicationForm = () => {
           </FormField>
           {skills.length > 0 ? (
             <div className="flex flex-col gap-4 items-start">
-              <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
+              <label htmlFor="careers-skills-languages-search" className={careersFormLabelClassName}>{fields.skillsLabel}</label>
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill) => (
                   <TagChip
@@ -888,7 +888,7 @@ const CareersApplicationForm = () => {
 
           {languages.length > 0 ? (
             <div className="flex flex-col gap-4">
-              <p className={careersFormLabelClassName}>{fields.languagesLabel}</p>
+              <label htmlFor="careers-skills-languages-search" className={careersFormLabelClassName}>{fields.languagesLabel}</label>
               <div className="flex flex-wrap gap-2">
                 {languages.map((language) => (
                   <TagChip

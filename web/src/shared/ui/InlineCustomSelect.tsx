@@ -346,12 +346,13 @@ const InlineCustomSelect = ({
   return (
     <div ref={rootRef} className="relative flex w-full flex-col gap-2">
       {!hideLabel ? (
-        <span
+        <label
           id={labelId}
+          htmlFor={id}
           className={cn(appointmentLabelClassName, labelClassName)}
         >
           {label}
-        </span>
+        </label>
       ) : null}
       <button
         ref={triggerRef}

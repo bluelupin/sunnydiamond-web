@@ -42,6 +42,7 @@ export default function CareersSkillsSearch({ placeholder, skills, languages, on
     }}>
       <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
         <input
+          id="careers-skills-languages-search"
           type="text" role="combobox" aria-label="Search skills and languages"
           aria-autocomplete="list" aria-expanded={open}
           aria-controls="careers-skills-languages-search-options"
