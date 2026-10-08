@@ -203,9 +203,9 @@ const CareersApplicationForm = () => {
       const parsedLanguages = [...new Set(data.skillsAndLanguages?.Languages?.map((item) => item.SkillName).filter(Boolean) ?? [])];
       setSkills(parsedSkills);
       setLanguages(parsedLanguages);
-    } catch (error) {
+    } catch {
       if (!controller.signal.aborted) {
-        setResumeParseError(error instanceof Error ? error.message : "Resume autofill failed. Please complete the form manually.");
+        setResumeParseError("Couldn't read resume details. Please fill the form manually.");
       }
     } finally {
       if (parseAbortRef.current === controller) {
@@ -214,6 +214,12 @@ const CareersApplicationForm = () => {
       }
     }
   }, [applicationFlow.applicationForm.workExperienceOptions]);
+
+  useEffect(() => {
+    if (!resumeParseError) return;
+    const timer = setTimeout(() => setResumeParseError(null), appStatusToastDurationMs);
+    return () => clearTimeout(timer);
+  }, [resumeParseError]);
 
   const dismissResumeValidationToast = useCallback(() => {
     if (resumeValidationToastTimeoutRef.current) {
@@ -287,7 +293,7 @@ const CareersApplicationForm = () => {
         return;
       } else {
         setIsParsingResume(false);
-        setResumeParseError("Autofill accepts PDF or DOCX. Your resume is attached; complete the form manually.");
+        setResumeParseError("Couldn't read resume details. Please fill the form manually.");
       }
     }
     clearPendingResume();
@@ -421,7 +427,7 @@ const CareersApplicationForm = () => {
       if (isCareersAutofillFileSupported(file)) {
         void autofillFromResume(file);
       } else {
-        setResumeParseError("Autofill accepts PDF or DOCX. Your resume is attached; complete the form manually.");
+        setResumeParseError("Couldn't read resume details. Please fill the form manually.");
       }
     } else {
       parseAbortRef.current?.abort();
@@ -597,16 +603,6 @@ const CareersApplicationForm = () => {
         {showError("resume") ? <FormFieldError message={errors.resume!} /> : null}
         {isParsingResume ? (
           <p className="font-gill text-sm text-darkblack" role="status">Reading your resume…</p>
-        ) : null}
-        {resumeParseError ? (
-          <div className="flex flex-wrap items-center gap-3" role="alert">
-            <p className="font-gill text-sm text-red-700">{resumeParseError}</p>
-            {resumeFile && isCareersAutofillFileSupported(resumeFile) ? (
-              <button type="button" onClick={() => void autofillFromResume(resumeFile)} className="font-gill text-sm underline">
-                Try autofill again
-              </button>
-            ) : null}
-          </div>
         ) : null}
 
         <section className={careersFormSectionClassName}>
@@ -1013,8 +1009,8 @@ const CareersApplicationForm = () => {
       />
 
       <AppStatusToast
-        open={Boolean(resumeValidationToastMessage)}
-        message={resumeValidationToastMessage ?? ""}
+        open={Boolean(resumeValidationToastMessage || resumeParseError)}
+        message={resumeValidationToastMessage ?? resumeParseError ?? ""}
       />
     </form>
   );
