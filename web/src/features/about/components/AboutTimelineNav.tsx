@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -23,6 +23,7 @@ const AboutTimelineNav = ({
   onYearSelect,
 }: AboutTimelineNavProps) => {
   const listId = useId();
+  const listRef = useRef<HTMLOListElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileLayout, setIsMobileLayout] = useState(false);
 
@@ -36,6 +37,16 @@ const AboutTimelineNav = ({
 
   useEffect(() => {
     setIsExpanded(false);
+  }, [activeYear]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const activeButton = list.querySelector<HTMLElement>(
+      `[data-timeline-year="${activeYear}"]`,
+    );
+    activeButton?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeYear]);
 
   const handleYearSelect = (year: TimelineYear) => {
@@ -91,8 +102,10 @@ const AboutTimelineNav = ({
       >
         <div className={cn(accordionCollapseInnerClassName, "md:overflow-visible")}>
           <ol
+            ref={listRef}
             id={listId}
-            className="mt-4 flex flex-col items-start gap-4 sm:gap-6 md:mt-0 md:gap-8 lg:items-start md:max-h-full max-h-[270px] md:overflow-y-hidden overflow-y-auto"
+            data-timeline-year-list
+            className="mt-4 flex flex-col items-start gap-4 sm:gap-6 md:mt-0 md:gap-8 lg:items-start md:max-h-[min(100%,calc(100vh-12rem))] max-h-[270px] overflow-y-auto overscroll-contain"
           >
             {years.map((year) => {
               const isActive = year === activeYear;
@@ -101,23 +114,24 @@ const AboutTimelineNav = ({
                 <li key={year}>
                   <button
                     type="button"
+                    data-timeline-year={year}
                     onClick={() => handleYearSelect(year)}
                     className={cn(
-                      "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none md:justify-start",
+                      "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-300 ease-out motion-reduce:transition-none md:justify-start",
                       !isActive && "opacity-40 hover:opacity-70",
                     )}
                     aria-current={isActive ? "step" : undefined}
                   >
                     <span
                       className={cn(
-                        "hidden h-px w-16 shrink-0 transition-colors duration-500 ease-out motion-reduce:transition-none md:block",
+                        "hidden h-px w-16 shrink-0 transition-colors duration-300 ease-out motion-reduce:transition-none md:block",
                         isActive ? "bg-white" : "bg-aboutInactive",
                       )}
                       aria-hidden
                     />
                     <span
                       className={cn(
-                        "font-gill leading-normal transition-all duration-500 ease-out motion-reduce:transition-none",
+                        "font-gill leading-normal transition-all duration-300 ease-out motion-reduce:transition-none",
                         isActive
                           ? "text-xl font-semibold text-white"
                           : "text-xl font-normal text-aboutInactive",

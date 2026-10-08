@@ -40,6 +40,7 @@ import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { useMounted } from "@/shared/hooks/use-mounted";
 import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
 import { useCheckoutSuccessHeaderActive } from "@/features/checkout/context/checkoutHeaderBridge";
+import { useAboutTimelineHeaderSuppressed } from "@/features/about/context/aboutTimelineHeaderBridge";
 import {
   CAREERS_ALL_OPENINGS_ROUTE,
   CAREERS_ROUTE,
@@ -131,16 +132,19 @@ const Header = () => {
   }, []);
 
   const careersHeaderMode = useCareersHeaderMode(pathname);
+  const isAboutTimelineHeaderSuppressed = useAboutTimelineHeaderSuppressed(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen || worldOfSunnyMenuOpen;
   const headerHidden = mobileMenuOpen || profileNavOpen;
-  const isHeaderScrollRevealEnabled = !headerHidden && !menuOpen && !searchOpen;
+  const isHeaderScrollRevealEnabled =
+    !headerHidden && !menuOpen && !searchOpen && !isAboutTimelineHeaderSuppressed;
   const { isVisible: isHeaderScrollVisible, isPastTop: isHeaderPastTop } = useHeaderScrollReveal({
     enabled: isHeaderScrollRevealEnabled,
     useMainScrollContainer: isAuthPage,
   });
-  const isHeaderShown = headerHidden || isHeaderScrollVisible;
+  const isHeaderShown =
+    headerHidden || (isAboutTimelineHeaderSuppressed ? false : isHeaderScrollVisible);
   const isScrollReturnSurface =
     isHeaderScrollVisible && isHeaderPastTop && !headerHidden && !menuOpen;
   const pathnameHeaderVariant = getHeaderVariant(pathname, { menuOpen });

@@ -38,7 +38,11 @@ const AboutTimelineSection = ({
   }
 
   return (
-    <section ref={sectionRef} aria-label="Company timeline" className="relative">
+    <section
+      ref={sectionRef}
+      aria-label="Company timeline"
+      className="relative"
+    >
       <div className="sticky top-0 z-10 h-screen overflow-hidden">
         <div className="absolute inset-0">
           {backgroundImage ? (
