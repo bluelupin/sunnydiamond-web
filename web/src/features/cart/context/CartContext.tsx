@@ -22,7 +22,7 @@ import {
 import {
   addProductToGuestCart,
   applyCartGiftCard,
-  ensureGuestCartId,
+  ensureCartId,
   estimateGuestCartShippingMethods,
   fetchCustomerCart,
   fetchGuestCart,
@@ -535,6 +535,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState, isAuthenticated, loadAuthenticatedCart, refreshCart, status]);
 
   const addItem = useCallback(async (payload: AddToBagPayload | Product): Promise<AddItemResult> => {
+    if (status === "loading") {
+      throw new Error("Your session is still loading. Please try again.");
+    }
     const normalized = normalizePayload(payload);
     const {
       product,
@@ -570,7 +573,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsUpdating(true);
 
     try {
-      const cartId = await ensureGuestCartId();
+      const cartId = await ensureCartId(isAuthenticated);
       const previousItems = cartState?.items ?? [];
       const nextState = await addProductToGuestCart({
         cartId,
@@ -643,7 +646,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsUpdating(false);
     }
-  }, [applyCartState, cartState?.items]);
+  }, [applyCartState, cartState?.items, isAuthenticated, status]);
 
   const removeItem = useCallback(async (lineItemId: string, options?: RemoveItemOptions) => {
     const cartId = getGuestCartId();
@@ -968,6 +971,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           lineItem.quantity,
           nextMetadata,
           serverOptions,
+          undefined,
+          isAuthenticated,
         );
 
         // The cart item uid rotates on every option update — re-key this line's
@@ -1034,7 +1039,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         throw error;
       }
     },
-    [applyCartState, cartState?.cart, cartState?.items, cartState?.totals.cartId],
+    [applyCartState, cartState?.cart, cartState?.items, cartState?.totals.cartId, isAuthenticated],
   );
 
   const applyGiftingSelection = useCallback(
@@ -1119,6 +1124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState]);
 
   const refreshCartFromMagento = useCallback(async () => {
+    if (status === "loading") return;
     setCartRefreshError(null);
 
     if (isAuthenticated) {
@@ -1151,7 +1157,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsUpdating(false);
     }
-  }, [applyCartState, isAuthenticated, refreshCart]);
+  }, [applyCartState, isAuthenticated, refreshCart, status]);
 
   const selectShippingMethod = useCallback(
     async (carrierCode: string, methodCode: string) => {
