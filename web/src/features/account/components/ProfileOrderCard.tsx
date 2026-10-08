@@ -303,9 +303,17 @@ export function ProfileOrderCard({
             </div>
           </div>
 
-          <DetailDarkButton type="button" className="w-full" onClick={handleViewDetails}>
-            {content.viewDetailsLabel}
-          </DetailDarkButton>
+          <div className="flex flex-col gap-4">
+            <DetailDarkButton type="button" className="w-full" onClick={handleViewDetails}>
+              {content.viewDetailsLabel}
+            </DetailDarkButton>
+
+            {order.showTrack && order.category !== "delivered" ? (
+              <DetailOutlineButton type="button" className="w-full" onClick={handleTrackOrder}>
+                {content.trackOrderLabel}
+              </DetailOutlineButton>
+            ) : null}
+          </div>
         </div>
 
         <div className="hidden flex-col gap-6 lg:flex">
