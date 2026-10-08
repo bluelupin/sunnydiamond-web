@@ -10,7 +10,13 @@ import SearchIcon from "@/assets/Icons/SearchIcon";
 import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { cn } from "@/shared/utils/cn";
-import { resolveHeaderNavHref, isHeaderNavLinkActive, isJewelleryNavLink } from "@/shared/utils/navigation";
+import {
+  resolveHeaderNavHref,
+  isHeaderNavLinkActive,
+  isJewelleryNavLink,
+  isWorldOfSunnyNavLink,
+} from "@/shared/utils/navigation";
+import { WorldOfSunnyCategoryMenu } from "@/shared/ui/layout/WorldOfSunnyCategoryMenu";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
@@ -39,7 +45,7 @@ function scheduleEnterAnimation(onEnter: () => void) {
   };
 }
 
-type SubPanelId = "appointment" | "jewellery" | "store-visit";
+type SubPanelId = "appointment" | "jewellery" | "world-of-sunny" | "store-visit";
 
 const MOBILE_NAV_TRANSITION_MS = 300;
 
@@ -77,6 +83,42 @@ type JewelleryPanelProps = {
   onBack: () => void;
   onClose: () => void;
 };
+
+const WorldOfSunnyPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
+  <div
+    className="flex h-full w-full flex-col bg-white"
+    role="dialog"
+    aria-modal="true"
+    aria-label="World of Sunny"
+  >
+    <div className="flex shrink-0 items-center px-4 pt-10 md:pt-6">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="Go back"
+        className="flex items-center gap-2"
+      >
+        <span className="inline-flex size-6 shrink-0 items-center justify-center">
+          <Image
+            src="/icons/chevron-right.svg"
+            alt=""
+            width={7}
+            height={15}
+            aria-hidden
+            className="-scale-x-100"
+          />
+        </span>
+        <span className="font-gill text-sm font-semibold uppercase leading-110 text-darkblack">
+          World of Sunny
+        </span>
+      </button>
+    </div>
+
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-20 pt-4">
+      <WorldOfSunnyCategoryMenu variant="mobile" onClose={onClose} />
+    </div>
+  </div>
+);
 
 const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
   <div
@@ -501,6 +543,7 @@ const MobileNavigation = ({
           <nav aria-label="Main navigation" className="mt-6 flex w-full flex-col gap-4">
             {navLinks.map((link, index) => {
               const isJewellery = isJewelleryNavLink(link.label);
+              const isWorldOfSunny = isWorldOfSunnyNavLink(link.label, link.url);
               const isActive = isHeaderNavLinkActive(pathname, link.label, link.url);
               return (
                 <Fragment key={link.id ?? link.label}>
@@ -509,7 +552,13 @@ const MobileNavigation = ({
                     href={resolveHeaderNavHref(link.label, link.url)}
                     isActive={isActive}
                     onNavigate={handleClose}
-                    onOpenPanel={isJewellery ? () => setSubPanel("jewellery") : undefined}
+                    onOpenPanel={
+                      isJewellery
+                        ? () => setSubPanel("jewellery")
+                        : isWorldOfSunny
+                          ? () => setSubPanel("world-of-sunny")
+                          : undefined
+                    }
                   />
                   {index < navLinks.length - 1 ? <NavDivider /> : null}
                 </Fragment>
@@ -580,6 +629,18 @@ const MobileNavigation = ({
             aria-hidden={!isSubPanelVisible}
           >
             <JewelleryPanel onBack={() => setSubPanel(null)} onClose={handleClose} />
+          </div>
+        ) : null}
+
+        {displayedSubPanel === "world-of-sunny" ? (
+          <div
+            className={cn(
+              "absolute inset-x-0 bottom-0 top-16 z-10",
+              mobileNavSubPanelMotionClass(isSubPanelVisible),
+            )}
+            aria-hidden={!isSubPanelVisible}
+          >
+            <WorldOfSunnyPanel onBack={() => setSubPanel(null)} onClose={handleClose} />
           </div>
         ) : null}
 

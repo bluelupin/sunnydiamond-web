@@ -22,6 +22,7 @@ import {
   isCheckoutSuccessRoute,
   isHeaderNavLinkActive,
   isJewelleryNavLink,
+  isWorldOfSunnyNavLink,
 } from "@/shared/utils/navigation";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
@@ -53,6 +54,14 @@ const JewelleryMegaMenu = dynamic(
   { ssr: false, loading: () => null },
 );
 
+const WorldOfSunnyMegaMenu = dynamic(
+  () =>
+    import("@/shared/ui/layout/WorldOfSunnyMegaMenu").then((mod) => ({
+      default: mod.WorldOfSunnyMegaMenu,
+    })),
+  { ssr: false, loading: () => null },
+);
+
 const SearchOverlay = dynamic(() => import("@/features/search/SearchOverlay"), { ssr: false, loading: () => null });
 
 const BookAnAppointmentPanel = dynamic(
@@ -62,6 +71,10 @@ const BookAnAppointmentPanel = dynamic(
 
 const preloadJewelleryMegaMenu = () => {
   void import("@/shared/ui/layout/JewelleryMegaMenu");
+};
+
+const preloadWorldOfSunnyMegaMenu = () => {
+  void import("@/shared/ui/layout/WorldOfSunnyMegaMenu");
 };
 
 const iconButtonClass =
@@ -89,7 +102,11 @@ const Header = () => {
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const [jewelleryMenuMounted, setJewelleryMenuMounted] = useState(false);
   const jewelleryMenuMountedRef = useRef(false);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [worldOfSunnyMenuOpen, setWorldOfSunnyMenuOpen] = useState(false);
+  const [worldOfSunnyMenuMounted, setWorldOfSunnyMenuMounted] = useState(false);
+  const worldOfSunnyMenuMountedRef = useRef(false);
+  const jewelleryCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const worldOfSunnyCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const mounted = useMounted();
@@ -116,7 +133,7 @@ const Header = () => {
   const careersHeaderMode = useCareersHeaderMode(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
-  const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
+  const menuOpen = mobileMenuOpen || jewelleryMenuOpen || worldOfSunnyMenuOpen;
   const headerHidden = mobileMenuOpen || profileNavOpen;
   const isHeaderScrollRevealEnabled = !headerHidden && !menuOpen && !searchOpen;
   const { isVisible: isHeaderScrollVisible, isPastTop: isHeaderPastTop } = useHeaderScrollReveal({
@@ -167,10 +184,24 @@ const Header = () => {
     setJewelleryMenuOpen(false);
     setJewelleryMenuMounted(false);
     jewelleryMenuMountedRef.current = false;
+    setWorldOfSunnyMenuOpen(false);
+    setWorldOfSunnyMenuMounted(false);
+    worldOfSunnyMenuMountedRef.current = false;
   }, [pathname]);
 
+  const closeWorldOfSunnyMenuNow = useCallback(() => {
+    if (worldOfSunnyCloseTimerRef.current) clearTimeout(worldOfSunnyCloseTimerRef.current);
+    setWorldOfSunnyMenuOpen(false);
+  }, []);
+
+  const closeJewelleryMenuNow = useCallback(() => {
+    if (jewelleryCloseTimerRef.current) clearTimeout(jewelleryCloseTimerRef.current);
+    setJewelleryMenuOpen(false);
+  }, []);
+
   const openJewelleryMenu = useCallback(() => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeWorldOfSunnyMenuNow();
+    if (jewelleryCloseTimerRef.current) clearTimeout(jewelleryCloseTimerRef.current);
     preloadJewelleryMegaMenu();
 
     if (!jewelleryMenuMountedRef.current) {
@@ -184,15 +215,32 @@ const Header = () => {
     }
 
     setJewelleryMenuOpen(true);
-  }, []);
+  }, [closeWorldOfSunnyMenuNow]);
 
   const scheduleCloseJewelleryMenu = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => setJewelleryMenuOpen(false), 150);
+    jewelleryCloseTimerRef.current = setTimeout(() => setJewelleryMenuOpen(false), 150);
   }, []);
 
-  const closeJewelleryMenuNow = useCallback(() => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    setJewelleryMenuOpen(false);
+  const openWorldOfSunnyMenu = useCallback(() => {
+    closeJewelleryMenuNow();
+    if (worldOfSunnyCloseTimerRef.current) clearTimeout(worldOfSunnyCloseTimerRef.current);
+    preloadWorldOfSunnyMegaMenu();
+
+    if (!worldOfSunnyMenuMountedRef.current) {
+      worldOfSunnyMenuMountedRef.current = true;
+      setWorldOfSunnyMenuMounted(true);
+      setWorldOfSunnyMenuOpen(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setWorldOfSunnyMenuOpen(true));
+      });
+      return;
+    }
+
+    setWorldOfSunnyMenuOpen(true);
+  }, [closeJewelleryMenuNow]);
+
+  const scheduleCloseWorldOfSunnyMenu = useCallback(() => {
+    worldOfSunnyCloseTimerRef.current = setTimeout(() => setWorldOfSunnyMenuOpen(false), 150);
   }, []);
 
   useLayoutEffect(() => {
@@ -200,6 +248,12 @@ const Header = () => {
       closeJewelleryMenuNow();
     }
   }, [isHeaderScrollVisible, jewelleryMenuOpen, closeJewelleryMenuNow]);
+
+  useLayoutEffect(() => {
+    if (!isHeaderScrollVisible && worldOfSunnyMenuOpen) {
+      closeWorldOfSunnyMenuNow();
+    }
+  }, [isHeaderScrollVisible, worldOfSunnyMenuOpen, closeWorldOfSunnyMenuNow]);
 
   const toggleJewelleryMenu = useCallback(() => {
     if (jewelleryMenuOpen) {
@@ -209,7 +263,16 @@ const Header = () => {
     openJewelleryMenu();
   }, [closeJewelleryMenuNow, jewelleryMenuOpen, openJewelleryMenu]);
 
-  const showJewelleryMenuLayer = jewelleryMenuMounted;
+  const toggleWorldOfSunnyMenu = useCallback(() => {
+    if (worldOfSunnyMenuOpen) {
+      closeWorldOfSunnyMenuNow();
+      return;
+    }
+    openWorldOfSunnyMenu();
+  }, [closeWorldOfSunnyMenuNow, openWorldOfSunnyMenu, worldOfSunnyMenuOpen]);
+
+  const showDesktopMegaMenuLayer = jewelleryMenuMounted || worldOfSunnyMenuMounted;
+  const isAnyDesktopMegaMenuOpen = jewelleryMenuOpen || worldOfSunnyMenuOpen;
 
   const handleJewelleryNavClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
@@ -218,6 +281,14 @@ const Header = () => {
       toggleJewelleryMenu();
     },
     [canHoverNav, toggleJewelleryMenu],
+  );
+
+  const handleWorldOfSunnyNavClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      toggleWorldOfSunnyMenu();
+    },
+    [toggleWorldOfSunnyMenu],
   );
 
   const useExpandedSearchHeader = searchOpen;
@@ -310,6 +381,7 @@ const Header = () => {
               <nav className="hidden items-center md:landscape:flex md:landscape:gap-10" aria-label="Main navigation">
                 {primaryLinks.map((link) => {
                   const isJewellery = isJewelleryNavLink(link.label);
+                  const isWorldOfSunny = isWorldOfSunnyNavLink(link.label, link.url);
                   const isActive = isHeaderNavLinkActive(pathname, link.label, link.url);
                   if (isJewellery) {
                     return (
@@ -332,6 +404,27 @@ const Header = () => {
                       </div>
                     );
                   }
+                  if (isWorldOfSunny) {
+                    return (
+                      <div
+                        key={link.id ?? link.label}
+                        className="inline-flex items-center"
+                        onMouseEnter={canHoverNav ? openWorldOfSunnyMenu : undefined}
+                        onMouseLeave={canHoverNav ? scheduleCloseWorldOfSunnyMenu : undefined}
+                      >
+                        <Link
+                          href={resolveHeaderNavHref(link.label, link.url)}
+                          className={navLinkClass(isActive || worldOfSunnyMenuOpen)}
+                          aria-current={isActive ? "page" : undefined}
+                          aria-expanded={worldOfSunnyMenuOpen}
+                          aria-haspopup="true"
+                          onClick={handleWorldOfSunnyNavClick}
+                        >
+                          {link.label}
+                        </Link>
+                      </div>
+                    );
+                  }
                   return (
                     <Link
                       key={link.id ?? link.label}
@@ -348,6 +441,7 @@ const Header = () => {
                     type="button"
                     onClick={() => {
                       closeJewelleryMenuNow();
+                      closeWorldOfSunnyMenuNow();
                       openAppointmentPanel();
                     }}
                     className={navLinkClass(isAppointmentActive || appointmentPanelOpen)}
@@ -406,7 +500,7 @@ const Header = () => {
             </div>
           </div>
 
-          {showJewelleryMenuLayer ? (
+          {showDesktopMegaMenuLayer && jewelleryMenuMounted ? (
             <FeatureErrorBoundary featureName="JewelleryMegaMenu">
               <JewelleryMegaMenu
                 open={jewelleryMenuOpen}
@@ -416,19 +510,43 @@ const Header = () => {
               />
             </FeatureErrorBoundary>
           ) : null}
+          {showDesktopMegaMenuLayer && worldOfSunnyMenuMounted ? (
+            <FeatureErrorBoundary featureName="WorldOfSunnyMegaMenu">
+              <WorldOfSunnyMegaMenu
+                open={worldOfSunnyMenuOpen}
+                onMouseEnter={canHoverNav ? openWorldOfSunnyMenu : undefined}
+                onMouseLeave={canHoverNav ? scheduleCloseWorldOfSunnyMenu : undefined}
+                onClose={closeWorldOfSunnyMenuNow}
+              />
+            </FeatureErrorBoundary>
+          ) : null}
         </div>
       </header>
 
-      {showJewelleryMenuLayer ? (
+      {showDesktopMegaMenuLayer ? (
         <div
           className={cn(
             "fixed inset-0 z-40 bg-black/50",
             "motion-safe:transition-opacity motion-safe:duration-300 motion-safe:ease-out",
-            jewelleryMenuOpen ? "opacity-100" : "pointer-events-none opacity-0",
+            isAnyDesktopMegaMenuOpen ? "opacity-100" : "pointer-events-none opacity-0",
           )}
-          onClick={canHoverNav ? undefined : closeJewelleryMenuNow}
-          onMouseEnter={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
-          aria-hidden={!jewelleryMenuOpen}
+          onClick={
+            canHoverNav
+              ? undefined
+              : () => {
+                  closeJewelleryMenuNow();
+                  closeWorldOfSunnyMenuNow();
+                }
+          }
+          onMouseEnter={
+            canHoverNav
+              ? () => {
+                  scheduleCloseJewelleryMenu();
+                  scheduleCloseWorldOfSunnyMenu();
+                }
+              : undefined
+          }
+          aria-hidden={!isAnyDesktopMegaMenuOpen}
         />
       ) : null}
 
