@@ -6,6 +6,7 @@ import {
   getProfileTimelineCompletedThroughIndex,
   getProfileTimelineFilledThroughIndex,
   isProfileTimelineStepActive,
+  resolveProfileTimelineStepDescription,
 } from "../utils/orderDeliveryTimeline.utils";
 
 type ProfileOrderTimelineProps = {
@@ -42,12 +43,10 @@ function ProfileOrderTimelineVertical({ steps }: { steps: ProfileTimelineStep[] 
         const isUpcoming = step.status === "upcoming";
         const isActive = isProfileTimelineStepActive(step.status);
         const isLast = index === steps.length - 1;
+        const description = resolveProfileTimelineStepDescription(step);
 
         return (
-          <div
-            key={`${step.step}-${step.label}`}
-            className={cn("flex gap-4", !isLast && "h-[60px]")}
-          >
+          <div key={`${step.step}-${step.label}`} className="flex gap-4">
             <div className="flex w-10 shrink-0 flex-col items-center">
               <span
                 className={cn(
@@ -69,15 +68,20 @@ function ProfileOrderTimelineVertical({ steps }: { steps: ProfileTimelineStep[] 
               ) : null}
             </div>
 
-            <div className="flex h-10 min-w-0 flex-1 items-center">
-              <span
+            <div className={cn("min-w-0 flex-1", isLast ? "pb-0 pt-1.5" : "pb-6 pt-1.5")}>
+              <p
                 className={cn(
                   "font-gill text-base leading-110 text-darkblack",
                   isActive || isCurrent ? "font-normal" : "font-light",
                 )}
               >
                 {step.label}
-              </span>
+              </p>
+              {description ? (
+                <p className="mt-1 font-gill text-base font-light leading-110 text-neutral500">
+                  {description}
+                </p>
+              ) : null}
             </div>
           </div>
         );

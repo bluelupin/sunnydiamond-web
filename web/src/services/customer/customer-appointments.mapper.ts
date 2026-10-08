@@ -126,6 +126,19 @@ function coerceMessageValue(value: unknown): string {
   return "";
 }
 
+function appendUniqueNoteLines(lines: string[], candidate: string | null | undefined): void {
+  if (!candidate) {
+    return;
+  }
+
+  for (const part of candidate.split(/\r?\n/)) {
+    const line = normalizeCustomerMessageText(part);
+    if (line && !lines.includes(line)) {
+      lines.push(line);
+    }
+  }
+}
+
 function mapCustomerMessage(
   item: StrapiCustomerAppointment & Record<string, unknown>,
 ): string | null {
@@ -358,8 +371,22 @@ export function mapCustomerAppointment(
     ...(() => {
       const rawMessage = mapCustomerMessage(normalized);
       const purposeOfVisit = mapPurposeOfVisit(normalized, rawMessage);
+      const noteLines: string[] = [];
+      appendUniqueNoteLines(noteLines, rawMessage);
+
+      for (const rawProduct of Array.isArray(normalized.products) ? normalized.products : []) {
+        if (!rawProduct || typeof rawProduct !== "object") {
+          continue;
+        }
+        appendUniqueNoteLines(
+          noteLines,
+          mapCustomerMessage(rawProduct as StrapiCustomerAppointment & Record<string, unknown>),
+        );
+      }
+
+      const combinedMessage = noteLines.length > 0 ? noteLines.join("\n") : rawMessage;
       return {
-        customerMessage: stripPurposePrefixFromMessage(rawMessage, purposeOfVisit),
+        customerMessage: stripPurposePrefixFromMessage(combinedMessage, purposeOfVisit),
         purposeOfVisit,
       };
     })(),
