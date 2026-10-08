@@ -1,5 +1,6 @@
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  resolveEngravingMaxCharacters,
   resolveEngravingPreviewImage,
   type ProductEngravingConfig,
 } from "@/features/products/constants/engraving";
@@ -43,7 +44,9 @@ export function mapMagentoProductEngraving(
 
   return {
     enabled: true,
-    maxCharacters: engravingText.maxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS,
+    maxCharacters:
+      resolveEngravingMaxCharacters(engravingText.maxCharacters) ??
+      DEFAULT_ENGRAVING_MAX_CHARACTERS,
     fonts: customOptions.engravingFont?.labels ?? [],
     ...(previewImage ? { previewImage } : {}),
   };

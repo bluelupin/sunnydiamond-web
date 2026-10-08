@@ -67,12 +67,13 @@ export const CATEGORY_ENGRAVING_PREVIEW_LAYOUTS: Partial<
   bracelets: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
     textArcPath: "M 118 84 Q 171 76 224 84",
-    fontSizeScale: 0.9,
+    fontSizeScale: 0.8,
   },
   earrings: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
-    textArcPath: "M 142 108 Q 171 100 200 108",
-    fontSizeScale: 0.78,
+    // Left butterfly back scallop — matches Earrings-engraving-preview / reference "A & K"
+    textArcPath: "M 40 10 Q 153 85 230 92",
+    fontSizeScale: 0.64,
   },
 };
 
@@ -181,6 +182,17 @@ export function resolveEngravingPreviewImage(
 /** @deprecated Use resolveEngravingPreviewImage */
 export const resolveRingEngravingPreviewImage = resolveEngravingPreviewImage;
 
+/** Catalog max length for engraving — prefers Magento customizable field `max_characters`. */
+export function resolveProductEngravingMaxCharacters(
+  product: Pick<Product, "engraving" | "customOptions">,
+): number {
+  return (
+    resolveEngravingMaxCharacters(product.customOptions?.engravingText?.maxCharacters) ??
+    resolveEngravingMaxCharacters(product.engraving?.maxCharacters) ??
+    DEFAULT_ENGRAVING_MAX_CHARACTERS
+  );
+}
+
 /** Normalize engraving config for PDP, cart, and any engraving drawer entry point. */
 export function resolveProductEngravingConfig(
   product: Pick<Product, "engraving" | "customOptions" | "categorySlug">,
@@ -189,10 +201,12 @@ export function resolveProductEngravingConfig(
     product.engraving?.previewImage,
     product.categorySlug,
   );
+  const maxCharacters = resolveProductEngravingMaxCharacters(product);
 
   if (isProductEngravingEnabled(product.engraving)) {
     return {
       ...product.engraving!,
+      maxCharacters,
       ...(previewImage ? { previewImage } : {}),
     };
   }
@@ -203,9 +217,7 @@ export function resolveProductEngravingConfig(
 
   return {
     enabled: true,
-    maxCharacters:
-      resolveEngravingMaxCharacters(product.customOptions?.engravingText?.maxCharacters) ??
-      DEFAULT_ENGRAVING_MAX_CHARACTERS,
+    maxCharacters,
     fonts: product.customOptions?.engravingFont?.labels ?? [],
     ...(previewImage ? { previewImage } : {}),
   };

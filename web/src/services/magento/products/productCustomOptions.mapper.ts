@@ -1,3 +1,4 @@
+import { resolveEngravingMaxCharacters } from "@/features/products/constants/engraving";
 import type {
   ProductCustomOptionChoice,
   ProductCustomOptionChoiceValue,
@@ -9,7 +10,7 @@ export type MagentoProductCustomOption = {
   uid?: string | null;
   title?: string | null;
   __typename?: string | null;
-  fieldValue?: { uid?: string | null; max_characters?: number | null } | null;
+  fieldValue?: { uid?: string | null; max_characters?: number | string | null } | null;
   dropDownValues?: Array<{
     uid?: string | null;
     title?: string | null;
@@ -148,11 +149,7 @@ function mapFieldOption(option: MagentoProductCustomOption): ProductCustomOption
     return null;
   }
 
-  const maxRaw = option.fieldValue?.max_characters;
-  const maxCharacters =
-    typeof maxRaw === "number" && Number.isFinite(maxRaw) && maxRaw > 0
-      ? Math.floor(maxRaw)
-      : null;
+  const maxCharacters = resolveEngravingMaxCharacters(option.fieldValue?.max_characters);
 
   return { optionUid, optionId, maxCharacters };
 }
