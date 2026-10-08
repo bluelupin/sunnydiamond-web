@@ -316,6 +316,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             open={isEngravingOpen}
             onClose={() => setIsEngravingOpen(false)}
             previewImage={engravingConfig?.previewImage}
+            categorySlug={product.categorySlug}
             fonts={engravingConfig?.fonts ?? availableEngravingFonts}
             maxCharacters={engravingConfig?.maxCharacters ?? engravingMaxCharacters}
             initialValue={initialEngravingSelection}

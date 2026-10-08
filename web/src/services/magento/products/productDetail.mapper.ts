@@ -432,9 +432,14 @@ export function mapMagentoProductDetailToProduct(
 
   const shortDescription = stripHtml(product.short_description?.html) || name;
   const customOptions = mapMagentoProductCustomOptions(product.options);
+  const jewelleryCategory = resolveJewelleryCategory(product.categories);
+  const categorySlug = jewelleryCategory.urlKey
+    ? MAGENTO_URL_KEY_TO_SLUG[jewelleryCategory.urlKey]
+    : undefined;
   const engraving = mapMagentoProductEngraving(customOptions, product.custom_attributesV2?.items, {
     mediaGallery: product.media_gallery,
     referenceImageUrl: product.image?.url,
+    categorySlug,
   });
   const productVideoUrl = resolveProductVideoUrl(
     product.custom_attributesV2?.items,
@@ -451,10 +456,6 @@ export function mapMagentoProductDetailToProduct(
         : gemstoneLine,
     };
   }
-  const jewelleryCategory = resolveJewelleryCategory(product.categories);
-  const categorySlug = jewelleryCategory.urlKey
-    ? MAGENTO_URL_KEY_TO_SLUG[jewelleryCategory.urlKey]
-    : undefined;
   const priceBreakup = resolveMagentoProductPriceBreakup(product.custom_attributesV2?.items);
 
   return {

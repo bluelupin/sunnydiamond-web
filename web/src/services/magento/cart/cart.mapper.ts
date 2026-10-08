@@ -24,6 +24,7 @@ import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   hasCatalogEngravingText,
 } from "@/features/products/constants/engraving";
+import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 export function applyCartLineDisplayImage(
   product: Product,
@@ -39,6 +40,20 @@ export function applyCartLineDisplayImage(
     image: trimmed,
     images: [trimmed],
   };
+}
+
+function resolveCartProductCategorySlug(
+  categories: Array<{ url_key?: string | null }> | null | undefined,
+): string | undefined {
+  const list = categories ?? [];
+  const diamondCategories = list.filter((category) => category.url_key?.startsWith("diamond-"));
+  const leafCategory =
+    diamondCategories.find((category) => {
+      const urlKey = category.url_key?.trim();
+      return Boolean(urlKey && MAGENTO_URL_KEY_TO_SLUG[urlKey]);
+    }) ?? diamondCategories[0];
+  const urlKey = leafCategory?.url_key?.trim();
+  return urlKey ? MAGENTO_URL_KEY_TO_SLUG[urlKey] : undefined;
 }
 
 function mapCartItemProduct(item: MagentoCartItem): Product | null {
@@ -64,12 +79,14 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
   );
   const image = primaryImage || fallBackImage;
   const customOptions = mapMagentoProductCustomOptions(product?.options);
+  const categorySlug = resolveCartProductCategorySlug(product?.categories);
   const engraving = mapMagentoProductEngraving(
     customOptions,
     product?.custom_attributesV2?.items,
     {
       mediaGallery: variant?.media_gallery ?? product?.media_gallery,
       referenceImageUrl: variant?.image?.url ?? product?.image?.url,
+      categorySlug,
     },
   );
 
@@ -81,6 +98,7 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     description: name,
     shortDescription: name,
     category: "",
+    ...(categorySlug ? { categorySlug } : {}),
     image,
     images: [image],
     carat: "",

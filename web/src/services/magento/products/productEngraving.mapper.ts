@@ -13,6 +13,7 @@ import {
 type MapMagentoProductEngravingOptions = {
   mediaGallery?: MagentoMediaGalleryItem[] | null;
   referenceImageUrl?: string | null;
+  categorySlug?: string | null;
 };
 
 /**
@@ -30,19 +31,20 @@ export function mapMagentoProductEngraving(
     return undefined;
   }
 
-  const { mediaGallery, referenceImageUrl } = options;
+  const { mediaGallery, referenceImageUrl, categorySlug } = options;
 
   const previewImageRaw =
     getMagentoCustomAttributeValue(items, "engraving_preview_image") ??
     getMagentoCustomAttributeValue(items, "sd_engraving_preview_image");
   const previewImage = resolveEngravingPreviewImage(
     resolveMagentoModelWearImageUrl(previewImageRaw, mediaGallery, referenceImageUrl) || undefined,
+    categorySlug,
   );
 
   return {
     enabled: true,
     maxCharacters: engravingText.maxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS,
     fonts: customOptions.engravingFont?.labels ?? [],
-    previewImage,
+    ...(previewImage ? { previewImage } : {}),
   };
 }
