@@ -20,6 +20,8 @@ type ProfileDeleteAccountDialogProps = {
   onDelete?: () => void;
 };
 
+const DELETE_ACCOUNT_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
+
 /** Figma 1480:20797 — delete account bottom sheet on mobile */
 export function ProfileDeleteAccountDialog({
   open,
@@ -39,7 +41,7 @@ export function ProfileDeleteAccountDialog({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          overlayClassName="z-[90] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          overlayClassName={`z-[90] ${DELETE_ACCOUNT_OVERLAY_CLASS}`}
           className="z-[90] w-full gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
           <div className="px-4 pt-6">
@@ -88,6 +90,7 @@ export function ProfileDeleteAccountDialog({
       <DialogContent
         elevated
         hideCloseButton
+        overlayClassName={DELETE_ACCOUNT_OVERLAY_CLASS}
         className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
       >
         <div className="flex flex-col gap-6">

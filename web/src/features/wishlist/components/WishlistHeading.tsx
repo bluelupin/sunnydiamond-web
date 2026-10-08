@@ -25,14 +25,14 @@ const WishlistHeading = ({
   const { requestAuth } = useRequestAuth();
   const showCount = productCount > 0;
   const showViewToggle = showCount;
-  const isAuthenticated = status === "authenticated";
+  const showSignInPrompt = status === "guest";
 
   return (
     <section
       aria-labelledby={hideTitle ? undefined : "wishlist-page-title"}
       className="w-full bg-white"
     >
-      {!isAuthenticated ? (
+      {showSignInPrompt ? (
         <div className="mt-6 flex flex-col items-center justify-center gap-4 bg-gray300 md:p-[18px] p-4 sm:flex-row sm:gap-2">
           <DetailTextLink onClick={() => requestAuth({ returnUrl: "/wishlist" })} className="md:text-base text-sm">
             Sign in
