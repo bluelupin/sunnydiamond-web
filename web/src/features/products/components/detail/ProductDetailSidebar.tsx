@@ -44,7 +44,7 @@ import ProductDetailAccordions from "./ProductDetailAccordions";
 import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import type { NormalizedProductDisplayPage } from "@/services/product-display/product-display-page.service";
-import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
+import { getRingSizeOptions } from "@/features/products/utils/ringSizeOptions.utils";
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
 import {
   findConfigurableVariantForMetal,
@@ -203,7 +203,10 @@ const ProductDetailSidebar = ({
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = resolveProductEngravingConfig(product);
   const engravingEnabled = isProductEngravingEnabled(engravingConfig);
-  const sizeLabels = getRingSizeLabels(product, sizeGuide);
+  const sizeOptions = getRingSizeOptions(product, sizeGuide, selectedMetal, preferredPurities);
+  const sizeLabels = sizeOptions.map(option => option.label);
+  const unavailableSizes = sizeOptions.filter(option => !option.inStock).map(option => option.label);
+  const selectedSize = sizeOptions.find(option => option.label === ringSize);
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = isMetalColorSelectable(product);
   const showMetalColor = content.metalColors.length > 0;
@@ -417,7 +420,7 @@ const ProductDetailSidebar = ({
   }, [initialEngravingSelection]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
-  const configurableOptionUids = getConfigurableOptionUidsForMetal(
+  const configurableOptionUids = selectedSize?.variant?.optionUids ?? getConfigurableOptionUidsForMetal(
     product,
     selectedMetal,
     preferredPurities,
@@ -454,6 +457,12 @@ const ProductDetailSidebar = ({
       setRingSizeError(
         `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
       );
+      scrollToRingSizeField();
+      return;
+    }
+
+    if (showSizeSelector && (!selectedSize || !selectedSize.inStock)) {
+      setRingSizeError("This size is out of stock. Please choose another size.");
       scrollToRingSizeField();
       return;
     }
@@ -632,6 +641,7 @@ const ProductDetailSidebar = ({
                   labelClassName="sr-only"
                   value={ringSize}
                   options={sizeLabels}
+                  unavailableOptions={unavailableSizes}
                   placeholder="Select"
                   invalid={ringSizeError != null}
                   onChange={(value) => {
