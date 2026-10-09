@@ -28,7 +28,7 @@ export default function JewelleryListingPromoCard({
     <Link
       href={card.cta.url}
       className={cn(
-        "group relative isolate flex min-w-0 w-full flex-col overflow-hidden bg-gray200",
+        "relative isolate flex min-w-0 w-full flex-col overflow-hidden bg-gray200",
         "h-[227px] lg:h-[496px] md:h-[450px]",
         className,
       )}
