@@ -10,7 +10,7 @@ type GiftingGiftCardSectionProps = {
 };
 
 const giftCardCtaClassName =
-  "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 hover:!border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+  "btn-border-slide inline-flex h-14 w-[192px] items-center justify-center border border-neutral300 hover:!border-neutral300 px-0 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-auto md:px-7";
 
 const GiftCardCta = ({ label, onClick }: { label: string; onClick: () => void }) => (
   <button type="button" onClick={onClick} className={giftCardCtaClassName}>
@@ -79,13 +79,13 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
         {cutoutSrc &&
           <Reveal
             direction="up"
-            className="pointer-events-none relative mx-auto mt-6 min-h-[240px] w-full max-w-[400px] px-0 md:absolute md:bottom-0 md:right-0 md:mt-0 md:block md:w-[min(791px,58vw)] lg:h-[527px] lg:w-[791px] md:max-w-none md:px-0"
+            className="pointer-events-none relative mx-auto mt-6 aspect-[375/249] w-full max-w-[400px] overflow-hidden px-0 md:absolute md:bottom-0 md:right-0 md:mt-0 md:block md:aspect-auto md:min-h-[240px] md:w-[min(791px,58vw)] lg:h-[527px] lg:w-[791px] md:max-w-none md:px-0 md:overflow-visible"
           >
             <Image
               src={cutoutSrc}
               alt={cutoutAlt}
               fill
-              className="object-contain object-center md:object-right-bottom"
+              className="scale-[1.2] object-contain object-center md:scale-100 md:object-right-bottom"
               sizes="(max-width: 768px) 100vw, 791px"
             />
           </Reveal>
