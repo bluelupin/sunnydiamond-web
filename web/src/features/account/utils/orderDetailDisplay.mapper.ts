@@ -179,7 +179,11 @@ export function mapTrackedOrderToProfileDetailUi(
         }
       : undefined,
     showCancel: actions ? actions.canCancel : category === "in_progress",
-    showReturn: actions ? actions.canReturn : category === "delivered",
+    showReturn: isGiftCardProfileOrder({ items })
+      ? false
+      : actions
+        ? actions.canReturn
+        : category === "delivered",
     showDownloadInvoice: true,
     ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
     showCancelNote: category === "in_progress",
@@ -230,7 +234,10 @@ export function mapTrackedOrderToProfileDetailUi(
   }
 
   if (category === "delivered" && isGiftCardProfileOrder(base)) {
-    return base;
+    return {
+      ...base,
+      showReturn: false,
+    };
   }
 
   if (deliveryTimeline.length > 0) {
