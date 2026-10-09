@@ -64,6 +64,7 @@ import type { JewelleryListingProductsData } from "@/types/magento/jewelleryList
 import type {
   NormalizedProductLandingHero,
   NormalizedProductLandingTrustBadge,
+  NormalizedProductListingCard,
 } from "@/services/product-landing/product-landing-page.types";
 
 type JewelleryProductPageProps = {
@@ -71,6 +72,7 @@ type JewelleryProductPageProps = {
   prefetchedCategoryUrlKey?: string | null;
   hero?: NormalizedProductLandingHero | null;
   trustBadges?: NormalizedProductLandingTrustBadge[];
+  listingCards?: readonly NormalizedProductListingCard[];
   /** /search: the shopper's query; hides the category tabs, which would drop it. */
   searchQuery?: string;
   /** /search: shown instead of the grid when the query finds nothing and no filter is set. */
@@ -95,6 +97,7 @@ const JewelleryProductPage = ({
   prefetchedCategoryUrlKey,
   hero,
   trustBadges = [],
+  listingCards = [],
   searchQuery,
   noResults,
 }: JewelleryProductPageProps) => {
@@ -744,6 +747,7 @@ const JewelleryProductPage = ({
         ) : (
           <JewelleryProductGrid
             products={products}
+            listingCards={listingCards}
             isWishlisted={isWishlisted}
             onToggleWishlist={handleToggleWishlist}
             metalPurityQuery={metalPurityQuery}
