@@ -14,6 +14,23 @@ const LIST_GAP_PX = 4;
 const VIEWPORT_PADDING_PX = 8;
 const LIST_MAX_HEIGHT_PX = 280;
 
+/** iOS/Android may emit a stray click on the element under the finger after a portaled option tap. */
+const swallowGhostClickAfterListSelection = () => {
+  const swallow = (event: MouseEvent) => {
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target.closest('button[aria-haspopup="listbox"]')
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    document.removeEventListener("click", swallow, true);
+  };
+
+  document.addEventListener("click", swallow, true);
+};
+
 type ListPosition = {
   top: number;
   left: number;
@@ -230,16 +247,20 @@ const InlineCustomSelect = ({
   const triggerLabel = selectedOption ?? placeholder;
   const showPlaceholder = !selectedOption;
 
-  const selectOption = (option: string) => {
-    onChange(option);
+  const closeListAfterSelection = () => {
     setIsOpen(false);
     onBlur?.();
+    swallowGhostClickAfterListSelection();
+  };
+
+  const selectOption = (option: string) => {
+    onChange(option);
+    closeListAfterSelection();
   };
 
   const clearSelection = () => {
     onChange("");
-    setIsOpen(false);
-    onBlur?.();
+    closeListAfterSelection();
   };
 
   const listbox =
