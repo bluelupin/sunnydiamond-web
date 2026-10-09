@@ -340,7 +340,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className={cn("flex flex-col gap-2", phoneLocked && "opacity-50")}>
               <div className="flex items-center gap-2">
                 <label htmlFor="profile-phone" className={appointmentLabelClassName}>
                   {content.fields.phone}
@@ -379,7 +379,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   aria-readonly={phoneLocked || undefined}
                   className={cn(
                     "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]",
-                    phoneLocked && "cursor-not-allowed opacity-70",
+                    phoneLocked && "cursor-not-allowed",
                   )}
                 />
                 {/* Only a number proven with a code signs in; offer the code for one typed in without it. */}
