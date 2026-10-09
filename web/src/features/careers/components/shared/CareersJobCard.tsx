@@ -81,13 +81,13 @@ const CareersJobCard = ({
       className={cn(
         "flex flex-col",
         isLanding &&
-          cn(
-            "gap-6 bg-gray200 p-4 md:bg-gray300 md:p-6",
-            isInteractive &&
-              "group cursor-pointer transition-colors md:flex-row md:items-start md:justify-between",
-          ),
+        cn(
+          "gap-6 bg-gray200 p-4 md:bg-gray300 md:hover:bg-gray200 md:p-6",
+          isInteractive &&
+          "group cursor-pointer transition-colors md:flex-row md:items-start md:justify-between",
+        ),
         isListing &&
-          "group cursor-pointer gap-6 bg-gray300 p-4 transition-colors md:bg-gray200 md:p-6 md:flex-row md:items-start md:justify-between md:hover:bg-gray300",
+        "group cursor-pointer gap-6 bg-gray300 p-4 transition-colors md:bg-gray200 md:p-6 md:flex-row md:items-start md:justify-between md:hover:bg-gray300",
         !isLanding && !isListing && "gap-6 bg-gray200 p-4 md:gap-8 md:p-8",
         className,
       )}
@@ -136,7 +136,7 @@ const CareersJobCard = ({
               isListing && "hidden lg:block",
               isListing ? postedDesktopClass : "",
               !isListing &&
-                (isLanding ? postedDesktopClass : "text-sm text-neutral500 md:text-base"),
+              (isLanding ? postedDesktopClass : "text-sm text-neutral500 md:text-base"),
             )}
           />
         ) : null}
