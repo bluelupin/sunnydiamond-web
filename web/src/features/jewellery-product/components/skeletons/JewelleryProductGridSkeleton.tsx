@@ -1,3 +1,5 @@
+import { PAGE_SIZE } from "../../data/filters";
+
 const shimmerClass = "animate-pulse bg-gray300";
 
 type JewelleryProductGridSkeletonProps = {
@@ -27,7 +29,7 @@ const JewelleryProductCardSkeleton = () => (
 const plpGridCellBorderClassName =
   "[&>*]:border-b [&>*]:border-solid [&>*]:border-neutral300 max-md:[&>*:not(:nth-child(2n))]:border-r md:[&>*:not(:nth-child(3n))]:border-r md:[&>*:nth-child(-n+3)]:border-t";
 
-const JewelleryProductGridSkeleton = ({ count = 9 }: JewelleryProductGridSkeletonProps) => (
+const JewelleryProductGridSkeleton = ({ count = PAGE_SIZE }: JewelleryProductGridSkeletonProps) => (
   <div
     className={`grid w-full min-w-0 grid-cols-2 items-stretch md:grid-cols-3 ${plpGridCellBorderClassName}`}
     aria-busy="true"
