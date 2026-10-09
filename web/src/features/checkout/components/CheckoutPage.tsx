@@ -56,7 +56,7 @@ import {
 } from "../utils/checkoutCustomer.utils";
 import {
   completeGuestCheckout,
-  ensureGuestCartId,
+  ensureCartId,
   fetchActiveCartState,
   prepareCheckoutForPayment,
   selectFirstAvailableGuestShippingMethod,
@@ -739,7 +739,7 @@ const CheckoutPage = () => {
             }
           }
 
-          const cartId = await ensureGuestCartId();
+          const cartId = await ensureCartId(isAuthenticated);
           const state = await prepareCheckoutForPayment(
             cartId,
             submittedForm,
@@ -797,14 +797,14 @@ const CheckoutPage = () => {
 
       void (async () => {
         try {
-          const cartId = await ensureGuestCartId();
+          const cartId = await ensureCartId(isAuthenticated);
 
           if (!cartId) {
             throw new Error("Your shopping bag could not be found. Please try again.");
           }
 
           const lineMetadata = readCartLineMetadata();
-          const cartState = await fetchActiveCartState(lineMetadata);
+          const cartState = await fetchActiveCartState(lineMetadata, undefined, isAuthenticated);
           const cartWithShipping = await selectFirstAvailableGuestShippingMethod(
             cartId,
             cartState,
@@ -844,6 +844,8 @@ const CheckoutPage = () => {
             cartId,
             submittedPayment.method,
             readCartLineMetadata(),
+            undefined,
+            isAuthenticated,
           );
 
           if (order.awaitingOnlinePayment) {
