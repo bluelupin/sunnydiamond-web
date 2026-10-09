@@ -43,6 +43,8 @@ type InlineCustomSelectProps = {
   label: string;
   value: string;
   options: readonly string[];
+  /** Unavailable options remain visible with a status label. */
+  unavailableOptions?: readonly string[];
   placeholder?: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -105,6 +107,7 @@ const InlineCustomSelect = ({
   label,
   value,
   options,
+  unavailableOptions = [],
   placeholder = "Select",
   onChange,
   onBlur,
@@ -336,6 +339,7 @@ const InlineCustomSelect = ({
         ) : null}
         {options.map((option) => {
           const selected = value === option;
+          const unavailable = unavailableOptions.includes(option);
 
           return (
             <button
@@ -343,6 +347,8 @@ const InlineCustomSelect = ({
               type="button"
               role="option"
               aria-selected={selected}
+              disabled={unavailable}
+              aria-disabled={unavailable || undefined}
               onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -351,13 +357,16 @@ const InlineCustomSelect = ({
               className={cn(
                 "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110",
                 "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
-                selected
+                unavailable
+                  ? "cursor-not-allowed bg-[#E8E8E8] font-normal text-[#999999]"
+                  : selected
                   ? "bg-[#DECAA0] font-normal text-darkblack"
                   : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
                 optionClassName,
               )}
             >
-              {option}
+              <span>{option}</span>
+              {unavailable ? <span className="ml-auto pl-4 font-gill text-sm font-normal text-[#999999]">Out of Stock</span> : null}
             </button>
           );
         })}
