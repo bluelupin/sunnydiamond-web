@@ -40,7 +40,8 @@ const ProductDetailHeroBanner = ({
   const sectionRef = useRef<HTMLElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
-  const showVideo = Boolean(videoSrc && shouldLoadVideo && !videoFailed);
+  const hasVideo = Boolean(videoSrc?.trim());
+  const showVideo = Boolean(hasVideo && shouldLoadVideo && !videoFailed);
   const videoRef = useMutedVideoPlayback(showVideo);
 
   const handleVideoError = useCallback(() => {
@@ -51,7 +52,7 @@ const ProductDetailHeroBanner = ({
     setVideoFailed(false);
     setShouldLoadVideo(false);
 
-    if (!videoSrc) {
+    if (!hasVideo) {
       return;
     }
 
@@ -75,7 +76,7 @@ const ProductDetailHeroBanner = ({
     return () => {
       observer.disconnect();
     };
-  }, [videoSrc]);
+  }, [hasVideo, videoSrc]);
 
   const handleVideoCanPlay = useCallback((event: React.SyntheticEvent<HTMLVideoElement>) => {
     void event.currentTarget.play().catch(() => {
@@ -92,17 +93,19 @@ const ProductDetailHeroBanner = ({
       aria-label="Lifestyle showcase"
       className="grid h-[400px] w-full overflow-hidden md:h-[500px] lg:h-[600px] [&>*]:col-start-1 [&>*]:row-start-1"
     >
-      <Image
-        src={imageSrc}
-        alt={alt}
-        width={1440}
-        height={800}
-        priority={false}
-        className="h-full w-full object-cover object-top"
-        sizes="100vw"
-      />
+      {!showVideo ? (
+        <Image
+          src={imageSrc}
+          alt={alt}
+          width={1440}
+          height={800}
+          priority={false}
+          className="h-full w-full object-cover object-top"
+          sizes="100vw"
+        />
+      ) : null}
 
-      {showVideo ? (
+      {showVideo && videoSrc ? (
         <video
           key={videoSrc}
           ref={videoRef}

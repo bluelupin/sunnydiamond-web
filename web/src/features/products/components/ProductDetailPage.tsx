@@ -65,8 +65,6 @@ const ProductDetailPageBody = ({
   sizeGuide = null,
   stockAlertEnabled = false,
   productDisplay,
-  heroBannerImage,
-  heroBannerVideo,
   moreForYou,
   alankaraPrefetch = null,
   editLineId,
@@ -153,8 +151,8 @@ const ProductDetailPageBody = ({
         </ProductDetailSidebar>
       </PageContainer>
       <ProductDetailBelowFoldLazy
-        heroBannerImage={heroBannerImage}
-        heroBannerVideo={heroBannerVideo}
+        heroBannerImage={content.heroBannerImage}
+        heroBannerVideo={content.heroBannerVideo}
         productName={product.name}
         productId={product.id}
         submissionProduct={displayProduct}

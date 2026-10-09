@@ -10,7 +10,7 @@ import { getMagentoGraphqlUrl } from "@/services/magento/config";
 import {
   getMagentoCustomAttributeValue,
   isMagentoPlaceholderImage,
-  resolveMagentoModelWearImageUrl,
+  resolveMagentoProductVideoUrl,
 } from "./magentoAttribute.utils";
 import { resolveMagentoProductImages } from "./products.mapper";
 import { resolveMagentoProductPricing } from "./productPricing.utils";
@@ -303,37 +303,6 @@ function resolveJewelleryCategory(
   return urlKey ? { name, urlKey } : { name };
 }
 
-function resolveProductVideoUrl(
-  items: MagentoCustomAttributeItem[] | null | undefined,
-  mediaGallery: MagentoProductDetailItem["media_gallery"],
-  referenceImageUrl?: string | null,
-): string | undefined {
-  const raw = getMagentoCustomAttributeValue(items, "product_video_url");
-  if (!raw) {
-    return undefined;
-  }
-
-  if (/^https?:\/\//i.test(raw)) {
-    return raw;
-  }
-
-  const resolvedFromCatalog = resolveMagentoModelWearImageUrl(
-    raw,
-    mediaGallery,
-    referenceImageUrl,
-  );
-  if (resolvedFromCatalog) {
-    return resolvedFromCatalog;
-  }
-
-  if (raw.startsWith("/")) {
-    const storeOrigin = getMagentoGraphqlUrl().replace(/\/graphql$/, "");
-    return `${storeOrigin}${raw}`;
-  }
-
-  return undefined;
-}
-
 function resolveDefaultMetalColorValue(
   configurable: ProductConfigurable | undefined,
   attributeMetalColor: string | null,
@@ -441,10 +410,11 @@ export function mapMagentoProductDetailToProduct(
     referenceImageUrl: product.image?.url,
     categorySlug,
   });
-  const productVideoUrl = resolveProductVideoUrl(
-    product.custom_attributesV2?.items,
+  const productVideoUrl = resolveMagentoProductVideoUrl(
+    getMagentoCustomAttributeValue(product.custom_attributesV2?.items, "product_video_url"),
     product.media_gallery,
     product.image?.url,
+    getMagentoGraphqlUrl().replace(/\/graphql$/, ""),
   );
   let detailSections = mapMagentoProductDetailSections(product.custom_attributesV2?.items);
   if (gemstoneType) {
