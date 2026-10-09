@@ -173,17 +173,17 @@ export function mapHeaderNavigationLinks(
 ): HeaderNavLink[] {
   if (!links?.length) return [];
 
-  return links
-    .map((link) => {
-      const label = cleanText(link.label);
-      const url = cleanText(link.url);
-      if (!label || !url) return null;
+  return links.flatMap((link): HeaderNavLink[] => {
+    const label = cleanText(link.label);
+    const url = cleanText(link.url);
+    if (!label || !url) return [];
 
-      const cards = (link.cards ?? [])
-        .map((card) => mapHeaderNavCard(card))
-        .filter((card): card is HeaderNavCard => card != null);
+    const cards = (link.cards ?? [])
+      .map((card) => mapHeaderNavCard(card))
+      .filter((card): card is HeaderNavCard => card != null);
 
-      return {
+    return [
+      {
         id: link.id,
         label,
         url,
@@ -192,9 +192,9 @@ export function mapHeaderNavigationLinks(
         showField: link.showField,
         sortOrder: link.sortOrder,
         cards,
-      } satisfies HeaderNavLink;
-    })
-    .filter((link): link is HeaderNavLink => link != null);
+      },
+    ];
+  });
 }
 
 function mapResponsiveImage(
