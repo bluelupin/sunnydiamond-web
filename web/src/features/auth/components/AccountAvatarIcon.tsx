@@ -11,9 +11,8 @@ type AccountAvatarIconProps = {
 
 /** Header account avatar with first-name initial. */
 export function AccountAvatarIcon({ firstName, className }: AccountAvatarIconProps) {
-  const { platform } = useUiPlatform();
   const initial = getProfileAvatarInitial(firstName);
-
+  const { windows } = useUiPlatform();
   return (
     <div
       className={cn(
@@ -22,12 +21,7 @@ export function AccountAvatarIcon({ firstName, className }: AccountAvatarIconPro
       )}
       aria-hidden
     >
-      <span
-        className={cn(
-          "grid size-full place-items-center leading-none",
-          platform === "other" && "translate-y-0.5",
-        )}
-      >
+      <span className={cn("inline-flex items-center justify-center", !windows && "pt-1")}>
         {initial}
       </span>
     </div>
