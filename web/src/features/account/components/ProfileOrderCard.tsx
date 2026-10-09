@@ -289,10 +289,21 @@ export function ProfileOrderCard({
             </div>
 
             {order.items.length > 0 ? (
-              <>
-                <ProfileOrderCardDivider />
-                <ProfileOrderMobileThumbnails items={order.items} />
-              </>
+              isGiftCardProfileOrder(order) ? (
+                <>
+                  <ProfileOrderCardDivider />
+                  <div className="flex flex-col gap-4">
+                    {order.items.map((item) => (
+                      <ProfileOrderItemRow key={item.id} item={item} />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ProfileOrderCardDivider />
+                  <ProfileOrderMobileThumbnails items={order.items} />
+                </>
+              )
             ) : null}
 
             <ProfileOrderCardDivider />

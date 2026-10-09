@@ -15,7 +15,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
       aria-labelledby="careers-life-title"
       className="bg-white md:bg-gray300"
     >
-      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-104 pt-16 md:pb-104 mt-0 pb-16 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1fr)] lg:items-stretch lg:gap-10">
+      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-104 pt-16 md:pb-104 mt-0 pb-16 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1fr)] lg:items-stretch lg:gap-10 md:gap-8">
         <div className="flex w-full min-w-0 flex-col gap-6 md:max-w-[300px] lg:max-w-none lg:gap-10">
           <Reveal direction="up">
             <h2
@@ -35,20 +35,19 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
             />
           </Reveal>
         </div>
-
         <Reveal
           direction="up"
-          className="flex w-full flex-col gap-4 md:min-w-0 md:flex-1 md:justify-center md:gap-6 md:self-stretch"
+          className="flex w-full flex-col gap-4 md:min-w-0 md:flex-1 md:gap-6 lg:mt-[127px]"
         >
-          <p className="w-full font-gill text-sm font-light leading-110 text-neutral500 md:text-xl md:font-normal md:text-darkblack">
+          <p className="w-full font-gill font-light leading-110 text-neutral500 lg:text-xl md:text-lg text-sm md:font-normal md:text-darkblack">
             {lifeAt.description}
           </p>
-          {lifeAt.additionalDescription ? (
-            <p className="w-full font-gill text-sm font-light leading-110 text-neutral500 md:text-xl md:font-normal md:text-darkblack">
+          {lifeAt.additionalDescription &&
+            <p className="w-full font-gill font-light leading-110 text-neutral500 lg:text-xl md:text-lg text-sm md:font-normal md:text-darkblack">
               {lifeAt.additionalDescription}
             </p>
-          ) : null}
-          {lifeAt.quote ? (
+          }
+          {lifeAt.quote &&
             <div className="flex w-full min-w-0 gap-2 items-center">
               <span
                 className="h-9 w-px shrink-0 bg-darkMagenta md:h-[38px] md:w-[1.5px]"
@@ -58,9 +57,8 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
                 &ldquo;{lifeAt.quote}&rdquo;
               </p>
             </div>
-          ) : null}
+          }
         </Reveal>
-
         <Reveal direction="up" className="grid grid-cols-[minmax(0,186fr)_minmax(0,160fr)] w-full items-center gap-3 md:grid-cols-2 md:gap-4 lg:hidden">
           <div className="relative aspect-[186/238] w-full overflow-hidden md:aspect-[474/496]">
             <Image
