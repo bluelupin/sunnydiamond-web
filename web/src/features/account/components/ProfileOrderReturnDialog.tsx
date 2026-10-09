@@ -10,6 +10,8 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
 
 type ProfileOrderReturnDialogProps = {
@@ -19,13 +21,75 @@ type ProfileOrderReturnDialogProps = {
   onProceedToReturn: () => void;
 };
 
+/** Return order bottom sheet on mobile (Figma), centered dialog on desktop */
 export function ProfileOrderReturnDialog({
   open,
   onOpenChange,
   onContactSupport,
   onProceedToReturn,
 }: ProfileOrderReturnDialogProps) {
+  const isMobile = useIsMobile();
   const content = profileTabsContent.orders.returnDialog;
+
+  const handleClose = () => onOpenChange(false);
+
+  const mobileDescription = content.descriptionMobileLines.map((line) => (
+    <span key={line} className="block">
+      {line}
+    </span>
+  ));
+
+  const proceedButton = (
+    <DetailDarkButton type="button" className="w-full sm:flex-1" onClick={onProceedToReturn}>
+      {content.proceedLabel}
+    </DetailDarkButton>
+  );
+  const contactButton = (
+    <DetailOutlineButton type="button" className="w-full sm:flex-1" onClick={onContactSupport}>
+      {content.contactSupportLabel}
+    </DetailOutlineButton>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          className="w-full gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
+        >
+          <div className="px-4 pt-6">
+            <div className="flex items-center justify-between gap-4">
+              <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <span className="md:text-32 text-2xl">{content.title}</span>
+              </SheetTitle>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="text-darkblack"
+                aria-label="Close"
+              >
+                <X className="size-6" strokeWidth={1.5} aria-hidden />
+              </button>
+            </div>
+
+            <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
+
+            <p className="mt-6 font-gill text-base font-light leading-110 text-neutral500">
+              {mobileDescription}
+            </p>
+          </div>
+
+          <div className="mt-12 border-t border-neutral300 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
+            <div className="flex flex-col gap-4">
+              {proceedButton}
+              {contactButton}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,13 +99,11 @@ export function ProfileOrderReturnDialog({
       >
         <div className="flex items-start justify-between gap-4 border-b border-neutral300 pb-4">
           <DialogTitle className="font-larken font-light leading-110 text-darkblack">
-            <span className="md:text-32 text-2xl">
-              {content.title}
-            </span>
+            <span className="md:text-32 text-2xl">{content.title}</span>
           </DialogTitle>
           <button
             type="button"
-            onClick={() => onOpenChange(false)}
+            onClick={handleClose}
             className="text-darkblack"
             aria-label="Close"
           >
@@ -49,17 +111,11 @@ export function ProfileOrderReturnDialog({
           </button>
         </div>
 
-        <p className="font-gill text-base font-light leading-110 text-neutral500">
-          {content.description}
-        </p>
+        <p className="font-gill text-base font-light leading-110 text-neutral500">{content.description}</p>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          <DetailOutlineButton type="button" className="w-full sm:flex-1" onClick={onContactSupport}>
-            {content.contactSupportLabel}
-          </DetailOutlineButton>
-          <DetailDarkButton type="button" className="w-full sm:flex-1" onClick={onProceedToReturn}>
-            {content.proceedLabel}
-          </DetailDarkButton>
+          {contactButton}
+          {proceedButton}
         </div>
       </DialogContent>
     </Dialog>

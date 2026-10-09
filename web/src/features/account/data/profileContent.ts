@@ -131,6 +131,13 @@ export const profileTabsContent = {
       title: "Return Order?",
       description:
         "Return this order if it’s not the right fit. Pickup and refund updates will be available in your profile.",
+      descriptionMobile:
+        "Not quite the right piece? You can return your order and track your pickup and refund updates from your profile.",
+      descriptionMobileLines: [
+        "Not quite the right piece? You can return your order",
+        "and track your pickup and refund updates from your",
+        "profile.",
+      ],
       contactSupportLabel: "CONTACT SUPPORT",
       proceedLabel: "PROCEED TO RETURN",
     },
@@ -138,6 +145,8 @@ export const profileTabsContent = {
       title: "Return Order?",
       description:
         "We’re sorry to see that you need to return your order. Please share your reason so we can serve you better next time.",
+      descriptionMobile:
+        "We’re sorry to hear that this piece is being returned. If you share your reason, it will help us serve you better in future.",
       reasonLabel: "Select Reason",
       reasons: [
         "Product was damaged",
@@ -147,11 +156,17 @@ export const profileTabsContent = {
       ],
       commentsPlaceholder: "Additional comments",
       confirmLabel: "CONFIRM RETURN",
+      /** Mobile radio labels only — submit payload still uses the source reason label. */
+      reasonLabelMobileBySourceLabel: {
+        "Product did not match expectations": "The product didn't meet my expectations",
+      },
     },
     returnSuccessDialog: {
       title: "Return Requested",
       description:
         "Your return request has been successfully placed. Your refund will be processed as per our refund policy.",
+      descriptionMobile:
+        "Your return request is confirmed. We'll process your refund according to our refund policy.",
     },
     otherReasonRequiredMessage: "Please add a comment for the selected reason.",
     refundNoteDateTemplate: "Refund to {mode} is expected by {date}.",
