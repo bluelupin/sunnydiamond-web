@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import { CartDivider, CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
@@ -10,10 +10,9 @@ import { cn } from "@/shared/utils/cn";
 import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
-import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { isGuestCheckoutPlaceholderEmail } from "@/services/magento/cart/checkoutAddress.mapper";
-import { isCreateAccountReady, type CreateAccountSecondaryField } from "../utils/authValidation";
+import { isCreateAccountReady, limitRegistrationPhone, validateLoginIdentifier, validateRegistrationPhone, type CreateAccountSecondaryField } from "../utils/authValidation";
 
 type LoginCreateAccountContentProps = {
   fullName: string;
@@ -88,6 +87,26 @@ const LoginCreateAccountContent = ({
   const emailFieldValue =
     email && !isGuestCheckoutPlaceholderEmail(email) ? email : "";
 
+  const [validation, setValidation] = useState<{
+    value: string; countryCode: string; field: CreateAccountSecondaryField; error?: string;
+  }>();
+  const contactValue = missingIdentifier === "email" ? emailFieldValue : phone;
+  useEffect(() => {
+    if (!contactValue.trim()) return;
+    const timer = window.setTimeout(() => {
+      const result = missingIdentifier === "email"
+        ? validateLoginIdentifier(contactValue, countryCode, { emailOnly: true })
+        : validateRegistrationPhone(contactValue, countryCode);
+      setValidation({ value: contactValue, countryCode, field: missingIdentifier, error: result.error });
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [contactValue, countryCode, missingIdentifier]);
+  const contactError = contactValue.trim() && validation?.value === contactValue
+    && validation.countryCode === countryCode && validation.field === missingIdentifier
+    ? validation.error : undefined;
+  const visibleEmailError = emailError ?? (missingIdentifier === "email" ? contactError : undefined);
+  const visiblePhoneError = phoneError ?? (missingIdentifier === "phone" ? contactError : undefined);
+
   const createAccountFormReady = useMemo(
     () =>
       isCreateAccountReady({
@@ -103,7 +122,7 @@ const LoginCreateAccountContent = ({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isRegistrationSessionRefreshing || !createAccountFormReady) {
+    if (submitting || isRegistrationSessionRefreshing || !createAccountFormReady) {
       return;
     }
     onCreateAccount();
@@ -176,11 +195,11 @@ const LoginCreateAccountContent = ({
                   placeholder="Enter your email address."
                   autoComplete="email"
                   required
-                  aria-invalid={emailError ? true : undefined}
-                  aria-describedby={emailError ? "create-account-email-error" : undefined}
-                  className={cn(fieldInputClassName, emailError && "border-[#F91616] bg-[#FEDCDC]")}
+                  aria-invalid={visibleEmailError ? true : undefined}
+                  aria-describedby={visibleEmailError ? "create-account-email-error" : undefined}
+                  className={cn(fieldInputClassName, visibleEmailError && "border-[#F91616] bg-[#FEDCDC]")}
                 />
-                <FormFieldError id="create-account-email-error" message={emailError} />
+                <FormFieldError id="create-account-email-error" message={visibleEmailError} />
               </div>
             ) : (
               <div className="flex flex-col gap-2">
@@ -190,7 +209,7 @@ const LoginCreateAccountContent = ({
                 <div
                   className={cn(
                     "flex h-14 w-full items-center gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
-                    phoneError && "border-[#F91616] bg-[#FEDCDC]",
+                    visiblePhoneError && "border-[#F91616] bg-[#FEDCDC]",
                   )}
                 >
                   <PhoneCountryCodeSelect
@@ -199,7 +218,7 @@ const LoginCreateAccountContent = ({
                     codes={otpCountryCodes}
                     onChange={(nextCode) => {
                       onCountryCodeChange(nextCode);
-                      onPhoneChange(sanitizePhoneInput(phone, nextCode));
+                      onPhoneChange(limitRegistrationPhone(phone, nextCode));
                     }}
                   />
                   <input
@@ -207,15 +226,15 @@ const LoginCreateAccountContent = ({
                     type="tel"
                     inputMode="numeric"
                     value={phone}
-                    onChange={(event) => onPhoneChange(event.target.value)}
+                    onChange={(event) => onPhoneChange(limitRegistrationPhone(event.target.value, countryCode))}
                     placeholder="Enter your phone number."
                     autoComplete="tel-national"
-                    aria-invalid={phoneError ? true : undefined}
-                    aria-describedby={phoneError ? "create-account-phone-error" : undefined}
+                    aria-invalid={visiblePhoneError ? true : undefined}
+                    aria-describedby={visiblePhoneError ? "create-account-phone-error" : undefined}
                     className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
                   />
                 </div>
-                <FormFieldError id="create-account-phone-error" message={phoneError} />
+                <FormFieldError id="create-account-phone-error" message={visiblePhoneError} />
               </div>
             )}
           </div>
