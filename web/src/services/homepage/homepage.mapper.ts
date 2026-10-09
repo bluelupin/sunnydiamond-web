@@ -20,7 +20,8 @@ import type { CraftsmanshipStep } from "@/types/homepage/craftsmanshipSteps";
 import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts";
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import type { HeaderNavCard, HeaderNavLink } from "@/shared/lib/shellNavigation";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import type { TrustBadge } from "@/types/homepage/trustBadges";
 import type { HomepageSeo } from "@/types/homepage/seo";
@@ -32,6 +33,8 @@ import type {
   StrapiFeaturedProductsBlock,
   StrapiGiftingBanner,
   StrapiGlobalShell,
+  StrapiHeaderNavCard,
+  StrapiHeaderNavLink,
   StrapiHomepageCta,
   StrapiHomepageEditorialBlocksEntity,
   StrapiHomepageHero,
@@ -60,14 +63,18 @@ export type NormalizedHomepageHero = {
   videoUrl?: string;
 };
 
+export type NormalizedHomepageGlobal = Omit<StrapiGlobalShell, "headerNavigationLinks"> & {
+  headerNavigationLinks?: HeaderNavLink[] | null;
+};
+
 export type NormalizedHomepageShell = {
-  global?: StrapiGlobalShell | null;
+  global?: NormalizedHomepageGlobal | null;
   homepage?: {
     hero?: NormalizedHomepageHero | null;
     seo?: HomepageSeo | null;
   } | null;
   hero?: NormalizedHomepageHero | null;
-  headerNavigationLinks?: StrapiGlobalShell["headerNavigationLinks"];
+  headerNavigationLinks?: HeaderNavLink[] | null;
   footerLinkGroups?: StrapiGlobalShell["footerLinkGroups"];
   footerCopyright?: string | null;
   socialLinks?: StrapiGlobalShell["socialLinks"];
@@ -115,6 +122,79 @@ function mapCta(cta?: StrapiHomepageCta | null): CategoryNavigationCta | undefin
     to: url,
     openInNewTab: cta.openInNewTab === true,
   };
+}
+
+function mapHeaderNavCta(cta?: StrapiHomepageCta | null): HeaderNavCard["cta"] | null {
+  if (!cta) return null;
+
+  const label = cleanText(cta.label);
+  const url = cleanText(cta.url);
+  if (!label || !url) return null;
+
+  return {
+    id: cta.id,
+    label,
+    url,
+    targetType: cta.targetType ?? null,
+    openInNewTab: cta.openInNewTab === true,
+  };
+}
+
+function mapHeaderNavCard(card?: StrapiHeaderNavCard | null): HeaderNavCard | null {
+  if (!card || card.isActive === false) return null;
+
+  const cta = mapHeaderNavCta(card.cta);
+  if (!cta) return null;
+
+  const desktopImageUrl = resolveCmsMediaUrl(card.image?.desktopImage);
+  const mobileImageUrl = resolveCmsMediaUrl(card.image?.mobileImage);
+  const imageSrc = desktopImageUrl ?? mobileImageUrl;
+  if (!imageSrc) return null;
+
+  const alt =
+    resolveCmsAltText(card.image?.desktopImage) ??
+    resolveCmsAltText(card.image?.mobileImage);
+
+  return {
+    id: card.id ?? `${cta.label}-${cta.url}`,
+    isActive: card.isActive ?? true,
+    cta,
+    image: {
+      id: card.image?.id,
+      desktopImageUrl,
+      mobileImageUrl: mobileImageUrl ?? desktopImageUrl,
+      alt,
+    },
+  };
+}
+
+export function mapHeaderNavigationLinks(
+  links?: StrapiHeaderNavLink[] | null,
+): HeaderNavLink[] {
+  if (!links?.length) return [];
+
+  return links.flatMap((link): HeaderNavLink[] => {
+    const label = cleanText(link.label);
+    const url = cleanText(link.url);
+    if (!label || !url) return [];
+
+    const cards = (link.cards ?? [])
+      .map((card) => mapHeaderNavCard(card))
+      .filter((card): card is HeaderNavCard => card != null);
+
+    return [
+      {
+        id: link.id,
+        label,
+        url,
+        targetType: link.targetType ?? null,
+        isActive: link.isActive,
+        showField: link.showField,
+        sortOrder: link.sortOrder,
+        cards,
+      },
+    ];
+  });
 }
 
 function mapResponsiveImage(
@@ -171,9 +251,15 @@ export function mapHomepageShellData(
   if (!raw) return {};
 
   const hero = mapHero(raw.homepage?.hero ?? raw.hero);
+  const headerNavigationLinks = mapHeaderNavigationLinks(raw.global?.headerNavigationLinks);
 
   return {
-    global: raw.global ?? undefined,
+    global: raw.global
+      ? {
+          ...raw.global,
+          headerNavigationLinks,
+        }
+      : undefined,
     homepage: {
       ...(raw.homepage ?? {}),
       hero: hero ?? null,

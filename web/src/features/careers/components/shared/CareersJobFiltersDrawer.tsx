@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import {
@@ -22,67 +21,25 @@ type CareersJobFiltersDrawerProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-type FilterDraft = {
-  location: string;
-  department: string;
-  experience: string;
-};
-
-const createEmptyFilterDraft = (): FilterDraft => ({
-  location: "",
-  department: "",
-  experience: "",
-});
-
 const CareersJobFiltersDrawer = ({ open, onOpenChange }: CareersJobFiltersDrawerProps) => {
   const {
     cms,
-    locationFilter,
-    departmentFilter,
-    experienceFilter,
     setLocationFilter,
     setDepartmentFilter,
     setExperienceFilter,
   } = useCareersJobs();
   const { filtersTitle, closeFiltersLabel } = cms.listing;
-  const [draft, setDraft] = useState<FilterDraft>(createEmptyFilterDraft);
-  const wasOpenRef = useRef(false);
-
-  useEffect(() => {
-    const justOpened = open && !wasOpenRef.current;
-
-    if (justOpened) {
-      setDraft({
-        location: locationFilter,
-        department: departmentFilter,
-        experience: experienceFilter,
-      });
-    }
-
-    wasOpenRef.current = open;
-  }, [open, locationFilter, departmentFilter, experienceFilter]);
 
   if (!filtersTitle) {
     return null;
   }
 
   const closeLabel = closeFiltersLabel ?? filtersTitle;
-  const hasSelectedFilters = Boolean(draft.location || draft.department || draft.experience);
-
-  const applyDraft = () => {
-    if (!hasSelectedFilters) return;
-    setLocationFilter(draft.location);
-    setDepartmentFilter(draft.department);
-    setExperienceFilter(draft.experience);
-    onOpenChange(false);
-  };
 
   const handleClearAll = () => {
-    const cleared = createEmptyFilterDraft();
-    setDraft(cleared);
-    setLocationFilter(cleared.location);
-    setDepartmentFilter(cleared.department);
-    setExperienceFilter(cleared.experience);
+    setLocationFilter("");
+    setDepartmentFilter("");
+    setExperienceFilter("");
     onOpenChange(false);
   };
 
@@ -108,20 +65,7 @@ const CareersJobFiltersDrawer = ({ open, onOpenChange }: CareersJobFiltersDrawer
               }
             />
             <span className="h-px w-full bg-neutral300" aria-hidden />
-            <CareersJobFilterFields
-              locationFilter={draft.location}
-              departmentFilter={draft.department}
-              experienceFilter={draft.experience}
-              onLocationFilterChange={(value) =>
-                setDraft((current) => ({ ...current, location: value }))
-              }
-              onDepartmentFilterChange={(value) =>
-                setDraft((current) => ({ ...current, department: value }))
-              }
-              onExperienceFilterChange={(value) =>
-                setDraft((current) => ({ ...current, experience: value }))
-              }
-            />
+            <CareersJobFilterFields listPlacement="portaled" />
           </div>
         </div>
 
@@ -139,12 +83,8 @@ const CareersJobFiltersDrawer = ({ open, onOpenChange }: CareersJobFiltersDrawer
             </button>
             <button
               type="button"
-              onClick={applyDraft}
-              disabled={!hasSelectedFilters}
-              className={cn(
-                careersDarkCtaClassName,
-                "min-w-0 flex-1 disabled:border-[#A2A1A1] disabled:opacity-100 disabled:[--btn-dark-slide-base:#A2A1A1]",
-              )}
+              onClick={() => onOpenChange(false)}
+              className={cn(careersDarkCtaClassName, "min-w-0 flex-1")}
             >
               <span className="relative z-10">{CAREERS_FILTER_APPLY_LABEL}</span>
             </button>

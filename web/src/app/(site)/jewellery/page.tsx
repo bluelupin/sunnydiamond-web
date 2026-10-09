@@ -97,6 +97,7 @@ export default async function Page({ searchParams }: PageProps) {
           prefetchedCategoryUrlKey={initialListing ? prefetchedCategoryUrlKey : undefined}
           hero={page.hero}
           trustBadges={page.trustBadges}
+          listingCards={page.listingCards}
         />
       </Suspense>
     </>

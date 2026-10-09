@@ -24,7 +24,7 @@ const AboutTimelineContent = ({
       key={activeYear}
       className={cn(
         "flex flex-col gap-6",
-        !reducedMotion && "animate-fade-in duration-500 ease-out",
+        !reducedMotion && "animate-fade-in duration-300 ease-out",
       )}
     >
       <div className="flex w-full max-w-308 items-center gap-2">

@@ -9,11 +9,14 @@ import type {
   NormalizedProductLandingResponsiveImage,
   NormalizedProductLandingSeo,
   NormalizedProductLandingTrustBadge,
+  NormalizedProductListingCard,
+  StrapiProductLandingCta,
   StrapiProductLandingHero,
   StrapiProductLandingPage,
   StrapiProductLandingResponsiveImage,
   StrapiProductLandingSeo,
   StrapiProductLandingTrustBadge,
+  StrapiProductListingCard,
 } from "./product-landing-page.types";
 import { EMPTY_PRODUCT_LANDING_PAGE } from "./product-landing-page.types";
 
@@ -131,6 +134,62 @@ const mapTrustBadges = (
     .map((badge) => mapTrustBadge(badge))
     .filter((badge): badge is NormalizedProductLandingTrustBadge => badge != null);
 
+function mapListingCardCta(
+  cta?: StrapiProductLandingCta | null,
+): NormalizedProductListingCard["cta"] | null {
+  if (!cta) return null;
+
+  const label = cleanText(cta.label);
+  const url = cleanText(cta.url);
+  if (!label || !url) return null;
+
+  return {
+    id: cta.id,
+    label,
+    url,
+    targetType: cta.targetType ?? null,
+    openInNewTab: cta.openInNewTab === true,
+  };
+}
+
+function parseListingCardPosition(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return null;
+  return Math.floor(parsed);
+}
+
+function mapListingCard(
+  card?: StrapiProductListingCard | null,
+): NormalizedProductListingCard | null {
+  if (!card || card.isActive === false) return null;
+
+  const description = cleanText(card.description);
+  const desktopPosition = parseListingCardPosition(card.desktopPosition);
+  const mobilePosition = parseListingCardPosition(card.mobilePosition);
+  const cta = mapListingCardCta(card.cta);
+  const image = mapResponsiveImage(card.image);
+
+  if (!description || !desktopPosition || !mobilePosition || !cta || !image) {
+    return null;
+  }
+
+  return {
+    id: card.id ?? `${description}-${desktopPosition}`,
+    description,
+    desktopPosition,
+    mobilePosition,
+    cta,
+    image,
+  };
+}
+
+const mapListingCards = (
+  cards?: StrapiProductListingCard[] | null,
+): NormalizedProductListingCard[] =>
+  (cards ?? [])
+    .map((card) => mapListingCard(card))
+    .filter((card): card is NormalizedProductListingCard => card != null);
+
 export function mapProductLandingPage(
   raw?: StrapiProductLandingPage | null,
 ): NormalizedProductLandingPage {
@@ -140,5 +199,6 @@ export function mapProductLandingPage(
     hero: mapHero(raw.hero),
     seo: mapSeo(raw.seo),
     trustBadges: mapTrustBadges(raw.trustBadges),
+    listingCards: mapListingCards(raw.listingCards),
   };
 }

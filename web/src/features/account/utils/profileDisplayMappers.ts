@@ -534,7 +534,11 @@ export function mapCustomerOrderToProfileUi(
     currency: order.currency,
     showTrack: actions ? actions.canTrack : category === "in_progress",
     showCancel: actions ? actions.canCancel : category === "in_progress",
-    showReturn: actions ? actions.canReturn : category === "delivered",
+    showReturn: isGiftCardProfileOrder({ items })
+      ? false
+      : actions
+        ? actions.canReturn
+        : category === "delivered",
     showDownloadInvoice: true,
     ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
     showCancelNote: category === "in_progress",

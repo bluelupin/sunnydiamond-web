@@ -165,7 +165,8 @@ async function runStaticChecks() {
   );
 
   // G. Load More
-  assertSource("PLP-067", "page size 9", filtersTs, "PAGE_SIZE = 9", "PAGE_SIZE is 9");
+  assertSource("PLP-067", "page size 10", filtersTs, "DESKTOP_PAGE_SIZE = 10", "DESKTOP_PAGE_SIZE is 10");
+  assertSource("PLP-067b", "mobile page size 10", filtersTs, "MOBILE_PAGE_SIZE = 10", "MOBILE_PAGE_SIZE is 10");
   assertSource("PLP-068", "load more section", plpComponent, "JewelleryLoadMoreSection", "Load more section wired");
   assertSource("PLP-069", "dedupe products", listingHook, "appendUniqueProducts", "Product dedup on append");
   assertSource("PLP-070", "load more with filters", listingHook, "getJewelleryListingFiltersKey", "Filters included in query key");

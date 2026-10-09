@@ -101,6 +101,9 @@ export default function FeaturedProductsCenterModeSlider({
     sliderRef.current?.slickNext();
   }, []);
 
+  const pathname = usePathname();
+  const isGiftingPage = pathname === "/gifting";
+
   const settings = useMemo<Settings>(
     () => ({
       className: "center",
@@ -110,8 +113,9 @@ export default function FeaturedProductsCenterModeSlider({
       slidesToShow: 1,
       speed: 500,
       afterChange: handleAfterChange,
+      ...(isGiftingPage ? { draggable: false } : {}),
     }),
-    [centerPadding, handleAfterChange],
+    [centerPadding, handleAfterChange, isGiftingPage],
   );
 
   if (items.length === 0) {
@@ -120,8 +124,9 @@ export default function FeaturedProductsCenterModeSlider({
 
   const activeItem = items[activeIndex] ?? items[0];
   const canNavigate = items.length > 1;
-  const pathname = usePathname();
-  const isGiftingPage = pathname === "/gifting";
+  const productLinkClassName =
+    "text-inherit no-underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+
   return (
     <div
       className={cn(
@@ -139,15 +144,36 @@ export default function FeaturedProductsCenterModeSlider({
                   isGiftingPage && "xl:h-[259px] xl:w-[600px]",
                 )}
               >
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={300}
-                  height={300}
-                  quality={75}
-                  className="h-full w-full object-contain"
-                  sizes="(max-width: 767px) 170px, 300px"
-                />
+                {isGiftingPage && item.href ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "relative z-10 block h-full w-full cursor-pointer",
+                      productLinkClassName,
+                    )}
+                    aria-label={item.name}
+                  >
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={300}
+                      height={300}
+                      quality={75}
+                      className="h-full w-full object-contain"
+                      sizes="(max-width: 767px) 170px, 300px"
+                    />
+                  </Link>
+                ) : (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={300}
+                    height={300}
+                    quality={75}
+                    className="h-full w-full object-contain"
+                    sizes="(max-width: 767px) 170px, 300px"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -157,26 +183,54 @@ export default function FeaturedProductsCenterModeSlider({
       <div className="content-section mx-auto mt-3 flex w-full max-w-[300px] flex-col items-center gap-4 text-center md:gap-6">
         <div className="flex flex-col items-center gap-4 md:min-h-0">
           {activeItem.name ? (
-            <p
-              className={cn(
-                "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
-                isGiftingPage && "lg:leading-110",
-                productNameDisplayClassName,
-              )}
-            >
-              {activeItem.name}
-            </p>
+            isGiftingPage && activeItem.href ? (
+              <Link
+                href={activeItem.href}
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                  isGiftingPage && "lg:leading-110",
+                  productNameDisplayClassName,
+                  productLinkClassName,
+                )}
+              >
+                {activeItem.name}
+              </Link>
+            ) : (
+              <p
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                  isGiftingPage && "lg:leading-110",
+                  productNameDisplayClassName,
+                )}
+              >
+                {activeItem.name}
+              </p>
+            )
           ) : null}
           {typeof activeItem.price === "number" ? (
-            <p
-              className={cn(
-                "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
-                isGiftingPage && "lg:leading-110",
-              )}
-            >
-              <span aria-hidden="true">₹ </span>
-              {formatPrice(activeItem.price)}
-            </p>
+            isGiftingPage && activeItem.href ? (
+              <Link
+                href={activeItem.href}
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                  isGiftingPage && "lg:leading-110",
+                  productLinkClassName,
+                )}
+              >
+                <span aria-hidden="true">₹ </span>
+                {formatPrice(activeItem.price)}
+              </Link>
+            ) : (
+              <p
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                  isGiftingPage && "lg:leading-110",
+                )}
+              >
+                <span aria-hidden="true">₹ </span>
+                {formatPrice(activeItem.price)}
+              </p>
+            )
           ) : null}
         </div>
         {showCta && (activeItem.ctaLabel || ctaLabel) && activeItem.href ? (
@@ -196,13 +250,13 @@ export default function FeaturedProductsCenterModeSlider({
         isGiftingPage ? "bottom-0 xl:top-[129.5px]" : "md:bottom-0 bottom-[50px]",
       )}
       >
-        <div className="pointer-events-auto flex lg:w-[487px] md:w-[400px] sm:w-[387px] w-[303px] items-center justify-between">
+        <div className="pointer-events-none flex lg:w-[487px] md:w-[400px] sm:w-[387px] w-[303px] items-center justify-between">
           <button
             type="button"
             aria-label="Previous product"
             disabled={!canNavigate}
             onClick={goPrev}
-            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            className="pointer-events-auto inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
             <svg
               width="24"
@@ -231,7 +285,7 @@ export default function FeaturedProductsCenterModeSlider({
             aria-label="Next product"
             disabled={!canNavigate}
             onClick={goNext}
-            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            className="pointer-events-auto inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
             <svg
               width="24"

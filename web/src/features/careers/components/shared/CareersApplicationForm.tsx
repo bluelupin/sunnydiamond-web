@@ -161,9 +161,7 @@ const CareersApplicationForm = () => {
   const [employeeJobTitle, setEmployeeJobTitle] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isParsingResume, setIsParsingResume] = useState(Boolean(applicationEntry === "resume" && pendingResumeFile));
-  const [resumeAutofillComplete, setResumeAutofillComplete] = useState(false);
   const [resumeParseError, setResumeParseError] = useState<string | null>(null);
-  const [resumeParseWarnings, setResumeParseWarnings] = useState<string[]>([]);
   const parseAbortRef = useRef<AbortController | null>(null);
   const pendingAutofillTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autofillNextFileRef = useRef(false);
@@ -176,13 +174,11 @@ const CareersApplicationForm = () => {
     const controller = new AbortController();
     parseAbortRef.current = controller;
     setIsParsingResume(true);
-    setResumeAutofillComplete(false);
     setResumeParseError(null);
-    setResumeParseWarnings([]);
     try {
       const parsed = await parseCareerResume(file, controller.signal);
       if (controller.signal.aborted) return;
-      const { data, meta } = parsed;
+      const { data } = parsed;
       const education = data.educationDetails?.[0];
       const phoneValue = getAutofillPhone(data.phoneNo);
       const experienceOption = getRelevantExperienceOption(
@@ -207,14 +203,9 @@ const CareersApplicationForm = () => {
       const parsedLanguages = [...new Set(data.skillsAndLanguages?.Languages?.map((item) => item.SkillName).filter(Boolean) ?? [])];
       setSkills(parsedSkills);
       setLanguages(parsedLanguages);
-      setResumeAutofillComplete(true);
-      setResumeParseWarnings([
-        ...(meta.warnings ?? []),
-        ...(meta.missingFields?.length ? ["Some fields could not be read. Please complete and review the form."] : []),
-      ]);
-    } catch (error) {
+    } catch {
       if (!controller.signal.aborted) {
-        setResumeParseError(error instanceof Error ? error.message : "Resume autofill failed. Please complete the form manually.");
+        setResumeParseError("Couldn't read resume details. Please fill the form manually.");
       }
     } finally {
       if (parseAbortRef.current === controller) {
@@ -223,6 +214,12 @@ const CareersApplicationForm = () => {
       }
     }
   }, [applicationFlow.applicationForm.workExperienceOptions]);
+
+  useEffect(() => {
+    if (!resumeParseError) return;
+    const timer = setTimeout(() => setResumeParseError(null), appStatusToastDurationMs);
+    return () => clearTimeout(timer);
+  }, [resumeParseError]);
 
   const dismissResumeValidationToast = useCallback(() => {
     if (resumeValidationToastTimeoutRef.current) {
@@ -296,7 +293,7 @@ const CareersApplicationForm = () => {
         return;
       } else {
         setIsParsingResume(false);
-        setResumeParseError("Autofill accepts PDF or DOCX. Your resume is attached; complete the form manually.");
+        setResumeParseError("Couldn't read resume details. Please fill the form manually.");
       }
     }
     clearPendingResume();
@@ -413,9 +410,7 @@ const CareersApplicationForm = () => {
     }
     parseAbortRef.current?.abort();
     setIsParsingResume(false);
-    setResumeAutofillComplete(false);
     setResumeParseError(null);
-    setResumeParseWarnings([]);
 
     const validationError = getCareersResumeValidationError(file);
     if (validationError) {
@@ -432,7 +427,7 @@ const CareersApplicationForm = () => {
       if (isCareersAutofillFileSupported(file)) {
         void autofillFromResume(file);
       } else {
-        setResumeParseError("Autofill accepts PDF or DOCX. Your resume is attached; complete the form manually.");
+        setResumeParseError("Couldn't read resume details. Please fill the form manually.");
       }
     } else {
       parseAbortRef.current?.abort();
@@ -457,8 +452,6 @@ const CareersApplicationForm = () => {
     setIsParsingResume(false);
     setResumeFile(null);
     setResumeParseError(null);
-    setResumeParseWarnings([]);
-    setResumeAutofillComplete(false);
     if (resumeInputRef.current) {
       resumeInputRef.current.value = "";
     }
@@ -610,24 +603,6 @@ const CareersApplicationForm = () => {
         {showError("resume") ? <FormFieldError message={errors.resume!} /> : null}
         {isParsingResume ? (
           <p className="font-gill text-sm text-darkblack" role="status">Reading your resume…</p>
-        ) : null}
-        {resumeAutofillComplete ? (
-          <p className="font-gill text-sm text-darkblack" role="status">Resume details added. Please review the form before submitting.</p>
-        ) : null}
-        {resumeParseError ? (
-          <div className="flex flex-wrap items-center gap-3" role="alert">
-            <p className="font-gill text-sm text-red-700">{resumeParseError}</p>
-            {resumeFile && isCareersAutofillFileSupported(resumeFile) ? (
-              <button type="button" onClick={() => void autofillFromResume(resumeFile)} className="font-gill text-sm underline">
-                Try autofill again
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-        {resumeParseWarnings.length > 0 ? (
-          <ul className="list-disc pl-5 font-gill text-sm text-amber-800" aria-label="Resume review notes">
-            {resumeParseWarnings.map((warning) => <li key={warning}>{warning}</li>)}
-          </ul>
         ) : null}
 
         <section className={careersFormSectionClassName}>
@@ -892,7 +867,7 @@ const CareersApplicationForm = () => {
           </FormField>
           {skills.length > 0 ? (
             <div className="flex flex-col gap-4 items-start">
-              <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
+              <label htmlFor="careers-skills-languages-search" className={careersFormLabelClassName}>{fields.skillsLabel}</label>
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill) => (
                   <TagChip
@@ -909,7 +884,7 @@ const CareersApplicationForm = () => {
 
           {languages.length > 0 ? (
             <div className="flex flex-col gap-4">
-              <p className={careersFormLabelClassName}>{fields.languagesLabel}</p>
+              <label htmlFor="careers-skills-languages-search" className={careersFormLabelClassName}>{fields.languagesLabel}</label>
               <div className="flex flex-wrap gap-2">
                 {languages.map((language) => (
                   <TagChip
@@ -1034,8 +1009,8 @@ const CareersApplicationForm = () => {
       />
 
       <AppStatusToast
-        open={Boolean(resumeValidationToastMessage)}
-        message={resumeValidationToastMessage ?? ""}
+        open={Boolean(resumeValidationToastMessage || resumeParseError)}
+        message={resumeValidationToastMessage ?? resumeParseError ?? ""}
       />
     </form>
   );

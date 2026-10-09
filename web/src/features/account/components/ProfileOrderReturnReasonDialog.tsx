@@ -9,7 +9,10 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
+import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
+import { pickResponsiveDialogCopy } from "../utils/pickResponsiveDialogCopy";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import FormRadioOption from "@/shared/ui/FormRadioOption";
 
@@ -31,8 +34,19 @@ export function ProfileOrderReturnReasonDialog({
   isSubmitting = false,
   errorMessage,
 }: ProfileOrderReturnReasonDialogProps) {
+  const isMobile = useIsMobile();
   const ordersContent = profileTabsContent.orders;
   const dialog = ordersContent.returnReasonDialog;
+  const description = pickResponsiveDialogCopy(dialog, "description", isMobile);
+  const mobileReasonLabels = dialog.reasonLabelMobileBySourceLabel;
+
+  const getReasonDisplayLabel = (sourceLabel: string) => {
+    if (!isMobile || !mobileReasonLabels) {
+      return sourceLabel;
+    }
+
+    return mobileReasonLabels[sourceLabel as keyof typeof mobileReasonLabels] ?? sourceLabel;
+  };
   const [selectedCode, setSelectedCode] = useState("");
   const [comments, setComments] = useState("");
 
@@ -79,12 +93,17 @@ export function ProfileOrderReturnReasonDialog({
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <p className="font-gill text-base font-light leading-110 text-neutral500">
-          {dialog.description}
+        <p
+          className={cn(
+            "font-gill text-base leading-110",
+            isMobile ? "font-normal text-darkblack" : "font-light text-neutral500",
+          )}
+        >
+          {description}
         </p>
 
         <div className="flex flex-col gap-4">
-          <p className="font-larken text-xl font-light leading-110 text-darkblack">
+          <p className="font-gill text-xl font-normal leading-110 text-darkblack">
             {dialog.reasonLabel}
           </p>
           <div className="flex flex-col gap-4">
@@ -93,7 +112,7 @@ export function ProfileOrderReturnReasonDialog({
                 key={reason.code}
                 name="return-order-reason"
                 value={reason.code}
-                label={reason.label}
+                label={getReasonDisplayLabel(reason.label)}
                 checked={selectedReason?.code === reason.code}
                 disabled={isSubmitting}
                 onSelect={setSelectedCode}

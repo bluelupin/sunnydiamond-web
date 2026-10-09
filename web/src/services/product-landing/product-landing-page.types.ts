@@ -40,12 +40,31 @@ export type StrapiProductLandingHero = {
   heroVideo?: StrapiProductLandingHeroVideo | null;
 };
 
+export type StrapiProductLandingCta = {
+  id?: number;
+  label?: string | null;
+  url?: string | null;
+  targetType?: string | null;
+  openInNewTab?: boolean | null;
+};
+
+export type StrapiProductListingCard = {
+  id?: number;
+  description?: string | null;
+  desktopPosition?: number | null;
+  mobilePosition?: number | null;
+  isActive?: boolean | null;
+  cta?: StrapiProductLandingCta | null;
+  image?: StrapiProductLandingResponsiveImage | null;
+};
+
 export type StrapiProductLandingPage = {
   id?: number;
   documentId?: string;
   hero?: StrapiProductLandingHero | null;
   seo?: StrapiProductLandingSeo | null;
   trustBadges?: StrapiProductLandingTrustBadge[] | null;
+  listingCards?: StrapiProductListingCard[] | null;
 };
 
 export type NormalizedProductLandingSeo = {
@@ -76,14 +95,31 @@ export type NormalizedProductLandingHero = {
   videoUrl?: string;
 };
 
+export type NormalizedProductListingCard = {
+  id: string | number;
+  description: string;
+  desktopPosition: number;
+  mobilePosition: number;
+  cta: {
+    id?: number;
+    label: string;
+    url: string;
+    targetType?: string | null;
+    openInNewTab?: boolean;
+  };
+  image: NormalizedProductLandingResponsiveImage;
+};
+
 export type NormalizedProductLandingPage = {
   hero: NormalizedProductLandingHero | null;
   seo: NormalizedProductLandingSeo | null;
   trustBadges: NormalizedProductLandingTrustBadge[];
+  listingCards: NormalizedProductListingCard[];
 };
 
 export const EMPTY_PRODUCT_LANDING_PAGE: NormalizedProductLandingPage = {
   hero: null,
   seo: null,
   trustBadges: [],
+  listingCards: [],
 };

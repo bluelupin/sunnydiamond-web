@@ -692,7 +692,9 @@
   }
 
   .text-tertiary-cta-underline:hover:not(:disabled)::after,
-  .text-tertiary-cta-underline:focus-visible::after {
+  .text-tertiary-cta-underline:focus-visible::after,
+  .group:hover .text-tertiary-cta-underline::after,
+  .group:focus-within .text-tertiary-cta-underline::after {
     transform: scaleX(0);
     transform-origin: right center;
   }
@@ -704,7 +706,9 @@
   }
 
   .text-tertiary-cta-underline:hover:not(:disabled)::after,
-  .text-tertiary-cta-underline:focus-visible::after {
+  .text-tertiary-cta-underline:focus-visible::after,
+  .group:hover .text-tertiary-cta-underline::after,
+  .group:focus-within .text-tertiary-cta-underline::after {
     transform: scaleX(0);
     transform-origin: right center;
   }

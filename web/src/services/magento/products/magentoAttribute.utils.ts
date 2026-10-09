@@ -206,6 +206,72 @@ export function resolveMagentoModelWearImageUrl(
   return galleryMatch ? stripMagentoImageCacheSegment(galleryMatch) : "";
 }
 
+const VIDEO_FILE_PATTERN = /\.(mp4|webm|mov)(\?|$)/i;
+
+function resolveMagentoVideoFromGallery(
+  raw: string,
+  mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
+): string {
+  const galleryUrls = getActiveGalleryUrls(mediaGallery);
+  const filename = raw.split("/").pop()?.toLowerCase() ?? raw.toLowerCase();
+
+  const match = galleryUrls.find((url) => {
+    const lower = url.toLowerCase();
+    if (!VIDEO_FILE_PATTERN.test(lower)) {
+      return false;
+    }
+
+    return (
+      lower.includes(raw.toLowerCase()) ||
+      lower.endsWith(raw.toLowerCase()) ||
+      lower.split("/").pop() === filename
+    );
+  });
+
+  return match ? stripMagentoImageCacheSegment(match) : "";
+}
+
+/** Resolves Magento `product_video_url` (absolute URL, catalog path, or gallery reference). */
+export function resolveMagentoProductVideoUrl(
+  raw: string | null | undefined,
+  mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
+  referenceImageUrl?: string | null,
+  storeOrigin?: string,
+): string | undefined {
+  const trimmed = raw?.trim();
+  if (!trimmed || isMagentoPlaceholderImage(trimmed)) {
+    return undefined;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return stripMagentoImageCacheSegment(trimmed);
+  }
+
+  const fromCatalog = buildMagentoDirectCatalogUrl(trimmed, referenceImageUrl);
+  if (fromCatalog) {
+    return fromCatalog;
+  }
+
+  const fromGallery = resolveMagentoVideoFromGallery(trimmed, mediaGallery);
+  if (fromGallery) {
+    return fromGallery;
+  }
+
+  const origin = storeOrigin?.replace(/\/$/, "") ?? "";
+  if (trimmed.startsWith("/") && origin) {
+    return `${origin}${trimmed}`;
+  }
+
+  if (origin) {
+    const path = trimmed.replace(/^\/+/, "");
+    if (path) {
+      return `${origin}/${path}`;
+    }
+  }
+
+  return undefined;
+}
+
 export function isMagentoPlaceholderImage(url: string | null | undefined): boolean {
   if (!url?.trim()) {
     return true;

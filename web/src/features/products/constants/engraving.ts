@@ -1,56 +1,213 @@
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import type { Product } from "@/features/products/data/products";
+import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
-/** Figma `4903:44931` — default ring close-up when Magento has no preview image. */
-export const RING_ENGRAVING_PREVIEW_IMAGE = "/images/products/pdp/ring-engraving-preview.png";
+/** Static PDP engraving previews keyed by jewellery PLP category slug. */
+export const CATEGORY_ENGRAVING_PREVIEW_IMAGES: Partial<
+  Record<JewelleryCategorySlug, string>
+> = {
+  rings: "/images/products/pdp/ring-engraving-preview.png",
+  earrings: "/images/products/pdp/Earrings-engraving-preview.png",
+  necklace: "/images/products/pdp/Necklace-engraving-preview.png",
+  pendants: "/images/products/pdp/Pendants-engraving-preview.png",
+  bracelets: "/images/products/pdp/Bracelet-engraving-preview.png",
+  bangles: "/images/products/pdp/Bangle-engraving-preview.png",
+};
 
-/** Figma `4903:44930` preview frame. */
-export const RING_ENGRAVING_PREVIEW_VIEWBOX = { width: 343, height: 214 } as const;
+/** Figma `4903:44930` — shared engraving preview coordinate space (343×214). */
+export const ENGRAVING_PREVIEW_VIEWBOX = { width: 343, height: 214 } as const;
+
+/** @deprecated Use ENGRAVING_PREVIEW_VIEWBOX */
+export const RING_ENGRAVING_PREVIEW_VIEWBOX = ENGRAVING_PREVIEW_VIEWBOX;
+
+export type EngravingPreviewLayout = {
+  viewBox: typeof ENGRAVING_PREVIEW_VIEWBOX;
+  textArcPath: string;
+  /** Scales resolved font size for smaller engraving surfaces (earring back, name tag). */
+  fontSizeScale?: number;
+};
 
 /**
- * Inner-band arc calibrated to Figma `4903:44987` ("Diya Gupta" placement).
- * Quadratic path bows upward at center to match the ring perspective.
+ * Inner-band arc calibrated to Figma `4903:44987` ("Diya Gupta" on ring inner wall).
  */
 export const RING_ENGRAVING_TEXT_ARC_PATH = "M 137 92 Q 174 84 210 92";
 
-export function resolveEngravingPreviewFontSize(text: string): number {
+/**
+ * Text paths calibrated to category preview assets — same 343×214 viewBox as the panel image.
+ * Straight paths use horizontal lines; curved paths follow inner metal surfaces.
+ */
+export const CATEGORY_ENGRAVING_PREVIEW_LAYOUTS: Partial<
+  Record<JewelleryCategorySlug, EngravingPreviewLayout>
+> = {
+  rings: {
+    viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+    textArcPath: RING_ENGRAVING_TEXT_ARC_PATH,
+  },
+  pendants: {
+    viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+    // Straight line on lower teardrop face — centered, just below the widest point
+    textArcPath: "M 108 105 L 234 145",
+    fontSizeScale: 0.72,
+  },
+  bangles: {
+    viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+    textArcPath: "M 88 76 Q 171 66 254 76",
+    fontSizeScale: 0.92,
+  },
+  necklace: {
+    viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+    // Oval tag long axis — slopes down left→right on Necklace-engraving-preview.png
+    textArcPath: "M 118 98 L 214 130",
+    fontSizeScale: 0.68,
+  },
+  bracelets: {
+    viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+    textArcPath: "M 118 84 Q 171 76 224 84",
+    fontSizeScale: 0.8,
+  },
+  earrings: {
+    viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+    // Left butterfly back scallop — matches Earrings-engraving-preview / reference "A & K"
+    textArcPath: "M 40 10 Q 153 85 230 92",
+    fontSizeScale: 0.64,
+  },
+};
+
+const ENGRAVING_PREVIEW_IMAGE_CATEGORY_HINTS: ReadonlyArray<
+  readonly [JewelleryCategorySlug, string]
+> = [
+  ["earrings", "Earrings-engraving-preview"],
+  ["necklace", "Necklace-engraving-preview"],
+  ["pendants", "Pendants-engraving-preview"],
+  ["bracelets", "Bracelet-engraving-preview"],
+  ["bangles", "Bangle-engraving-preview"],
+  ["rings", "ring-engraving-preview"],
+];
+
+const DEFAULT_ENGRAVING_PREVIEW_LAYOUT: EngravingPreviewLayout = {
+  viewBox: ENGRAVING_PREVIEW_VIEWBOX,
+  textArcPath: RING_ENGRAVING_TEXT_ARC_PATH,
+};
+
+export function resolveEngravingPreviewCategorySlug(
+  categorySlug?: string | null,
+  previewImage?: string | null,
+): JewelleryCategorySlug | null {
+  if (categorySlug) {
+    const normalized = categorySlug.trim().toLowerCase() as JewelleryCategorySlug;
+    if (CATEGORY_ENGRAVING_PREVIEW_LAYOUTS[normalized]) {
+      return normalized;
+    }
+  }
+
+  const preview = previewImage?.trim();
+  if (!preview) {
+    return null;
+  }
+
+  for (const [slug, hint] of ENGRAVING_PREVIEW_IMAGE_CATEGORY_HINTS) {
+    if (preview.includes(hint)) {
+      return slug;
+    }
+  }
+
+  for (const [slug, path] of Object.entries(CATEGORY_ENGRAVING_PREVIEW_IMAGES) as Array<
+    [JewelleryCategorySlug, string]
+  >) {
+    if (preview.includes(path)) {
+      return slug;
+    }
+  }
+
+  return null;
+}
+
+export function resolveEngravingPreviewLayout(
+  categorySlug?: string | null,
+  previewImage?: string | null,
+): EngravingPreviewLayout {
+  const slug = resolveEngravingPreviewCategorySlug(categorySlug, previewImage);
+  if (slug && CATEGORY_ENGRAVING_PREVIEW_LAYOUTS[slug]) {
+    return CATEGORY_ENGRAVING_PREVIEW_LAYOUTS[slug]!;
+  }
+
+  return DEFAULT_ENGRAVING_PREVIEW_LAYOUT;
+}
+
+export function resolveEngravingPreviewFontSize(text: string, fontSizeScale = 1): number {
   const length = text.trim().length;
-  if (length <= 5) return 14;
-  if (length <= 8) return 13.5;
-  if (length <= 12) return 12.5;
-  return 11.5;
+  let base: number;
+  if (length <= 5) base = 14;
+  else if (length <= 8) base = 13.5;
+  else if (length <= 12) base = 12.5;
+  else base = 11.5;
+
+  const scaled = base * fontSizeScale;
+  return Math.round(scaled * 10) / 10;
 }
 
 const CATALOG_PRODUCT_IMAGE_PATTERN = /\/catalog\/product\//i;
 
+export function resolveCategoryEngravingPreviewImage(
+  categorySlug?: string | null,
+): string | undefined {
+  if (!categorySlug) {
+    return undefined;
+  }
+
+  const normalized = categorySlug.trim().toLowerCase() as JewelleryCategorySlug;
+  return CATEGORY_ENGRAVING_PREVIEW_IMAGES[normalized];
+}
+
 /**
- * Ring engraving preview asset for all engraving-enabled products.
- * Ignores Magento catalog product shots — only dedicated preview assets pass through.
+ * Dedicated Magento preview when configured; otherwise category static asset.
+ * Ignores Magento catalog product shots. Returns undefined when no preview exists.
  */
-export function resolveEngravingPreviewImage(previewImage?: string | null): string {
+export function resolveEngravingPreviewImage(
+  previewImage?: string | null,
+  categorySlug?: string | null,
+): string | undefined {
   const trimmed = previewImage?.trim();
   if (trimmed && !CATALOG_PRODUCT_IMAGE_PATTERN.test(trimmed)) {
     return trimmed;
   }
 
-  return RING_ENGRAVING_PREVIEW_IMAGE;
+  return resolveCategoryEngravingPreviewImage(categorySlug);
 }
 
 /** @deprecated Use resolveEngravingPreviewImage */
 export const resolveRingEngravingPreviewImage = resolveEngravingPreviewImage;
 
+/** Catalog max length for engraving — prefers Magento customizable field `max_characters`. */
+export function resolveProductEngravingMaxCharacters(
+  product: Pick<Product, "engraving" | "customOptions">,
+): number {
+  return (
+    resolveEngravingMaxCharacters(product.customOptions?.engravingText?.maxCharacters) ??
+    resolveEngravingMaxCharacters(product.engraving?.maxCharacters) ??
+    DEFAULT_ENGRAVING_MAX_CHARACTERS
+  );
+}
+
 /** Normalize engraving config for PDP, cart, and any engraving drawer entry point. */
 export function resolveProductEngravingConfig(
-  product: Pick<Product, "engraving" | "customOptions">,
+  product: Pick<Product, "engraving" | "customOptions" | "categorySlug">,
 ): ProductEngravingConfig | undefined {
+  const previewImage = resolveEngravingPreviewImage(
+    product.engraving?.previewImage,
+    product.categorySlug,
+  );
+  const maxCharacters = resolveProductEngravingMaxCharacters(product);
+
   if (isProductEngravingEnabled(product.engraving)) {
     return {
       ...product.engraving!,
-      previewImage: resolveEngravingPreviewImage(product.engraving!.previewImage),
+      maxCharacters,
+      ...(previewImage ? { previewImage } : {}),
     };
   }
 
@@ -60,11 +217,9 @@ export function resolveProductEngravingConfig(
 
   return {
     enabled: true,
-    maxCharacters:
-      resolveEngravingMaxCharacters(product.customOptions?.engravingText?.maxCharacters) ??
-      DEFAULT_ENGRAVING_MAX_CHARACTERS,
+    maxCharacters,
     fonts: product.customOptions?.engravingFont?.labels ?? [],
-    previewImage: RING_ENGRAVING_PREVIEW_IMAGE,
+    ...(previewImage ? { previewImage } : {}),
   };
 }
 

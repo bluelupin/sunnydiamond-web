@@ -140,5 +140,16 @@ export function useMagentoWishlistProducts(wishlistedSkus: string[]): UseMagento
     };
   }, [skuKey]);
 
-  return { products, isLoading, error };
+  const skus = skuKey ? skuKey.split("|") : [];
+  const awaitingInitialProductFetch =
+    skus.length > 0 &&
+    products.length === 0 &&
+    !error &&
+    !hasSameSkuSet(skus, previousSkusRef.current);
+
+  return {
+    products,
+    isLoading: isLoading || awaitingInitialProductFetch,
+    error,
+  };
 }

@@ -38,6 +38,17 @@ export function isJewelleryNavLink(label: string): boolean {
   return normalizedLabel === "jewellery" || normalizedLabel === "jewelry";
 }
 
+export function isWorldOfSunnyNavLink(label: string, url?: string): boolean {
+  const normalizedLabel = label.trim().toLowerCase();
+  const normalizedUrl = (url ?? "").replace(/\/$/, "") || "/";
+
+  return (
+    normalizedLabel === "world of sunny" ||
+    normalizedLabel === "about us" ||
+    normalizedUrl === "/about"
+  );
+}
+
 export function isHeaderNavLinkActive(
   pathname: string,
   label: string,

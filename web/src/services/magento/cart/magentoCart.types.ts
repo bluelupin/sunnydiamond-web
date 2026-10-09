@@ -4,10 +4,16 @@ import type {
 } from "../products/magentoProduct.types";
 import type { MagentoProductCustomOption } from "../products/productCustomOptions.mapper";
 
+export type MagentoCartCategory = {
+  name?: string | null;
+  url_key?: string | null;
+};
+
 export type MagentoCartProduct = {
   sku?: string | null;
   name?: string | null;
   url_key?: string | null;
+  categories?: MagentoCartCategory[] | null;
   image?: { url?: string | null } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
   custom_attributesV2?: {

@@ -88,6 +88,10 @@ const cartFields = (productCustomOptions: string) => `
         sku
         name
         url_key
+        categories {
+          name
+          url_key
+        }
         image {
           url
         }

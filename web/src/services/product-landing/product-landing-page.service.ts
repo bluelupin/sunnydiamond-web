@@ -13,7 +13,10 @@ const PRODUCT_LANDING_POPULATE =
   "&populate[hero][populate][image][populate][desktopImage]=true" +
   "&populate[hero][populate][image][populate][mobileImage]=true" +
   "&populate[seo][populate]=ogImage" +
-  "&populate[trustBadges][populate]=icon";
+  "&populate[trustBadges][populate]=icon" +
+  "&populate[listingCards][populate][cta]=true" +
+  "&populate[listingCards][populate][image][populate][desktopImage]=true" +
+  "&populate[listingCards][populate][image][populate][mobileImage]=true";
 
 export const getProductLandingPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedProductLandingPage> => {

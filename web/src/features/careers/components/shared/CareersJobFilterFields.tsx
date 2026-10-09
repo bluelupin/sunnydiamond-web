@@ -11,9 +11,17 @@ type FilterFieldProps = {
   value: string;
   options: string[];
   onChange: (value: string) => void;
+  listPlacement?: "portaled" | "inline";
 };
 
-const FilterField = ({ id, label, value, options, onChange }: FilterFieldProps) => {
+const FilterField = ({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+  listPlacement,
+}: FilterFieldProps) => {
   return (
     <CareersInlineSelectField
       id={id}
@@ -22,6 +30,7 @@ const FilterField = ({ id, label, value, options, onChange }: FilterFieldProps) 
       options={options}
       placeholder={CAREERS_FILTER_PLACEHOLDER}
       onChange={onChange}
+      listPlacement={listPlacement}
     />
   );
 };
@@ -33,6 +42,7 @@ type CareersJobFilterFieldsProps = {
   onLocationFilterChange?: (value: string) => void;
   onDepartmentFilterChange?: (value: string) => void;
   onExperienceFilterChange?: (value: string) => void;
+  listPlacement?: "portaled" | "inline";
 };
 
 const CareersJobFilterFields = ({
@@ -42,6 +52,7 @@ const CareersJobFilterFields = ({
   onLocationFilterChange,
   onDepartmentFilterChange,
   onExperienceFilterChange,
+  listPlacement,
 }: CareersJobFilterFieldsProps = {}) => {
   const {
     cms,
@@ -78,6 +89,7 @@ const CareersJobFilterFields = ({
         value={locationFilter}
         options={filterOptions.locations}
         onChange={handleLocationFilterChange}
+        listPlacement={listPlacement}
       />
       <FilterField
         id="careers-filter-department"
@@ -85,6 +97,7 @@ const CareersJobFilterFields = ({
         value={departmentFilter}
         options={filterOptions.departments}
         onChange={handleDepartmentFilterChange}
+        listPlacement={listPlacement}
       />
       <FilterField
         id="careers-filter-experience"
@@ -92,6 +105,7 @@ const CareersJobFilterFields = ({
         value={experienceFilter}
         options={filterOptions.experiences}
         onChange={handleExperienceFilterChange}
+        listPlacement={listPlacement}
       />
     </div>
   );
