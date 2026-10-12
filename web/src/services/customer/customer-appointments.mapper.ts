@@ -1,3 +1,4 @@
+import { getIndianStateFromMagentoRegionId } from "@/services/magento/regions/indiaRegionIds";
 import type {
   CustomerAppointment,
   CustomerAppointmentProduct,
@@ -238,20 +239,141 @@ function pickTextField(
   return null;
 }
 
+/** State may be a name, a Magento region id, or a CMS relation `{ name }` / `{ data: { name } }`. */
+function readStateText(value: unknown, depth = 0): string {
+  if (depth > 3 || value == null) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (/^\d+$/.test(trimmed)) {
+      return getIndianStateFromMagentoRegionId(Number(trimmed)) ?? trimmed;
+    }
+    return trimmed;
+  }
+
+  if (typeof value === "number" && Number.isInteger(value)) {
+    return getIndianStateFromMagentoRegionId(value) ?? "";
+  }
+
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const text = readStateText(entry, depth + 1);
+      if (text) {
+        return text;
+      }
+    }
+    return "";
+  }
+
+  if (typeof value !== "object") {
+    return "";
+  }
+
+  const record = value as Record<string, unknown>;
+  const regionId = record.region_id ?? record.regionId;
+  if (typeof regionId === "number") {
+    const fromId = getIndianStateFromMagentoRegionId(regionId);
+    if (fromId) {
+      return fromId;
+    }
+  }
+
+  if (typeof record.region === "string" && record.region.trim()) {
+    return record.region.trim();
+  }
+
+  for (const key of ["name", "label", "value", "optionValue", "title"] as const) {
+    const text = readStateText(record[key], depth + 1);
+    if (text) {
+      return text;
+    }
+  }
+
+  if (record.data != null) {
+    const text = readStateText(record.data, depth + 1);
+    if (text) {
+      return text;
+    }
+  }
+
+  if (record.attributes != null) {
+    const text = readStateText(record.attributes, depth + 1);
+    if (text) {
+      return text;
+    }
+  }
+
+  return "";
+}
+
+function readStateFromRecord(item: Record<string, unknown>): string {
+  for (const key of ["state", "region", "province", "addressState", "stateName"] as const) {
+    const text = readStateText(item[key]);
+    if (text) {
+      return text;
+    }
+  }
+
+  const nestedAddress = item.address;
+  if (nestedAddress && typeof nestedAddress === "object" && !Array.isArray(nestedAddress)) {
+    const nested = nestedAddress as Record<string, unknown>;
+    for (const key of ["state", "region", "province"] as const) {
+      const text = readStateText(nested[key]);
+      if (text) {
+        return text;
+      }
+    }
+  }
+
+  return "";
+}
+
 function mapAppointmentAddressFields(
   item: StrapiCustomerAppointment & Record<string, unknown>,
 ): Pick<
   CustomerAppointment,
   "addressLine1" | "addressLine2" | "pincode" | "city" | "state"
 > {
-  const stateFromField = pickTextField(item, ["state", "region", "province"]);
+  let stateFromField = readStateFromRecord(item);
+  if (!stateFromField && Array.isArray(item.products)) {
+    for (const product of item.products) {
+      if (!product || typeof product !== "object") {
+        continue;
+      }
+      const productRecord = product as Record<string, unknown>;
+      stateFromField = readStateFromRecord(productRecord);
+      if (stateFromField) {
+        break;
+      }
+    }
+  }
+
   // Legacy try-at-home submissions packed `State: …` into requestDetails.
-  const stateFromMessage = extractStateFromMessageText(
+  let stateFromMessage = extractStateFromMessageText(
     coerceMessageValue(item.requestDetails) ||
       coerceMessageValue(item.notes) ||
       coerceMessageValue(item.customerMessage) ||
       "",
   );
+  if (!stateFromMessage && Array.isArray(item.products)) {
+    for (const product of item.products) {
+      if (!product || typeof product !== "object") {
+        continue;
+      }
+      const productRecord = product as Record<string, unknown>;
+      stateFromMessage = extractStateFromMessageText(
+        coerceMessageValue(productRecord.requestDetails) ||
+          coerceMessageValue(productRecord.notes) ||
+          coerceMessageValue(productRecord.customerMessage) ||
+          "",
+      );
+      if (stateFromMessage) {
+        break;
+      }
+    }
+  }
 
   return {
     addressLine1: pickTextField(item, [

@@ -37,17 +37,39 @@ export const TRY_AT_HOME_INDIAN_STATES = [
   "Puducherry",
 ] as const;
 
-/** Prefilled values may differ in case from CMS options (e.g. "uttar pradesh" vs "Uttar Pradesh"). */
+function normalizeStateOptionKey(value: string): string {
+  return value.trim().toLowerCase().replace(/&/g, "and").replace(/\s+/g, " ");
+}
+
+/** Prefilled values may differ in case or punctuation from the dropdown (e.g. "uttar pradesh", "Jammu & Kashmir"). */
 export function matchTryAtHomeStateSelectOption(
   value: string,
   options: readonly string[],
 ): string {
-  const normalized = value.trim().toLowerCase();
+  const normalized = normalizeStateOptionKey(value);
   if (!normalized) {
     return "";
   }
 
-  return options.find((option) => option.toLowerCase() === normalized) ?? "";
+  const exact = options.find((option) => normalizeStateOptionKey(option) === normalized);
+  if (exact) {
+    return exact;
+  }
+
+  // "NCT of Delhi" → "Delhi". Skip very short values so a code like "UP" is not matched by substring.
+  if (normalized.length < 4) {
+    return "";
+  }
+
+  return (
+    options.find((option) => {
+      const optionKey = normalizeStateOptionKey(option);
+      return (
+        optionKey.length >= 4 &&
+        (normalized.includes(optionKey) || optionKey.includes(normalized))
+      );
+    }) ?? ""
+  );
 }
 
 /** Full state/UT list for address forms; CMS entries are merged in but never replace this list. */

@@ -567,11 +567,12 @@ const ProductAppointmentPanel = ({
   };
 
   const handleLegacySuccess = (message: string) => {
-    if (variant === "personalise" || variant === "schedule-video-call") {
+    if (variant === "schedule-video-call") {
       showStatusToast(message);
       return;
     }
 
+    // Personalise closes and unmounts the panel, so the toast has to live on the global status toast.
     toast(config.successToast);
   };
 

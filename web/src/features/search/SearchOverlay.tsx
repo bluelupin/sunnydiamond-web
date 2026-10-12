@@ -17,8 +17,8 @@ import {
   type SearchLink,
 } from "./quickSearch";
 import { searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
-import { addRecentSearch, clearRecentSearches, readRecentSearches } from "./recentSearches";
-import { useQuickSearch, useSearchSuggestions } from "./useQuickSearch";
+import { addRecentSearch, readRecentSearches } from "./recentSearches";
+import { useQuickSearch } from "./useQuickSearch";
 
 type Option = {
   id: string;
@@ -89,7 +89,6 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
   const [highlight, setHighlight] = useState({ key: "", index: -1 });
   const [recent, setRecent] = useState(() => readRecentSearches());
   const { query, active, result, loading, failed } = useQuickSearch(text);
-  const { popular } = useSearchSuggestions(open);
   const lastTracked = useRef("");
   // Radix returns focus to a Dialog.Trigger; the header icons are plain buttons, so remember
   // what had focus when search opened and give it back on close.
@@ -124,15 +123,14 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
   );
 
   const prefixTypeahead = useMemo(() => {
-    if (!active) return { recent: [] as SearchLink[], popular: [] as SearchLink[] };
+    if (!active) return { recent: [] as SearchLink[] };
     const recentLinks = recent
       .filter((label) => searchTermMatchesInput(label, query))
       .map((label) => ({ label, href: searchResultsHref(label) }));
-    const popularLinks = popular.filter((link) => searchTermMatchesInput(link.label, query));
-    return { recent: recentLinks, popular: popularLinks };
-  }, [active, query, recent, popular]);
+    return { recent: recentLinks };
+  }, [active, query, recent]);
 
-  const hasPrefixTypeahead = prefixTypeahead.recent.length > 0 || prefixTypeahead.popular.length > 0;
+  const hasPrefixTypeahead = prefixTypeahead.recent.length > 0;
 
   const showEmptyState =
     active && Boolean(result) && !loading && !hasResults && !hasPrefixTypeahead && !failed;
@@ -157,12 +155,10 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
         ...linkOptions("recent", prefixTypeahead.recent, (link) => link.label, (link) => (
           <TypeaheadLabel label={link.label} />
         )),
-        ...linkOptions("popular", prefixTypeahead.popular, (link) => link.label, (link) => (
-          <TypeaheadLabel label={link.label} />
-        )),
       ];
-      if (result?.query === query && result.products.length) {
+      if (result?.query === query) {
         options.push(
+          ...linkOptions("categories", result.categories, () => result.query),
           ...result.products.map((product, index) => ({
             id: `${baseId}-products-${index}`,
             href: product.href,
@@ -170,6 +166,8 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             group: "products",
             render: <ProductRow product={product} />,
           })),
+          ...linkOptions("articles", result.articles, () => result.query),
+          ...linkOptions("services", result.services, () => result.query),
         );
       }
       if (options.length === 0) return [];
@@ -177,44 +175,26 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
     };
 
     if (!active) {
-      const options: Option[] = [
-        ...linkOptions(
-          "recent",
-          recent.map((label) => ({ label, href: searchResultsHref(label) })),
-          (link) => link.label,
-          (link) => <TypeaheadLabel label={link.label} />,
-        ),
-        ...linkOptions("popular", popular, (link) => link.label, (link) => (
-          <TypeaheadLabel label={link.label} />
-        )),
-      ];
+      const options: Option[] = linkOptions(
+        "recent",
+        recent.map((label) => ({ label, href: searchResultsHref(label) })),
+        (link) => link.label,
+        (link) => <TypeaheadLabel label={link.label} />,
+      );
       if (options.length === 0) return [];
-      const hasRecents = recent.length > 0;
       return [
         {
           key: "default",
           title: "",
-          flat: !hasRecents,
+          flat: true,
           options,
-          action: hasRecents ? (
-            <button
-              type="button"
-              className="font-gill text-sm uppercase leading-110 text-darkblack underline underline-offset-4"
-              onClick={() => {
-                clearRecentSearches();
-                setRecent([]);
-              }}
-            >
-              Clear
-            </button>
-          ) : undefined,
         },
       ];
     }
 
-    // Figma typing — flat recent/popular + API products (no Categories / Learn / Services section UI).
+    // Typing — recent prefix matches, then API categories, products, blogs, services (flat list).
     return flatTypingOptions();
-  }, [active, query, result, hasResults, popular, recent, baseId, prefixTypeahead]);
+  }, [active, query, result, hasResults, recent, baseId, prefixTypeahead]);
 
   const showListbox = !showEmptyState && groups.some((group) => group.options.length > 0);
 

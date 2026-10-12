@@ -38,7 +38,7 @@ export function searchResultsHref(query: string): string {
   return `/search?q=${encodeURIComponent(cleanSearchQuery(query))}`;
 }
 
-/** Figma typeahead — recent/popular rows while the shopper types. */
+/** Typeahead — recent search rows while the shopper types (popular/suggested not shown in overlay). */
 export function searchTermMatchesInput(label: string, query: string): boolean {
   const normalizedLabel = label.trim().toLowerCase();
   const normalizedQuery = cleanSearchQuery(query).toLowerCase();

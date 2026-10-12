@@ -243,8 +243,8 @@ export function ProfileAppointmentReschedulePanel({
   }, [cmsForm]);
 
   const stateOptions = useMemo(
-    () => getTryAtHomeStateSelectOptions(cmsStateOptionSource, address?.state),
-    [address?.state, cmsStateOptionSource],
+    () => getTryAtHomeStateSelectOptions(cmsStateOptionSource, addressState || address?.state),
+    [address?.state, addressState, cmsStateOptionSource],
   );
 
   const selectedAddressState = useMemo(
