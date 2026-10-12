@@ -253,16 +253,15 @@ const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => {
         {isSeparate ? copy.separateBags : copy.singleBag}
       </p>
       <div
-        className="relative w-full overflow-hidden bg-gray200"
-        style={{ height: cartFlowSpec.gifting.personalise.heroImageHeight }}
+        className="relative w-full overflow-hidden bg-gray200 lg:h-[140px] md:h-[200px] h-[120px]"
       >
         <Image
           src={isSeparate ? bagHero.separate : bagHero.single}
           alt={bagHero.alt}
           width={bagHero.width}
           height={bagHero.height}
-          className="absolute inset-x-0 w-full object-cover"
-          style={{ top: bagHero.offsetTop, height: bagHero.height }}
+          className="absolute inset-x-0 w-full object-cover md:h-auto h-fit"
+          style={{ top: bagHero.offsetTop}}
           sizes={`${bagHero.width}px`}
         />
       </div>

@@ -92,7 +92,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
                       sizes="(max-width: 1023px) 68px, 91px"
                     />
                   </div>
-                  <div className="flex min-w-0 max-w-[176px] flex-col gap-2">
+                  <div className="flex min-w-0 max-w-fit flex-col gap-2">
                     <p
                       className={cn(
                         "font-gill text-base leading-110 text-darkblack",
