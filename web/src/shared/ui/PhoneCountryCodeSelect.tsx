@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   APPOINTMENT_COUNTRY_CODES,
   DEFAULT_COUNTRY_CODE,
 } from "@/shared/constants/appointmentForm";
+import {
+  formatPhoneDialCodeLabel,
+  resolvePhoneCountryCodeDisplay,
+} from "@/shared/constants/phoneCountryCodeDisplay";
+import { MOBILE_MAX_WIDTH_PX } from "@/shared/lib/breakpoints";
+import { CountryFlagIcon } from "@/shared/ui/CountryFlagIcon";
 import { cn } from "@/shared/utils/cn";
 
 const LIST_ANIMATION_MS = 200;
+const LIST_MAX_HEIGHT_PX = 280;
+const LIST_GAP_PX = 24;
+const VIEWPORT_PADDING_PX = 8;
+const LIST_MIN_HEIGHT_PX = 112;
 
 const SelectChevron = ({ open }: { open: boolean }) => (
   <span
@@ -56,6 +66,24 @@ type PhoneCountryCodeSelectProps = {
 
 const DEFAULT_CODES = APPOINTMENT_COUNTRY_CODES.map((entry) => entry.code);
 
+/** Phone row container (prefix + national input), including nested checkout layout. */
+function resolvePhoneFieldRow(root: HTMLElement): HTMLElement | null {
+  let node: HTMLElement | null = root.parentElement;
+
+  while (node && node !== document.body) {
+    const hasPhoneInput = node.querySelector("input");
+    const hasCodeTrigger = node.querySelector('button[aria-haspopup="listbox"]');
+
+    if (hasPhoneInput && hasCodeTrigger && node.classList.contains("h-14")) {
+      return node;
+    }
+
+    node = node.parentElement;
+  }
+
+  return root.parentElement;
+}
+
 /** Compact themed country-code picker for phone input rows. */
 const PhoneCountryCodeSelect = ({
   id = "phone-country-code",
@@ -69,15 +97,61 @@ const PhoneCountryCodeSelect = ({
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
   const [isListVisible, setIsListVisible] = useState(false);
+  const [listOpensUpward, setListOpensUpward] = useState(false);
+  const [listMaxHeight, setListMaxHeight] = useState(LIST_MAX_HEIGHT_PX);
+  const [listFieldWidthStyle, setListFieldWidthStyle] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxId = `${id}-listbox`;
+
+  const updateListPlacement = useCallback(() => {
+    const trigger = triggerRef.current;
+    const root = rootRef.current;
+    if (!trigger) {
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING_PX;
+    const spaceAbove = rect.top - VIEWPORT_PADDING_PX;
+    const openUpward = spaceBelow < LIST_MAX_HEIGHT_PX && spaceAbove > spaceBelow;
+    const availableSpace = openUpward ? spaceAbove : spaceBelow;
+    const maxHeight = Math.min(
+      LIST_MAX_HEIGHT_PX,
+      Math.max(availableSpace - LIST_GAP_PX, LIST_MIN_HEIGHT_PX),
+    );
+
+    setListOpensUpward(openUpward);
+    setListMaxHeight(maxHeight);
+
+    const isMobileViewport = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH_PX}px)`).matches;
+    if (isMobileViewport && root) {
+      const row = resolvePhoneFieldRow(root);
+      if (row) {
+        const rowRect = row.getBoundingClientRect();
+        const rootRect = root.getBoundingClientRect();
+        setListFieldWidthStyle({
+          left: rowRect.left - rootRect.left,
+          width: rowRect.width,
+        });
+        return;
+      }
+    }
+
+    setListFieldWidthStyle(null);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       setShouldRenderList(true);
+      updateListPlacement();
 
       const frame = window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
+          updateListPlacement();
           setIsListVisible(true);
         });
       });
@@ -96,7 +170,27 @@ const PhoneCountryCodeSelect = ({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isOpen]);
+  }, [isOpen, updateListPlacement]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    updateListPlacement();
+
+    const handleLayoutChange = () => {
+      updateListPlacement();
+    };
+
+    window.addEventListener("resize", handleLayoutChange);
+    window.addEventListener("scroll", handleLayoutChange, true);
+
+    return () => {
+      window.removeEventListener("resize", handleLayoutChange);
+      window.removeEventListener("scroll", handleLayoutChange, true);
+    };
+  }, [isOpen, updateListPlacement]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -132,6 +226,7 @@ const PhoneCountryCodeSelect = ({
   return (
     <div ref={rootRef} className={cn("relative shrink-0", className)}>
       <button
+        ref={triggerRef}
         type="button"
         id={id}
         disabled={disabled}
@@ -167,18 +262,31 @@ const PhoneCountryCodeSelect = ({
           onClick={(event) => {
             event.stopPropagation();
           }}
+          style={{
+            maxHeight: listMaxHeight,
+            ...(listFieldWidthStyle
+              ? { left: listFieldWidthStyle.left, width: listFieldWidthStyle.width }
+              : {}),
+          }}
           className={cn(
-            "verticleMobileScrollbar absolute left-0 top-full z-[90] mt-1 flex min-w-[112px] flex-col overflow-hidden bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+            "verticleMobileScrollbar absolute z-[90] flex flex-col overflow-y-auto bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+            listFieldWidthStyle ? "min-w-0 max-w-none" : "-left-[13px] min-w-[280px]",
             "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
-            "motion-safe:origin-top",
+            listOpensUpward ? "bottom-full mb-6 motion-safe:origin-bottom" : "top-full mt-6 motion-safe:origin-top",
             isListVisible
               ? "motion-safe:translate-y-0 motion-safe:opacity-100"
-              : "motion-safe:-translate-y-1 motion-safe:opacity-0",
+              : listOpensUpward
+                ? "motion-safe:translate-y-1 motion-safe:opacity-0"
+                : "motion-safe:-translate-y-1 motion-safe:opacity-0",
             !isOpen && "pointer-events-none",
           )}
         >
           {codes.map((code) => {
             const selected = value === code;
+            const display = resolvePhoneCountryCodeDisplay(code);
+            const countryLabel = display.iso
+              ? `${display.name} (${display.iso})`
+              : display.name;
 
             return (
               <button
@@ -186,6 +294,7 @@ const PhoneCountryCodeSelect = ({
                 type="button"
                 role="option"
                 aria-selected={selected}
+                aria-label={`${countryLabel} ${formatPhoneDialCodeLabel(code)}`}
                 onMouseDown={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -196,14 +305,16 @@ const PhoneCountryCodeSelect = ({
                   selectCode(code);
                 }}
                 className={cn(
-                  "flex h-14 w-full shrink-0 items-center px-3 text-left font-gill text-sm leading-110",
+                  "flex h-14 w-full shrink-0 items-center gap-2 p-3 text-left font-gill text-base font-normal leading-110",
                   "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
                   selected
-                    ? "bg-[#DECAA0] font-normal text-darkblack"
-                    : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
+                    ? "bg-gold300 text-darkblack"
+                    : "bg-[#F2F2F2] text-neutral500 hover:bg-gold300 hover:text-darkblack",
                 )}
               >
-                {code}
+                <CountryFlagIcon iso={display.iso} />
+                <span className="min-w-0 shrink-0 whitespace-nowrap">{countryLabel}</span>
+                <span className="shrink-0 whitespace-nowrap">{formatPhoneDialCodeLabel(code)}</span>
               </button>
             );
           })}
