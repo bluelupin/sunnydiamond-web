@@ -1,14 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  APPOINTMENT_COUNTRY_CODES,
-  DEFAULT_COUNTRY_CODE,
-} from "@/shared/constants/appointmentForm";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import {
   formatPhoneDialCodeLabel,
-  resolvePhoneCountryCodeDisplay,
+  resolvePhoneCountryCodeDisplayFromEntry,
 } from "@/shared/constants/phoneCountryCodeDisplay";
+import { filterPhoneCountryEntriesByDialCodes } from "@/shared/constants/phoneCountryCodes";
 import { MOBILE_MAX_WIDTH_PX } from "@/shared/lib/breakpoints";
 import { CountryFlagIcon } from "@/shared/ui/CountryFlagIcon";
 import { cn } from "@/shared/utils/cn";
@@ -64,8 +62,6 @@ type PhoneCountryCodeSelectProps = {
   codes?: readonly string[];
 };
 
-const DEFAULT_CODES = APPOINTMENT_COUNTRY_CODES.map((entry) => entry.code);
-
 /** Phone row container (prefix + national input), including nested checkout layout. */
 function resolvePhoneFieldRow(root: HTMLElement): HTMLElement | null {
   let node: HTMLElement | null = root.parentElement;
@@ -92,8 +88,13 @@ const PhoneCountryCodeSelect = ({
   onBlur,
   disabled = false,
   className,
-  codes = DEFAULT_CODES,
+  codes,
 }: PhoneCountryCodeSelectProps) => {
+  const listEntries = useMemo(
+    () => filterPhoneCountryEntriesByDialCodes(codes),
+    [codes],
+  );
+
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
   const [isListVisible, setIsListVisible] = useState(false);
@@ -281,20 +282,18 @@ const PhoneCountryCodeSelect = ({
             !isOpen && "pointer-events-none",
           )}
         >
-          {codes.map((code) => {
-            const selected = value === code;
-            const display = resolvePhoneCountryCodeDisplay(code);
-            const countryLabel = display.iso
-              ? `${display.name} (${display.iso})`
-              : display.name;
+          {listEntries.map((entry) => {
+            const selected = value === entry.code;
+            const display = resolvePhoneCountryCodeDisplayFromEntry(entry);
+            const countryLabel = `${display.name} (${display.iso})`;
 
             return (
               <button
-                key={code}
+                key={`${entry.country}-${entry.code}`}
                 type="button"
                 role="option"
                 aria-selected={selected}
-                aria-label={`${countryLabel} ${formatPhoneDialCodeLabel(code)}`}
+                aria-label={`${countryLabel} ${formatPhoneDialCodeLabel(entry.code)}`}
                 onMouseDown={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -302,7 +301,7 @@ const PhoneCountryCodeSelect = ({
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  selectCode(code);
+                  selectCode(entry.code);
                 }}
                 className={cn(
                   "flex h-14 w-full shrink-0 items-center gap-2 p-3 text-left font-gill text-base font-normal leading-110",
@@ -313,8 +312,8 @@ const PhoneCountryCodeSelect = ({
                 )}
               >
                 <CountryFlagIcon iso={display.iso} />
-                <span className="min-w-0 shrink-0 whitespace-nowrap">{countryLabel}</span>
-                <span className="shrink-0 whitespace-nowrap">{formatPhoneDialCodeLabel(code)}</span>
+                <span className="min-w-0 flex-1 truncate whitespace-nowrap">{countryLabel}</span>
+                <span className="shrink-0 whitespace-nowrap">{formatPhoneDialCodeLabel(entry.code)}</span>
               </button>
             );
           })}

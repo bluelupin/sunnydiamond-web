@@ -70,6 +70,7 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "^16.2.4",
+    "libphonenumber-js": "^1.13.15",
     "postcss": "^8.5.6",
     "postcss-styled-syntax": "^0.7.1",
     "tailwindcss": "^3.4.17",

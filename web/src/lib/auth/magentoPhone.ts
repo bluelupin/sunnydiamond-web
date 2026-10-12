@@ -1,3 +1,5 @@
+import { getSortedUniqueDialCodes } from "@/shared/constants/phoneCountryCodes";
+
 /**
  * Phone helpers for Magento: E.164 for OTP calls, split/join for stored numbers.
  *
@@ -58,7 +60,7 @@ export const parseOtpCountryCodes = (value: string | null | undefined): string[]
  * (SunnyDiamonds\CustomerAuth\Model\Otp\OtpCountries). Dial codes are prefix-free,
  * so the first match is the only match.
  */
-const KNOWN_DIAL_CODES = ["+1", "+44", "+61", "+65", "+91", "+965", "+966", "+968", "+971", "+973", "+974"];
+const KNOWN_DIAL_CODES = getSortedUniqueDialCodes();
 
 /**
  * Splits a stored number into picker code + national digits. "+<code>…" keeps its

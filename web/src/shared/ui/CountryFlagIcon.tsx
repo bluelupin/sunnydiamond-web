@@ -1,40 +1,8 @@
 "use client";
 
-import AE from "country-flag-icons/react/3x2/AE";
-import AF from "country-flag-icons/react/3x2/AF";
-import AL from "country-flag-icons/react/3x2/AL";
-import AU from "country-flag-icons/react/3x2/AU";
-import BH from "country-flag-icons/react/3x2/BH";
-import GB from "country-flag-icons/react/3x2/GB";
-import IN from "country-flag-icons/react/3x2/IN";
-import KW from "country-flag-icons/react/3x2/KW";
-import NZ from "country-flag-icons/react/3x2/NZ";
-import OM from "country-flag-icons/react/3x2/OM";
-import QA from "country-flag-icons/react/3x2/QA";
-import SA from "country-flag-icons/react/3x2/SA";
-import SG from "country-flag-icons/react/3x2/SG";
-import US from "country-flag-icons/react/3x2/US";
+import { hasFlag } from "country-flag-icons";
+import * as FlagStrings from "country-flag-icons/string/3x2";
 import { cn } from "@/shared/utils/cn";
-
-type CountryFlagComponent = typeof IN;
-
-/** ISO codes used by `phoneCountryCodeDisplay` — tree-shaken per-country imports. */
-const FLAG_BY_ISO: Record<string, CountryFlagComponent> = {
-  AE,
-  AF,
-  AL,
-  AU,
-  BH,
-  GB,
-  IN,
-  KW,
-  NZ,
-  OM,
-  QA,
-  SA,
-  SG,
-  US,
-};
 
 function InternationalFlagPlaceholder({ className }: { className?: string }) {
   return (
@@ -62,18 +30,25 @@ type CountryFlagIconProps = {
 /** Figma 6752:65169 — 24×24 flag in phone country-code list rows. */
 export function CountryFlagIcon({ iso, className }: CountryFlagIconProps) {
   const normalized = iso.trim().toUpperCase();
-  const Flag = normalized ? FLAG_BY_ISO[normalized] : undefined;
 
-  if (!Flag) {
+  if (!normalized || !hasFlag(normalized)) {
+    return <InternationalFlagPlaceholder className={className} />;
+  }
+
+  const svg = (FlagStrings as Record<string, string>)[normalized];
+  if (!svg) {
     return <InternationalFlagPlaceholder className={className} />;
   }
 
   return (
     <span
-      className={cn("inline-flex size-6 shrink-0 overflow-hidden", className)}
+      className={cn(
+        "inline-flex size-6 shrink-0 overflow-hidden [&>svg]:block [&>svg]:h-full [&>svg]:w-full",
+        className,
+      )}
       aria-hidden
-    >
-      <Flag className="h-full w-full" />
-    </span>
+      // SVG strings from country-flag-icons are trusted package assets.
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
   );
 }
