@@ -647,6 +647,9 @@ const ProductDetailSidebar = ({
                     placeholder="Select"
                     invalid={ringSizeError != null}
                     onChange={(value) => {
+                      if (value && unavailableSizes.includes(value)) {
+                        return;
+                      }
                       setRingSize(value);
                       if (value) {
                         setRingSizeError(null);
