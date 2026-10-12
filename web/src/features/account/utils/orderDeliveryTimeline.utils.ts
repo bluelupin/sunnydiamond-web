@@ -45,6 +45,23 @@ export function normalizeOrderStatus(status: string): string {
     .replace(/\s+/g, " ");
 }
 
+/** When `sunny_actions` is absent, infer cancel eligibility from the Magento status label. */
+export function canCancelInProgressOrderFromStatus(status: string): boolean {
+  const normalized = normalizeOrderStatus(status);
+
+  if (
+    normalized.includes("out for delivery") ||
+    normalized.includes("shipped") ||
+    normalized.includes("delivered") ||
+    normalized === "complete" ||
+    normalized === "closed"
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export function getOrderDeliveryTimelineActiveStep(status: string): number | null {
   const statusCode = status.trim().toLowerCase();
   const codeStep = ORDER_FLOW_STATUS_TO_ACTIVE_STEP[statusCode];
@@ -292,6 +309,32 @@ export function isActiveDigitalGiftCardOrder(order: {
 /** Figma UI-Production 4858:124270 — right-aligned contact CTA width on desktop. */
 export const DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS =
   "h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:w-[414px] lg:max-w-[414px]";
+
+/** Figma: sole order action — right half on mobile, 414px on desktop. */
+export const PROFILE_ORDER_SINGLE_ACTION_ROW_CLASS = "flex w-full justify-end";
+
+export const PROFILE_ORDER_SINGLE_ACTION_SLOT_CLASS =
+  "box-border w-1/2 max-w-[414px] shrink-0 lg:w-[414px]";
+
+export type ProfileOrderActionVisibility = {
+  showDownloadInvoice?: boolean;
+  showCancel?: boolean;
+  showReturn?: boolean;
+  showContactUs?: boolean;
+};
+
+export function countProfileOrderVisibleActions(order: ProfileOrderActionVisibility): number {
+  return [
+    order.showDownloadInvoice,
+    order.showCancel,
+    order.showReturn,
+    order.showContactUs,
+  ].filter(Boolean).length;
+}
+
+/** Button fills the slot (works with product detail dark button default `w-full`). */
+export const PROFILE_ORDER_SINGLE_ACTION_CTA_CLASS =
+  "h-14 min-h-14 w-full min-w-0 shrink-0 px-7 py-5 font-normal";
 
 type DigitalGiftCardContactUsOrder = {
   items: Array<{ subtitle?: string }>;

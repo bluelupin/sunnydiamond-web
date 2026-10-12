@@ -12,6 +12,7 @@ import {
 } from "./orderGiftDetection.utils";
 import {
   buildOrderDeliveryTimelineFromStatus,
+  canCancelInProgressOrderFromStatus,
   formatOrderStatusLabel,
   giftCardNameForSku,
   giftCardSubtitleForSku,
@@ -149,6 +150,9 @@ export function mapTrackedOrderToProfileDetailUi(
     ? undefined
     : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
+  const showCancel = actions
+    ? actions.canCancel
+    : category === "in_progress" && canCancelInProgressOrderFromStatus(order.status);
   const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
   const deliveryTimeline =
     trackingTimeline.length > 0
@@ -178,7 +182,7 @@ export function mapTrackedOrderToProfileDetailUi(
           phone: order.shippingAddress.phone,
         }
       : undefined,
-    showCancel: actions ? actions.canCancel : category === "in_progress",
+    showCancel,
     showReturn: isGiftCardProfileOrder({ items })
       ? false
       : actions
@@ -186,9 +190,9 @@ export function mapTrackedOrderToProfileDetailUi(
         : category === "delivered",
     showDownloadInvoice: true,
     ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
-    showCancelNote: category === "in_progress",
+    showCancelNote: category === "in_progress" && showCancel,
     footnote:
-      category === "in_progress"
+      category === "in_progress" && showCancel
         ? ordersContent.cancelNote
         : category === "delivered"
           ? formatReturnDeadlineNote(order.sunnyDelivery?.returnableTill)

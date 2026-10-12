@@ -14,6 +14,10 @@ import { cn } from "@/shared/utils/cn";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
+import {
+  PROFILE_ORDER_SINGLE_ACTION_ROW_CLASS,
+  PROFILE_ORDER_SINGLE_ACTION_SLOT_CLASS,
+} from "../utils/orderDeliveryTimeline.utils";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const PROFILE_FIELD_INFO_TOOLTIP_BG = "#0A0A0A";
@@ -259,6 +263,21 @@ export function ProfileOrderMobileStatusBadge({
 
 export function ProfileOrderCardDivider() {
   return <div className="lg:h-px h-[0.5px] w-full shrink-0 bg-neutral300" aria-hidden />;
+}
+
+/** Order detail / listing — one CTA: half-width of the row, right-aligned (Figma). */
+export function ProfileOrderSingleActionCtaShell({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn(PROFILE_ORDER_SINGLE_ACTION_ROW_CLASS, className)}>
+      <div className={PROFILE_ORDER_SINGLE_ACTION_SLOT_CLASS}>{children}</div>
+    </div>
+  );
 }
 
 /** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
