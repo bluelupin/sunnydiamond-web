@@ -112,6 +112,8 @@ export const profileTabsContent = {
       title: "Cancel Order?",
       description:
         "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+      descriptionMobile:
+        "We're sorry to see you go. Let us know what changed. Your feedback helps us do better.",
       reasonLabel: "Select Reason",
       reasons: [
         "Expected delivery timeline no longer works for me",
@@ -124,8 +126,15 @@ export const profileTabsContent = {
     },
     cancelSuccessDialog: {
       title: "Order Cancellation",
+      titleMobile: "Order Cancelled",
       description:
         "Order cancelled successfully. You can track your refund status from your order summary.",
+      descriptionDesktopLines: [
+        "Order cancelled successfully. You can track your refund status from your",
+        "order summary.",
+      ],
+      descriptionMobile:
+        "Your order has been successfully cancelled. You can track your refund status from your order summary.",
     },
     returnDialog: {
       title: "Return Order?",
