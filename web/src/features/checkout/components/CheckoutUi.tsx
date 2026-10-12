@@ -149,6 +149,8 @@ type CheckoutSelectFieldProps = {
   triggerClassName?: string;
   /** `inlineCustom` — portaled `InlineCustomSelect` (PDP Size pattern) for long state lists. */
   variant?: "radix" | "inlineCustom";
+  /** For `inlineCustom` inside sheets/modals where portaled lists cannot receive clicks. */
+  listPlacement?: "portaled" | "inline";
 };
 
 export const CheckoutSelectField = ({
@@ -165,6 +167,7 @@ export const CheckoutSelectField = ({
   disabled = false,
   triggerClassName,
   variant = "radix",
+  listPlacement = "portaled",
 }: CheckoutSelectFieldProps) => {
   if (variant === "inlineCustom") {
     const optionLabels = options.map((option) => option.label);
@@ -195,6 +198,7 @@ export const CheckoutSelectField = ({
           placeholderClassName="font-normal text-gray600"
           listClassName="bg-aboutInactive"
           optionClassName="text-base"
+          listPlacement={listPlacement}
         />
         <FormFieldError id={`${id}-error`} message={error} />
       </div>

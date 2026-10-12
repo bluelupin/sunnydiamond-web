@@ -44,7 +44,7 @@ export function ProfileDeleteAddressDialog({
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetContent
           side="bottom"
-          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          overlayClassName="bg-[rgba(30,30,30,0.75)] !backdrop-blur-9 test"
           className="w-full gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
           <div className="px-4 pt-6">

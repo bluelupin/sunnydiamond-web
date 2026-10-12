@@ -312,7 +312,7 @@ const PhoneCountryCodeSelect = ({
                 )}
               >
                 <CountryFlagIcon iso={display.iso} />
-                <span className="min-w-0 flex-1 truncate whitespace-nowrap">{countryLabel}</span>
+                <span className="min-w-0 truncate whitespace-nowrap">{countryLabel}</span>
                 <span className="shrink-0 whitespace-nowrap">{formatPhoneDialCodeLabel(entry.code)}</span>
               </button>
             );

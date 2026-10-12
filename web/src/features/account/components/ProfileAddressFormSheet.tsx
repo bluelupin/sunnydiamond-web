@@ -300,14 +300,15 @@ export function ProfileAddressFormSheet({
             <CheckoutSelectField
               id="profile-address-state"
               label="State"
+              variant="inlineCustom"
+              listPlacement="inline"
+              placeholder="Select State"
               value={form.state}
               onChange={(value) => handleChange("state", value)}
               onBlur={() => markTouched("state")}
               invalid={showError("state")}
               error={showError("state") ? errors.state : undefined}
               options={stateOptions}
-              placeholder="Select State"
-              triggerClassName="data-[placeholder]:text-gray600"
               disabled={isSaving}
             />
             <FormFieldError message={formError ?? undefined} />
