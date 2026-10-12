@@ -49,8 +49,8 @@ export const CATEGORY_ENGRAVING_PREVIEW_LAYOUTS: Partial<
   },
   pendants: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
-    // Straight line on lower teardrop face — centered, just below the widest point
-    textArcPath: "M 108 105 L 234 145",
+    // Horizontal line on lower teardrop face — centered, just below the widest point
+    textArcPath: "M 108 135 L 234 135",
     fontSizeScale: 0.72,
   },
   bangles: {
@@ -61,13 +61,13 @@ export const CATEGORY_ENGRAVING_PREVIEW_LAYOUTS: Partial<
   necklace: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
     // Oval tag long axis — slopes down left→right on Necklace-engraving-preview.png
-    textArcPath: "M 118 98 L 214 130",
+    textArcPath: "M 120 105 L 215 125",
     fontSizeScale: 0.68,
   },
   bracelets: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
-    textArcPath: "M 118 84 Q 171 76 224 84",
-    fontSizeScale: 0.8,
+    textArcPath: "M 118 80 Q 171 76 224 80",
+    fontSizeScale: 0.7,
   },
   earrings: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,

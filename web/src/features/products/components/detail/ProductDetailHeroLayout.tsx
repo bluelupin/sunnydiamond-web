@@ -6,8 +6,6 @@ import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
 import ProductDetailGallery from "./ProductDetailGallery";
 import { usePdpPurchaseStickySync } from "@/features/products/hooks/usePdpPurchaseStickySync";
-import { PDP_STICKY_TOP_CLASS } from "./productDetailLayout";
-
 type ProductDetailHeroLayoutProps = {
   product: Product;
   purchase: ReactNode;
@@ -44,7 +42,7 @@ const ProductDetailHeroLayout = ({ product, purchase, details }: ProductDetailHe
       >
         <div
           ref={purchaseRef}
-          className={cn("row-start-1 min-w-0 md:sticky md:self-start", PDP_STICKY_TOP_CLASS)}
+          className={cn("row-start-1 min-w-0 md:sticky md:self-start", "top-6 lg:top-8")}
         >
           {purchase}
           <div className="row-start-2 min-w-0 md:mt-10 mt-6">

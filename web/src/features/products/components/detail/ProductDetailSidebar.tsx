@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, type ReactNode } from "react"
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   AttributeSeparator,
   DetailDarkButton,
@@ -195,12 +195,13 @@ const ProductDetailSidebar = ({
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
   const [isAddingToBag, setIsAddingToBag] = useState(false);
-  const router = useRouter();
   const pathname = usePathname() ?? "/";
   const { status } = useAuth();
   const { openLoginModal } = useLoginModal();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
+  const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
+  const displayedWishlisted = optimisticWishlisted ?? wishlisted;
   const engravingConfig = resolveProductEngravingConfig(product);
   const engravingEnabled = isProductEngravingEnabled(engravingConfig);
   const sizeOptions = getRingSizeOptions(product, sizeGuide, selectedMetal, preferredPurities);
@@ -240,6 +241,10 @@ const ProductDetailSidebar = ({
     },
     [openLoginModal, pathname, status],
   );
+
+  useEffect(() => {
+    setOptimisticWishlisted(null);
+  }, [wishlisted]);
 
   useEffect(() => {
     if (status !== "authenticated" || !pendingHereForYouPanel) {
@@ -501,8 +506,8 @@ const ProductDetailSidebar = ({
           >
             <span>₹{formatJewelleryPrice(pricing.price)}</span>
             {!isMobileSticky &&
-            pricing.originalPrice != null &&
-            pricing.originalPrice > pricing.price ? (
+              pricing.originalPrice != null &&
+              pricing.originalPrice > pricing.price ? (
               <span className="text-gray600 line-through">
                 ₹{formatJewelleryPrice(pricing.originalPrice)}
               </span>
@@ -531,22 +536,19 @@ const ProductDetailSidebar = ({
           )}
           <button
             type="button"
-            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            aria-pressed={wishlisted}
+            aria-label={displayedWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={displayedWishlisted}
             onClick={() => {
-              if (status !== "authenticated") {
-                router.push("/wishlist");
-                return;
-              }
+              setOptimisticWishlisted(!displayedWishlisted);
               toggleWishlist(product.id);
             }}
             className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
           >
             <WishlistIcon
-              filled={wishlisted}
+              filled={displayedWishlisted}
               className={cn(
                 "size-6 transition-colors duration-200",
-                wishlisted ? "text-linkGold" : "text-darkblack",
+                displayedWishlisted ? "text-linkGold" : "text-darkblack",
               )}
             />
           </button>
@@ -617,61 +619,61 @@ const ProductDetailSidebar = ({
               </div>
             </div>
           ) : null}
-
-          <div className="flex flex-col gap-6">
-            {showSizeSelector ? (
-              <div
-                ref={ringSizeSectionRef}
-                className="flex scroll-mt-28 flex-col gap-2"
-                style={{ scrollMarginBottom: clearancePx }}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
-                    {sizeGuide?.sizeFieldLabel ?? "Size"}
-                  </p>
-                  {showFindYourSizeLink ? (
-                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
-                      {findYourSizeLabel}
-                    </DetailTextLink>
-                  ) : null}
+          {(showSizeSelector || (engravingEnabled && engravingConfig)) ? (
+            <div className="flex flex-col gap-6">
+              {showSizeSelector ? (
+                <div
+                  ref={ringSizeSectionRef}
+                  className="flex scroll-mt-28 flex-col gap-2"
+                  style={{ scrollMarginBottom: clearancePx }}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+                      {sizeGuide?.sizeFieldLabel ?? "Size"}
+                    </p>
+                    {showFindYourSizeLink ? (
+                      <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
+                        {findYourSizeLabel}
+                      </DetailTextLink>
+                    ) : null}
+                  </div>
+                  <InlineCustomSelect
+                    id="product-ring-size"
+                    label={sizeGuide?.sizeFieldLabel ?? "Size"}
+                    labelClassName="sr-only"
+                    value={ringSize}
+                    options={sizeLabels}
+                    unavailableOptions={unavailableSizes}
+                    placeholder="Select"
+                    invalid={ringSizeError != null}
+                    onChange={(value) => {
+                      setRingSize(value);
+                      if (value) {
+                        setRingSizeError(null);
+                      }
+                    }}
+                    triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+                    placeholderClassName="font-normal text-gray600"
+                    listClassName="bg-aboutInactive"
+                    optionClassName="text-base"
+                  />
+                  <FormFieldError message={ringSizeError ?? undefined} />
                 </div>
-                <InlineCustomSelect
-                  id="product-ring-size"
-                  label={sizeGuide?.sizeFieldLabel ?? "Size"}
-                  labelClassName="sr-only"
-                  value={ringSize}
-                  options={sizeLabels}
-                  unavailableOptions={unavailableSizes}
-                  placeholder="Select"
-                  invalid={ringSizeError != null}
-                  onChange={(value) => {
-                    setRingSize(value);
-                    if (value) {
-                      setRingSizeError(null);
-                    }
-                  }}
-                  triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
-                  placeholderClassName="font-normal text-gray600"
-                  listClassName="bg-aboutInactive"
-                  optionClassName="text-base"
-                />
-                <FormFieldError message={ringSizeError ?? undefined} />
-              </div>
-            ) : null}
-
-            {engravingEnabled && engravingConfig ? (
-              <button
-                type="button"
-                onClick={() => setIsEngravingOpen(true)}
-                className="flex h-14 items-center justify-between gap-4 bg-aboutInactive p-3 text-left"
-              >
-                <span className="font-gill text-base leading-110 text-darkblack">
-                  {engravingSelection?.text ?? "Metal Engraving (Optional)"}
-                </span>
-                <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
-              </button>
-            ) : null}
-          </div>
+              ) : null}
+              {engravingEnabled && engravingConfig ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEngravingOpen(true)}
+                  className="flex h-14 items-center justify-between gap-4 bg-aboutInactive p-3 text-left"
+                >
+                  <span className="font-gill text-base leading-110 text-darkblack">
+                    {engravingSelection?.text ?? "Metal Engraving (Optional)"}
+                  </span>
+                  <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="hidden md:block">{renderPurchaseActionsBar("desktop")}</div>
