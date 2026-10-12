@@ -28,6 +28,10 @@ export default function AppointmentGenericFields({ form, values, codes, errors, 
   const { minDate, maxDate } = getAppointmentBookingDateBounds(APPOINTMENT_BOOKING_WINDOW, now);
   const dateIndex = form.fields.findIndex((field) => appointmentFieldKind(field) === "date");
   const date = dateIndex < 0 ? "" : values[appointmentFieldKey(form.fields[dateIndex], dateIndex)] ?? "";
+  const slotIndex = form.fields.findIndex((field) => appointmentFieldKind(field) === "slot");
+  const availabilitySlots = slotIndex < 0
+    ? undefined
+    : appointmentFieldOptions(form.fields[slotIndex], form);
   return (
     <fieldset disabled={disabled} className="flex min-w-0 flex-col gap-6">
       {form.fields.map((field, index) => {
@@ -53,7 +57,7 @@ export default function AppointmentGenericFields({ form, values, codes, errors, 
                 <input {...inputProps} type="tel" inputMode="numeric" autoComplete="tel-national" onChange={(event) => change(sanitizePhoneInput(event.target.value, code))} className="min-w-0 flex-1 bg-transparent font-gill text-sm outline-none placeholder:text-[#999999]" />
               </div>
             ) : kind === "date" ? (
-              <AppointmentDateField id={id} value={value} onChange={change} onBlur={blur} minDate={minDate} maxDate={maxDate} placeholder={field.placeholder} hasError={Boolean(error)} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} />
+              <AppointmentDateField id={id} value={value} onChange={change} onBlur={blur} minDate={minDate} maxDate={maxDate} availabilitySlots={availabilitySlots} minNoticeMinutes={APPOINTMENT_BOOKING_WINDOW.minNoticeMinutes} placeholder={field.placeholder} hasError={Boolean(error)} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} />
             ) : kind === "slot" ? (
               <div id={id} role="group" aria-label={label} aria-describedby={error ? `${id}-error` : undefined} className="grid grid-cols-2 gap-3">
                 {options.map((slot) => (
