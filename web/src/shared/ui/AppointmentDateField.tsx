@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
+import { isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 
 const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
@@ -16,6 +17,8 @@ type AppointmentDateFieldProps = {
   value: string;
   minDate: string;
   maxDate?: string;
+  availabilitySlots?: readonly string[];
+  minNoticeMinutes?: number;
   onChange: (value: string) => void;
   onBlur?: () => void;
   hasError?: boolean;
@@ -87,6 +90,8 @@ const AppointmentDateField = ({
   value,
   minDate,
   maxDate,
+  availabilitySlots,
+  minNoticeMinutes = 0,
   onChange,
   onBlur,
   hasError,
@@ -280,7 +285,16 @@ const AppointmentDateField = ({
             const isToday = isSameDay(date, new Date());
             const isDisabled =
               normalizedDate < minSelectableDate ||
-              (maxSelectableDate != null && normalizedDate > maxSelectableDate);
+              (maxSelectableDate != null && normalizedDate > maxSelectableDate) ||
+              (availabilitySlots != null &&
+                !availabilitySlots.some((slot) =>
+                  isAppointmentTimeSlotAvailable(
+                    slot,
+                    toDateValue(date),
+                    new Date(),
+                    minNoticeMinutes,
+                  ),
+                ));
 
             return (
               <button
