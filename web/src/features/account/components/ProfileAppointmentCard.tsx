@@ -188,6 +188,8 @@ function ProfileAppointmentNote({
   note,
   purposeOfVisit,
   yourRequirement,
+  notePrompt,
+  noteAnswer,
   purposeLabel,
   requirementLabel,
 }: {
@@ -195,10 +197,12 @@ function ProfileAppointmentNote({
   note: string;
   purposeOfVisit?: string;
   yourRequirement?: string;
+  notePrompt?: string;
+  noteAnswer?: string;
   purposeLabel?: string;
   requirementLabel?: string;
 }) {
-  const hasStructuredNote = Boolean(purposeOfVisit || yourRequirement);
+  const hasStructuredNote = Boolean(purposeOfVisit || yourRequirement || (notePrompt && noteAnswer));
 
   return (
     <div className={sectionCardClassName}>
@@ -215,6 +219,12 @@ function ProfileAppointmentNote({
             <div className="flex flex-col gap-2">
               <p className="font-normal">{requirementLabel ?? "Your Requirement"}</p>
               <p className="font-light whitespace-pre-line">{yourRequirement}</p>
+            </div>
+          ) : null}
+          {notePrompt && noteAnswer ? (
+            <div className="flex flex-col gap-2">
+              <p className="font-normal">{notePrompt}</p>
+              <p className="font-light whitespace-pre-line">{noteAnswer}</p>
             </div>
           ) : null}
         </div>
@@ -350,14 +360,11 @@ export function ProfileAppointmentCard({
       : String(appointment.notes ?? "").trim();
   const isGeneralAppointmentForm =
     appointment.formTag.trim().toLowerCase() === "book-an-appointment";
-  const displayedNotesText = isGeneralAppointmentForm
-    ? notesText.replace(/^([^:\n]+):\s*/, "$1\n")
-    : notesText;
+  const generalAppointmentNote = isGeneralAppointmentForm
+    ? notesText.match(/^([^:\n]+):\s*([\s\S]*)$/)
+    : null;
   const purposeOfVisit = appointment.purposeOfVisit?.trim() ?? "";
-  const yourRequirement = isGeneralAppointmentForm
-    ? ""
-    : appointment.yourRequirement?.trim() ?? notesText;
-  const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
+  const showNoteSection = Boolean(purposeOfVisit || notesText);
   const { windows } = useUiPlatform();
   // The Figma store visit card has no product images.
   const isStoreVisit = appointment.type === "store_visit";
@@ -405,13 +412,12 @@ export function ProfileAppointmentCard({
       {showNoteSection ? (
         <ProfileAppointmentNote
           title={content.notesLabel}
-          note={displayedNotesText}
+          note={notesText}
           purposeOfVisit={
             appointment.type === "store_visit" ? purposeOfVisit || undefined : undefined
           }
-          yourRequirement={
-            appointment.type === "store_visit" ? yourRequirement || undefined : undefined
-          }
+          notePrompt={generalAppointmentNote?.[1].trim()}
+          noteAnswer={generalAppointmentNote?.[2].trim()}
           purposeLabel={content.purposeOfVisitLabel}
           requirementLabel={content.yourRequirementLabel}
         />
