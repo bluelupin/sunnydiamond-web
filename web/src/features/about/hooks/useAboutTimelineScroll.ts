@@ -86,6 +86,33 @@ function getScrollTopForYearIndex(
   return pinTop + index * window.innerHeight;
 }
 
+function getMaxSnapScrollTop(
+  section: HTMLElement,
+  maxIndex: number,
+  pinScrollTopRef: { current: number | null },
+): number {
+  return getScrollTopForYearIndex(section, maxIndex, pinScrollTopRef);
+}
+
+/** Scroll is in the spacer below the last year snap — allow native scroll out of the section. */
+function isBelowTimelineSnapRange(
+  scrollY: number,
+  section: HTMLElement,
+  maxIndex: number,
+  pinScrollTopRef: { current: number | null },
+): boolean {
+  return scrollY > getMaxSnapScrollTop(section, maxIndex, pinScrollTopRef) + SCROLL_DRIFT_TOLERANCE_PX;
+}
+
+/** Scroll is above the first year snap — allow native scroll back into content above. */
+function isAboveTimelineSnapRange(
+  scrollY: number,
+  section: HTMLElement,
+  pinScrollTopRef: { current: number | null },
+): boolean {
+  return scrollY < getPinScrollTop(section, pinScrollTopRef) - SCROLL_DRIFT_TOLERANCE_PX;
+}
+
 function isTimelinePinned(section: HTMLElement): boolean {
   const rect = section.getBoundingClientRect();
   const viewportHeight = window.innerHeight;
@@ -194,15 +221,19 @@ export function useAboutTimelineScroll(
     const section = sectionRef.current;
     if (!section) return;
 
-    const pinned = isTimelinePinned(section);
-    setAboutTimelineHeaderSuppressed(pinned);
-
     const yearCount = years.length;
     if (yearCount === 0) {
       return;
     }
 
     const maxIndex = yearCount - 1;
+    const scrollY = window.scrollY;
+    const pinned = isTimelinePinned(section);
+    const suppressHeader =
+      pinned &&
+      !isBelowTimelineSnapRange(scrollY, section, maxIndex, pinScrollTopRef) &&
+      !isAboveTimelineSnapRange(scrollY, section, pinScrollTopRef);
+    setAboutTimelineHeaderSuppressed(suppressHeader);
 
     if (!pinned) {
       wasPinnedRef.current = false;
@@ -230,10 +261,27 @@ export function useAboutTimelineScroll(
       return;
     }
 
+    if (isBelowTimelineSnapRange(scrollY, section, maxIndex, pinScrollTopRef)) {
+      applyActiveIndex(maxIndex);
+      setProgressFromIndex(maxIndex, yearCount);
+      return;
+    }
+
+    if (isAboveTimelineSnapRange(scrollY, section, pinScrollTopRef)) {
+      applyActiveIndex(0);
+      setProgressFromIndex(0, yearCount);
+      return;
+    }
+
+    if (!wheelStepLockRef.current) {
+      const scrollIndex = getYearIndexFromScroll(section, yearCount, pinScrollTopRef);
+      applyActiveIndex(scrollIndex);
+    }
+
     const lockedIndex = activeIndexRef.current;
     const expectedTop = getScrollTopForYearIndex(section, lockedIndex, pinScrollTopRef);
 
-    if (Math.abs(window.scrollY - expectedTop) > SCROLL_DRIFT_TOLERANCE_PX) {
+    if (Math.abs(scrollY - expectedTop) > SCROLL_DRIFT_TOLERANCE_PX) {
       if (!wheelStepLockRef.current) {
         window.scrollTo({ top: expectedTop, left: 0, behavior: "auto" });
       }
