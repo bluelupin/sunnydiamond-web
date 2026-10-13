@@ -412,17 +412,18 @@ const ProductDetailSidebar = ({
   }, [product.id]);
 
   useEffect(() => {
-    if (hasHydratedEngravingRef.current) {
+    if (initialEngravingSelection == null) {
       return;
     }
 
-    if (initialEngravingSelection == null) {
+    // Late cart hydration (edit from bag): apply when local state is still empty.
+    if (hasHydratedEngravingRef.current && engravingSelection?.text?.trim()) {
       return;
     }
 
     setEngravingSelection(initialEngravingSelection);
     hasHydratedEngravingRef.current = true;
-  }, [initialEngravingSelection]);
+  }, [initialEngravingSelection, engravingSelection?.text]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
   const configurableOptionUids = selectedSize?.variant?.optionUids ?? getConfigurableOptionUidsForMetal(

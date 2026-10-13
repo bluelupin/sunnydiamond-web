@@ -347,7 +347,7 @@ export function isCartLineEngravingEnabled(
 }
 
 export type CartLineEngravingContext = {
-  options: Pick<CartLineOptions, "engravingSupported">;
+  options: Pick<CartLineOptions, "engravingSupported" | "engraving">;
   productCustomOptions?: ProductCustomOptions | null;
 };
 
@@ -355,7 +355,15 @@ export type CartLineEngravingContext = {
 export function isCartLineEngravingCapable(
   context: CartLineEngravingContext,
 ): boolean {
-  return hasCatalogEngravingText(context.productCustomOptions);
+  if (hasCatalogEngravingText(context.productCustomOptions)) {
+    return true;
+  }
+
+  if (context.options.engravingSupported === true) {
+    return true;
+  }
+
+  return Boolean(stripLineInstanceFromEngraving(context.options.engraving ?? "").trim());
 }
 
 export function mergeCartLineOptions(
@@ -369,21 +377,29 @@ export function mergeCartLineOptions(
 }
 
 export function resolveCartLineEngravingSelection(
-  product: Pick<Product, "engraving">,
-  lineItem?: { options: CartLineOptions },
+  product: Pick<Product, "engraving" | "customOptions" | "categorySlug">,
+  lineItem?: {
+    options: CartLineOptions;
+    product?: Pick<Product, "customOptions">;
+  },
   metadata?: {
     options?: CartLineOptions;
     productCustomOptions?: ProductCustomOptions | null;
   },
 ): EngravingSelection | null {
-  if (!isProductEngravingEnabled(product.engraving)) {
+  const engravingConfig = resolveProductEngravingConfig(product);
+  if (!engravingConfig) {
     return null;
   }
 
   const mergedOptions = mergeCartLineOptions(lineItem?.options, metadata?.options);
+  const productCustomOptions =
+    metadata?.productCustomOptions ??
+    lineItem?.product?.customOptions ??
+    product.customOptions;
   const engravingContext: CartLineEngravingContext = {
     options: mergedOptions,
-    productCustomOptions: metadata?.productCustomOptions,
+    productCustomOptions,
   };
 
   if (!isCartLineEngravingCapable(engravingContext)) {
@@ -395,10 +411,12 @@ export function resolveCartLineEngravingSelection(
     return null;
   }
 
+  const fonts = resolveEngravingFonts(engravingConfig.fonts);
+
   return {
     text,
     // Fall back only to a font the product actually offers — never fabricate one.
-    font: mergedOptions.engravingFont?.trim() || product.engraving?.fonts?.[0] || "",
+    font: mergedOptions.engravingFont?.trim() || fonts[0] || "",
   };
 }
 
