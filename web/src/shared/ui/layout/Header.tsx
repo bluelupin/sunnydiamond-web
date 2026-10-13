@@ -78,6 +78,10 @@ const preloadWorldOfSunnyMegaMenu = () => {
   void import("@/shared/ui/layout/WorldOfSunnyMegaMenu");
 };
 
+const preloadSearchOverlay = () => {
+  void import("@/features/search/SearchOverlay");
+};
+
 const iconButtonClass =
   "inline-flex size-6 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
@@ -85,14 +89,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchMounted, setSearchMounted] = useState(false);
-  const openSearch = () => {
-    setSearchMounted(true);
-    setSearchOpen(true);
-  };
-  const toggleSearch = () => {
-    setSearchMounted(true);
-    setSearchOpen((open) => !open);
-  };
+  const searchMountedRef = useRef(false);
   const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
   const [appointmentPanelMounted, setAppointmentPanelMounted] = useState(false);
   const openAppointmentPanel = useCallback(() => {
@@ -108,6 +105,7 @@ const Header = () => {
   const worldOfSunnyMenuMountedRef = useRef(false);
   const jewelleryCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const worldOfSunnyCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const mounted = useMounted();
@@ -135,7 +133,8 @@ const Header = () => {
   const isAboutTimelineHeaderSuppressed = useAboutTimelineHeaderSuppressed(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
-  const menuOpen = mobileMenuOpen || jewelleryMenuOpen || worldOfSunnyMenuOpen;
+  const menuOpen =
+    mobileMenuOpen || jewelleryMenuOpen || worldOfSunnyMenuOpen || searchOpen;
   const headerHidden = mobileMenuOpen || profileNavOpen;
   const isHeaderScrollRevealEnabled =
     !headerHidden && !menuOpen && !searchOpen && !isAboutTimelineHeaderSuppressed;
@@ -203,7 +202,17 @@ const Header = () => {
     setJewelleryMenuOpen(false);
   }, []);
 
+  const closeSearchNow = useCallback(() => {
+    if (searchCloseTimerRef.current) clearTimeout(searchCloseTimerRef.current);
+    setSearchOpen(false);
+  }, []);
+
+  const scheduleCloseSearch = useCallback(() => {
+    searchCloseTimerRef.current = setTimeout(() => closeSearchNow(), 150);
+  }, [closeSearchNow]);
+
   const openJewelleryMenu = useCallback(() => {
+    closeSearchNow();
     closeWorldOfSunnyMenuNow();
     if (jewelleryCloseTimerRef.current) clearTimeout(jewelleryCloseTimerRef.current);
     preloadJewelleryMegaMenu();
@@ -219,13 +228,14 @@ const Header = () => {
     }
 
     setJewelleryMenuOpen(true);
-  }, [closeWorldOfSunnyMenuNow]);
+  }, [closeSearchNow, closeWorldOfSunnyMenuNow]);
 
   const scheduleCloseJewelleryMenu = useCallback(() => {
     jewelleryCloseTimerRef.current = setTimeout(() => setJewelleryMenuOpen(false), 150);
   }, []);
 
   const openWorldOfSunnyMenu = useCallback(() => {
+    closeSearchNow();
     closeJewelleryMenuNow();
     if (worldOfSunnyCloseTimerRef.current) clearTimeout(worldOfSunnyCloseTimerRef.current);
     preloadWorldOfSunnyMegaMenu();
@@ -241,11 +251,46 @@ const Header = () => {
     }
 
     setWorldOfSunnyMenuOpen(true);
-  }, [closeJewelleryMenuNow]);
+  }, [closeJewelleryMenuNow, closeSearchNow]);
 
   const scheduleCloseWorldOfSunnyMenu = useCallback(() => {
     worldOfSunnyCloseTimerRef.current = setTimeout(() => setWorldOfSunnyMenuOpen(false), 150);
   }, []);
+
+  const openSearchPanel = useCallback(() => {
+    closeJewelleryMenuNow();
+    closeWorldOfSunnyMenuNow();
+    if (searchCloseTimerRef.current) clearTimeout(searchCloseTimerRef.current);
+    preloadSearchOverlay();
+
+    if (!searchMountedRef.current) {
+      searchMountedRef.current = true;
+      setSearchMounted(true);
+      setSearchOpen(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setSearchOpen(true));
+      });
+      return;
+    }
+
+    setSearchOpen(true);
+  }, [closeJewelleryMenuNow, closeWorldOfSunnyMenuNow]);
+
+  const openSearch = () => {
+    openSearchPanel();
+  };
+
+  const toggleSearch = useCallback(() => {
+    if (searchOpen) {
+      closeSearchNow();
+      return;
+    }
+    openSearchPanel();
+  }, [closeSearchNow, openSearchPanel, searchOpen]);
+
+  const handleSearchClick = useCallback(() => {
+    toggleSearch();
+  }, [toggleSearch]);
 
   useLayoutEffect(() => {
     if (!isHeaderScrollVisible && jewelleryMenuOpen) {
@@ -258,6 +303,12 @@ const Header = () => {
       closeWorldOfSunnyMenuNow();
     }
   }, [isHeaderScrollVisible, worldOfSunnyMenuOpen, closeWorldOfSunnyMenuNow]);
+
+  useLayoutEffect(() => {
+    if (!isHeaderScrollVisible && searchOpen) {
+      closeSearchNow();
+    }
+  }, [closeSearchNow, isHeaderScrollVisible, searchOpen]);
 
   const toggleJewelleryMenu = useCallback(() => {
     if (jewelleryMenuOpen) {
@@ -275,8 +326,9 @@ const Header = () => {
     openWorldOfSunnyMenu();
   }, [closeWorldOfSunnyMenuNow, openWorldOfSunnyMenu, worldOfSunnyMenuOpen]);
 
-  const showDesktopMegaMenuLayer = jewelleryMenuMounted || worldOfSunnyMenuMounted;
-  const isAnyDesktopMegaMenuOpen = jewelleryMenuOpen || worldOfSunnyMenuOpen;
+  const showDesktopMegaMenuLayer =
+    jewelleryMenuMounted || worldOfSunnyMenuMounted || searchMounted;
+  const isAnyDesktopMegaMenuOpen = jewelleryMenuOpen || worldOfSunnyMenuOpen || searchOpen;
 
   const handleJewelleryNavClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
@@ -344,18 +396,23 @@ const Header = () => {
       <header
         className={cn(
           "fixed top-0 inset-x-0",
-          searchOpen ? "z-[62]" : "z-50",
+          "z-50",
           "motion-safe:transform-gpu motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out",
           headerHidden ? "pointer-events-none opacity-0" : "",
-          !headerHidden && !isHeaderShown && !searchOpen ? "-translate-y-full" : "translate-y-0",
+          !headerHidden && !isHeaderShown ? "-translate-y-full" : "translate-y-0",
         )}
         aria-hidden={headerHidden}
       >
         <div
           className={cn(
-            "w-full max-md:pt-[env(safe-area-inset-top,0px)] md:max-desktop:portrait:pt-[env(safe-area-inset-top,0px)] md:landscape:pt-0",
-            searchOpen ? "bg-white border-b border-neutral300" : headerSurfaceClass,
+            "relative w-full max-md:pt-[env(safe-area-inset-top,0px)] md:max-desktop:portrait:pt-[env(safe-area-inset-top,0px)] md:landscape:pt-0",
+            searchOpen
+              ? "bg-white motion-safe:transition-colors motion-safe:duration-300 motion-safe:ease-out"
+              : headerSurfaceClass,
           )}
+          onMouseLeave={
+            canHoverNav && searchOpen ? scheduleCloseSearch : undefined
+          }
         >
           {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
           <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:landscape:h-[104px] md:landscape:px-10 md:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
@@ -462,21 +519,21 @@ const Header = () => {
               <div className="pointer-events-auto">{Logo}</div>
             </div>
             <div className={cn("relative z-10 flex items-center gap-6 lg:gap-6", textClass)}>
-              <button
-                type="button"
-                className={cn(
-                  "!hidden md:landscape:!flex",
-                  iconButtonClass,
-                  hoverClass,
-                  searchOpen && "text-linkGold",
-                )}
-                onClick={toggleSearch}
-                aria-label="Search"
-                aria-haspopup="dialog"
-                aria-expanded={searchOpen}
+              <div
+                className="!hidden md:landscape:!inline-flex"
+                onMouseEnter={canHoverNav ? openSearchPanel : undefined}
               >
-                <SearchIcon className="size-6" />
-              </button>
+                <button
+                  type="button"
+                  className={cn(iconButtonClass, hoverClass, searchOpen && "text-linkGold")}
+                  onClick={handleSearchClick}
+                  aria-label="Search"
+                  aria-haspopup="dialog"
+                  aria-expanded={searchOpen}
+                >
+                  <SearchIcon className="size-6" />
+                </button>
+              </div>
 
               <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
 
@@ -524,6 +581,16 @@ const Header = () => {
               />
             </FeatureErrorBoundary>
           ) : null}
+          {showDesktopMegaMenuLayer && searchMounted ? (
+            <FeatureErrorBoundary featureName="SearchOverlay">
+              <SearchOverlay
+                open={searchOpen}
+                onOpenChange={(next) => (next ? setSearchOpen(true) : closeSearchNow())}
+                onDesktopMouseEnter={canHoverNav ? openSearchPanel : undefined}
+                onDesktopMouseLeave={canHoverNav ? scheduleCloseSearch : undefined}
+              />
+            </FeatureErrorBoundary>
+          ) : null}
         </div>
       </header>
 
@@ -540,6 +607,7 @@ const Header = () => {
               : () => {
                   closeJewelleryMenuNow();
                   closeWorldOfSunnyMenuNow();
+                  closeSearchNow();
                 }
           }
           onMouseEnter={
@@ -547,6 +615,7 @@ const Header = () => {
               ? () => {
                   scheduleCloseJewelleryMenu();
                   scheduleCloseWorldOfSunnyMenu();
+                  scheduleCloseSearch();
                 }
               : undefined
           }
@@ -570,12 +639,6 @@ const Header = () => {
         navItems={profileNavItems}
         cartCount={displayCartCount}
       />
-
-      {searchMounted ? (
-        <FeatureErrorBoundary featureName="SearchOverlay">
-          <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
-        </FeatureErrorBoundary>
-      ) : null}
 
       {appointmentPanelMounted ? (
         <FeatureErrorBoundary featureName="BookAnAppointmentPanel">

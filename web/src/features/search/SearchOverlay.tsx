@@ -1,11 +1,20 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { History } from "lucide-react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { cn } from "@/shared/utils/cn";
 import {
   MAX_SEARCH_LENGTH,
@@ -14,6 +23,7 @@ import {
   type QuickSearchProduct,
   type SearchLink,
 } from "./quickSearch";
+import { SearchDesktopMegaMenu } from "./SearchDesktopMegaMenu";
 import { searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
 import { addRecentSearch, readRecentSearches } from "./recentSearches";
 import { useQuickSearch } from "./useQuickSearch";
@@ -43,6 +53,9 @@ function TypeaheadLabel({ label }: { label: string }) {
 type SearchOverlayProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** WorldOfSunnyMegaMenu — keep panel open while pointer is over dropdown. */
+  onDesktopMouseEnter?: () => void;
+  onDesktopMouseLeave?: () => void;
 };
 
 const suggestionRowClassName = "flex w-full items-center gap-2 py-0 text-left";
@@ -64,8 +77,15 @@ function LinkRow({ link }: { link: SearchLink }) {
   return <span className="min-w-0 flex-1 truncate font-light text-neutral500">{link.label}</span>;
 }
 
-export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
+export default function SearchOverlay({
+  open,
+  onOpenChange,
+  onDesktopMouseEnter,
+  onDesktopMouseLeave,
+}: SearchOverlayProps) {
   const router = useRouter();
+  const isMobileHeader = useMobileHeaderLayout();
+  const searchPanelRef = useRef<HTMLDivElement>(null);
   const baseId = useId();
   const listId = `${baseId}-list`;
   const [text, setText] = useState("");
@@ -81,6 +101,15 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
     if (!open) return;
     setRecent(readRecentSearches());
   }, [open]);
+
+  useEffect(() => {
+    if (!open || isMobileHeader) return;
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const frame = requestAnimationFrame(() => {
+      searchPanelRef.current?.querySelector("input")?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open, isMobileHeader]);
 
   // A new result set starts with nothing highlighted, so Enter goes to the results page.
   const listKey = active ? (result?.query ?? "") : "empty";
@@ -226,41 +255,28 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
 
   let optionIndex = -1;
 
-  return (
-    <DialogPrimitive.Root open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className={searchOverlayFigmaSpec.overlayScrimClassName} />
-        <DialogPrimitive.Content
-          aria-describedby={undefined}
-          className={searchOverlayFigmaSpec.panelShellClassName}
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-            returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-            (event.currentTarget as HTMLElement).querySelector("input")?.focus();
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            if (returnFocus.current?.isConnected) returnFocus.current.focus();
-          }}
-        >
-          <DialogPrimitive.Title className="sr-only">Search Sunny Diamonds</DialogPrimitive.Title>
+  const focusSearchInput = (container: HTMLElement) => {
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    container.querySelector("input")?.focus();
+  };
 
-          <div
-            className={cn(
-              searchOverlayFigmaSpec.panelSurfaceClassName,
-              searchOverlayFigmaSpec.panelSurfaceMinHeightClassName,
-              searchOverlayFigmaSpec.panelSurfaceMaxHeightClassName,
-            )}
-          >
-            {/* Figma 4903:69973 — 1040 column: 40px below header rule, then search + 24px gap + suggestions */}
-            <div
-              className={cn(
-                searchOverlayFigmaSpec.contentTopPaddingClassName,
-                searchOverlayFigmaSpec.sectionGapClassName,
-                searchOverlayFigmaSpec.contentColumnClassName,
-              )}
-              style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
-            >
+  const searchPanelBody = (
+    <div
+      ref={searchPanelRef}
+      className={cn(
+        isMobileHeader
+          ? searchOverlayFigmaSpec.panelSurfaceClassName
+          : searchOverlayFigmaSpec.desktopPanelSurfaceClassName,
+      )}
+    >
+      <div
+        className={cn(
+          searchOverlayFigmaSpec.contentTopPaddingClassName,
+          searchOverlayFigmaSpec.sectionGapClassName,
+          searchOverlayFigmaSpec.contentColumnClassName,
+        )}
+        style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
+      >
             <div className={cn("w-full shrink-0", searchOverlayFigmaSpec.searchBarClassName)}>
               <SearchIcon className={searchOverlayFigmaSpec.searchBarIconClassName} aria-hidden />
               <input
@@ -389,13 +405,62 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             ) : null}
             */}
             </div>
-          </div>
-          <div
-            data-search-overlay-scrim
-            className={searchOverlayFigmaSpec.panelScrimClassName}
-            aria-hidden
-            onClick={() => close()}
-          />
+    </div>
+  );
+
+  const preventMobileBackdropDismiss = isMobileHeader
+    ? (event: Event) => {
+        event.preventDefault();
+      }
+    : undefined;
+
+  const dialogFocusHandlers = {
+    onOpenAutoFocus: (event: Event) => {
+      event.preventDefault();
+      focusSearchInput(event.currentTarget as HTMLElement);
+    },
+    onCloseAutoFocus: (event: Event) => {
+      event.preventDefault();
+      if (returnFocus.current?.isConnected) returnFocus.current.focus();
+    },
+    onPointerDownOutside: preventMobileBackdropDismiss,
+    onInteractOutside: preventMobileBackdropDismiss,
+  };
+
+  if (!isMobileHeader) {
+    return (
+      <SearchDesktopMegaMenu
+        open={open}
+        onMouseEnter={onDesktopMouseEnter}
+        onMouseLeave={onDesktopMouseLeave}
+      >
+        <span className="sr-only">Search Sunny Diamonds</span>
+        {searchPanelBody}
+      </SearchDesktopMegaMenu>
+    );
+  }
+
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
+      <DialogPrimitive.Portal forceMount>
+        <DialogPrimitive.Overlay
+          forceMount
+          className={cn(
+            searchOverlayFigmaSpec.mobileOverlayScrimClassName,
+            searchOverlayFigmaSpec.mobileOverlayFadeTransitionClassName,
+          )}
+        />
+        <DialogPrimitive.Content
+          forceMount
+          aria-describedby={undefined}
+          className={cn(
+            searchOverlayFigmaSpec.mobilePanelShellClassName,
+            searchOverlayFigmaSpec.mobilePanelExpandTransitionClassName,
+          )}
+          {...dialogFocusHandlers}
+        >
+          <DialogPrimitive.Title className="sr-only">Search Sunny Diamonds</DialogPrimitive.Title>
+          {searchPanelBody}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

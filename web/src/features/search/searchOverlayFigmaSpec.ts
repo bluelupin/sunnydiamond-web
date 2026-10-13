@@ -20,22 +20,26 @@ export const searchOverlayFigmaSpec = {
     "min-w-0 flex-1 bg-transparent font-gill text-[14px] font-light font-[300] leading-110 text-darkblack placeholder:font-light placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden",
   /** Figma — magnifier on suggestion rows below the field #4D4D4D. */
   suggestionSearchIconClassName: "size-6 shrink-0 text-neutral500",
-  /** Radix hit target only; visible dim is the flex scrim below the white band. */
-  overlayScrimClassName:
-    "fixed inset-x-0 bottom-0 top-16 z-[60] bg-transparent md:landscape:top-[104px]",
-  /** Mobile — full-height white panel below header; desktop landscape — white band + dim scrim. */
-  panelShellClassName:
-    "fixed inset-x-0 bottom-0 top-16 z-[61] flex !h-[calc(100dvh-4rem)] flex-col bg-white p-0 shadow-none outline-none md:landscape:top-[104px] md:landscape:!h-[calc(100dvh-104px)] md:landscape:bg-transparent",
-  /** Figma 4903:69970 mobile — scrollable white fill; 1440×693 desktop — capped search band. */
-  panelSurfaceClassName:
-    "flex min-h-0 w-full flex-1 overflow-y-auto bg-white md:landscape:flex-none md:landscape:shrink-0",
-  panelSurfaceMinHeightClassName:
-    "md:landscape:min-h-[min(589px,calc(100dvh-104px-30dvh))]",
-  panelSurfaceMaxHeightClassName:
-    "md:landscape:max-h-[min(589px,calc(100dvh-104px-30dvh))]",
-  /** Dimmed page below white band — desktop landscape only (Figma “bg screen”). */
-  panelScrimClassName:
-    "hidden min-h-[30dvh] w-full flex-1 bg-darkblack/40 md:landscape:block",
+  /** Mobile — full-height panel below header (portrait / narrow). */
+  mobileOverlayScrimClassName:
+    "fixed inset-x-0 bottom-0 top-16 z-[60] bg-transparent max-md:top-[calc(4rem+env(safe-area-inset-top,0px))] md:max-desktop:portrait:top-[calc(4rem+env(safe-area-inset-top,0px))]",
+  mobilePanelShellClassName:
+    "fixed inset-x-0 bottom-0 top-16 z-[61] flex !h-[calc(100dvh-4rem-env(safe-area-inset-top,0px))] flex-col bg-white p-0 shadow-none outline-none max-md:top-[calc(4rem+env(safe-area-inset-top,0px))] md:max-desktop:portrait:top-[calc(4rem+env(safe-area-inset-top,0px))] md:max-desktop:portrait:!h-[calc(100dvh-4rem-env(safe-area-inset-top,0px))]",
+  /** Desktop — same drop-down anchor as WorldOfSunnyMegaMenu (`absolute` under header bar). */
+  desktopDropdownShellClassName:
+    "absolute inset-x-0 top-full z-40 flex max-h-[min(589px,calc(100dvh-104px-4rem))] flex-col overflow-hidden bg-white p-0 shadow-sm outline-none",
+  /** Figma 4903:69970 mobile — scrollable white fill; desktop — capped search band in dropdown. */
+  panelSurfaceClassName: "flex min-h-0 w-full flex-1 overflow-y-auto bg-white",
+  desktopPanelSurfaceClassName:
+    "flex min-h-0 w-full flex-1 overflow-y-auto bg-white max-h-[min(589px,calc(100dvh-104px-4rem))]",
+  /** Same expand/collapse motion as WorldOfSunnyMegaMenu / JewelleryMegaMenu. */
+  dropdownExpandTransitionClassName:
+    "motion-safe:transform-gpu motion-safe:origin-top motion-safe:transition-[opacity,transform] motion-safe:duration-300 motion-safe:ease-out",
+  /** Mobile Radix dialog panel (data-state driven). */
+  mobilePanelExpandTransitionClassName:
+    "motion-safe:transform-gpu motion-safe:origin-top motion-safe:transition-[opacity,transform] motion-safe:duration-300 motion-safe:ease-out data-[state=open]:motion-safe:translate-y-0 data-[state=open]:motion-safe:opacity-100 data-[state=closed]:motion-safe:-translate-y-2 data-[state=closed]:motion-safe:opacity-0 data-[state=closed]:pointer-events-none",
+  mobileOverlayFadeTransitionClassName:
+    "motion-safe:transition-opacity motion-safe:duration-300 motion-safe:ease-out data-[state=open]:opacity-100 data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0",
   /** Figma 4903:69969 — 40px from header rule to search column. */
   contentTopPaddingClassName: "pt-10",
   contentColumnClassName: "mx-auto flex w-full min-h-0 flex-col px-4 pb-6 md:px-10",
