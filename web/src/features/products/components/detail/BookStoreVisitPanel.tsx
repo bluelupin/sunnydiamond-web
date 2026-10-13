@@ -43,7 +43,7 @@ import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-for
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import {
   appointmentFieldClassName,
@@ -1021,8 +1021,9 @@ const BookingFormStep = ({
   onNoteChange,
   onSubmit,
 }: BookingFormStepProps) => {
+  const { customer } = useAuth();
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
-    getAuthLoginIdentifierKind(),
+    signupMethodToContactLockKind(customer?.signupMethod),
   );
 
   const formValues = useMemo(

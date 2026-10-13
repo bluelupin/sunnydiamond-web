@@ -15,7 +15,7 @@ import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-s
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import OverlaySelectField from "@/shared/ui/OverlaySelectField";
@@ -105,6 +105,7 @@ const TryAtHomeDetailsStep = ({
   onProceed,
   savedDetails = null,
 }: TryAtHomeDetailsStepProps) => {
+  const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(open);
   const [name, setName] = useState(() => savedDetails?.name ?? "");
   const [countryCode, setCountryCode] = useState(() => savedDetails?.countryCode ?? "+91");
@@ -122,7 +123,7 @@ const TryAtHomeDetailsStep = ({
   const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
   const hasTimeSlots = Boolean(timeSlots?.length ?? true);
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
-    getAuthLoginIdentifierKind(),
+    signupMethodToContactLockKind(customer?.signupMethod),
   );
 
   const formValues = useMemo(

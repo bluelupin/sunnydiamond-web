@@ -11,7 +11,7 @@ import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-c
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import {
   appointmentFieldClassName,
@@ -94,7 +94,7 @@ const ProductAppointmentForm = ({
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(open);
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
-    getAuthLoginIdentifierKind(),
+    signupMethodToContactLockKind(customer?.signupMethod),
   );
 
   const [name, setName] = useState("");

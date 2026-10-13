@@ -14,9 +14,10 @@ import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisi
 import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { normalizeAppointmentDateInput } from "@/features/products/utils/tryAtHomeBooking";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import {
   getProductFormByTag,
@@ -172,6 +173,7 @@ export function ProfileAppointmentReschedulePanel({
   onClose,
   onRescheduled,
 }: ProfileAppointmentReschedulePanelProps) {
+  const { customer } = useAuth();
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [step, setStep] = useState<RescheduleStep>("details");
   const [name, setName] = useState("");
@@ -203,7 +205,7 @@ export function ProfileAppointmentReschedulePanel({
   const hasAddressStep = isTryAtHome && Boolean(address);
   const isAddressStep = hasAddressStep && step === "address";
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
-    getAuthLoginIdentifierKind(),
+    signupMethodToContactLockKind(customer?.signupMethod),
   );
   const { detectAddress, isLocating } = useCurrentLocationAddress();
 

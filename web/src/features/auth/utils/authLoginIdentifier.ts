@@ -31,7 +31,17 @@ export function clearAuthLoginIdentifierKind(): void {
   }
 }
 
-/** Field locks for appointment forms based on how the user signed in. */
+/** Maps Magento `/me` `signupMethod` (`sd_signup_method`) to contact lock kind — same as Profile. */
+export function signupMethodToContactLockKind(
+  signupMethod: string | null | undefined,
+): AuthLoginIdentifierKind | null {
+  const method = signupMethod?.trim().toLowerCase();
+  if (method === "phone") return "phone";
+  if (method === "email") return "email";
+  return null;
+}
+
+/** Field locks for appointment/profile contact fields from signup method or login identifier kind. */
 export function getAppointmentContactLocks(kind: AuthLoginIdentifierKind | null): {
   phoneLocked: boolean;
   emailLocked: boolean;
