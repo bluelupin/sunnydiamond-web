@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { History } from "lucide-react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
-import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -47,25 +45,10 @@ type SearchOverlayProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const productRowClassName =
-  "flex w-full items-center gap-3 py-1 text-left font-gill text-sm font-normal leading-110 text-darkblack";
-
 const suggestionRowClassName = "flex w-full items-center gap-2 py-0 text-left";
 
 function ProductRow({ product }: { product: QuickSearchProduct }) {
-  return (
-    <>
-      <span className="relative size-14 shrink-0 overflow-hidden bg-gray300">
-        {product.image ? <Image src={product.image} alt="" fill sizes="56px" className="object-cover" /> : null}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-1 font-gill text-sm leading-110">
-        <span className="truncate font-normal text-darkblack">{product.name}</span>
-        <span className="font-normal text-darkblack">
-          {product.fromPrice ? "From " : ""}₹ {formatJewelleryPrice(product.price)}
-        </span>
-      </span>
-    </>
-  );
+  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{product.name}</span>;
 }
 
 function LinkRow({ link }: { link: SearchLink }) {
@@ -302,8 +285,8 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             {active && !result && loading && !hasPrefixTypeahead ? (
               <div className={cn("flex flex-col", searchOverlayFigmaSpec.suggestionGapClassName)} aria-hidden>
                 {[0, 1, 2].map((row) => (
-                  <div key={row} className="flex items-center gap-3">
-                    <div className="size-14 animate-pulse bg-gray300" />
+                  <div key={row} className="flex items-center gap-2">
+                    <div className="size-6 shrink-0 animate-pulse rounded-sm bg-gray300" />
                     <div className="h-4 w-1/2 animate-pulse bg-gray300" />
                   </div>
                 ))}
@@ -364,7 +347,6 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                       {group.options.map((option) => {
                         optionIndex += 1;
                         const index = optionIndex;
-                        const isProduct = option.group === "products";
                         const isRecentRow = option.group === "recent";
                         return (
                           <div
@@ -373,7 +355,7 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                             role="option"
                             aria-selected={index === activeIndex}
                             className={cn(
-                              isProduct ? productRowClassName : suggestionRowClassName,
+                              suggestionRowClassName,
                               "cursor-pointer rounded-sm font-gill text-sm leading-110 hover:bg-gray200",
                               index === activeIndex && "bg-gray200",
                             )}
@@ -381,13 +363,11 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                             onMouseDown={(event) => event.preventDefault()}
                             onClick={() => go(option.href, option.recent, option)}
                           >
-                            {!isProduct ? (
-                              isRecentRow ? (
-                                <History className="size-6 shrink-0 text-neutral500" strokeWidth={1.25} aria-hidden />
-                              ) : (
-                                <SearchIcon className={searchOverlayFigmaSpec.suggestionSearchIconClassName} aria-hidden />
-                              )
-                            ) : null}
+                            {isRecentRow ? (
+                              <History className="size-6 shrink-0 text-neutral500" strokeWidth={1.25} aria-hidden />
+                            ) : (
+                              <SearchIcon className={searchOverlayFigmaSpec.suggestionSearchIconClassName} aria-hidden />
+                            )}
                             {option.render}
                           </div>
                         );
