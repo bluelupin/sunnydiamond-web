@@ -211,6 +211,11 @@ export function useAboutTimelineScroll(
     }
 
     if (!wasPinnedRef.current) {
+      const sectionTopScrollY = window.scrollY + section.getBoundingClientRect().top;
+      if (window.scrollY < sectionTopScrollY - SCROLL_DRIFT_TOLERANCE_PX) {
+        return;
+      }
+
       wasPinnedRef.current = true;
       wheelAccumulatorRef.current = 0;
       const initialIndex = getYearIndexFromScroll(section, yearCount, pinScrollTopRef);
