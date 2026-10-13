@@ -13,8 +13,13 @@ export const searchOverlayFigmaSpec = {
   /** Figma — 1040×46 (desktop) / 343×46 (mobile inset). */
   searchBarClassName:
     "flex h-[46px] w-full shrink-0 items-center gap-2 border border-aboutInactive bg-aboutInactive px-3 py-0",
+  /** Figma — magnifier in field + typed query #0A0A0A. */
+  searchBarIconClassName: "size-6 shrink-0 text-darkblack",
+  /** Figma typing in field — Gill Sans 14px / Light (300) / #0A0A0A; placeholder styles unchanged. */
   searchInputClassName:
-    "min-w-0 flex-1 bg-transparent font-gill text-sm font-light leading-110 text-darkblack placeholder:font-light placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden",
+    "min-w-0 flex-1 bg-transparent font-gill text-[14px] font-light font-[300] leading-110 text-darkblack placeholder:font-light placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden",
+  /** Figma — magnifier on suggestion rows below the field #4D4D4D. */
+  suggestionSearchIconClassName: "size-6 shrink-0 text-neutral500",
   /** Radix hit target only; visible dim is the flex scrim below the white band. */
   overlayScrimClassName:
     "fixed inset-x-0 bottom-0 top-16 z-[60] bg-transparent md:landscape:top-[104px]",

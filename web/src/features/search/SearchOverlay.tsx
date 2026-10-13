@@ -39,7 +39,7 @@ type Group = {
 };
 
 function TypeaheadLabel({ label }: { label: string }) {
-  return <span className="min-w-0 flex-1 truncate font-normal text-darkblack">{label}</span>;
+  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{label}</span>;
 }
 
 type SearchOverlayProps = {
@@ -72,7 +72,7 @@ function LinkRow({ link }: { link: SearchLink }) {
   if (link.detail) {
     return (
       <span className="flex min-w-0 flex-1 items-baseline gap-1">
-        <span className="truncate font-normal text-darkblack">{link.label}</span>
+        <span className="truncate font-normal text-neutral500">{link.label}</span>
         <span className="shrink-0 font-light text-neutral500">{link.detail}</span>
       </span>
     );
@@ -279,7 +279,7 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
               style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
             >
             <div className={cn("w-full shrink-0", searchOverlayFigmaSpec.searchBarClassName)}>
-              <SearchIcon className="size-6 shrink-0 text-darkblack" />
+              <SearchIcon className={searchOverlayFigmaSpec.searchBarIconClassName} aria-hidden />
               <input
                 type="search"
                 value={text}
@@ -383,9 +383,9 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                           >
                             {!isProduct ? (
                               isRecentRow ? (
-                                <History className="size-6 shrink-0 text-darkblack" strokeWidth={1.25} aria-hidden />
+                                <History className="size-6 shrink-0 text-neutral500" strokeWidth={1.25} aria-hidden />
                               ) : (
-                                <SearchIcon className="size-6 shrink-0 text-darkblack" />
+                                <SearchIcon className={searchOverlayFigmaSpec.suggestionSearchIconClassName} aria-hidden />
                               )
                             ) : null}
                             {option.render}
