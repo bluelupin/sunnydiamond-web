@@ -6,6 +6,10 @@ import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
+import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
 import AppointmentGenericFields from "./AppointmentGenericFields";
 import { appointmentFieldKey, appointmentFieldKind, appointmentFormErrors, appointmentSubmission } from "../utils/appointmentGenericForm";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -52,6 +56,15 @@ const BookAnAppointmentPanel = ({
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [now, setNow] = useState(() => new Date());
   const errors = cmsForm ? appointmentFormErrors(cmsForm, values, countryCodes, now) : {};
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(getAuthLoginIdentifierKind());
+  const lockedContactFields = new Set(
+    cmsForm?.fields.flatMap((field, index) => {
+      const kind = appointmentFieldKind(field);
+      return (kind === "phone" && phoneLocked) || (kind === "email" && emailLocked)
+        ? [appointmentFieldKey(field, index)]
+        : [];
+    }) ?? [],
+  );
 
   useEffect(() => {
     if (!panelActive) {
@@ -198,7 +211,7 @@ const BookAnAppointmentPanel = ({
             ) : !cmsForm ? <p role="status" className="font-gill text-sm">Loading appointment form...</p> : (
               <AppointmentGenericFields form={cmsForm} values={values} codes={countryCodes}
                 errors={Object.fromEntries(Object.entries(errors).filter(([key]) => submitted || touched[key]))}
-                disabled={isSubmitting} now={now}
+                disabled={isSubmitting} lockedFields={lockedContactFields} now={now}
                 onBlur={(key) => setTouched((current) => ({ ...current, [key]: true }))}
                 onCodeChange={(key, code) => {
                   editedFieldsRef.current.add(key);

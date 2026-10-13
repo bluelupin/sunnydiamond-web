@@ -1,14 +1,14 @@
 "use client";
 
 import DiamondIcon from "@/assets/Icons/Diamond";
-import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
+import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { profileTabsContent } from "../data/profileContent";
 import { ProfileTabEmptyStateLayout } from "./profileUi";
 
 const content = profileTabsContent.appointments;
 
 /** Figma 4215:62247 desktop / 4215:62517 mobile — profile appointments empty state */
-export function ProfileAppointmentsEmptyState() {
+export function ProfileAppointmentsEmptyState({ onBookAppointment }: { onBookAppointment: () => void }) {
   return (
     <ProfileTabEmptyStateLayout>
       <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -23,12 +23,12 @@ export function ProfileAppointmentsEmptyState() {
           </p>
         </div>
 
-        <CartPrimaryLink
-          href={content.emptyCtaHref}
+        <CartPrimaryButton
+          onClick={onBookAppointment}
           className="w-full max-w-xs shrink-0 sm:w-auto"
         >
           {content.emptyCta}
-        </CartPrimaryLink>
+        </CartPrimaryButton>
       </div>
     </ProfileTabEmptyStateLayout>
   );

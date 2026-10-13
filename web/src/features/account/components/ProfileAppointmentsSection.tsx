@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
@@ -29,6 +30,11 @@ import {
 } from "./profileUi";
 import FormFieldError from "@/shared/ui/FormFieldError";
 
+const BookAnAppointmentPanel = dynamic(
+  () => import("@/features/appointment/components/BookAnAppointmentPanel"),
+  { ssr: false, loading: () => null },
+);
+
 const content = profileTabsContent.appointments;
 
 const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
@@ -40,6 +46,7 @@ const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
 const ProfileAppointmentsSection = () => {
   const { data, isLoading, error, page, setPage, refresh } = useCustomerAppointments(true);
   const [activeFilter, setActiveFilter] = useState<AppointmentFilterKey | null>(null);
+  const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<ProfileAppointmentUi | null>(
     null,
@@ -242,7 +249,7 @@ const ProfileAppointmentsSection = () => {
     return (
       <>
         {statusToast}
-        <ProfileAppointmentsEmptyState />
+        <><ProfileAppointmentsEmptyState onBookAppointment={() => setAppointmentPanelOpen(true)} />{appointmentPanelOpen ? <BookAnAppointmentPanel variant="modal" open onClose={() => setAppointmentPanelOpen(false)} showBack={false} /> : null}</>
       </>
     );
   }

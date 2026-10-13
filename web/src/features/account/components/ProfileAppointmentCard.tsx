@@ -348,8 +348,15 @@ export function ProfileAppointmentCard({
     typeof appointment.notes === "string"
       ? appointment.notes.trim()
       : String(appointment.notes ?? "").trim();
+  const isGeneralAppointmentForm =
+    appointment.formTag.trim().toLowerCase() === "book-an-appointment";
+  const displayedNotesText = isGeneralAppointmentForm
+    ? notesText.replace(/^([^:\n]+):\s*/, "$1\n")
+    : notesText;
   const purposeOfVisit = appointment.purposeOfVisit?.trim() ?? "";
-  const yourRequirement = appointment.yourRequirement?.trim() ?? notesText;
+  const yourRequirement = isGeneralAppointmentForm
+    ? ""
+    : appointment.yourRequirement?.trim() ?? notesText;
   const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
   const { windows } = useUiPlatform();
   // The Figma store visit card has no product images.
@@ -398,7 +405,7 @@ export function ProfileAppointmentCard({
       {showNoteSection ? (
         <ProfileAppointmentNote
           title={content.notesLabel}
-          note={notesText}
+          note={displayedNotesText}
           purposeOfVisit={
             appointment.type === "store_visit" ? purposeOfVisit || undefined : undefined
           }
