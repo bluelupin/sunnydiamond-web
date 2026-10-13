@@ -69,6 +69,11 @@ const BookAnAppointmentPanel = ({
   useEffect(() => {
     if (!panelActive) {
       appliedProfileRef.current = false;
+      editedFieldsRef.current.clear();
+      setValues({});
+      setCountryCodes({});
+      setSubmitted(false);
+      setTouched({});
       return;
     }
     if (status !== "authenticated" || !cmsForm || !profileContact || appliedProfileRef.current) return;
