@@ -93,10 +93,25 @@ export async function createGenericSubmission(
   if (!response.ok) {
     let message = `Generic submission failed (${response.status})`;
     try {
-      const payloadJson = (await response.json()) as { error?: string };
-      if (payloadJson.error?.trim()) {
-        message = payloadJson.error;
-      }
+      const payloadJson = (await response.json()) as {
+        message?: unknown;
+        error?: unknown;
+        details?: unknown;
+      };
+      const getMessage = (value: unknown): string | undefined => {
+        if (typeof value === "string" && value.trim()) return value.trim();
+        if (!value || typeof value !== "object") return undefined;
+        const record = value as Record<string, unknown>;
+        if (typeof record.message === "string" && record.message.trim()) {
+          return record.message.trim();
+        }
+        return getMessage(record.error) ?? getMessage(record.details);
+      };
+      message =
+        getMessage(payloadJson.error) ??
+        getMessage(payloadJson.message) ??
+        getMessage(payloadJson.details) ??
+        message;
     } catch {
       // ignore parse errors
     }
