@@ -73,7 +73,7 @@ const ProductDetailVisitUsSection = ({
         className={cn(
           isContactVariant
             ? "relative h-[320px] w-full overflow-hidden md:h-[387px]"
-            : "relative h-361 w-full overflow-hidden md:h-600 lg:h-804",
+            : "mt-16 lg:mt-104 relative h-361 w-full overflow-hidden md:h-600 lg:h-804",
         )}
       >
         {/* Absolute media layer so non-banner showroom crops don't expand the section and clip copy */}
@@ -144,7 +144,7 @@ const ProductDetailVisitUsSection = ({
         submissionFormTag={bookVisitFormTag}
         productName={productName}
         productId={productId}
-      submissionProduct={submissionProduct}
+        submissionProduct={submissionProduct}
       />
     </>
   );

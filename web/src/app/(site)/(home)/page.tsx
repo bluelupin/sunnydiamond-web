@@ -7,6 +7,7 @@ import {
   getCachedHomepageShell,
   prefetchHomepageCms,
 } from "@/lib/homepage/prefetchHomepageCms";
+import { prefetchHomepageBelowFold } from "@/lib/homepage/prefetchHomepageBelowFold";
 import { getHomepageSeo } from "@/services/homepage/seo.service";
 import {
   preloadHeroLcpImages,
@@ -59,8 +60,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  // Above-the-fold only: Alankara/Magento loads when the lazy FeaturedCollectionSection mounts.
   const prefetched = await prefetchHomepageCms();
+  const belowFoldPromise = prefetchHomepageBelowFold(prefetched);
+
   const hero = resolveHeroContent(prefetched.shell);
   const craftingRarity = resolveCraftingRarityContent(
     prefetched.shell,
@@ -70,15 +72,17 @@ export default async function Page() {
 
   preloadHeroLcpImages(hero);
 
-  const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(
-    prefetched.shell ?? {},
-  );
+  const [{ title, description, canonicalUrl, imageUrl }, belowFold] = await Promise.all([
+    Promise.resolve(resolveHomepageSeoMetadata(prefetched.shell ?? {})),
+    belowFoldPromise,
+  ]);
 
   return (
     <HomepageCmsProvider
       shell={prefetched.shell}
       editorial={prefetched.editorial}
       shopping={prefetched.shopping}
+      alankara={belowFold.alankara ?? undefined}
     >
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
       <HomePageView hero={hero} craftingRarity={craftingRarity} />

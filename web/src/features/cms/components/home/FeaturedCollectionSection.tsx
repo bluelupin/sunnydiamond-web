@@ -47,24 +47,31 @@ const FeaturedCollectionSection = ({
   const productCtaLabel = collectionProps.productCtaLabel;
 
   const hasServerPrefetch = prefetchedAlankara !== undefined;
+  const prefetchedProducts = hasServerPrefetch ? (prefetchedAlankara?.products ?? null) : null;
+  const shouldFetchMagentoClient =
+    Boolean(magentoCollectionSlug) &&
+    (!hasServerPrefetch || prefetchedProducts === null);
 
   const [magentoProducts, setMagentoProducts] = useState<AlankaraCollectionProduct[] | null>(
-    hasServerPrefetch ? (prefetchedAlankara?.products ?? null) : null,
+    prefetchedProducts,
   );
   const [defaultActiveIndex, setDefaultActiveIndex] = useState(
     hasServerPrefetch
       ? (prefetchedAlankara?.defaultActiveIndex ?? collectionProps.defaultActiveIndex)
       : collectionProps.defaultActiveIndex,
   );
-  const [isMagentoLoading, setIsMagentoLoading] = useState(
-    !hasServerPrefetch && Boolean(magentoCollectionSlug),
-  );
+  const [isMagentoLoading, setIsMagentoLoading] = useState(shouldFetchMagentoClient);
 
   useEffect(() => {
-    if (hasServerPrefetch || !magentoCollectionSlug) {
+    if (!shouldFetchMagentoClient || !magentoCollectionSlug) {
       if (!hasServerPrefetch) {
         setMagentoProducts(null);
         setDefaultActiveIndex(collectionProps.defaultActiveIndex);
+      } else if (prefetchedProducts !== null) {
+        setMagentoProducts(prefetchedProducts);
+        setDefaultActiveIndex(
+          prefetchedAlankara?.defaultActiveIndex ?? collectionProps.defaultActiveIndex,
+        );
       }
       setIsMagentoLoading(false);
       return;
@@ -99,7 +106,10 @@ const FeaturedCollectionSection = ({
 
     return () => controller.abort();
   }, [
+    shouldFetchMagentoClient,
     hasServerPrefetch,
+    prefetchedAlankara?.defaultActiveIndex,
+    prefetchedProducts,
     magentoCollectionSlug,
     productCtaLabel,
     collectionProps.defaultActiveIndex,

@@ -29,7 +29,7 @@ const ProductDetailMoreForYouSection = ({ items, title }: ProductDetailMoreForYo
   const sectionTitle = title.trim();
 
   return (
-    <section aria-labelledby="more-for-you-heading" className="overflow-x-clip py-16 lg:py-104">
+    <section aria-labelledby="more-for-you-heading" className="overflow-x-clip mt-16 lg:mt-104">
       <div className="flex w-full max-w-full flex-col items-center gap-6 overflow-x-clip lg:gap-10">
         {sectionTitle ? (
           <div className="px-4 lg:px-10">
