@@ -124,8 +124,20 @@ const BookAnAppointmentPanel = ({
   const handleClear = () => {
     appliedProfileRef.current = true;
     cmsForm?.fields.forEach((field, index) => editedFieldsRef.current.add(appointmentFieldKey(field, index)));
-    setValues({});
-    setCountryCodes({});
+    setValues((current) =>
+      Object.fromEntries(
+        [...lockedContactFields]
+          .filter((key) => current[key] !== undefined)
+          .map((key) => [key, current[key]]),
+      ),
+    );
+    setCountryCodes((current) =>
+      Object.fromEntries(
+        [...lockedContactFields]
+          .filter((key) => current[key] !== undefined)
+          .map((key) => [key, current[key]]),
+      ),
+    );
     setSubmitted(false);
     setTouched({});
   };
