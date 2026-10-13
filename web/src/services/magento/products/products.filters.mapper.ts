@@ -9,6 +9,10 @@ import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import { resolveMagentoCollectionValue } from "./collectionProducts.service";
 import { formatMagentoFacetLabel, normalizeGemstoneTypeLabel } from "./magentoAttribute.utils";
+import {
+  formatMetalColorLabel,
+  resolveMetalFilterSwatchColor,
+} from "@/features/products/utils/metalColorOptions.utils";
 import { getMagentoPriceFilterTaxMultiplier } from "@/services/magento/config";
 import {
   isAllCategoriesSelected,
@@ -166,7 +170,7 @@ export function buildMagentoProductsFilter({
     const typeValues = resolveSelectedMetalTypeValues(filters.metalTypes, facets);
 
     if (typeValues.length > 0) {
-      magentoFilter.sd_metal_type = { in: typeValues };
+      magentoFilter.sd_metal_color = { in: typeValues };
     }
   }
 
@@ -342,10 +346,120 @@ function mapMetalPurityOptions(
   return mapFacetOptions(options);
 }
 
+/** Figma PLP filter drawer — Metal Type chip order (color variants). */
+const PLP_METAL_COLOR_FIGMA_LABEL_ORDER = ["White Gold", "Yellow Gold", "Rose Gold"] as const;
+
+function compareMetalTypeFacetOptions(
+  left: { label: string },
+  right: { label: string },
+): number {
+  const leftIndex = PLP_METAL_COLOR_FIGMA_LABEL_ORDER.indexOf(
+    left.label as (typeof PLP_METAL_COLOR_FIGMA_LABEL_ORDER)[number],
+  );
+  const rightIndex = PLP_METAL_COLOR_FIGMA_LABEL_ORDER.indexOf(
+    right.label as (typeof PLP_METAL_COLOR_FIGMA_LABEL_ORDER)[number],
+  );
+
+  if (leftIndex >= 0 && rightIndex >= 0) {
+    return leftIndex - rightIndex;
+  }
+
+  if (leftIndex >= 0) {
+    return -1;
+  }
+
+  if (rightIndex >= 0) {
+    return 1;
+  }
+
+  return left.label.localeCompare(right.label);
+}
+
+function formatMetalTypeFacetLabel(rawLabel: string, value: string): string {
+  const fromLabel = formatMetalColorLabel(rawLabel);
+  const fromValue = formatMetalColorLabel(value);
+
+  if (fromLabel) {
+    return fromLabel;
+  }
+
+  if (fromValue) {
+    return fromValue;
+  }
+
+  return formatMagentoFacetLabel(rawLabel) ?? rawLabel;
+}
+
 function mapMetalTypeOptions(
   options: Array<{ label?: string | null; value?: string | null; count?: number | null }> | null | undefined,
 ) {
-  return mapFacetOptions(options, (label) => formatMagentoFacetLabel(label) ?? label);
+  return (options ?? [])
+    .map((option) => {
+      const rawLabel = option.label?.trim();
+      const value = option.value?.trim();
+
+      if (!rawLabel || !value) {
+        return null;
+      }
+
+      const label = formatMetalTypeFacetLabel(rawLabel, value);
+      const swatchKey = /^\d+$/.test(value) ? rawLabel : value;
+
+      return {
+        label,
+        value,
+        count: option.count ?? undefined,
+        swatchColor: resolveMetalFilterSwatchColor(swatchKey, label),
+      };
+    })
+    .filter((option): option is NonNullable<typeof option> => option != null)
+    .sort(compareMetalTypeFacetOptions);
+}
+
+/** Always list every Magento metal color; aggregation supplies counts when present in the PLP scope. */
+export function mergeMetalTypeFacetOptions(
+  aggregationOptions: readonly JewelleryFilterFacetOption[],
+  catalogOptions: readonly JewelleryFilterFacetOption[],
+): JewelleryFilterFacetOption[] {
+  const mappedCatalog = mapMetalTypeOptions(
+    catalogOptions.map((option) => ({
+      label: option.label,
+      value: option.value,
+      count: option.count,
+    })),
+  );
+
+  if (mappedCatalog.length === 0) {
+    return [...aggregationOptions].sort(compareMetalTypeFacetOptions);
+  }
+
+  const byValue = new Map<string, JewelleryFilterFacetOption>();
+
+  for (const option of mappedCatalog) {
+    byValue.set(option.value, option);
+  }
+
+  for (const option of aggregationOptions) {
+    const existing = byValue.get(option.value);
+    byValue.set(option.value, {
+      label: option.label || existing?.label || "",
+      value: option.value,
+      count: option.count ?? existing?.count,
+      swatchColor: option.swatchColor ?? existing?.swatchColor,
+    });
+  }
+
+  return Array.from(byValue.values()).sort(compareMetalTypeFacetOptions);
+}
+
+function resolveMetalTypeAggregation(
+  aggregationList: MagentoAggregation[],
+): MagentoAggregation["options"] {
+  const metalColorAggregation = aggregationList.find(
+    (item) => item?.attribute_code === "sd_metal_color",
+  );
+
+  return metalColorAggregation?.options;
 }
 
 function mapGemstoneTypeOptions(
@@ -496,7 +610,7 @@ export function mapMagentoAggregationsToFacets(
   const aggregationList = aggregations ?? [];
   const priceAggregation = aggregationList.find((item) => item?.attribute_code === "price");
   const categoryAggregation = aggregationList.find((item) => item?.attribute_code === "category_uid");
-  const metalTypeAggregation = aggregationList.find((item) => item?.attribute_code === "sd_metal_type");
+  const metalTypeAggregationOptions = resolveMetalTypeAggregation(aggregationList);
   const purityAggregation = aggregationList.find((item) => item?.attribute_code === "sd_metal_purity");
   const gemstoneTypeAggregation = aggregationList.find(
     (item) => item?.attribute_code === "sd_gemstone_type",
@@ -539,7 +653,8 @@ export function mapMagentoAggregationsToFacets(
     maxPrice: priceBounds.maxPrice,
     priceBuckets,
     categories,
-    metalTypes: mapMetalTypeOptions(metalTypeAggregation?.options),
+    metalTypes: mapMetalTypeOptions(metalTypeAggregationOptions),
+    metalTypeAttributeCode: "sd_metal_color",
     metalPurities: mapMetalPurityOptions(purityAggregation?.options),
     gemstoneTypes: mapGemstoneTypeOptions(gemstoneTypeAggregation?.options),
     occasions: mapFacetOptions(occasionsAggregation?.options, (label) => formatMagentoFacetLabel(label) ?? label),
@@ -561,6 +676,7 @@ export const EMPTY_JEWELLERY_FILTER_FACETS: JewelleryFilterFacets = {
   priceBuckets: [],
   categories: [],
   metalTypes: [],
+  metalTypeAttributeCode: "sd_metal_color",
   metalPurities: [],
   gemstoneTypes: [],
   occasions: [],

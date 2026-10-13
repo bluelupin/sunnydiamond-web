@@ -40,6 +40,20 @@ function normalizeMetalColorKey(value: string): string {
   return value.trim().toLowerCase().replace(/[_\s]+/g, "-");
 }
 
+/** PLP metal-type filter chips — same swatch resolution as PDP metal color options. */
+export function resolveMetalFilterSwatchColor(
+  id: string,
+  label: string,
+  magentoSwatchHex?: string | null,
+): string {
+  const fromMagento = magentoSwatchHex?.trim();
+  if (fromMagento) {
+    return fromMagento;
+  }
+
+  return resolveSwatchColor(id, label);
+}
+
 function resolveSwatchColor(id: string, label: string): string {
   for (const candidate of [normalizeMetalColorKey(id), normalizeMetalColorKey(label)]) {
     if (METAL_COLOR_SWATCHES[candidate]) {

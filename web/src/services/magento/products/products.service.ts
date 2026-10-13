@@ -19,6 +19,7 @@ import {
   enrichFacetsWithNavCategories,
   mapMagentoAggregationsToFacets,
   mergeGemstoneTypeFacetOptions,
+  mergeMetalTypeFacetOptions,
 } from "./products.filters.mapper";
 import {
   getMagentoProductAttributeOptions,
@@ -398,7 +399,10 @@ async function fetchMagentoJewelleryProducts({
     includeDrawerFilters: false,
   });
 
-  const [data, facetScopeData] = await Promise.all([
+  const fetchMetalColorCatalogOptions = () =>
+    getMagentoProductAttributeOptions("sd_metal_color", signal).catch(() => []);
+
+  const [data, facetScopeData, metalColorCatalogOptions] = await Promise.all([
     measureJewelleryPlpGraphql("products", fetchProducts, {
       page,
       pageSize,
@@ -419,12 +423,21 @@ async function fetchMagentoJewelleryProducts({
         }),
       { category: categoryUrlKey ?? "all" },
     ),
+    measureJewelleryPlpGraphql(
+      "metal-color-options",
+      fetchMetalColorCatalogOptions,
+      { category: categoryUrlKey ?? "all" },
+    ),
   ]);
 
   const mappedFacets = mapMagentoAggregationsToFacets(facetScopeData.products?.aggregations);
+  const mappedFacetsWithMetalColors: JewelleryFilterFacets = {
+    ...mappedFacets,
+    metalTypes: mergeMetalTypeFacetOptions(mappedFacets.metalTypes, metalColorCatalogOptions),
+  };
   const responseFacets = categoryUrlKey
-    ? enrichFacetsWithCategoryChildren(mappedFacets, navCategories, categoryUrlKey)
-    : enrichFacetsWithNavCategories(mappedFacets, navCategories);
+    ? enrichFacetsWithCategoryChildren(mappedFacetsWithMetalColors, navCategories, categoryUrlKey)
+    : enrichFacetsWithNavCategories(mappedFacetsWithMetalColors, navCategories);
   const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
   const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
   const pageInfo = data.products?.page_info;
@@ -444,6 +457,10 @@ async function fetchMagentoJewelleryProducts({
     // Keep Magento attribute options available for URL slug → option id sync.
     facets: {
       ...responseFacets,
+      metalTypes: mergeMetalTypeFacetOptions(
+        responseFacets.metalTypes,
+        facetsForFilter.metalTypes,
+      ),
       occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
       collections: mergeFacetOptions(responseFacets.collections, facetsForFilter.collections),
       gemstoneTypes: mergeGemstoneTypeFacetOptions(
