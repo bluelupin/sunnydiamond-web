@@ -95,7 +95,7 @@ const AppointmentDateField = ({
   onChange,
   onBlur,
   hasError,
-  placeholder = "Select date",
+  placeholder = "Select Date",
   displayFormat = "dd/mm/yy",
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,

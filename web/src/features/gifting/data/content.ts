@@ -9,7 +9,7 @@ export const giftingPageContent = {
   },
   discover: {
     categoryLabel: "I am looking for",
-    categoryPlaceholder: "Select category",
+    categoryPlaceholder: "Select Category",
     priceLabel: "Up to",
     pricePlaceholder: "Select Price Range",
     occasionLabel: "By Occasion",

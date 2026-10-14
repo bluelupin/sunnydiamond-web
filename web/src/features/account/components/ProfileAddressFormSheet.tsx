@@ -241,7 +241,7 @@ export function ProfileAddressFormSheet({
             <CheckoutField
               id="profile-address-name"
               label={addressContent.fullNameLabel}
-              placeholder="Enter your full name"
+              placeholder="Enter Your Full Name"
               value={form.name}
               onChange={(value) => handleChange("name", value)}
               onBlur={() => markTouched("name")}
@@ -252,7 +252,7 @@ export function ProfileAddressFormSheet({
             <CheckoutField
               id="profile-address-line-1"
               label="Address Line 1"
-              placeholder="Enter House Number and Street Name"
+              placeholder="Enter House Number And Street Name"
               value={form.addressLine1}
               onChange={(value) => handleChange("addressLine1", value)}
               onBlur={() => markTouched("addressLine1")}
@@ -277,7 +277,7 @@ export function ProfileAddressFormSheet({
               <CheckoutField
                 id="profile-address-pincode"
                 label="Pincode"
-                placeholder="Enter Pin code"
+                placeholder="Enter Pin Code"
                 value={form.pincode}
                 onChange={(value) => handleChange("pincode", value)}
                 onBlur={() => markTouched("pincode")}

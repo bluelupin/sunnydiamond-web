@@ -169,7 +169,7 @@ const LoginCreateAccountContent = ({
                 type="text"
                 value={fullName}
                 onChange={(event) => onFullNameChange(event.target.value)}
-                placeholder="Enter your full name"
+                placeholder="Enter Your Full Name"
                 autoComplete="name"
                 required
                 aria-invalid={fullNameError ? true : undefined}
@@ -192,7 +192,7 @@ const LoginCreateAccountContent = ({
                   type="email"
                   value={emailFieldValue}
                   onChange={(event) => onEmailChange(event.target.value)}
-                  placeholder="Enter your email address."
+                  placeholder="Enter Your Email Address."
                   autoComplete="email"
                   required
                   aria-invalid={visibleEmailError ? true : undefined}
@@ -227,7 +227,7 @@ const LoginCreateAccountContent = ({
                     inputMode="numeric"
                     value={phone}
                     onChange={(event) => onPhoneChange(limitRegistrationPhone(event.target.value, countryCode))}
-                    placeholder="Enter your phone number."
+                    placeholder="Enter Your Phone Number."
                     autoComplete="tel-national"
                     aria-invalid={visiblePhoneError ? true : undefined}
                     aria-describedby={visiblePhoneError ? "create-account-phone-error" : undefined}

@@ -85,7 +85,7 @@ const LoginIdentifierField = ({
           value={identifier}
           onChange={(event) => onIdentifierChange(limitLoginIdentifier(event.target.value, countryCode, emailOnly))}
           placeholder={
-            emailOnly ? "Enter your email address." : "Enter your phone number or email address."
+            emailOnly ? "Enter Your Email Address." : "Enter Your Phone Number Or Email Address."
           }
           autoComplete={isEmailMode ? "username" : "tel-national"}
           required
