@@ -43,8 +43,6 @@ type CheckoutFormStepProps = {
   showVerify?: boolean;
   /** Mobile sign-in is off, so the guest contact field takes an email address only. */
   emailOnly?: boolean;
-  /** Countries the guest contact number can be verified in (SMS OTP countries). */
-  contactCountryCodes?: readonly string[];
   /** Guest email blur — checks if the account already exists. */
   onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
@@ -230,7 +228,6 @@ export const CheckoutFormStep = ({
   onVerifyPhone,
   showVerify = true,
   emailOnly = false,
-  contactCountryCodes,
   onContactBlur,
   validation,
   isAuthenticated = false,
@@ -283,7 +280,6 @@ export const CheckoutFormStep = ({
               onContactBlur?.();
             }}
             countryCode={form.contactCountryCode}
-            countryCodes={contactCountryCodes}
             onCountryCodeChange={(code) => onChange("contactCountryCode", code)}
             verified={phoneVerified}
             onVerify={onVerifyPhone}

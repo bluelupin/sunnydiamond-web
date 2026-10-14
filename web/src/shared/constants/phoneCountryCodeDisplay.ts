@@ -32,7 +32,7 @@ export function resolvePhoneCountryCodeDisplayFromEntry(entry: PhoneCountryEntry
 export function resolvePhoneCountryCodeDisplay(code: string, iso?: string): PhoneCountryCodeDisplay {
   const normalized = code.trim();
   const byIso = iso?.trim() ? findPhoneCountryEntryByIso(iso) : undefined;
-  const entry = byIso ?? findPhoneCountryEntryByDialCode(normalized);
+  const entry = byIso ?? findPhoneCountryEntryByDialCode(normalized, iso);
 
   if (entry) {
     return resolvePhoneCountryCodeDisplayFromEntry(entry);

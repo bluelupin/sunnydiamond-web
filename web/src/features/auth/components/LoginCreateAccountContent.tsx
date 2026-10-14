@@ -19,7 +19,6 @@ type LoginCreateAccountContentProps = {
   email: string;
   phone: string;
   countryCode: string;
-  otpCountryCodes: readonly string[];
   missingIdentifier: CreateAccountSecondaryField;
   termsAccepted: boolean;
   marketingOptIn: boolean;
@@ -60,7 +59,6 @@ const LoginCreateAccountContent = ({
   email,
   phone,
   countryCode,
-  otpCountryCodes,
   missingIdentifier,
   termsAccepted,
   marketingOptIn,
@@ -215,7 +213,6 @@ const LoginCreateAccountContent = ({
                   <PhoneCountryCodeSelect
                     id="create-account-country-code"
                     value={countryCode || DEFAULT_COUNTRY_CODE}
-                    codes={otpCountryCodes}
                     onChange={(nextCode) => {
                       onCountryCodeChange(nextCode);
                       onPhoneChange(limitRegistrationPhone(phone, nextCode));

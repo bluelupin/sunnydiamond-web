@@ -20,7 +20,6 @@ import {
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import {
-  APPOINTMENT_COUNTRY_CODES,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
@@ -45,11 +44,7 @@ type ProfileDetailsSectionProps = {
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { logout, refresh } = useAuth();
-  const { otpLoginEnabled, otpCountryCodes } = useAuthFeatures();
-  // With SMS OTP on, a new number is verified by SMS, so only SMS countries are offered.
-  const phoneCountryCodes = otpLoginEnabled
-    ? otpCountryCodes
-    : APPOINTMENT_COUNTRY_CODES.map((entry) => entry.code);
+  const { otpLoginEnabled } = useAuthFeatures();
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -355,7 +350,6 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                 <PhoneCountryCodeSelect
                   id="profile-phone-country-code"
                   value={phoneCountryCode}
-                  codes={phoneCountryCodes}
                   onChange={(code) => {
                     setPhoneCountryCode(code);
                     setPhone((current) => sanitizePhoneInput(current, code));

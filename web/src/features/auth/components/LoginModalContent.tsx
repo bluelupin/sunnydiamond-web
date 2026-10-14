@@ -19,8 +19,6 @@ type LoginModalContentProps = {
   identifierError?: string;
   emailOnly: boolean;
   otpBlockedForCountry: boolean;
-  /** Dial codes that can get an SMS code. */
-  otpCountryCodes: readonly string[];
   /** The SMS could not be sent and email codes work: offer them instead. */
   offerEmailFallback: boolean;
   noSignInMethod: boolean;
@@ -65,7 +63,6 @@ const LoginModalContent = ({
   identifierError,
   emailOnly,
   otpBlockedForCountry,
-  otpCountryCodes,
   offerEmailFallback,
   noSignInMethod,
   showGoogle,
@@ -117,7 +114,6 @@ const LoginModalContent = ({
           countryCode={countryCode}
           error={identifierError}
           emailOnly={emailOnly}
-          countryCodes={otpCountryCodes}
           inputRef={identifierInputRef}
           onIdentifierChange={onIdentifierChange}
           onCountryCodeChange={onCountryCodeChange}

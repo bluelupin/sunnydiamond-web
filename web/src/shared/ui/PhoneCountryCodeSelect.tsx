@@ -6,7 +6,11 @@ import {
   formatPhoneDialCodeLabel,
   resolvePhoneCountryCodeDisplayFromEntry,
 } from "@/shared/constants/phoneCountryCodeDisplay";
-import { filterPhoneCountryEntriesByDialCodes } from "@/shared/constants/phoneCountryCodes";
+import {
+  filterPhoneCountryEntriesByDialCodes,
+  resolvePhoneCountryEntryInList,
+  type PhoneCountryEntry,
+} from "@/shared/constants/phoneCountryCodes";
 import { MOBILE_MAX_WIDTH_PX } from "@/shared/lib/breakpoints";
 import { CountryFlagIcon } from "@/shared/ui/CountryFlagIcon";
 import { cn } from "@/shared/utils/cn";
@@ -54,11 +58,13 @@ const SelectChevron = ({ open }: { open: boolean }) => (
 type PhoneCountryCodeSelectProps = {
   id?: string;
   value?: string;
-  onChange: (code: string) => void;
+  /** ISO 3166-1 alpha-2 when disambiguating shared dial codes (e.g. +1). */
+  countryIso?: string;
+  onChange: (code: string, countryIso?: string) => void;
   onBlur?: () => void;
   disabled?: boolean;
   className?: string;
-  /** Codes offered; defaults to the general form list. Sign-in passes only the SMS countries. */
+  /** Restrict to specific E.164 dial codes (rare). Omit for the full sovereign-country list (195). */
   codes?: readonly string[];
 };
 
@@ -84,6 +90,7 @@ function resolvePhoneFieldRow(root: HTMLElement): HTMLElement | null {
 const PhoneCountryCodeSelect = ({
   id = "phone-country-code",
   value = DEFAULT_COUNTRY_CODE,
+  countryIso,
   onChange,
   onBlur,
   disabled = false,
@@ -94,6 +101,12 @@ const PhoneCountryCodeSelect = ({
     () => filterPhoneCountryEntriesByDialCodes(codes),
     [codes],
   );
+
+  const [selectedCountryIso, setSelectedCountryIso] = useState(() => {
+    return (
+      resolvePhoneCountryEntryInList(value, listEntries, { iso: countryIso })?.country ?? "IN"
+    );
+  });
 
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
@@ -107,6 +120,27 @@ const PhoneCountryCodeSelect = ({
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxId = `${id}-listbox`;
+
+  const selectedEntry = useMemo(
+    () =>
+      resolvePhoneCountryEntryInList(value, listEntries, {
+        iso: countryIso,
+        preferredIso: selectedCountryIso,
+      }),
+    [value, listEntries, countryIso, selectedCountryIso],
+  );
+
+  useEffect(() => {
+    const resolved = resolvePhoneCountryEntryInList(value, listEntries, {
+      iso: countryIso,
+      preferredIso: selectedCountryIso,
+    });
+    if (resolved && resolved.country !== selectedCountryIso) {
+      setSelectedCountryIso(resolved.country);
+    }
+  }, [value, listEntries, countryIso, selectedCountryIso]);
+
+  const triggerDialCode = selectedEntry?.code ?? value;
 
   const updateListPlacement = useCallback(() => {
     const trigger = triggerRef.current;
@@ -218,8 +252,9 @@ const PhoneCountryCodeSelect = ({
     };
   }, [isOpen, onBlur]);
 
-  const selectCode = (code: string) => {
-    onChange(code);
+  const selectEntry = (entry: PhoneCountryEntry) => {
+    setSelectedCountryIso(entry.country);
+    onChange(entry.code, entry.country);
     setIsOpen(false);
     onBlur?.();
   };
@@ -248,7 +283,7 @@ const PhoneCountryCodeSelect = ({
           disabled && "cursor-not-allowed opacity-60",
         )}
       >
-        <span>{value}</span>
+        <span>{triggerDialCode}</span>
         <SelectChevron open={isOpen} />
       </button>
       {shouldRenderList ? (
@@ -283,9 +318,10 @@ const PhoneCountryCodeSelect = ({
           )}
         >
           {listEntries.map((entry) => {
-            const selected = value === entry.code;
+            const selected = entry.country === selectedCountryIso;
             const display = resolvePhoneCountryCodeDisplayFromEntry(entry);
             const countryLabel = `${display.name} (${display.iso})`;
+            const dialCodeLabel = formatPhoneDialCodeLabel(display.code);
 
             return (
               <button
@@ -293,7 +329,7 @@ const PhoneCountryCodeSelect = ({
                 type="button"
                 role="option"
                 aria-selected={selected}
-                aria-label={`${countryLabel} ${formatPhoneDialCodeLabel(entry.code)}`}
+                aria-label={`${countryLabel} ${dialCodeLabel}`}
                 onMouseDown={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -301,7 +337,7 @@ const PhoneCountryCodeSelect = ({
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  selectCode(entry.code);
+                  selectEntry(entry);
                 }}
                 className={cn(
                   "flex h-14 w-full shrink-0 items-center gap-2 p-3 text-left font-gill text-base font-normal leading-110",
@@ -312,8 +348,8 @@ const PhoneCountryCodeSelect = ({
                 )}
               >
                 <CountryFlagIcon iso={display.iso} />
-                <span className="min-w-0 truncate whitespace-nowrap">{countryLabel}</span>
-                <span className="shrink-0 whitespace-nowrap">{formatPhoneDialCodeLabel(entry.code)}</span>
+                <span className="min-w-0 flex-1 truncate whitespace-nowrap">{countryLabel}</span>
+                <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums">{dialCodeLabel}</span>
               </button>
             );
           })}

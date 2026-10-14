@@ -250,8 +250,6 @@ type CheckoutPhoneFieldProps = {
   onBlur?: () => void;
   placeholder?: string;
   countryCode?: string;
-  /** Codes the picker offers; defaults to the general form list. */
-  countryCodes?: readonly string[];
   onCountryCodeChange?: (code: string) => void;
   verified?: boolean;
   onVerify?: () => void;
@@ -272,7 +270,6 @@ export const CheckoutPhoneField = ({
   onBlur,
   placeholder = "Enter",
   countryCode = DEFAULT_COUNTRY_CODE,
-  countryCodes,
   onCountryCodeChange,
   verified,
   onVerify,
@@ -309,7 +306,6 @@ export const CheckoutPhoneField = ({
             <PhoneCountryCodeSelect
               id={`${id}-country-code`}
               value={countryCode}
-              codes={countryCodes}
               onChange={(code) => onCountryCodeChange?.(code)}
               disabled={disabled || !onCountryCodeChange}
             />

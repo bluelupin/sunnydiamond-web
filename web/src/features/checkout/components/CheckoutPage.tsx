@@ -111,7 +111,7 @@ const CheckoutPage = () => {
     closeLoginModal,
     registerCheckoutRegistrationSessionExpiredHandler,
   } = useLoginModal();
-  const { otpLoginEnabled, emailOtpLoginEnabled, otpCountryCodes } = useAuthFeatures();
+  const { otpLoginEnabled, emailOtpLoginEnabled } = useAuthFeatures();
   /**
    * With SMS sign-in off there is no mobile identity to take, so the contact field is an
    * email address and nothing else — offering "PhoneNo / Email ID" would accept a number
@@ -1095,7 +1095,6 @@ const CheckoutPage = () => {
                   isCheckoutEmailContact(form.phoneOrEmail) ? emailOtpLoginEnabled : otpLoginEnabled
                 }
                 emailOnly={contactEmailOnly}
-                contactCountryCodes={otpCountryCodes}
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}

@@ -34,7 +34,7 @@ import {
 
 export { DEFAULT_COUNTRY_CODE };
 
-/** All assignable phone countries (ISO + E.164 prefix). India is listed first. */
+/** Phone country dropdown (195 sovereign states; ISO + E.164). India is listed first. */
 export const APPOINTMENT_COUNTRY_CODES: readonly PhoneCountryEntry[] = PHONE_COUNTRY_ENTRIES;
 
 /** Figma 4903:44932 — Neutrals/200 fill; Neutrals/600 1px border on focus. */
