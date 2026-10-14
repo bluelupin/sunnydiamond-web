@@ -1,7 +1,10 @@
+/** Header search icon — mobile dialog must not swallow this as an outside dismiss. */
+export const HEADER_SEARCH_TRIGGER_ATTR = "data-header-search-trigger";
+
 /** Figma 4903:69969 — expanded navigation search overlay (desktop). */
 export const searchOverlayFigmaSpec = {
   contentMaxWidth: 1040,
-  searchPlaceholder: "What are you looking for?",
+  searchPlaceholder: "What Are You Looking For?",
   /** Figma empty state — no query-specific copy. */
   emptyStateMessage: "Nothing Matches Your Search",
   /** Figma — Gill Sans Regular 14px / 400. */

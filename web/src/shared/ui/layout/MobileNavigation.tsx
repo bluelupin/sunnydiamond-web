@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
@@ -15,7 +15,15 @@ import {
   isHeaderNavLinkActive,
   isJewelleryNavLink,
   isWorldOfSunnyNavLink,
+  scrollToTopBeforeClientNavigation,
 } from "@/shared/utils/navigation";
+import {
+  cleanSearchQuery,
+  MAX_SEARCH_LENGTH,
+  MIN_SEARCH_LENGTH,
+  searchResultsHref,
+} from "@/features/search/quickSearch";
+import { addRecentSearch } from "@/features/search/recentSearches";
 import { WorldOfSunnyCategoryMenu } from "@/shared/ui/layout/WorldOfSunnyCategoryMenu";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
@@ -284,6 +292,7 @@ const MobileNavigation = ({
   onProfileOpen,
   onSearchOpen,
 }: MobileNavigationProps) => {
+  const router = useRouter();
   const pathname = usePathname() ?? "/";
   const [subPanel, setSubPanel] = useState<SubPanelId | null>(null);
   const [displayedSubPanel, setDisplayedSubPanel] = useState<SubPanelId | null>(null);
@@ -425,6 +434,21 @@ const MobileNavigation = ({
     searchInputRef.current?.focus();
   }, []);
 
+  const handleSearchSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const query = cleanSearchQuery(searchQuery);
+      if (query.length < MIN_SEARCH_LENGTH) {
+        return;
+      }
+      addRecentSearch(query);
+      handleClose();
+      scrollToTopBeforeClientNavigation();
+      router.push(searchResultsHref(query));
+    },
+    [handleClose, router, searchQuery],
+  );
+
   if (!isRendered) return null;
 
   return (
@@ -515,18 +539,23 @@ const MobileNavigation = ({
           <form
             role="search"
             className="mt-2 flex h-[46px] w-full items-center gap-2 border border-aboutInactive bg-aboutInactive p-3"
-            onSubmit={(event) => event.preventDefault()}
+            onSubmit={handleSearchSubmit}
           >
-            <SearchIcon className="size-4 shrink-0 text-darkblack" />
+            <svg width="24" height="22" viewBox="0 0 24 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10.5 16.5C14.6421 16.5 18 13.422 18 9.625C18 5.82804 14.6421 2.75 10.5 2.75C6.35786 2.75 3 5.82804 3 9.625C3 13.422 6.35786 16.5 10.5 16.5Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M15.8037 14.4865L21.0003 19.25" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <input
               ref={searchInputRef}
               type="text"
+              enterKeyHint="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="What are you looking for?"
+              placeholder="What Are You Looking For?"
               aria-label="Search"
               autoComplete="off"
-              className="min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill text-sm font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:text-sm placeholder:font-light placeholder:leading-110 placeholder:text-darkblack"
+              maxLength={MAX_SEARCH_LENGTH}
+              className="min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill text-sm font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:text-sm placeholder:font-light placeholder:leading-110 placeholder:text-gray600"
             />
             {searchQuery ? (
               <button

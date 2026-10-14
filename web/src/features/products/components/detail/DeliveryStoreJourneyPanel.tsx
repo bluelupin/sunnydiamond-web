@@ -27,6 +27,8 @@ type DeliveryStoreJourneyPanelProps = {
   open: boolean;
   onClose: () => void;
   city?: string;
+  /** When set (e.g. from showroom CMS), overrides the static location map URL. */
+  mapUrl?: string | null;
 };
 
 type JourneyStep = "availability" | "booking";
@@ -35,6 +37,7 @@ const DeliveryStoreJourneyPanel = ({
   open,
   onClose,
   city = "Coimbatore",
+  mapUrl: mapUrlProp,
 }: DeliveryStoreJourneyPanelProps) => {
   const { toast } = useToast();
   const [step, setStep] = useState<JourneyStep>("availability");
@@ -47,6 +50,7 @@ const DeliveryStoreJourneyPanel = ({
   const [note, setNote] = useState("");
 
   const store = DELIVERY_STORE_LOCATIONS[city] ?? DELIVERY_STORE_LOCATIONS.Coimbatore;
+  const directionsUrl = (mapUrlProp ?? store.mapUrl).trim();
 
   useEffect(() => {
     if (!open) {
@@ -149,7 +153,15 @@ const DeliveryStoreJourneyPanel = ({
                       </p>
                     </div>
                   </div>
-                  <DetailTextLink href={store.collectionHref}>VIEW COLLECTION</DetailTextLink>
+                  {directionsUrl ? (
+                    <DetailTextLink
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      GET DIRECTION
+                    </DetailTextLink>
+                  ) : null}
                 </StoreVisitMapBlock>
               </div>
             </div>

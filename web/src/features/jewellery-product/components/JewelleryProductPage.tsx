@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import PageContainer from "@/shared/ui/layout/PageContainer";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
@@ -186,15 +187,15 @@ const JewelleryProductPage = ({
   const initialListingParams =
     initialListing && prefetchedCategoryUrlKey !== undefined
       ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, {
-          collectionSlug,
-          occasionSlug,
-          diamondShapeSlug,
-          fancyColourSlug,
-          minPrice: minPriceFromUrl,
-          maxPrice: maxPriceFromUrl,
-          sortSlug: searchParams?.get("sort"),
-          facets: initialListing.facets,
-        })
+        collectionSlug,
+        occasionSlug,
+        diamondShapeSlug,
+        fancyColourSlug,
+        minPrice: minPriceFromUrl,
+        maxPrice: maxPriceFromUrl,
+        sortSlug: searchParams?.get("sort"),
+        facets: initialListing.facets,
+      })
       : undefined;
 
   // /search has no category path, so a main category picked in the drawer lives in ?category=
@@ -705,6 +706,7 @@ const JewelleryProductPage = ({
   const showFilterEmptyState =
     !isLoading && !showListingError && products.length === 0 && hasActiveFilters(filters, facets);
   const showNoResults = Boolean(noResults) && !isLoading && !showListingError && !showFilterEmptyState && products.length === 0;
+  const showSearchEmpty = Boolean(searchQuery) && showNoResults;
 
   const metalPurityQuery = useMemo(
     () => getSelectedMetalPurityQuery(filters.metalPurities, facets),
@@ -719,9 +721,30 @@ const JewelleryProductPage = ({
     toggleWishlist(productId);
   };
 
+  if (showSearchEmpty) {
+    return (
+      <div className="pb-0 md:pb-0">
+        {hero ? <JewelleryHeroSection {...hero} /> : null}
+        {/* <PageContainer className="pb-6 pt-10 lg:pb-10 lg:pt-16">
+          <h2 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48">
+            Results for &lsquo;{searchQuery}&rsquo;
+          </h2>
+        </PageContainer> */}
+        <section className="relative isolate z-0 w-full bg-gray200">{noResults}</section>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-0 md:pb-0">
       {hero ? <JewelleryHeroSection {...hero} /> : null}
+      {/* {searchQuery ? (
+        <PageContainer className="pb-6 pt-10 lg:pb-10 lg:pt-16">
+          <h2 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48">
+            Results for &lsquo;{searchQuery}&rsquo;
+          </h2>
+        </PageContainer>
+      ) : null} */}
       {searchQuery ? null : (
         <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
       )}
@@ -742,8 +765,6 @@ const JewelleryProductPage = ({
           <JewelleryListingErrorState message={error} onRetry={retryListing} />
         ) : showFilterEmptyState ? (
           <JewelleryListingEmptyState onClearFilters={handleClearFilters} />
-        ) : showNoResults ? (
-          noResults
         ) : (
           <JewelleryProductGrid
             products={products}

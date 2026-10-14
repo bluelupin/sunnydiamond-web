@@ -14,7 +14,8 @@ export type DeliveryStoreLocation = {
   cityLabel: string;
   address: string;
   phone: string;
-  collectionHref: string;
+  /** Google Maps (or CMS showroom mapUrl) for GET DIRECTION. */
+  mapUrl: string;
 };
 
 export const DELIVERY_STORE_LOCATIONS: Record<string, DeliveryStoreLocation> = {
@@ -22,6 +23,6 @@ export const DELIVERY_STORE_LOCATIONS: Record<string, DeliveryStoreLocation> = {
     cityLabel: "COIMBATORE",
     address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd Ernakulam, Kerala 682035",
     phone: "+91 97443 55555",
-    collectionHref: "/jewellery",
+    mapUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
   },
 };

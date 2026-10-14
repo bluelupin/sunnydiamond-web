@@ -57,6 +57,12 @@ export const jewelleryListingEmptyStateContent = {
   clearFiltersLabel: "Clear All Filters",
 } as const;
 
+/** /search PLP — same empty title as filter empty; clear action mirrors filter empty. */
+export const searchListingEmptyStateContent = {
+  title: jewelleryListingEmptyStateContent.filterTitle,
+  clearSearchLabel: "Clear Search",
+} as const;
+
 export const jewelleryListingErrorStateContent = {
   listingTitle: "Unable to load products",
   listingDescription: "We couldn't load the product listing right now. Please try again in a moment.",

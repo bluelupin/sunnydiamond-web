@@ -26,7 +26,7 @@ export function SearchDesktopMegaMenu({
         "motion-safe:transform-gpu motion-safe:origin-top",
         "motion-safe:transition-[opacity,transform] motion-safe:duration-300 motion-safe:ease-out",
         open
-          ? "motion-safe:translate-y-0 motion-safe:opacity-100"
+          ? "motion-safe:translate-y-0 motion-safe:opacity-100 min-h-[50vh]"
           : "motion-safe:-translate-y-2 motion-safe:opacity-0",
         !open && "pointer-events-none",
       )}

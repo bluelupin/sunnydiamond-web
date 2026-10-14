@@ -1,6 +1,9 @@
 import { learnAboutDiamondsRoute } from "@/features/education/data/content";
 import { CAREERS_ALL_OPENINGS_ROUTE } from "@/features/careers/constants/careersRoutes";
-import { isJewelleryCategoryPath } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import {
+  isJewelleryCategoryPath,
+  isJewelleryListingPath,
+} from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 export const WORLD_OF_SUNNY_PATH = "/world-of-sunny";
 export const BESPOKE_JEWELLERY_PATH = "/bespoke-jewellery";
@@ -83,7 +86,7 @@ export function isHeroOverlayRoute(pathname: string): boolean {
     pathname === "/" ||
     pathname === WORLD_OF_SUNNY_PATH ||
     pathname === learnAboutDiamondsRoute ||
-    isJewelleryCategoryPath(pathname) ||
+    isJewelleryListingPath(pathname) ||
     pathname === "/bespoke-jewellery" ||
     pathname === "/gifting" ||
     pathname === "/careers" ||

@@ -106,6 +106,10 @@ const Header = () => {
   const jewelleryCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const worldOfSunnyCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchDismissRef = useRef<(() => void) | null>(null);
+  const registerSearchDismiss = useCallback((dismiss: (() => void) | null) => {
+    searchDismissRef.current = dismiss;
+  }, []);
   const { totalItems: cartCount } = useCart();
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
   const mounted = useMounted();
@@ -282,11 +286,15 @@ const Header = () => {
 
   const toggleSearch = useCallback(() => {
     if (searchOpen) {
-      closeSearchNow();
+      if (isMobileHeader) {
+        searchDismissRef.current?.() ?? closeSearchNow();
+      } else {
+        closeSearchNow();
+      }
       return;
     }
     openSearchPanel();
-  }, [closeSearchNow, openSearchPanel, searchOpen]);
+  }, [closeSearchNow, isMobileHeader, openSearchPanel, searchOpen]);
 
   const handleSearchClick = useCallback(() => {
     toggleSearch();
@@ -396,7 +404,7 @@ const Header = () => {
       <header
         className={cn(
           "fixed top-0 inset-x-0",
-          "z-50",
+          isMobileHeader && searchOpen ? "z-[70]" : "z-50",
           "motion-safe:transform-gpu motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out",
           headerHidden ? "pointer-events-none opacity-0" : "",
           !headerHidden && !isHeaderShown ? "-translate-y-full" : "translate-y-0",
@@ -428,6 +436,7 @@ const Header = () => {
               </button>
               <button
                 type="button"
+                data-header-search-trigger
                 className={cn(iconButtonClass, textClass, hoverClass, searchOpen && "text-linkGold")}
                 onClick={toggleSearch}
                 aria-label="Search"
@@ -586,6 +595,7 @@ const Header = () => {
               <SearchOverlay
                 open={searchOpen}
                 onOpenChange={(next) => (next ? setSearchOpen(true) : closeSearchNow())}
+                onRegisterDismiss={registerSearchDismiss}
                 onDesktopMouseEnter={canHoverNav ? openSearchPanel : undefined}
                 onDesktopMouseLeave={canHoverNav ? scheduleCloseSearch : undefined}
               />

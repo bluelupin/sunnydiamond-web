@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -24,7 +25,7 @@ import {
   type SearchLink,
 } from "./quickSearch";
 import { SearchDesktopMegaMenu } from "./SearchDesktopMegaMenu";
-import { searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
+import { HEADER_SEARCH_TRIGGER_ATTR, searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
 import { addRecentSearch, readRecentSearches } from "./recentSearches";
 import { useQuickSearch } from "./useQuickSearch";
 
@@ -53,6 +54,8 @@ function TypeaheadLabel({ label }: { label: string }) {
 type SearchOverlayProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Header icon toggle — full dismiss (clears query + closes Radix). */
+  onRegisterDismiss?: (dismiss: (() => void) | null) => void;
   /** WorldOfSunnyMegaMenu — keep panel open while pointer is over dropdown. */
   onDesktopMouseEnter?: () => void;
   onDesktopMouseLeave?: () => void;
@@ -80,6 +83,7 @@ function LinkRow({ link }: { link: SearchLink }) {
 export default function SearchOverlay({
   open,
   onOpenChange,
+  onRegisterDismiss,
   onDesktopMouseEnter,
   onDesktopMouseLeave,
 }: SearchOverlayProps) {
@@ -213,13 +217,19 @@ export default function SearchOverlay({
   const options = useMemo(() => groups.flatMap((group) => group.options), [groups]);
   const activeOption = activeIndex >= 0 ? options[activeIndex] : undefined;
 
-  const close = () => {
+  const close = useCallback(() => {
     onOpenChange(false);
     setText("");
     // The overlay stays mounted between openings; a row highlighted last time must not
     // come back when the same words are typed again, or Enter would open it.
     setHighlight({ key: "", index: -1 });
-  };
+  }, [onOpenChange]);
+
+  useEffect(() => {
+    if (!isMobileHeader) return;
+    onRegisterDismiss?.(close);
+    return () => onRegisterDismiss?.(null);
+  }, [close, isMobileHeader, onRegisterDismiss]);
 
   const go = (href: string, recentText: string, option?: Option) => {
     if (recentText) {
@@ -408,8 +418,15 @@ export default function SearchOverlay({
     </div>
   );
 
-  const preventMobileBackdropDismiss = isMobileHeader
+  const handleMobileOutsideInteraction = isMobileHeader
     ? (event: Event) => {
+        const target = event.target;
+        if (target instanceof HTMLElement && target.closest(`[${HEADER_SEARCH_TRIGGER_ATTR}]`)) {
+          // Radix blocks the trigger click when we preventDefault here; closing explicitly
+          // keeps icon toggle working while backdrop taps still do not dismiss.
+          if (open) close();
+          return;
+        }
         event.preventDefault();
       }
     : undefined;
@@ -423,8 +440,8 @@ export default function SearchOverlay({
       event.preventDefault();
       if (returnFocus.current?.isConnected) returnFocus.current.focus();
     },
-    onPointerDownOutside: preventMobileBackdropDismiss,
-    onInteractOutside: preventMobileBackdropDismiss,
+    onPointerDownOutside: handleMobileOutsideInteraction,
+    onInteractOutside: handleMobileOutsideInteraction,
   };
 
   if (!isMobileHeader) {
@@ -441,10 +458,16 @@ export default function SearchOverlay({
   }
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
+    <DialogPrimitive.Root
+      open={open}
+      modal={false}
+      onOpenChange={(next) => (next ? onOpenChange(true) : close())}
+    >
       <DialogPrimitive.Portal forceMount>
-        <DialogPrimitive.Overlay
-          forceMount
+        {/* Non-modal Root skips Radix Overlay; keep a scrim below the header for layout parity. */}
+        <div
+          aria-hidden
+          data-state={open ? "open" : "closed"}
           className={cn(
             searchOverlayFigmaSpec.mobileOverlayScrimClassName,
             searchOverlayFigmaSpec.mobileOverlayFadeTransitionClassName,
