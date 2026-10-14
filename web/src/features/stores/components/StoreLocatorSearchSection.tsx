@@ -25,11 +25,9 @@ type StoreLocatorSearchSectionProps = {
 const StoreLocatorSearchSection = ({
   searchQuery,
   onSearchQueryChange,
-  searchPlaceholder,
   pincodeError,
 }: StoreLocatorSearchSectionProps) => {
-  const placeholder =
-    searchPlaceholder?.trim() || storeLocatorDefaultSearchPlaceholder;
+  const placeholder = storeLocatorDefaultSearchPlaceholder;
   const errorMessage = pincodeError?.trim() || undefined;
   const { searchMaxWidth, searchHeight } = storeLocatorSearchFigmaSpec;
 
