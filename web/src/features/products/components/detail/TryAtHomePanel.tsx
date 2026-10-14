@@ -18,7 +18,7 @@ import {
   signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
-import OverlaySelectField from "@/shared/ui/OverlaySelectField";
+import { CheckoutSelectField } from "@/features/checkout/components/CheckoutUi";
 import { matchTryAtHomeStateSelectOption } from "@/features/products/data/tryAtHomeContent";
 import {
   appointmentFieldClassName,
@@ -556,17 +556,17 @@ const TryAtHomeAddressStep = ({
               </div>
             </div>
 
-            <OverlaySelectField
+            <CheckoutSelectField
               id="try-at-home-state"
-              label={form?.stateLabel ?? ""}
+              label={form?.stateLabel ?? "State"}
+              variant="inlineCustom"
+              listPlacement="inline"
+              placeholder={form?.statePlaceholder?.trim() || "Select"}
               value={selectedState}
-              options={stateOptions}
-              placeholder={form?.statePlaceholder ?? ""}
               onChange={setState}
               onBlur={() => markTouched("state")}
-              labelClassName={appointmentLabelClassName}
+              options={stateOptions.map((option) => ({ value: option, label: option }))}
               invalid={showError("state")}
-              errorId={showError("state") ? "try-at-home-state-error" : undefined}
               error={showError("state") ? errors.state : undefined}
             />
           </div>
