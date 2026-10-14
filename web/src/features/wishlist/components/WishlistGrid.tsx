@@ -16,8 +16,8 @@ type WishlistGridProps = {
 };
 
 const WISHLIST_GRID_CLASS: Record<WishlistGridVariant, string> = {
-  page: "grid w-full grid-cols-2 gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-3",
-  profile: "grid w-full grid-cols-2 gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-2 lg:gap-6 lg:bg-transparent bg-gray200",
+  page: "grid w-full grid-cols-2 items-stretch gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-3",
+  profile: "grid w-full grid-cols-2 items-stretch gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-2 lg:gap-6 lg:bg-transparent bg-gray200",
 };
 
 const WishlistGrid = ({
