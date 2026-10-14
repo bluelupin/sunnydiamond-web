@@ -68,16 +68,7 @@ function ProductRow({ product }: { product: QuickSearchProduct }) {
 }
 
 function LinkRow({ link }: { link: SearchLink }) {
-  if (link.detail) {
-    return (
-      <span className="flex min-w-0 flex-1 items-baseline gap-1">
-        <span className="truncate font-normal text-neutral500">{link.label}</span>
-        <span className="shrink-0 font-light text-neutral500">{link.detail}</span>
-      </span>
-    );
-  }
-
-  return <span className="min-w-0 flex-1 truncate font-light text-neutral500">{link.label}</span>;
+  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{link.label}</span>;
 }
 
 export default function SearchOverlay({
@@ -100,6 +91,8 @@ export default function SearchOverlay({
   // Radix returns focus to a Dialog.Trigger; the header icons are plain buttons, so remember
   // what had focus when search opened and give it back on close.
   const returnFocus = useRef<HTMLElement | null>(null);
+  /** After navigating to results, do not focus the header search control (Enter would reopen search). */
+  const skipReturnFocusRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -114,6 +107,21 @@ export default function SearchOverlay({
     });
     return () => cancelAnimationFrame(frame);
   }, [open, isMobileHeader]);
+
+  // Desktop mega menu stays mounted while collapsed; blur so keystrokes do not hit a hidden input.
+  useEffect(() => {
+    if (open) return;
+    const input = searchPanelRef.current?.querySelector("input");
+    if (input instanceof HTMLElement && document.activeElement === input) {
+      input.blur();
+    }
+    if (!skipReturnFocusRef.current) return;
+    skipReturnFocusRef.current = false;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.getAttribute("aria-label") === "Search") {
+      active.blur();
+    }
+  }, [open]);
 
   // A new result set starts with nothing highlighted, so Enter goes to the results page.
   const listKey = active ? (result?.query ?? "") : "empty";
@@ -239,11 +247,14 @@ export default function SearchOverlay({
     if (option) {
       trackEvent("select_item", { item_list_name: `search_${option.group}`, search_term: query, href });
     }
+    skipReturnFocusRef.current = true;
     close();
     router.push(href);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!open) return;
+
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       if (!options.length) return;
       event.preventDefault();
@@ -295,10 +306,11 @@ export default function SearchOverlay({
                 maxLength={MAX_SEARCH_LENGTH}
                 onChange={(event) => setText(event.target.value)}
                 onKeyDown={onKeyDown}
+                tabIndex={open ? 0 : -1}
                 placeholder={searchOverlayFigmaSpec.searchPlaceholder}
                 role="combobox"
                 aria-label="Search"
-                aria-expanded={showListbox}
+                aria-expanded={open && showListbox}
                 aria-controls={listId}
                 aria-autocomplete="list"
                 aria-activedescendant={activeOption?.id}
@@ -438,6 +450,7 @@ export default function SearchOverlay({
     },
     onCloseAutoFocus: (event: Event) => {
       event.preventDefault();
+      if (skipReturnFocusRef.current) return;
       if (returnFocus.current?.isConnected) returnFocus.current.focus();
     },
     onPointerDownOutside: handleMobileOutsideInteraction,

@@ -21,6 +21,7 @@ export function SearchDesktopMegaMenu({
   return (
     <div
       aria-hidden={!open}
+      {...(!open ? { inert: true as const } : {})}
       className={cn(
         "absolute inset-x-0 top-full z-40 bg-white shadow-sm",
         "motion-safe:transform-gpu motion-safe:origin-top",
