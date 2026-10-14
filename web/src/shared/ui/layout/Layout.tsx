@@ -24,13 +24,18 @@ const Layout = ({ children }: { children: ReactNode }) => {
   }, [pathname]);
 
   return (
-    <div className={cn("flex flex-col", isAuthPage ? "h-[100dvh] overflow-hidden" : "min-h-screen")}>
+    <div
+      className={cn(
+        "flex flex-col overflow-hidden",
+        isAuthPage ? "relative isolate z-10 h-[100dvh] max-h-[100dvh] min-h-[100lvh]" : "min-h-screen",
+      )}
+    >
       <BrowserBackScrollRestore />
       <Header />
       <main
         className={
           isAuthPage
-            ? "relative flex-1 min-h-0 overflow-y-auto"
+            ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
             : offsetMain
               ? cn(
                   "flex-1 pt-[calc(64px+env(safe-area-inset-top,0px))] md:landscape:pt-104 lg:landscape:pt-104",

@@ -46,7 +46,7 @@ export const PRODUCT_APPOINTMENT_PANEL_CONFIG: Record<
     noteLabel: "What are you looking for?",
     noteLabelClassName: "font-gill text-base leading-110 text-darkblack",
     noteTextareaClassName: "font-gill text-base leading-110",
-    notePlaceholder: "Eg: I Am Looking For An Engagement Ring",
+    notePlaceholder: "Eg: I am looking for an engagement ring",
     noteRequired: false,
     showTimeSlots: true,
     showReferenceImage: false,
