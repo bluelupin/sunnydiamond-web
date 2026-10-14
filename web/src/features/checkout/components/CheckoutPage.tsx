@@ -52,6 +52,8 @@ import {
 import {
   applyCustomerAddressToCheckoutForm,
   CHECKOUT_SHIPPING_ADDRESS_FIELDS,
+  isAuthenticatedCheckoutContactEmailOnly,
+  isAuthenticatedCheckoutContactVerified,
   sanitizeCheckoutFormNames,
 } from "../utils/checkoutCustomer.utils";
 import {
@@ -212,8 +214,8 @@ const CheckoutPage = () => {
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
 
   const formValidation = useCheckoutFormValidation(form, {
-    // A signed-in customer's contact field is the order email, never a number.
-    emailOnly: contactEmailOnly || isAuthenticated,
+    emailOnly:
+      contactEmailOnly || (isAuthenticated && isAuthenticatedCheckoutContactEmailOnly(customer)),
   });
   const paymentValidation = useCheckoutPaymentValidation(
     payment,
@@ -968,6 +970,9 @@ const CheckoutPage = () => {
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {
     if (checkoutLockedRef.current) return;
+    if (isAuthenticated && field === "phoneOrEmail") {
+      return;
+    }
 
     if (field === "pincode" || field === "billingPincode") {
       setForm((current) => ({
@@ -1103,16 +1108,8 @@ const CheckoutPage = () => {
                 // Saved addresses still loading: typing now would be overwritten by the prefill.
                 fieldsDisabled={isSavingAddresses || (isAuthenticated && addressesLoading)}
                 contactVerified={
-                  isAuthenticated &&
-                  (isCheckoutEmailContact(form.phoneOrEmail)
-                    ? customer?.emailVerified === true &&
-                      form.phoneOrEmail.trim().toLowerCase() === customer.email.toLowerCase()
-                    : customer?.phoneVerified === true)
+                  isAuthenticated && isAuthenticatedCheckoutContactVerified(customer)
                 }
-                // The mobile number is this customer's identity, so the email is theirs to
-                // change for this order. Signed up by email: the email is the identity and
-                // stays as it is (QA bug #28, decision of 4 Oct).
-                contactEmailEditable={customer?.phoneVerified === true}
               />
             ) : (
               <CheckoutPaymentStep

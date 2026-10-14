@@ -251,6 +251,7 @@ export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
       // A network failure or cancellation must not replace the shopper's cart.
       const unavailable = error instanceof MagentoGraphqlError && (
         /could not find a cart|cart.*(?:isn't|is not|not) active|current user cannot perform|customerCart/i.test(error.message)
+        || /\(403\)$/.test(error.message)
         || error.errors.some((entry) => entry.extensions?.category === "graphql-authorization")
       );
       if (!unavailable || signal?.aborted) {

@@ -76,20 +76,22 @@ function appendUniqueProducts(
 
 function buildListingScopeKey(
   categoryUrlKey: string | null | undefined,
+  search: string,
   sortValue: string,
   pageSize: number,
 ): string {
-  return `${categoryUrlKey ?? ""}|${sortValue}|${pageSize}`;
+  return `${categoryUrlKey ?? ""}|${search.trim()}|${sortValue}|${pageSize}`;
 }
 
 function buildListingQueryKey(
   categoryUrlKey: string | null | undefined,
+  search: string,
   sortValue: string,
   pageSize: number,
   filters: JewelleryFilterState,
   facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
 ): string {
-  return `${buildListingScopeKey(categoryUrlKey, sortValue, pageSize)}|${getJewelleryListingFiltersKey(filters, facets)}`;
+  return `${buildListingScopeKey(categoryUrlKey, search, sortValue, pageSize)}|${getJewelleryListingFiltersKey(filters, facets)}`;
 }
 
 function seedInitialListingPageCaches(
@@ -175,6 +177,7 @@ export function useMagentoJewelleryListing({
   const prefetchedScopeKey = initialListingParams
     ? buildListingScopeKey(
         initialListingParams.categoryUrlKey,
+        search,
         initialListingParams.sortValue,
         initialListingParams.pageSize,
       )
@@ -184,6 +187,7 @@ export function useMagentoJewelleryListing({
     initialListing && initialListingParams
       ? buildListingQueryKey(
           initialListingParams.categoryUrlKey,
+          search,
           initialListingParams.sortValue,
           initialListingParams.pageSize,
           initialListingParams.filters ?? createEmptyFilterState(),
@@ -323,6 +327,7 @@ export function useMagentoJewelleryListing({
         setIsLoading(false);
         const resolvedKey = buildListingQueryKey(
           categoryUrlKey,
+          search,
           sortValue,
           pageSize,
           filtersRef.current,
@@ -342,7 +347,7 @@ export function useMagentoJewelleryListing({
       return;
     }
 
-    const currentScopeKey = buildListingScopeKey(categoryUrlKey, sortValue, pageSize);
+    const currentScopeKey = buildListingScopeKey(categoryUrlKey, search, sortValue, pageSize);
 
     if (
       consumePrefetchedListingRef.current &&
@@ -375,6 +380,7 @@ export function useMagentoJewelleryListing({
         setResolvedListingQueryKey(
           buildListingQueryKey(
             categoryUrlKey,
+            search,
             sortValue,
             pageSize,
             filtersRef.current,
@@ -394,6 +400,7 @@ export function useMagentoJewelleryListing({
     void fetchInitialListing();
   }, [
     categoryUrlKey,
+    search,
     sortValue,
     pageSize,
     fetchInitialListing,
@@ -573,6 +580,7 @@ export function useMagentoJewelleryListing({
 
   const listingQueryKey = buildListingQueryKey(
     categoryUrlKey,
+    search,
     sortValue,
     pageSize,
     filters,

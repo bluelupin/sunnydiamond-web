@@ -24,12 +24,14 @@ import {
   isDefaultPriceRange,
   getSelectedMetalPurityQuery,
   parseJewelleryListingSortParam,
+  readJewelleryListingSortFromUrl,
   reconcileJewelleryPriceFilterState,
 } from "../data/filters";
 import {
   hasPrimaryListingContext,
   isJewelleryCategoryPath,
   JEWELLERY_PATH,
+  JEWELLERY_SEARCH_PATH,
   parseJewelleryCategorySlug,
   preserveJewelleryListingSearchParams,
   readJewelleryListingUrlParams,
@@ -121,7 +123,7 @@ const JewelleryProductPage = ({
   );
 
   const [sortValue, setSortValue] = useState(() =>
-    parseJewelleryListingSortParam(searchParams?.get("sort")),
+    readJewelleryListingSortFromUrl(searchParams?.toString()),
   );
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
     if (initialListing?.facets) {
@@ -238,7 +240,7 @@ const JewelleryProductPage = ({
   }, [pathname, categoryUrlKeyFromRoute, searchParams]);
 
   useEffect(() => {
-    const sortFromUrl = parseJewelleryListingSortParam(searchParams?.get("sort"));
+    const sortFromUrl = readJewelleryListingSortFromUrl(searchParams?.toString());
     setSortValue((current) => (current === sortFromUrl ? current : sortFromUrl));
   }, [searchParams]);
 
@@ -277,14 +279,27 @@ const JewelleryProductPage = ({
           ? resolveCategoryUrlKeyFromPathname(currentPath)
           : null;
 
-      if (!hasPrimaryListingContext(preserved) && !isJewelleryCategoryPath(currentPath)) {
+      const isSearchResultsPath =
+        currentPath === JEWELLERY_SEARCH_PATH || currentPath === `${JEWELLERY_SEARCH_PATH}/`;
+
+      if (
+        !hasPrimaryListingContext(preserved) &&
+        !isJewelleryCategoryPath(currentPath) &&
+        !isSearchResultsPath
+      ) {
+        return;
+      }
+
+      setSortValue(parseJewelleryListingSortParam(params.get("sort")));
+
+      if (isSearchResultsPath) {
+        setSearchCategoryUrlKey(resolveCategoryUrlKeyFromQueryParam(params.get("category")));
         return;
       }
 
       setSelectedCategoryUrlKey(nextUrlKey);
       lastFacetsSyncedCategoryRef.current = nextUrlKey;
       facetsSyncedRef.current = true;
-      setSortValue(parseJewelleryListingSortParam(params.get("sort")));
 
       if (nextUrlKey === null) {
         setFilters({

@@ -11,6 +11,7 @@ import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "./productsBySkus.query";
 import {
   mapJewellerySortToMagento,
   mapMagentoProductsToJewelleryListing,
+  sortJewelleryListingProducts,
 } from "./products.mapper";
 import {
   buildMagentoProductsFilter,
@@ -372,7 +373,11 @@ async function fetchMagentoJewelleryProducts({
       category: categoryUrlKey ?? "all",
     });
     const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
-    const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
+    const products = applySearchListingSort(
+      refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter),
+      search,
+      sortValue,
+    );
     const pageInfo = data.products?.page_info;
 
     return {
@@ -439,7 +444,11 @@ async function fetchMagentoJewelleryProducts({
     ? enrichFacetsWithCategoryChildren(mappedFacetsWithMetalColors, navCategories, categoryUrlKey)
     : enrichFacetsWithNavCategories(mappedFacetsWithMetalColors, navCategories);
   const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
-  const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
+  const products = applySearchListingSort(
+    refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter),
+    search,
+    sortValue,
+  );
   const pageInfo = data.products?.page_info;
 
   return {
@@ -475,6 +484,18 @@ export type MagentoJewelleryInitialListingResult = {
   listing: JewelleryListingProductsData;
   pendingProducts: JewelleryListingProduct[];
 };
+
+function applySearchListingSort(
+  products: JewelleryListingProduct[],
+  search: string,
+  sortValue: string,
+): JewelleryListingProduct[] {
+  if (!search.trim() || sortValue === "featured") {
+    return products;
+  }
+
+  return sortJewelleryListingProducts(products, sortValue);
+}
 
 function refineListingProductsForExactPrice(
   products: JewelleryListingProduct[],

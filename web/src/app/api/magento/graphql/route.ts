@@ -46,23 +46,38 @@ export async function POST(request: NextRequest) {
         }
       : {};
 
-  try {
-    const response = await fetch(getMagentoGraphqlUrl(), {
+  const buildMagentoHeaders = (includeCustomerToken: boolean) => ({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    Store: MAGENTO_DEFAULT_STORE_CODE,
+    ...(includeCustomerToken && customerToken
+      ? { Authorization: `Bearer ${customerToken}` }
+      : {}),
+    ...forwardedHeaders,
+    // Search-results pagination and facets must not count as searches (SunnyDiamonds_QuickSearch).
+    ...(request.headers.get("x-sunny-search-mode") === "suggest"
+      ? { "X-Sunny-Search-Mode": "suggest" }
+      : {}),
+  });
+
+  const fetchMagento = (includeCustomerToken: boolean) =>
+    fetch(getMagentoGraphqlUrl(), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Store: MAGENTO_DEFAULT_STORE_CODE,
-        ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}),
-        ...forwardedHeaders,
-        // Search-results pagination and facets must not count as searches (SunnyDiamonds_QuickSearch).
-        ...(request.headers.get("x-sunny-search-mode") === "suggest" ? { "X-Sunny-Search-Mode": "suggest" } : {}),
-      },
+      headers: buildMagentoHeaders(includeCustomerToken),
       body: JSON.stringify({ query: body.query, variables: body.variables }),
       ...(isCartOperation || customerToken
         ? { cache: "no-store" as const }
         : { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }),
     });
+
+  try {
+    let response = await fetchMagento(Boolean(customerToken));
+
+    // Stale session cookies break guest-cart calls (cart_id is its own credential).
+    // Retry once without Authorization before surfacing 403 to the browser.
+    if (response.status === 403 && customerToken) {
+      response = await fetchMagento(false);
+    }
 
     const json = await response.json();
 

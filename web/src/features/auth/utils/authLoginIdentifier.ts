@@ -36,9 +36,19 @@ export function signupMethodToContactLockKind(
   signupMethod: string | null | undefined,
 ): AuthLoginIdentifierKind | null {
   const method = signupMethod?.trim().toLowerCase();
-  if (method === "phone") return "phone";
+  if (!method || method === "unknown") return null;
+  if (method === "phone" || method.includes("mobile") || method.includes("sms")) return "phone";
   if (method === "email") return "email";
+  if (method.includes("phone")) return "phone";
+  if (method.includes("email")) return "email";
   return null;
+}
+
+/** Signup method when set; otherwise the identifier kind from the last OTP sign-in on this device. */
+export function resolveCustomerContactLockKind(
+  signupMethod: string | null | undefined,
+): AuthLoginIdentifierKind | null {
+  return signupMethodToContactLockKind(signupMethod) ?? getAuthLoginIdentifierKind();
 }
 
 /** Field locks for appointment/profile contact fields from signup method or login identifier kind. */
