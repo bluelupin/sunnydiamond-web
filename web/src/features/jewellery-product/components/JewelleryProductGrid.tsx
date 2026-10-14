@@ -17,9 +17,6 @@ interface JewelleryProductGridProps {
   metalPurityQuery?: string;
 }
 
-const plpGridCellBorderClassName =
-  "[&>*]:border-b [&>*]:border-solid [&>*]:border-neutral300 max-md:[&>*:not(:nth-child(2n))]:border-r md:[&>*:not(:nth-child(3n))]:border-r md:[&>*:nth-child(-n+3)]:border-t";
-
 const JewelleryProductGrid = ({
   products,
   listingCards = [],
@@ -49,7 +46,7 @@ const JewelleryProductGrid = ({
 
   return (
     <div
-      className={`grid w-full min-w-0 grid-cols-2 items-stretch md:grid-cols-3 ${plpGridCellBorderClassName}`}
+      className="grid w-full min-w-0 grid-cols-2 items-stretch md:grid-cols-3"
       onPointerLeave={handleGridPointerLeave}
     >
       {gridItems.map((item) => {
