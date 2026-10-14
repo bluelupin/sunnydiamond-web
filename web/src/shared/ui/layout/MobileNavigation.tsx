@@ -523,7 +523,7 @@ const MobileNavigation = ({
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="What Are You Looking For ?"
+              placeholder="What are you looking for?"
               aria-label="Search"
               autoComplete="off"
               className="min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill text-sm font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:text-sm placeholder:font-light placeholder:leading-110 placeholder:text-darkblack"

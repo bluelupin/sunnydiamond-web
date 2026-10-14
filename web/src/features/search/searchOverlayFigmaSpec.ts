@@ -1,7 +1,7 @@
 /** Figma 4903:69969 — expanded navigation search overlay (desktop). */
 export const searchOverlayFigmaSpec = {
   contentMaxWidth: 1040,
-  searchPlaceholder: "What Are You Looking For ?",
+  searchPlaceholder: "What are you looking for?",
   /** Figma empty state — no query-specific copy. */
   emptyStateMessage: "Nothing Matches Your Search",
   /** Figma — Gill Sans Regular 14px / 400. */

@@ -26,7 +26,7 @@ export const giftCardFlowContent = {
   },
   message: {
     label: "Add a Message",
-    placeholder: "Write A Personalised Note Here",
+    placeholder: "Write a personalised note here",
   },
   details: {
     senderHeading: "Sender's Details",
