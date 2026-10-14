@@ -142,3 +142,31 @@ export function mapJewellerySortToMagento(
       return { position: "ASC" };
   }
 }
+
+/** Aligns grid order with PLP cards when catalog search sort is loose or ignored server-side. */
+export function sortJewelleryListingProducts(
+  products: JewelleryListingProduct[],
+  sortValue: string,
+): JewelleryListingProduct[] {
+  if (sortValue === "featured" || products.length < 2) {
+    return products;
+  }
+
+  const sorted = [...products];
+
+  switch (sortValue) {
+    case "price-asc":
+      sorted.sort((left, right) => left.price - right.price || left.name.localeCompare(right.name));
+      break;
+    case "price-desc":
+      sorted.sort((left, right) => right.price - left.price || left.name.localeCompare(right.name));
+      break;
+    case "name-asc":
+      sorted.sort((left, right) => left.name.localeCompare(right.name));
+      break;
+    default:
+      return products;
+  }
+
+  return sorted;
+}
