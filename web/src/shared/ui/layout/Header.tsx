@@ -362,12 +362,12 @@ const Header = () => {
       ? "text-white"
       : "text-darkblack";
   const logoClass = useExpandedSearchHeader
-    ? "text-darkMagenta"
+    ? "text-darkblack"
     : isLightOverlay
       ? "text-white"
       : isAuthPage
         ? "text-darkblack"
-        : "text-darkMagenta";
+        : "text-darkblack";
   const hoverClass = isLightOverlay ? "hover:text-linkGold" : "hover:text-linkGold";
   const navLinkClass = (active = false) =>
     cn(

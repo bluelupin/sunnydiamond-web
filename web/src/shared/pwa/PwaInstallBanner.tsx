@@ -12,6 +12,7 @@ import {
   markPwaInstallBannerDismissed,
   wasPwaInstallBannerDismissed,
 } from "./pwaInstallPrompt";
+import SDLogo from "@/assets/Icons/SDLogo";
 
 const BANNER_COPY = {
   title: "Install Sunny Diamonds",
@@ -95,14 +96,7 @@ export default function PwaInstallBanner() {
         )}
       >
         <div className="flex flex-1 items-start gap-3 md:items-center">
-          <Image
-            src="/android-chrome-192x192.png"
-            alt=""
-            width={48}
-            height={48}
-            className="size-12 shrink-0 rounded-lg"
-            aria-hidden
-          />
+          <SDLogo className="text-darkblack size-12 shrink-0 rounded-lg" aria-hidden />
           <div className="min-w-0 text-left">
             <p className="font-larken text-lg font-light leading-110 text-darkblack">{BANNER_COPY.title}</p>
             <p className="mt-1 font-gill text-sm font-light leading-110 text-neutral500">
