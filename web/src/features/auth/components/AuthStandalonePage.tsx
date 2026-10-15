@@ -5,6 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthFlow } from "../hooks/useAuthFlow";
 import { getAuthFlowLabel } from "../utils/authNavigation";
+import {
+  authLoginMobileBackgroundImageClassName,
+  authLoginWebBackgroundImageClassName,
+} from "../constants/authLoginBackground";
 import AuthFlowSteps from "./AuthFlowSteps";
 
 type AuthStandalonePageProps = {
@@ -45,17 +49,14 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
   const flowLabel = getAuthFlowLabel(step);
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
-      <div
-        className="pointer-events-none fixed inset-0 z-0 min-h-[100dvh] min-h-[100lvh] w-full"
-        aria-hidden
-      >
+    <div className="relative flex h-full min-h-0 flex-col">
+      <div className="absolute inset-0">
         <Image
           src={LOGIN_WEB_BACKGROUND_IMAGE_URL}
           alt=""
           fill
           priority
-          className="hidden object-cover object-[58%_42%] md:block"
+          className={authLoginWebBackgroundImageClassName}
           sizes="100vw"
           aria-hidden
         />
@@ -64,7 +65,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
           alt=""
           fill
           priority
-          className="block object-cover object-bottom md:hidden"
+          className={authLoginMobileBackgroundImageClassName}
           sizes="100vw"
           aria-hidden
         />
@@ -75,7 +76,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
       </div>
 
       <div
-        className="relative z-10 flex h-full min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(64px+env(safe-area-inset-top,0px))] md:px-8 md:landscape:justify-center md:landscape:pt-104 md:landscape:py-6 justify-end lg:items-end items-center lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]"
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(64px+env(safe-area-inset-top,0px))] md:px-8 md:landscape:justify-center md:landscape:pt-104 md:landscape:py-6 justify-end lg:items-end items-center lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]"
       >
         <div
           role="region"
