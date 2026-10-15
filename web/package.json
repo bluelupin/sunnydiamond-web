@@ -28,8 +28,7 @@
     "test:gift-card": "node scripts/run-gift-card-test-cases.mjs",
     "test:gift-card-orders": "node --experimental-strip-types --no-warnings scripts/check-gift-card-order-display.mjs",
     "test:search": "node scripts/run-search-test-cases.mjs",
-    "test:intl-otp": "node --experimental-strip-types --no-warnings scripts/check-intl-otp.mjs",
-    "generate:brand-icons": "node scripts/generate-brand-icons.mjs"
+    "test:intl-otp": "node --experimental-strip-types --no-warnings scripts/check-intl-otp.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -71,7 +70,6 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "^16.2.4",
-    "sharp": "^0.34.5",
     "libphonenumber-js": "^1.13.15",
     "postcss": "^8.5.6",
     "postcss-styled-syntax": "^0.7.1",

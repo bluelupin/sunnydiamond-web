@@ -1,6 +1,6 @@
 /* Sunny Diamonds — basic offline cache (static assets + navigation fallback). */
 
-const CACHE_NAME = "sunny-diamonds-pwa-v2";
+const CACHE_NAME = "sunny-diamonds-pwa-v1";
 const PRECACHE_URLS = ["/", "/manifest.json"];
 
 function isSameOrigin(url) {
