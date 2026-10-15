@@ -241,7 +241,7 @@ export default function SearchOverlay({
 
   useEffect(() => {
     if (!open || !isMobileHeader) return;
-    const onKeyDown = (event: KeyboardEvent) => {
+    const onKeyDown = (event: WindowEventMap["keydown"]) => {
       if (event.key === "Escape") close();
     };
     window.addEventListener("keydown", onKeyDown);
