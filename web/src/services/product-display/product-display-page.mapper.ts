@@ -1,4 +1,5 @@
 import { isSectionActive } from "@/shared/utils/cmsSection";
+import { splitTitleLinesOnNewline } from "@/shared/utils/splitTitleLinesOnNewline";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import {
   EMPTY_PRODUCT_DISPLAY_PAGE,
@@ -69,16 +70,6 @@ export function mapVisitUsSection(
   };
 }
 
-function splitBenefitTitle(title: string): [string, string] {
-  const words = title.trim().split(/\s+/).filter(Boolean);
-  if (words.length <= 1) {
-    return [title.trim(), ""];
-  }
-
-  const midpoint = Math.ceil(words.length / 2);
-  return [words.slice(0, midpoint).join(" "), words.slice(midpoint).join(" ")] as [string, string];
-}
-
 function unwrapStrapiComponentEntry<T extends Record<string, unknown>>(entry: unknown): T {
   if (!entry || typeof entry !== "object") {
     return entry as T;
@@ -143,11 +134,12 @@ function mapStripItem(
     return null;
   }
 
-  const lines = splitBenefitTitle(title);
+  const lines = splitTitleLinesOnNewline(title);
+  const flatLabel = lines.join(" ");
 
   return {
-    label: title,
-    mobileLabel: title,
+    label: flatLabel,
+    mobileLabel: flatLabel,
     lines,
     icon,
   };
@@ -204,11 +196,12 @@ function mapCartStripItem(
     return null;
   }
 
-  const lines = splitBenefitTitle(title);
+  const lines = splitTitleLinesOnNewline(title);
+  const flatLabel = lines.join(" ");
 
   return {
-    label: title,
-    mobileLabel: title,
+    label: flatLabel,
+    mobileLabel: flatLabel,
     lines,
     icon,
   };

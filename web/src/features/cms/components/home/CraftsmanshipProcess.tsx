@@ -190,23 +190,29 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const hasDesktopVideoBackground = desktopIsVideo && Boolean(resolvedDesktopImage);
   const hasMobileVideoBackground = mobileIsVideo && Boolean(resolvedMobileImage);
   const hasAnyVideoBackground = hasDesktopVideoBackground || hasMobileVideoBackground;
-  const { activeIndex, progress, containerRef } = useStepScroll(Math.max(stepCount, 1));
-
-  // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
-  const rotateY = progress * 540;
-  const rotateX = 18 - progress * 36;
-  const rotateZ = Math.sin(progress * Math.PI * 2) * 8;
 
   const isSectionVisible =
     craftsmanship.fromCms &&
     craftsmanship.showField !== false &&
     isSectionActive(craftsmanship.isActive);
 
-  if (isEditorialLoading || !isSectionVisible) {
-    return null;
-  }
+  const shouldRenderSection =
+    !isEditorialLoading &&
+    isSectionVisible &&
+    Boolean(sectionTitle.trim()) &&
+    stepCount > 0;
 
-  if (!sectionTitle.trim() || stepCount === 0) {
+  const { activeIndex, progress, containerRef } = useStepScroll(
+    Math.max(stepCount, 1),
+    shouldRenderSection,
+  );
+
+  // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
+  const rotateY = progress * 540;
+  const rotateX = 18 - progress * 36;
+  const rotateZ = Math.sin(progress * Math.PI * 2) * 8;
+
+  if (!shouldRenderSection) {
     return null;
   }
 

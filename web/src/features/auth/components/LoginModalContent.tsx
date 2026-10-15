@@ -129,12 +129,11 @@ const LoginModalContent = ({
         ) : null}
 
         {!noSignInMethod && otpBlockedForCountry ? (
-          <div role="status" className="flex flex-col gap-1">
+          <div role="status" className="flex items-center justify-between gap-1">
             {/* Adapted from the Authentication & Registration Flow document's wording,
                 now that SMS codes reach some countries (CR-B3). */}
-            <p className="font-gill text-sm font-light leading-110 text-neutral500">
-              SMS codes aren&apos;t available for this country yet. Please use your Email
-              Address, Google Sign-In, or Apple Sign-In to continue.
+            <p className="font-gill text-sm font-light leading-110 text-red-500">
+              SMS codes aren&apos;t available for this country yet.
             </p>
             <button
               type="button"

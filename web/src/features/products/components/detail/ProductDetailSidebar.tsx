@@ -673,7 +673,10 @@ const ProductDetailSidebar = ({
                   <span className="font-gill text-base leading-110 text-darkblack">
                     {engravingSelection?.text ?? "Metal Engraving (Optional)"}
                   </span>
-                  <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack">
+                    <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
               ) : null}
             </div>
@@ -752,7 +755,7 @@ const ProductDetailSidebar = ({
                 target={strip.tnc.openInNewTab ? "_blank" : undefined}
                 rel={strip.tnc.openInNewTab ? "noopener noreferrer" : undefined}
               >
-                {strip.tnc.label}
+                {strip.tnc.label} 
               </DetailTextLink>
             ) : null}
           </div>
@@ -766,7 +769,7 @@ const ProductDetailSidebar = ({
                       "flex w-full shrink-0 flex-col items-center justify-center text-center",
                       "max-md:gap-2 max-md:px-3 max-md:py-4",
                       "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
-                      "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
+                      "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-2",
                       index > 0 && "md:landscape:border-l-[0.5px] md:landscape:border-neutral300 border-gray600",
                     )}
                   >
@@ -780,17 +783,12 @@ const ProductDetailSidebar = ({
                         className="size-10 object-contain"
                       />
                     </div>
-                    <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
-                      {benefit.mobileLabel}
-                    </span>
-                    <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
-                      {benefit.lines[0]}
-                      {benefit.lines[1] ? (
-                        <>
-                          <br />
-                          {benefit.lines[1]}
-                        </>
-                      ) : null}
+                    <span className="font-gill text-base leading-110 text-darkblack">
+                      {benefit.lines.map((line, lineIndex) => (
+                        <span key={`${benefit.label}-${lineIndex}`} className="block">
+                          {line}
+                        </span>
+                      ))}
                     </span>
                   </li>
                 );

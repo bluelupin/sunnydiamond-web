@@ -26,8 +26,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden",
-        isAuthPage ? "relative isolate z-10 h-[100dvh] max-h-[100dvh] min-h-[100lvh]" : "min-h-screen",
+        "flex flex-col",
+        isAuthPage
+          ? "relative isolate z-10 h-[100dvh] max-h-[100dvh] min-h-[100lvh] overflow-hidden"
+          : "min-h-screen overflow-x-clip",
       )}
     >
       <BrowserBackScrollRestore />

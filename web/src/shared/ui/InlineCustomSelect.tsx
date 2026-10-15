@@ -67,39 +67,16 @@ type InlineCustomSelectProps = {
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
-  <span
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
     className={cn(
-      "pointer-events-none inline-flex size-[24px] shrink-0 items-center justify-center overflow-visible text-darkblack",
+      "block shrink-0 overflow-visible inline-flex items-center justify-center overflow-visible motion-safe:origin-center motion-safe:transform-gpu",
+      "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out",
+      open ? "rotate-180" : "",
     )}
     aria-hidden
   >
-    <span
-      className={cn(
-        "inline-flex size-[16px] items-center justify-center overflow-visible motion-safe:origin-center motion-safe:transform-gpu",
-        "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out",
-        open ? "-rotate-90" : "rotate-90",
-      )}
-    >
-      <svg
-        width="7.038"
-        height="14.651"
-        viewBox="-0.5 -0.5 8.03817 15.6508"
-        fill="none"
-        overflow="visible"
-        xmlns="http://www.w3.org/2000/svg"
-        className="block shrink-0 overflow-visible"
-        aria-hidden
-      >
-        <path
-          d="M0.379628 0.325396L6.37963 7.3254L0.379628 14.3254"
-          stroke="currentColor"
-          strokeWidth="1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  </span>
+    <path d="M20 8L12.5 15.5L5 8" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
 );
 
 const InlineCustomSelect = ({

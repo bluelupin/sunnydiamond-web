@@ -102,7 +102,8 @@ export default function HomeBelowFoldSections() {
         <DiamondsForEveryoneSection id="diamonds-for-everyone" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="CraftsmanshipProcess" minHeight="">
+      {/* ScrollReveal transform on the wrapper breaks sticky + scroll-scrub in this section. */}
+      <LazyHomeSection featureName="CraftsmanshipProcess" minHeight="min-h-[750px]" animate={false}>
         <CraftsmanshipProcess id="craftsmanship" />
       </LazyHomeSection>
 
