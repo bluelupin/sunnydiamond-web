@@ -1,18 +1,22 @@
-import * as React from "react";
+import { useSyncExternalStore } from "react";
+
+const MOBILE_HEADER_MEDIA_QUERY = "(max-width: 767px), (orientation: portrait)";
+
+function subscribeMobileHeaderLayout(onStoreChange: () => void) {
+  const mq = window.matchMedia(MOBILE_HEADER_MEDIA_QUERY);
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
+
+function getMobileHeaderLayoutSnapshot() {
+  return window.matchMedia(MOBILE_HEADER_MEDIA_QUERY).matches;
+}
 
 /** Matches header `md:landscape:hidden` — mobile bar on small screens and portrait tablet. */
 export function useMobileHeaderLayout() {
-  const [isMobileHeader, setIsMobileHeader] = React.useState(false);
-
-  React.useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px), (orientation: portrait)");
-    const onChange = () => {
-      setIsMobileHeader(mq.matches);
-    };
-    mq.addEventListener("change", onChange);
-    onChange();
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  return isMobileHeader;
+  return useSyncExternalStore(
+    subscribeMobileHeaderLayout,
+    getMobileHeaderLayoutSnapshot,
+    () => false,
+  );
 }

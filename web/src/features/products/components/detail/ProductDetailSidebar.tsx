@@ -784,11 +784,14 @@ const ProductDetailSidebar = ({
                       />
                     </div>
                     <span className="font-gill text-base leading-110 text-darkblack">
-                      {benefit.lines.map((line, lineIndex) => (
-                        <span key={`${benefit.label}-${lineIndex}`} className="block">
-                          {line}
-                        </span>
-                      ))}
+                      <span className="md:landscape:hidden">{benefit.mobileLabel}</span>
+                      <span className="hidden md:landscape:block">
+                        {benefit.lines.map((line, lineIndex) => (
+                          <span key={`${benefit.label}-${lineIndex}`} className="block">
+                            {line}
+                          </span>
+                        ))}
+                      </span>
                     </span>
                   </li>
                 );

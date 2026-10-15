@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { createPortal } from "react-dom";
 import { History } from "lucide-react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
@@ -100,13 +100,13 @@ export default function SearchOverlay({
   }, [open]);
 
   useEffect(() => {
-    if (!open || isMobileHeader) return;
+    if (!open) return;
     returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const frame = requestAnimationFrame(() => {
       searchPanelRef.current?.querySelector("input")?.focus();
     });
     return () => cancelAnimationFrame(frame);
-  }, [open, isMobileHeader]);
+  }, [open]);
 
   // Desktop mega menu stays mounted while collapsed; blur so keystrokes do not hit a hidden input.
   useEffect(() => {
@@ -239,6 +239,32 @@ export default function SearchOverlay({
     return () => onRegisterDismiss?.(null);
   }, [close, isMobileHeader, onRegisterDismiss]);
 
+  useEffect(() => {
+    if (!open || !isMobileHeader) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [close, isMobileHeader, open]);
+
+  useEffect(() => {
+    if (!open || !isMobileHeader) return;
+
+    const headerSearchTriggerSelector = `[${HEADER_SEARCH_TRIGGER_ATTR}]`;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.closest(headerSearchTriggerSelector)) return;
+      if (searchPanelRef.current?.contains(target)) return;
+      close();
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [close, isMobileHeader, open]);
+
   const go = (href: string, recentText: string, option?: Option) => {
     if (recentText) {
       addRecentSearch(recentText);
@@ -275,11 +301,6 @@ export default function SearchOverlay({
   };
 
   let optionIndex = -1;
-
-  const focusSearchInput = (container: HTMLElement) => {
-    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    container.querySelector("input")?.focus();
-  };
 
   const searchPanelBody = (
     <div
@@ -430,33 +451,6 @@ export default function SearchOverlay({
     </div>
   );
 
-  const handleMobileOutsideInteraction = isMobileHeader
-    ? (event: Event) => {
-        const target = event.target;
-        if (target instanceof HTMLElement && target.closest(`[${HEADER_SEARCH_TRIGGER_ATTR}]`)) {
-          // Radix blocks the trigger click when we preventDefault here; closing explicitly
-          // keeps icon toggle working while backdrop taps still do not dismiss.
-          if (open) close();
-          return;
-        }
-        event.preventDefault();
-      }
-    : undefined;
-
-  const dialogFocusHandlers = {
-    onOpenAutoFocus: (event: Event) => {
-      event.preventDefault();
-      focusSearchInput(event.currentTarget as HTMLElement);
-    },
-    onCloseAutoFocus: (event: Event) => {
-      event.preventDefault();
-      if (skipReturnFocusRef.current) return;
-      if (returnFocus.current?.isConnected) returnFocus.current.focus();
-    },
-    onPointerDownOutside: handleMobileOutsideInteraction,
-    onInteractOutside: handleMobileOutsideInteraction,
-  };
-
   if (!isMobileHeader) {
     return (
       <SearchDesktopMegaMenu
@@ -470,35 +464,34 @@ export default function SearchOverlay({
     );
   }
 
-  return (
-    <DialogPrimitive.Root
-      open={open}
-      modal={false}
-      onOpenChange={(next) => (next ? onOpenChange(true) : close())}
-    >
-      <DialogPrimitive.Portal forceMount>
-        {/* Non-modal Root skips Radix Overlay; keep a scrim below the header for layout parity. */}
-        <div
-          aria-hidden
-          data-state={open ? "open" : "closed"}
-          className={cn(
-            searchOverlayFigmaSpec.mobileOverlayScrimClassName,
-            searchOverlayFigmaSpec.mobileOverlayFadeTransitionClassName,
-          )}
-        />
-        <DialogPrimitive.Content
-          forceMount
-          aria-describedby={undefined}
-          className={cn(
-            searchOverlayFigmaSpec.mobilePanelShellClassName,
-            searchOverlayFigmaSpec.mobilePanelExpandTransitionClassName,
-          )}
-          {...dialogFocusHandlers}
-        >
-          <DialogPrimitive.Title className="sr-only">Search Sunny Diamonds</DialogPrimitive.Title>
-          {searchPanelBody}
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+  if (!open) {
+    return null;
+  }
+
+  return createPortal(
+    <>
+      <div
+        aria-hidden
+        data-state="open"
+        className={cn(
+          searchOverlayFigmaSpec.mobileOverlayScrimClassName,
+          searchOverlayFigmaSpec.mobileOverlayFadeTransitionClassName,
+        )}
+        onClick={() => close()}
+      />
+      <div
+        role="dialog"
+        aria-modal={false}
+        aria-label="Search Sunny Diamonds"
+        data-state="open"
+        className={cn(
+          searchOverlayFigmaSpec.mobilePanelShellClassName,
+          searchOverlayFigmaSpec.mobilePanelExpandTransitionClassName,
+        )}
+      >
+        {searchPanelBody}
+      </div>
+    </>,
+    document.body,
   );
 }

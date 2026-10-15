@@ -438,7 +438,10 @@ const Header = () => {
                 type="button"
                 data-header-search-trigger
                 className={cn(iconButtonClass, textClass, hoverClass, searchOpen && "text-linkGold")}
-                onClick={toggleSearch}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleSearch();
+                }}
                 aria-label="Search"
                 aria-haspopup="dialog"
                 aria-expanded={searchOpen}
@@ -617,7 +620,7 @@ const Header = () => {
               : () => {
                   closeJewelleryMenuNow();
                   closeWorldOfSunnyMenuNow();
-                  closeSearchNow();
+                  searchDismissRef.current?.() ?? closeSearchNow();
                 }
           }
           onMouseEnter={

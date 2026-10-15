@@ -1,4 +1,4 @@
-/** Header search icon — mobile dialog must not swallow this as an outside dismiss. */
+/** Header mobile search trigger (toggle); kept for tests and future branch wiring. */
 export const HEADER_SEARCH_TRIGGER_ATTR = "data-header-search-trigger";
 
 /** Figma 4903:69969 — expanded navigation search overlay (desktop). */

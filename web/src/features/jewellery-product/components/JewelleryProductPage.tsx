@@ -69,6 +69,7 @@ import type {
   NormalizedProductLandingTrustBadge,
   NormalizedProductListingCard,
 } from "@/services/product-landing/product-landing-page.types";
+import { cn } from "@/shared/utils/cn";
 
 type JewelleryProductPageProps = {
   initialListing?: JewelleryListingProductsData;
@@ -740,12 +741,7 @@ const JewelleryProductPage = ({
     return (
       <div className="pb-0 md:pb-0">
         {hero ? <JewelleryHeroSection {...hero} /> : null}
-        {/* <PageContainer className="pb-6 pt-10 lg:pb-10 lg:pt-16">
-          <h2 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48">
-            Results for &lsquo;{searchQuery}&rsquo;
-          </h2>
-        </PageContainer> */}
-        <section className="relative isolate z-0 w-full bg-gray200">{noResults}</section>
+        <section className="relative isolate z-0 w-full bg-white">{noResults}</section>
       </div>
     );
   }
@@ -773,7 +769,7 @@ const JewelleryProductPage = ({
         isFilterOpen={isFilterOpen}
       />
 
-      <section className="relative isolate z-0 w-full bg-gray200">
+      <section className={cn("relative isolate z-0 w-full", showFilterEmptyState ? "bg-white" : "bg-gray200")}>
         {isLoading ? (
           <JewelleryProductGridSkeleton count={pageSize} />
         ) : showListingError ? (
