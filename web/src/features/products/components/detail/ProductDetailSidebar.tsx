@@ -48,7 +48,7 @@ import { getRingSizeOptions } from "@/features/products/utils/ringSizeOptions.ut
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
 import {
   findConfigurableVariantForMetal,
-  getConfigurableOptionUidsForMetal,
+  getConfigurableOptionUidsForCartItem,
 } from "@/features/products/utils/productVariant.utils";
 import {
   resolveHereForYouButtonVariant,
@@ -426,9 +426,11 @@ const ProductDetailSidebar = ({
   }, [initialEngravingSelection, engravingSelection?.text]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
-  const configurableOptionUids = selectedSize?.variant?.optionUids ?? getConfigurableOptionUidsForMetal(
+  const configurableOptionUids = getConfigurableOptionUidsForCartItem(
     product,
     selectedMetal,
+    ringSize || undefined,
+    selectedSize?.variant,
     preferredPurities,
   );
 

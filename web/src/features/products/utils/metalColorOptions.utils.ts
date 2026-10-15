@@ -25,15 +25,59 @@ export function formatMetalColorLabel(value: string): string {
     .join(" ");
 }
 
+export type ConfigurableOrderLineSkuParts = {
+  ringSize?: string;
+  metalSlug?: string;
+};
+
 /**
- * Configurable child line SKUs from Magento orders: `{numericParent}-{metalSlug}`.
- * Same slug family as PDP/cart `options.metal` (e.g. yellow-gold → Yellow Gold via formatMetalColorLabel).
+ * Magento configurable child line SKUs on orders:
+ * - `{parent}-{size}-{metalSlug}` e.g. 2120925809802-5-yellow-gold (Diya)
+ * - `{parent}-{metalSlug}` e.g. 2120925809846-yellow-gold (Anya)
+ * - `{parent}-{size}` e.g. 2120925809802-6 (legacy size-only child)
  */
-export function metalSlugFromOrderProductSku(sku: string | null | undefined): string | undefined {
+export function parseConfigurableOrderLineSku(
+  sku: string | null | undefined,
+): ConfigurableOrderLineSkuParts {
   const normalized = sku?.trim().toLowerCase();
-  if (!normalized) return undefined;
-  const match = normalized.match(/^\d+-([a-z0-9]+(?:-[a-z0-9]+)*)$/);
-  return match?.[1];
+  if (!normalized) {
+    return {};
+  }
+
+  const metalAndSize = normalized.match(
+    /^(\d+)-(\d+)-([a-z][a-z0-9]*(?:-[a-z0-9]+)*)$/,
+  );
+  if (metalAndSize) {
+    return {
+      ringSize: metalAndSize[2],
+      metalSlug: metalAndSize[3],
+    };
+  }
+
+  const twoPart = normalized.match(/^(\d+)-([a-z0-9]+(?:-[a-z0-9]+)*)$/);
+  const suffix = twoPart?.[2];
+  if (!suffix) {
+    return {};
+  }
+
+  if (/^\d+$/.test(suffix)) {
+    return { ringSize: suffix };
+  }
+
+  if (/[a-z]/.test(suffix) && !/^\d/.test(suffix)) {
+    return { metalSlug: suffix };
+  }
+
+  return {};
+}
+
+/** Metal slug fallback when order options omit configurable metal (not `{parent}-6`). */
+export function metalSlugFromOrderProductSku(sku: string | null | undefined): string | undefined {
+  return parseConfigurableOrderLineSku(sku).metalSlug;
+}
+
+export function ringSizeFromOrderProductSku(sku: string | null | undefined): string | undefined {
+  return parseConfigurableOrderLineSku(sku).ringSize;
 }
 
 function normalizeMetalColorKey(value: string): string {
