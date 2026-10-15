@@ -348,8 +348,8 @@ const PhoneCountryCodeSelect = ({
                 )}
               >
                 <CountryFlagIcon iso={display.iso} />
-                <span className="min-w-0 flex-1 truncate whitespace-nowrap">{countryLabel}</span>
-                <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums">{dialCodeLabel}</span>
+                <span className="min-w-0 flex-1 truncate whitespace-nowrap">{countryLabel} {dialCodeLabel}</span>
+                {/* <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums">{dialCodeLabel}</span> */}
               </button>
             );
           })}

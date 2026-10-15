@@ -41,8 +41,9 @@ const ProductDetailHeroBanner = ({
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const hasVideo = Boolean(videoSrc?.trim());
-  const showVideo = Boolean(hasVideo && shouldLoadVideo && !videoFailed);
-  const videoRef = useMutedVideoPlayback(showVideo);
+  const showVideoSources = Boolean(hasVideo && shouldLoadVideo && !videoFailed);
+  const showStaticImage = !hasVideo || videoFailed;
+  const videoRef = useMutedVideoPlayback(hasVideo && !videoFailed);
 
   const handleVideoError = useCallback(() => {
     setVideoFailed(true);
@@ -84,6 +85,22 @@ const ProductDetailHeroBanner = ({
     });
   }, []);
 
+  useEffect(() => {
+    if (!showVideoSources) {
+      return;
+    }
+
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    video.load();
+    void video.play().catch(() => {
+      // Autoplay can be blocked transiently; onCanPlay may retry.
+    });
+  }, [showVideoSources, videoSrc, videoRef]);
+
   const videoWebmSrc = videoSrc ? resolveCompanionWebmSrc(videoSrc) : undefined;
   const videoMimeType = videoSrc ? resolveVideoMimeType(videoSrc) : "video/mp4";
 
@@ -93,7 +110,7 @@ const ProductDetailHeroBanner = ({
       aria-label="Lifestyle showcase"
       className="grid h-[400px] w-full overflow-hidden md:h-[500px] lg:h-[600px] [&>*]:col-start-1 [&>*]:row-start-1"
     >
-      {!showVideo ? (
+      {showStaticImage ? (
         <Image
           src={imageSrc}
           alt={alt}
@@ -105,24 +122,30 @@ const ProductDetailHeroBanner = ({
         />
       ) : null}
 
-      {showVideo && videoSrc ? (
+      {hasVideo && videoSrc && !videoFailed ? (
         <video
           key={videoSrc}
           ref={videoRef}
-          className="h-full w-full object-cover object-top"
-          autoPlay
+          className="pointer-events-none h-full w-full object-cover object-top"
+          autoPlay={showVideoSources}
           loop
           muted
           playsInline
-          preload="metadata"
+          disablePictureInPicture
+          controls={false}
+          preload={showVideoSources ? "metadata" : "none"}
           poster={imageSrc}
           aria-hidden
           tabIndex={-1}
-          onCanPlay={handleVideoCanPlay}
+          onCanPlay={showVideoSources ? handleVideoCanPlay : undefined}
           onError={handleVideoError}
         >
-          {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
-          <source src={videoSrc} type={videoMimeType} />
+          {showVideoSources ? (
+            <>
+              {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
+              <source src={videoSrc} type={videoMimeType} />
+            </>
+          ) : null}
         </video>
       ) : null}
     </section>
