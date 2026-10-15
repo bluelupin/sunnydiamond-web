@@ -36,7 +36,7 @@ import {
 } from "@/features/products/utils/metalColorOptions.utils";
 import {
   applySelectedMetalVariant,
-  getConfigurableOptionUidsForMetal,
+  getConfigurableOptionUidsForCartItem,
 } from "@/features/products/utils/productVariant.utils";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
@@ -195,8 +195,12 @@ const WishlistAddToBagPanel = ({
       return;
     }
 
-    const configurableOptionUids =
-      selectedSize?.variant?.optionUids ?? getConfigurableOptionUidsForMetal(detailProduct, selectedMetal);
+    const configurableOptionUids = getConfigurableOptionUidsForCartItem(
+      detailProduct,
+      selectedMetal,
+      ringSize || undefined,
+      selectedSize?.variant,
+    );
 
     onAddToBag({
       product: displayProduct ?? detailProduct,

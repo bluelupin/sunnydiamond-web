@@ -287,6 +287,8 @@ type AddProductToGuestCartInput = {
   lineOptions?: CartLineOptions;
   productCustomOptions?: ProductCustomOptions;
   configurableOptionUids?: string[];
+  /** When > 0, parent SKU must use addProductsToCart with configurable UIDs — never addSimpleProductsToCart. */
+  configurableAxisCount?: number;
   lineMetadata: StoredCartLineMetadata;
   signal?: AbortSignal;
 };
@@ -298,6 +300,7 @@ export async function addProductToGuestCart({
   lineOptions = {},
   productCustomOptions,
   configurableOptionUids = [],
+  configurableAxisCount = 0,
   lineMetadata,
   signal,
 }: AddProductToGuestCartInput): Promise<GuestCartState> {
@@ -305,11 +308,15 @@ export async function addProductToGuestCart({
   const optionPayload = buildMagentoCartItemOptionPayload(
     lineOptions,
     configurableUids.length > 0 && productCustomOptions
-      ? { ...productCustomOptions, metal: undefined }
+      ? { ...productCustomOptions, metal: undefined, ringSize: undefined }
       : productCustomOptions,
   );
   const selectedOptions = [...(optionPayload?.selectedOptions ?? []), ...configurableUids];
   const enteredOptions = optionPayload?.enteredOptions ?? [];
+
+  if (configurableAxisCount > 0 && configurableUids.length < configurableAxisCount) {
+    throw new Error("Please select all product options before adding to bag.");
+  }
 
   if (!optionPayload && configurableUids.length === 0) {
     return addSimpleProductToGuestCart(cartId, sku, quantity, lineMetadata, signal);
