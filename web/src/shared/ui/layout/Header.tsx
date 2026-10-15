@@ -389,7 +389,7 @@ const Header = () => {
       aria-label={siteConfig.brand.name}
       className={cn("inline-flex shrink-0 items-center justify-center leading-none", logoClass)}
     >
-      <SDLogo className="!h-16 !w-20 md:landscape:!h-14 md:landscape:!w-14 lg:landscape:!h-[62px] lg:landscape:!w-[62px]" />
+      <SDLogo className="!h-16 !w-20 max-[340px]:mr-9 md:landscape:!h-14 md:landscape:!w-14 lg:landscape:!h-[62px] lg:landscape:!w-[62px]" />
     </Link>
   );
 

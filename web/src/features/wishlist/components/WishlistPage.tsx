@@ -85,10 +85,9 @@ const WishlistPage = () => {
       />
 
       <div
-        className={cn(
-          "bg-gray200",
+        className={cn(showEmptyState ? "bg-white" : "bg-gray200",
           (showEmptyState || showLoadError || needsFooterMargin) && "md:mb-24 mb-6",
-          showEmptyState && "lg:mb-0 lg:bg-white",
+          // showEmptyState && "lg:mb-0 lg:bg-white",
         )}
       >
         {showListingSkeleton ? (
