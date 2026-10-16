@@ -27,6 +27,7 @@ import {
   mergeFacetOptions,
 } from "./productAttributeOptions.service";
 import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils/collectionListing";
+import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/utils/diamondShapeListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import { MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
@@ -285,6 +286,31 @@ async function enrichFacetsWithGemstoneAttributeOptions(
   }
 }
 
+async function enrichFacetsWithDiamondShapeAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const diamondShape = filters.diamondShape.trim();
+  if (!diamondShape) {
+    return facets;
+  }
+
+  if (resolveDiamondShapeFacetOption(diamondShape, facets.diamondShapes)) {
+    return facets;
+  }
+
+  try {
+    const magentoShapes = await getMagentoProductAttributeOptions("sd_diamond_shape", signal);
+    return {
+      ...facets,
+      diamondShapes: mergeFacetOptions(facets.diamondShapes, magentoShapes),
+    };
+  } catch {
+    return facets;
+  }
+}
+
 async function enrichFacetsWithDrawerAttributeOptions(
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
@@ -296,7 +322,8 @@ async function enrichFacetsWithDrawerAttributeOptions(
     withOccasions,
     signal,
   );
-  return enrichFacetsWithGemstoneAttributeOptions(filters, withCollections, signal);
+  const withGemstones = await enrichFacetsWithGemstoneAttributeOptions(filters, withCollections, signal);
+  return enrichFacetsWithDiamondShapeAttributeOptions(filters, withGemstones, signal);
 }
 
 async function fetchMagentoJewelleryProducts({

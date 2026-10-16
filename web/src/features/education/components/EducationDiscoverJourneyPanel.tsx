@@ -19,7 +19,10 @@ import {
 } from "@/features/jewellery-product/data/filters";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { mapMagentoCategoriesToPlpNav } from "@/features/jewellery-product/utils/plpCategoryNav";
-import { DIAMOND_SHAPE_OPTIONS } from "@/features/jewellery-product/utils/diamondShapeListing";
+import {
+  DIAMOND_SHAPE_OPTIONS,
+  slugifyDiamondShapeLabel,
+} from "@/features/jewellery-product/utils/diamondShapeListing";
 import type { JewelleryCategory, JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import type {
   JewelleryFilterFacetOption,
@@ -38,6 +41,7 @@ import {
   resolveDiscoverJourneySteps,
 } from "../data/discoverJourney";
 import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
+import { discoverJourneyHasMatchingProducts } from "../utils/discoverJourneyAvailability";
 import { buildEducationJourneyHref } from "../utils/educationJourneyRoutes";
 import EducationDiscoverJourneyStepper from "./EducationDiscoverJourneyStepper";
 
@@ -101,6 +105,8 @@ const EducationDiscoverJourneyPanel = ({
   );
   const [isCheckingStep3Shape, setIsCheckingStep3Shape] = useState(false);
   const [step3ShapeHasProducts, setStep3ShapeHasProducts] = useState<boolean | null>(null);
+  const [categoryListingFacets, setCategoryListingFacets] =
+    useState<JewelleryFilterFacets | null>(null);
   const step2CategoryVerifyRequestRef = useRef(0);
   const step3ShapeVerifyRequestRef = useRef(0);
 
@@ -146,6 +152,7 @@ const EducationDiscoverJourneyPanel = ({
       setStep2CategoryHasProducts(null);
       setIsCheckingStep3Shape(false);
       setStep3ShapeHasProducts(null);
+      setCategoryListingFacets(null);
       setMinInputFocused(false);
       setMaxInputFocused(false);
       return;
@@ -275,26 +282,23 @@ const EducationDiscoverJourneyPanel = ({
     return normalized;
   };
 
-  const verifyProductsAvailable = async (
-    range: { minPrice: number; maxPrice: number },
-    categoryUrlKey: string | null,
-    diamondShape = "",
-  ): Promise<boolean> => {
-    const data = await getMagentoJewelleryProducts({
-      page: 1,
-      pageSize: 1,
-      categoryUrlKey,
-      filters: {
-        ...createEmptyFilterState(),
-        minPrice: range.minPrice,
-        maxPrice: range.maxPrice,
-        diamondShape: diamondShape.trim(),
-      },
-      facets,
-      includeFacets: false,
-    });
+  const resolveDiscoverJourneyShapeSlug = (shapeValue: string): string => {
+    const trimmed = shapeValue.trim();
+    if (!trimmed) {
+      return "";
+    }
 
-    return data.totalCount > 0;
+    const option =
+      diamondShapeOptions.find((item) => item.value === trimmed) ??
+      diamondShapeOptions.find(
+        (item) => slugifyDiamondShapeLabel(item.label) === trimmed.toLowerCase(),
+      );
+
+    if (option) {
+      return slugifyDiamondShapeLabel(option.label);
+    }
+
+    return slugifyDiamondShapeLabel(trimmed);
   };
 
   const availabilityErrorMessage =
@@ -320,15 +324,16 @@ const EducationDiscoverJourneyPanel = ({
 
     void (async () => {
       try {
-        const hasProducts = await verifyProductsAvailable(
-          { minPrice, maxPrice },
+        const { hasProducts, listingFacets } = await discoverJourneyHasMatchingProducts({
           categoryUrlKey,
-        );
+          range: { minPrice, maxPrice },
+        });
 
         if (requestId !== step2CategoryVerifyRequestRef.current) {
           return;
         }
 
+        setCategoryListingFacets(listingFacets);
         setStep2CategoryHasProducts(hasProducts);
         setShowAvailabilityError(!hasProducts);
       } catch {
@@ -369,16 +374,19 @@ const EducationDiscoverJourneyPanel = ({
 
     void (async () => {
       try {
-        const hasProducts = await verifyProductsAvailable(
-          { minPrice, maxPrice },
+        const shapeSlug = resolveDiscoverJourneyShapeSlug(trimmedShape);
+        const { hasProducts, listingFacets } = await discoverJourneyHasMatchingProducts({
           categoryUrlKey,
-          trimmedShape,
-        );
+          range: { minPrice, maxPrice },
+          diamondShapeSlug: shapeSlug,
+          listingFacets: categoryListingFacets ?? undefined,
+        });
 
         if (requestId !== step3ShapeVerifyRequestRef.current) {
           return;
         }
 
+        setCategoryListingFacets(listingFacets);
         setStep3ShapeHasProducts(hasProducts);
         setShowAvailabilityError(!hasProducts);
       } catch {
@@ -426,7 +434,11 @@ const EducationDiscoverJourneyPanel = ({
       void (async () => {
         try {
           const range = commitPriceRangeForProceed();
-          const hasProducts = await verifyProductsAvailable(range, null);
+          const { hasProducts } = await discoverJourneyHasMatchingProducts({
+            categoryUrlKey: null,
+            range,
+            listingFacets: facets,
+          });
 
           if (!hasProducts) {
             setShowAvailabilityError(true);
@@ -465,6 +477,7 @@ const EducationDiscoverJourneyPanel = ({
       minPrice,
       maxPrice,
       diamondShapeLabel: selectedShape.label,
+      listingFacets: categoryListingFacets ?? facets,
     });
 
     setShowAvailabilityError(false);
