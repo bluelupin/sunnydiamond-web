@@ -263,11 +263,6 @@ function ShowroomsMobileAccordion({
   | "emptyMessage"
 >) {
   const mobilePadding = storeLocatorSearchMobileFigmaSpec.paddingX;
-  const featuredLocation =
-    locations.find((location) => location.id === activeId) ?? locations[0];
-  const remainingLocations = noAreaCopy
-    ? locations.filter((location) => location.id !== featuredLocation?.id)
-    : locations;
 
   return (
     <div className="flex flex-col items-left gap-4 bg-white lg:hidden">
@@ -276,10 +271,7 @@ function ShowroomsMobileAccordion({
           {noAreaCopy ? (
             <ShowroomNoAreaListLead
               copy={noAreaCopy}
-              featuredLocation={featuredLocation}
-              getDirectionsLabel={getDirectionsLabel}
               horizontalPadding={mobilePadding}
-              includeMobileImage
             />
           ) : (
             <div className="w-full px-4">{listHeader}</div>
@@ -294,15 +286,6 @@ function ShowroomsMobileAccordion({
               {emptyMessage}
             </p>
           ) : null
-        ) : noAreaCopy ? (
-          remainingLocations.map((location) => (
-            <ShowroomCollapsedRow
-              key={location.id}
-              location={location}
-              onSelect={onSelect}
-              horizontalPadding={mobilePadding}
-            />
-          ))
         ) : (
           locations.map((location) => {
             const isSelected = location.id === activeId;
@@ -364,19 +347,23 @@ function ShowroomsDesktopLayout({
   imageAlt: string;
 }) {
   const matchedIdSet = new Set(matchedStoreIds ?? []);
-  const matchedLocations = locations.filter((location) => matchedIdSet.has(location.id));
-  const matchedCount = matchedLocations.length;
+  const matchedCount = matchedStoreIds?.length ?? 0;
   const showNearbyLabel = Boolean(
     nearbyStoresLabel?.trim() && matchedCount > 0 && locations.length > matchedCount,
   );
-  const orderedLocations = showNearbyLabel
-    ? [...matchedLocations, ...locations.filter((location) => !matchedIdSet.has(location.id))]
-    : locations;
-  const featuredLocation =
-    orderedLocations.find((location) => location.id === activeId) ?? orderedLocations[0];
-  const listLocations = noAreaCopy
-    ? orderedLocations.filter((location) => location.id !== featuredLocation?.id)
-    : orderedLocations;
+  // In-place list: divider before the first row after the last search hit (not list reorder).
+  let lastMatchedIndex = -1;
+  if (showNearbyLabel) {
+    for (let i = 0; i < locations.length; i += 1) {
+      if (matchedIdSet.has(locations[i].id)) {
+        lastMatchedIndex = i;
+      }
+    }
+  }
+  const exploreNearbyInsertIndex =
+    showNearbyLabel && lastMatchedIndex >= 0 && lastMatchedIndex < locations.length - 1
+      ? lastMatchedIndex + 1
+      : -1;
 
   return (
     <div
@@ -393,11 +380,7 @@ function ShowroomsDesktopLayout({
         style={{ maxWidth: figma.listMaxWidth }}
       >
         {noAreaCopy ? (
-          <ShowroomNoAreaListLead
-            copy={noAreaCopy}
-            featuredLocation={featuredLocation}
-            getDirectionsLabel={getDirectionsLabel}
-          />
+          <ShowroomNoAreaListLead copy={noAreaCopy} getDirectionsLabel={getDirectionsLabel} />
         ) : listHeader ? (
           <div
             className="w-full"
@@ -425,9 +408,9 @@ function ShowroomsDesktopLayout({
               </p>
             ) : null
           ) : (
-            listLocations.map((location, index) => {
-              const isSelected = !noAreaCopy && location.id === activeId;
-              const insertNearbyLabel = showNearbyLabel && index === matchedCount;
+            locations.map((location, index) => {
+              const isSelected = location.id === activeId;
+              const insertNearbyLabel = index === exploreNearbyInsertIndex;
 
               return (
                 <div key={location.id} className="w-full">

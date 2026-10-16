@@ -56,6 +56,8 @@ const BookAnAppointmentPanel = ({
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [now, setNow] = useState(() => new Date());
   const errors = cmsForm ? appointmentFormErrors(cmsForm, values, countryCodes, now) : {};
+  const isSubmitDisabled =
+    !cmsForm || Boolean(loadError) || isSubmitting || Object.keys(errors).length > 0;
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(getAuthLoginIdentifierKind());
   const lockedContactFields = new Set(
     cmsForm?.fields.flatMap((field, index) => {
@@ -271,7 +273,7 @@ const BookAnAppointmentPanel = ({
           </button>
           <button
             type="submit"
-            disabled={!cmsForm || Boolean(loadError) || isSubmitting}
+            disabled={isSubmitDisabled}
             className="order-1 flex h-14 w-full max-w-[343px] min-w-0 items-center justify-center bg-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50 md:order-2 md:max-w-none md:flex-[1.35] md:whitespace-nowrap"
           >
             Book an Appointment
