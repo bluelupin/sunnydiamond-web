@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -120,6 +121,7 @@ function AddressCard({
 }
 
 const ProfileAddressesSection = () => {
+  const { customer } = useAuth();
   const { show: showAddressToast, node: addressToast } = useProfileAddressToastController();
   const {
     addresses,
@@ -130,7 +132,10 @@ const ProfileAddressesSection = () => {
     updateAddress,
     deleteAddress,
     setDefaultShippingAddress,
-  } = useCustomerAddresses(true);
+  } = useCustomerAddresses(true, {
+    persistProfileListOrder: true,
+    customerId: customer?.id ?? null,
+  });
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingUid, setEditingUid] = useState<string | null>(null);
   const [deleteUid, setDeleteUid] = useState<string | null>(null);

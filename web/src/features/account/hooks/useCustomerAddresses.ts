@@ -11,6 +11,44 @@ import type {
   CustomerAddress,
   CustomerAddressInput,
 } from "@/services/customer/customer-account.types";
+import {
+  orderAddressesByUidList,
+  readProfileAddressListOrder,
+  writeProfileAddressListOrder,
+} from "../utils/profileAddressListOrder";
+
+/** Keep list order when only address data/flags change (Magento may reorder). */
+function mergeAddressesPreservingOrder(
+  previous: CustomerAddress[],
+  next: CustomerAddress[],
+): CustomerAddress[] {
+  return orderAddressesByUidList(
+    previous.map((address) => address.uid),
+    next,
+  );
+}
+
+type UseCustomerAddressesOptions = {
+  /** Profile → My Address: preserve card order across refresh after mark-default. */
+  persistProfileListOrder?: boolean;
+  customerId?: number | null;
+};
+
+function applyProfileListOrder(
+  addresses: CustomerAddress[],
+  customerId: number | null | undefined,
+): CustomerAddress[] {
+  if (!customerId) {
+    return addresses;
+  }
+
+  const storedOrder = readProfileAddressListOrder(customerId);
+  if (!storedOrder?.length) {
+    return addresses;
+  }
+
+  return orderAddressesByUidList(storedOrder, addresses);
+}
 
 type UseCustomerAddressesResult = {
   addresses: CustomerAddress[];
@@ -24,7 +62,12 @@ type UseCustomerAddressesResult = {
   setDefaultShippingAddress: (uid: string) => Promise<void>;
 };
 
-export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult {
+export function useCustomerAddresses(
+  enabled = true,
+  options?: UseCustomerAddressesOptions,
+): UseCustomerAddressesResult {
+  const persistProfileListOrder = Boolean(options?.persistProfileListOrder);
+  const customerId = options?.customerId ?? null;
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(enabled));
   const [isSaving, setIsSaving] = useState(false);
@@ -68,7 +111,11 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
             setAddresses([]);
             setError("Unable to load addresses. Please sign in again.");
           } else {
-            setAddresses(result);
+            setAddresses(
+              persistProfileListOrder
+                ? applyProfileListOrder(result, customerId)
+                : result,
+            );
           }
         }
       } catch (loadError) {
@@ -86,7 +133,7 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
       cancelled = true;
       controller.abort();
     };
-  }, [enabled, refreshKey]);
+  }, [enabled, refreshKey, persistProfileListOrder, customerId]);
 
   const createAddress = useCallback(async (input: CustomerAddressInput) => {
     setIsSaving(true);
@@ -142,7 +189,13 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
 
     try {
       const nextAddresses = await setCustomerDefaultShippingAddress(uid);
-      setAddresses(nextAddresses);
+      setAddresses((previous) => {
+        const merged = mergeAddressesPreservingOrder(previous, nextAddresses);
+        if (persistProfileListOrder && customerId) {
+          writeProfileAddressListOrder(customerId, merged);
+        }
+        return merged;
+      });
     } catch (defaultError) {
       const message =
         defaultError instanceof Error ? defaultError.message : "Failed to set default address";
@@ -151,7 +204,7 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
     } finally {
       setIsSaving(false);
     }
-  }, []);
+  }, [persistProfileListOrder, customerId]);
 
   return {
     addresses,
