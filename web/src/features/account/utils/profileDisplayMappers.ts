@@ -159,7 +159,7 @@ function isCashOnDeliveryPayment(paymentTypes: string[] | undefined): boolean {
 }
 
 /** Figma cancelled card: "Within 5-7 business days" — Magento sends the bare window. */
-function resolveCancellationRefundEstimate(refund: TrackedOrderRefundStatus | null): string {
+export function resolveCancellationRefundEstimate(refund: TrackedOrderRefundStatus | null): string {
   if (refund?.estimatedCompletionDate) {
     return formatOrderDate(refund.estimatedCompletionDate);
   }
@@ -511,9 +511,13 @@ export function mapCustomerOrderToProfileUi(
   const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapOrderItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
-  const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
-    ? undefined
-    : resolveOrderDeliveryBy(order.sunnyDelivery);
+  // Cancelled orders are not being delivered — hide the pre-cancel estimate on listing too.
+  const deliveryBy =
+    category === "cancelled"
+      ? undefined
+      : isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
+        ? undefined
+        : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
   const showCancel = actions
     ? actions.canCancel

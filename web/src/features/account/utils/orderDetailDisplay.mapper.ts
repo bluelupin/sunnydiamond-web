@@ -25,6 +25,7 @@ import {
   formatReturnDeadlineNote,
   LEGACY_CANCELLED_REFUND_STEPS,
   LEGACY_RETURN_REFUND_STEPS,
+  resolveCancellationRefundEstimate,
   resolveEstimatedDeliveryValue,
   resolveOrderDeliveryBy,
   resolveRefundEstimateValue,
@@ -146,9 +147,12 @@ export function mapTrackedOrderToProfileDetailUi(
   const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapDetailItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
-  const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
-    ? undefined
-    : resolveOrderDeliveryBy(order.sunnyDelivery);
+  const deliveryBy =
+    category === "cancelled"
+      ? undefined
+      : isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
+        ? undefined
+        : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
   const showCancel = actions
     ? actions.canCancel
@@ -199,6 +203,15 @@ export function mapTrackedOrderToProfileDetailUi(
           : undefined,
   };
 
+  // Figma: cancelled COD was never paid — no refund stepper (match order listing).
+  if (category === "cancelled" && isCashOnDeliveryOrder(order)) {
+    return {
+      ...base,
+      showDownloadInvoice: false,
+      showContactUs: true,
+    };
+  }
+
   if (category === "returned" || category === "cancelled") {
     const refundTimeline = resolveRefundTimeline(
       order,
@@ -208,16 +221,19 @@ export function mapTrackedOrderToProfileDetailUi(
     return {
       ...base,
       showDownloadInvoice: false,
-      showContactUs: category === "cancelled",
+      showContactUs: true,
       ...(category === "cancelled"
         ? {
+            estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,
+            estimatedDeliveryValue: resolveCancellationRefundEstimate(order.sunnyRefund),
+          }
+        : {
             estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
             estimatedDeliveryValue: resolveRefundEstimateValue(
               order.sunnyRefund,
-              ordersContent.estimatedDeliveryRangePlaceholder,
+              ordersContent.estimatedDeliveryPlaceholder,
             ),
-          }
-        : {}),
+          }),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
