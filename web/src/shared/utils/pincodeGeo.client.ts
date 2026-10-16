@@ -7,10 +7,20 @@ type PincodeGeoResponse = {
   state?: string;
 };
 
+function createPinLookupAbortSignal(): AbortSignal {
+  if (typeof AbortSignal.timeout === "function") {
+    return AbortSignal.timeout(PIN_LOOKUP_TIMEOUT_MS);
+  }
+
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), PIN_LOOKUP_TIMEOUT_MS);
+  return controller.signal;
+}
+
 /** Client lookup: Indian PIN → city/state (same API as checkout). Failures return null. */
 export async function fetchPincodeCityState(
   pin: string,
-  signal: AbortSignal = AbortSignal.timeout(PIN_LOOKUP_TIMEOUT_MS),
+  signal: AbortSignal = createPinLookupAbortSignal(),
 ): Promise<{ city: string; state: string } | null> {
   try {
     const response = await fetch(`/api/pincode-geo/${encodeURIComponent(pin)}`, { signal });

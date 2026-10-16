@@ -13,8 +13,6 @@ type UsePincodeCityStateAutofillOptions = {
   pincode: string;
   enabled?: boolean;
   onApply: (address: PincodeCityState, pin: string) => void;
-  /** Re-run lookup when this changes (e.g. CMS form loaded) without editing pincode. */
-  lookupRevision?: string | number;
 };
 
 /**
@@ -25,7 +23,6 @@ export function usePincodeCityStateAutofill({
   pincode,
   enabled = true,
   onApply,
-  lookupRevision,
 }: UsePincodeCityStateAutofillOptions): void {
   const requestRef = useRef(0);
   const onApplyRef = useRef(onApply);
@@ -58,5 +55,5 @@ export function usePincodeCityStateAutofill({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [enabled, lookupRevision, pincode]);
+  }, [enabled, pincode]);
 }

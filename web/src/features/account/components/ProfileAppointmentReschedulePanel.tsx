@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
@@ -61,8 +61,8 @@ import {
 import {
   getTryAtHomeStateSelectOptions,
   matchTryAtHomeStateSelectOption,
-  resolveTryAtHomeAddressStateLabelForUi,
 } from "@/features/products/data/tryAtHomeContent";
+import { INDIAN_STATES_AND_UTS } from "@/shared/constants/indianStatesAndUts";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 
@@ -124,56 +124,6 @@ const ALL_ADDRESS_FIELDS: AddressField[] = [
   "city",
   "state",
 ];
-
-/** Pincode autofill mounts with the address step (same lifecycle as Try at Home). */
-function ReschedulePincodeAutofill({
-  pincode,
-  cmsStateFieldOptions,
-  cmsStateRelationOptions,
-  stateOptionsRef,
-  onApplyCity,
-  onApplyState,
-  lookupRevision,
-}: {
-  pincode: string;
-  cmsStateFieldOptions?: readonly string[];
-  cmsStateRelationOptions?: NormalizedProductForm["stateRelationOptions"];
-  stateOptionsRef: RefObject<readonly string[]>;
-  onApplyCity: (city: string) => void;
-  onApplyState: (state: string) => void;
-  lookupRevision?: string | number;
-}) {
-  const pincodeRef = useRef(pincode);
-  pincodeRef.current = pincode;
-
-  const onApply = useCallback(
-    (lookup: { city: string; state: string }, pin: string) => {
-      if (pincodeRef.current.trim() !== pin) {
-        return;
-      }
-
-      if (lookup.city) {
-        onApplyCity(lookup.city);
-      }
-      if (lookup.state) {
-        const label =
-          resolveTryAtHomeAddressStateLabelForUi(
-            lookup.state,
-            cmsStateFieldOptions,
-            cmsStateRelationOptions,
-          ) || lookup.state.trim();
-        const options = stateOptionsRef.current ?? [];
-        const matched = matchTryAtHomeStateSelectOption(label, options) || label;
-        onApplyState(matched);
-      }
-    },
-    [cmsStateFieldOptions, cmsStateRelationOptions, onApplyCity, onApplyState, stateOptionsRef],
-  );
-
-  usePincodeCityStateAutofill({ pincode, onApply, lookupRevision });
-
-  return null;
-}
 
 /** Same showroom card as the PDP Book a Visit panel, for the booked store. */
 function RescheduleStoreVisitCard({
@@ -301,6 +251,33 @@ export function ProfileAppointmentReschedulePanel({
     () => matchTryAtHomeStateSelectOption(addressState, stateOptions),
     [addressState, stateOptions],
   );
+
+  const pincodeRef = useRef(pincode);
+  pincodeRef.current = pincode;
+
+  const applyPincodeLookup = useCallback((lookup: { city: string; state: string }, pin: string) => {
+    if (pincodeRef.current.trim() !== pin) {
+      return;
+    }
+
+    if (lookup.city) {
+      setCity(lookup.city);
+    }
+    if (lookup.state) {
+      const raw = lookup.state.trim();
+      const matched =
+        matchTryAtHomeStateSelectOption(raw, stateOptionsRef.current) ||
+        matchTryAtHomeStateSelectOption(raw, INDIAN_STATES_AND_UTS) ||
+        raw;
+      setAddressState(matched);
+    }
+  }, []);
+
+  usePincodeCityStateAutofill({
+    pincode,
+    enabled: isAddressStep,
+    onApply: applyPincodeLookup,
+  });
 
   const isAddressChanged =
     isTryAtHome &&
@@ -647,19 +624,6 @@ export function ProfileAppointmentReschedulePanel({
 
               {isAddressStep ? (
                 <>
-                  <ReschedulePincodeAutofill
-                    pincode={pincode}
-                    cmsStateFieldOptions={cmsForm?.stateFieldOptions}
-                    cmsStateRelationOptions={cmsForm?.stateRelationOptions}
-                    stateOptionsRef={stateOptionsRef}
-                    onApplyCity={setCity}
-                    onApplyState={setAddressState}
-                    lookupRevision={
-                      cmsForm
-                        ? `${cmsForm.stateFieldOptions.length}:${cmsForm.stateRelationOptions.length}`
-                        : 0
-                    }
-                  />
                   <div className="flex flex-col gap-2">
                     <label
                       htmlFor="reschedule-appointment-address-line-1"
