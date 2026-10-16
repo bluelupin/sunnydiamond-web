@@ -41,7 +41,13 @@ import {
   resolveDiscoverJourneySteps,
 } from "../data/discoverJourney";
 import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
-import { discoverJourneyHasMatchingProducts } from "../utils/discoverJourneyAvailability";
+import {
+  clearDiscoverJourneyListingFacetCache,
+  discoverJourneyHasMatchingProducts,
+  isDiscoverJourneyAbortError,
+  prefetchDiscoverJourneyCategoryFacets,
+  primeDiscoverJourneyListingFacetCache,
+} from "../utils/discoverJourneyAvailability";
 import { buildEducationJourneyHref } from "../utils/educationJourneyRoutes";
 import EducationDiscoverJourneyStepper from "./EducationDiscoverJourneyStepper";
 
@@ -142,6 +148,7 @@ const EducationDiscoverJourneyPanel = ({
 
   useEffect(() => {
     if (!open) {
+      clearDiscoverJourneyListingFacetCache();
       setStep(1);
       setCategorySlug("all");
       setDiamondShapeValue("");
@@ -175,6 +182,7 @@ const EducationDiscoverJourneyPanel = ({
           data.facets.maxPrice > data.facets.minPrice ? data.facets : createFallbackFacets();
 
         setFacets(nextFacets);
+        primeDiscoverJourneyListingFacetCache(null, nextFacets);
         setMinPrice(nextFacets.minPrice);
         setMaxPrice(nextFacets.maxPrice);
         setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
@@ -313,10 +321,27 @@ const EducationDiscoverJourneyPanel = ({
       return;
     }
 
+    const prefetchController = new AbortController();
+    prefetchDiscoverJourneyCategoryFacets(
+      categories.map((category) => category.urlKey ?? null),
+      prefetchController.signal,
+    );
+
+    return () => {
+      prefetchController.abort();
+    };
+  }, [step, categories]);
+
+  useEffect(() => {
+    if (step !== 2) {
+      return;
+    }
+
     const category = categories.find((item) => item.slug === categorySlug);
     const categoryUrlKey = category?.urlKey ?? null;
     const requestId = step2CategoryVerifyRequestRef.current + 1;
     step2CategoryVerifyRequestRef.current = requestId;
+    const controller = new AbortController();
 
     setIsCheckingStep2Category(true);
     setStep2CategoryHasProducts(null);
@@ -327,6 +352,7 @@ const EducationDiscoverJourneyPanel = ({
         const { hasProducts, listingFacets } = await discoverJourneyHasMatchingProducts({
           categoryUrlKey,
           range: { minPrice, maxPrice },
+          signal: controller.signal,
         });
 
         if (requestId !== step2CategoryVerifyRequestRef.current) {
@@ -336,8 +362,11 @@ const EducationDiscoverJourneyPanel = ({
         setCategoryListingFacets(listingFacets);
         setStep2CategoryHasProducts(hasProducts);
         setShowAvailabilityError(!hasProducts);
-      } catch {
-        if (requestId !== step2CategoryVerifyRequestRef.current) {
+      } catch (error) {
+        if (
+          isDiscoverJourneyAbortError(error) ||
+          requestId !== step2CategoryVerifyRequestRef.current
+        ) {
           return;
         }
 
@@ -349,6 +378,10 @@ const EducationDiscoverJourneyPanel = ({
         }
       }
     })();
+
+    return () => {
+      controller.abort();
+    };
   }, [step, categorySlug, minPrice, maxPrice, categories]);
 
   useEffect(() => {
@@ -367,6 +400,7 @@ const EducationDiscoverJourneyPanel = ({
     const categoryUrlKey = selectedCategory?.urlKey ?? null;
     const requestId = step3ShapeVerifyRequestRef.current + 1;
     step3ShapeVerifyRequestRef.current = requestId;
+    const controller = new AbortController();
 
     setIsCheckingStep3Shape(true);
     setStep3ShapeHasProducts(null);
@@ -380,6 +414,7 @@ const EducationDiscoverJourneyPanel = ({
           range: { minPrice, maxPrice },
           diamondShapeSlug: shapeSlug,
           listingFacets: categoryListingFacets ?? undefined,
+          signal: controller.signal,
         });
 
         if (requestId !== step3ShapeVerifyRequestRef.current) {
@@ -389,8 +424,11 @@ const EducationDiscoverJourneyPanel = ({
         setCategoryListingFacets(listingFacets);
         setStep3ShapeHasProducts(hasProducts);
         setShowAvailabilityError(!hasProducts);
-      } catch {
-        if (requestId !== step3ShapeVerifyRequestRef.current) {
+      } catch (error) {
+        if (
+          isDiscoverJourneyAbortError(error) ||
+          requestId !== step3ShapeVerifyRequestRef.current
+        ) {
           return;
         }
 
@@ -402,6 +440,10 @@ const EducationDiscoverJourneyPanel = ({
         }
       }
     })();
+
+    return () => {
+      controller.abort();
+    };
   }, [step, diamondShapeValue, minPrice, maxPrice, selectedCategory?.urlKey]);
 
   const handleBack = () => {
@@ -446,6 +488,9 @@ const EducationDiscoverJourneyPanel = ({
           }
 
           setShowAvailabilityError(false);
+          prefetchDiscoverJourneyCategoryFacets(
+            categories.map((category) => category.urlKey ?? null),
+          );
           setStep(2);
         } catch {
           setShowAvailabilityError(true);

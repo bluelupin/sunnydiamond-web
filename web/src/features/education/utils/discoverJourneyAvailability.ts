@@ -8,8 +8,65 @@ export type DiscoverJourneyPriceRange = {
   maxPrice: number;
 };
 
-/** Category-scoped (or all-jewellery) price bounds — matches PLP prefetch clamping. */
-export async function fetchDiscoverJourneyListingFacets(
+/** Align with PLP client listing cache — facets are stable for the panel session. */
+const DISCOVER_JOURNEY_FACET_CACHE_TTL_MS = 60_000;
+
+type DiscoverJourneyFacetCacheEntry = {
+  facets: JewelleryFilterFacets;
+  fetchedAt: number;
+};
+
+const discoverJourneyListingFacetCache = new Map<string, DiscoverJourneyFacetCacheEntry>();
+const discoverJourneyListingFacetsInFlight = new Map<string, Promise<JewelleryFilterFacets>>();
+
+function discoverJourneyFacetScopeKey(categoryUrlKey: string | null): string {
+  return categoryUrlKey ?? "all";
+}
+
+export function isDiscoverJourneyAbortError(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
+
+  return error instanceof Error && error.name === "AbortError";
+}
+
+export function clearDiscoverJourneyListingFacetCache(): void {
+  discoverJourneyListingFacetCache.clear();
+  discoverJourneyListingFacetsInFlight.clear();
+}
+
+export function peekDiscoverJourneyListingFacets(
+  categoryUrlKey: string | null,
+): JewelleryFilterFacets | null {
+  const entry = discoverJourneyListingFacetCache.get(
+    discoverJourneyFacetScopeKey(categoryUrlKey),
+  );
+
+  if (!entry) {
+    return null;
+  }
+
+  if (Date.now() - entry.fetchedAt > DISCOVER_JOURNEY_FACET_CACHE_TTL_MS) {
+    discoverJourneyListingFacetCache.delete(discoverJourneyFacetScopeKey(categoryUrlKey));
+    return null;
+  }
+
+  return entry.facets;
+}
+
+/** Seeds the session cache (e.g. after step-1 global facet load). */
+export function primeDiscoverJourneyListingFacetCache(
+  categoryUrlKey: string | null,
+  facets: JewelleryFilterFacets,
+): void {
+  discoverJourneyListingFacetCache.set(discoverJourneyFacetScopeKey(categoryUrlKey), {
+    facets,
+    fetchedAt: Date.now(),
+  });
+}
+
+async function fetchDiscoverJourneyListingFacetsFromNetwork(
   categoryUrlKey: string | null,
   signal?: AbortSignal,
 ): Promise<JewelleryFilterFacets> {
@@ -23,6 +80,63 @@ export async function fetchDiscoverJourneyListingFacets(
   });
 
   return data.facets;
+}
+
+/** Category-scoped (or all-jewellery) price bounds — matches PLP prefetch clamping. */
+export async function getDiscoverJourneyListingFacets(
+  categoryUrlKey: string | null,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const cached = peekDiscoverJourneyListingFacets(categoryUrlKey);
+  if (cached) {
+    return cached;
+  }
+
+  const scopeKey = discoverJourneyFacetScopeKey(categoryUrlKey);
+  const inFlight = discoverJourneyListingFacetsInFlight.get(scopeKey);
+  if (inFlight) {
+    return inFlight;
+  }
+
+  const fetchPromise = fetchDiscoverJourneyListingFacetsFromNetwork(categoryUrlKey, signal)
+    .then((facets) => {
+      primeDiscoverJourneyListingFacetCache(categoryUrlKey, facets);
+      discoverJourneyListingFacetsInFlight.delete(scopeKey);
+      return facets;
+    })
+    .catch((error) => {
+      discoverJourneyListingFacetsInFlight.delete(scopeKey);
+      throw error;
+    });
+
+  discoverJourneyListingFacetsInFlight.set(scopeKey, fetchPromise);
+  return fetchPromise;
+}
+
+/** Warms facet cache for step-2 category tiles (deduped in-flight per scope). */
+export function prefetchDiscoverJourneyCategoryFacets(
+  categoryUrlKeys: readonly (string | null)[],
+  signal?: AbortSignal,
+): void {
+  const seen = new Set<string>();
+
+  for (const categoryUrlKey of categoryUrlKeys) {
+    const scopeKey = discoverJourneyFacetScopeKey(categoryUrlKey);
+    if (seen.has(scopeKey)) {
+      continue;
+    }
+    seen.add(scopeKey);
+
+    if (peekDiscoverJourneyListingFacets(categoryUrlKey)) {
+      continue;
+    }
+
+    void getDiscoverJourneyListingFacets(categoryUrlKey, signal).catch((error) => {
+      if (isDiscoverJourneyAbortError(error)) {
+        return;
+      }
+    });
+  }
 }
 
 export function buildDiscoverJourneyListingFilters(
@@ -61,7 +175,12 @@ export async function discoverJourneyHasMatchingProducts({
   signal?: AbortSignal;
 }): Promise<{ hasProducts: boolean; listingFacets: JewelleryFilterFacets }> {
   const scopedFacets =
-    listingFacets ?? (await fetchDiscoverJourneyListingFacets(categoryUrlKey, signal));
+    listingFacets ??
+    (await getDiscoverJourneyListingFacets(categoryUrlKey, signal));
+
+  if (listingFacets) {
+    primeDiscoverJourneyListingFacetCache(categoryUrlKey, listingFacets);
+  }
 
   const filters = buildDiscoverJourneyListingFilters(range, diamondShapeSlug, scopedFacets);
 
