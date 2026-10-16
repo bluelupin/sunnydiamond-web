@@ -53,7 +53,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         {children}
       </main>
       {hideFooter ? null : <Footer className={hideFooterOnMobile ? "max-md:hidden" : undefined} />}
-      <PwaInstallBanner />
+      {/* <PwaInstallBanner /> */}
     </div>
   );
 };
