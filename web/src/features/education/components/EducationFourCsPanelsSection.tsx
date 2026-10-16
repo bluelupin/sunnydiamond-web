@@ -13,6 +13,7 @@ import {
 import type { NormalizedEducationFourCsPanel } from "@/services/education/learn-about-diamonds-page.types";
 import EducationMetricSlider from "./EducationMetricSlider";
 import EducationCaratHandVisual from "./EducationCaratHandVisual";
+import EducationPanelCrossfadeImage from "./EducationPanelCrossfadeImage";
 import Reveal from "@/shared/Animation/Reveal";
 
 const PanelTexture = ({ panelId, alt }: { panelId: string; alt?: string }) => (
@@ -145,21 +146,17 @@ const PanelMedia = ({
             {cutDualImages ? (
               <div className="flex items-center gap-4 lg:gap-6">
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
-                  <Image
-                    key={`${panel.id}-${activeIndex}-dual-1-${cutDualImages[1]}`}
+                  <EducationPanelCrossfadeImage
                     src={cutDualImages[1]}
                     alt={slider.options[activeIndex]?.dualImageAlts?.[1] ?? ""}
-                    fill
                     className="object-contain"
                     sizes="200px"
                   />
                 </div>
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
-                  <Image
-                    key={`${panel.id}-${activeIndex}-dual-0-${cutDualImages[0]}`}
+                  <EducationPanelCrossfadeImage
                     src={cutDualImages[0]}
                     alt={slider.options[activeIndex]?.dualImageAlts?.[0] ?? ""}
-                    fill
                     className="object-cover"
                     sizes="200px"
                   />
@@ -167,11 +164,9 @@ const PanelMedia = ({
               </div>
             ) : activeImage ? (
               <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
-                <Image
-                  key={`${panel.id}-${activeIndex}-${activeImage}`}
+                <EducationPanelCrossfadeImage
                   src={activeImage}
                   alt={slider.options[activeIndex]?.imageAlt ?? ""}
-                  fill
                   className="object-contain"
                   sizes="200px"
                 />
