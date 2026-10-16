@@ -1,7 +1,9 @@
 import type {
+  CmsStateRelationOption,
   NormalizedProductForm,
   StrapiProductForm,
   StrapiProductFormDynamicField,
+  StrapiProductFormStateOption,
 } from "./product-form.types";
 
 const cleanText = (value?: string | null): string | undefined => {
@@ -37,6 +39,31 @@ const mapFieldOptions = (field?: StrapiProductFormDynamicField): string[] =>
   field?.dropdownOptions
     ?.map((option) => cleanText(option.optionValue))
     .filter((option): option is string => Boolean(option)) ?? [];
+
+function mapStateRelationOptions(
+  raw?: StrapiProductFormStateOption[] | null,
+): CmsStateRelationOption[] {
+  const mapped: CmsStateRelationOption[] = [];
+
+  for (const option of raw ?? []) {
+    const label =
+      cleanText(option.name) ??
+      cleanText(option.label) ??
+      cleanText(option.value) ??
+      cleanText(option.code);
+    const submitValue =
+      cleanText(option.name) ??
+      cleanText(option.label) ??
+      cleanText(option.value) ??
+      cleanText(option.code);
+
+    if (label && submitValue) {
+      mapped.push({ label, submitValue });
+    }
+  }
+
+  return mapped;
+}
 
 export function mapProductForm(
   raw?: StrapiProductForm | null,
@@ -105,16 +132,19 @@ export function mapProductForm(
       ?.map((slot) => cleanText(slot.timeString))
       .filter((slot): slot is string => Boolean(slot)) ?? [];
 
+  const stateRelationOptions = mapStateRelationOptions(raw.stateOptions);
   const stateOptions =
-    raw.stateOptions
-      ?.map(
-        (option) =>
-          cleanText(option.name) ??
-          cleanText(option.label) ??
-          cleanText(option.value) ??
-          cleanText(option.code),
-      )
-      .filter((option): option is string => Boolean(option)) ?? [];
+    stateRelationOptions.length > 0
+      ? stateRelationOptions.map((option) => option.label)
+      : (raw.stateOptions
+          ?.map(
+            (option) =>
+              cleanText(option.name) ??
+              cleanText(option.label) ??
+              cleanText(option.value) ??
+              cleanText(option.code),
+          )
+          .filter((option): option is string => Boolean(option)) ?? []);
 
   return {
     formName: cleanText(raw.formName) ?? formTag,
@@ -125,6 +155,7 @@ export function mapProductForm(
     isMultiStep: Boolean(raw.isMultiStep),
     timeSlots,
     stateOptions,
+    stateRelationOptions,
     nameLabel: formatFieldLabel(nameField),
     namePlaceholder: normalizePlaceholder(nameField?.placeholder),
     phoneLabel: formatFieldLabel(phoneField),

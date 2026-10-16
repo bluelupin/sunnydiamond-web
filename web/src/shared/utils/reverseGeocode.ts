@@ -1,4 +1,4 @@
-import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
+import { INDIAN_STATES_AND_UTS } from "@/shared/constants/indianStatesAndUts";
 
 export type ParsedAddress = {
   addressLine1: string;
@@ -35,7 +35,7 @@ const emptyAddress = (): ParsedAddress => ({
 
 export const resolveIndianState = (
   value: string | undefined,
-  states: readonly string[] = TRY_AT_HOME_INDIAN_STATES,
+  states: readonly string[] = INDIAN_STATES_AND_UTS,
 ): string => {
   if (!value?.trim()) {
     return "";

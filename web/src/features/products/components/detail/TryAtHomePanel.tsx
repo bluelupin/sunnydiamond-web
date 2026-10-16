@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,12 @@ import {
 } from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { CheckoutSelectField } from "@/features/checkout/components/CheckoutUi";
-import { matchTryAtHomeStateSelectOption } from "@/features/products/data/tryAtHomeContent";
+import {
+  getTryAtHomeStateSelectOptions,
+  matchTryAtHomeStateSelectOption,
+  pickTryAtHomeStateForCmsApi,
+  resolveTryAtHomeAddressStateLabelForUi,
+} from "@/features/products/data/tryAtHomeContent";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
@@ -35,6 +40,7 @@ import { getProductSubmissionVariant } from "@/features/products/utils/productSu
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
+import { usePincodeCityStateAutofill } from "@/shared/hooks/use-pincode-city-state-autofill";
 import {
   createProductSubmission,
   getProductFormByTag,
@@ -327,7 +333,11 @@ const TryAtHomeAddressStep = ({
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
   const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
-  const stateOptions = useMemo(() => form?.stateFieldOptions ?? [], [form?.stateFieldOptions]);
+  const cmsStateOptions = form?.stateFieldOptions;
+  const stateOptions = useMemo(
+    () => getTryAtHomeStateSelectOptions(cmsStateOptions, state),
+    [cmsStateOptions, state],
+  );
   const selectedState = matchTryAtHomeStateSelectOption(state, stateOptions);
 
   const defaultShippingAddress = useMemo(() => {
@@ -343,6 +353,12 @@ const TryAtHomeAddressStep = ({
       return;
     }
 
+    // Addresses can load after the step opens; don't overwrite a pincode the user already entered.
+    if (pincode.trim().length > 0) {
+      setHasAppliedAddressPrefill(true);
+      return;
+    }
+
     const mapped = mapCustomerAddressToFormInput(defaultShippingAddress);
 
     setAddressLine1(mapped.addressLine1);
@@ -351,7 +367,35 @@ const TryAtHomeAddressStep = ({
     setCity(mapped.city);
     setState(mapped.state);
     setHasAppliedAddressPrefill(true);
-  }, [defaultShippingAddress, hasAppliedAddressPrefill]);
+  }, [defaultShippingAddress, hasAppliedAddressPrefill, pincode]);
+
+  const pincodeRef = useRef(pincode);
+  pincodeRef.current = pincode;
+
+  const applyPincodeLookup = useCallback(
+    (lookup: { city: string; state: string }, pin: string) => {
+      if (pincodeRef.current.trim() !== pin) {
+        return;
+      }
+
+      if (lookup.city) {
+        setCity(lookup.city);
+      }
+      if (lookup.state) {
+        const label = resolveTryAtHomeAddressStateLabelForUi(
+          lookup.state,
+          cmsStateOptions,
+          form?.stateRelationOptions,
+        );
+        if (label) {
+          setState(label);
+        }
+      }
+    },
+    [cmsStateOptions, form?.stateRelationOptions],
+  );
+
+  usePincodeCityStateAutofill({ pincode, onApply: applyPincodeLookup });
 
   const errors = useMemo(
     () => ({
@@ -404,7 +448,17 @@ const TryAtHomeAddressStep = ({
     if (!isValid) {
       return;
     }
-    onSubmit({ addressLine1, addressLine2, pincode, city, state: selectedState });
+    const stateForSubmit = pickTryAtHomeStateForCmsApi(
+      selectedState || state,
+      form
+        ? {
+            stateFieldOptions: form.stateFieldOptions,
+            stateOptions: form.stateOptions,
+            stateRelationOptions: form.stateRelationOptions,
+          }
+        : null,
+    );
+    onSubmit({ addressLine1, addressLine2, pincode, city, state: stateForSubmit });
   };
 
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
