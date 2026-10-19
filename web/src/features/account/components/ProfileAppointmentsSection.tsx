@@ -101,8 +101,7 @@ const ProfileAppointmentsSection = () => {
     return Array.from(skus);
   }, [data]);
 
-  const { products: magentoProducts, isLoading: isProductImagesLoading } =
-    useMagentoWishlistProducts(appointmentSkus);
+  const { products: magentoProducts } = useMagentoWishlistProducts(appointmentSkus);
 
   const productImageBySku = useMemo(
     () => buildMagentoProductImageBySku(magentoProducts),
@@ -220,7 +219,7 @@ const ProfileAppointmentsSection = () => {
     />
   );
 
-  if (isLoading || (appointmentSkus.length > 0 && isProductImagesLoading)) {
+  if (isLoading) {
     return (
       <>
         {statusToast}
