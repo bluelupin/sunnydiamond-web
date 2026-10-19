@@ -3,6 +3,10 @@ import { splitTitleLinesOnNewline } from "@/lib/homepage/resolveHomepageAboveFol
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import {
+  GIFTING_CONTENT_IMAGE_QUALITY,
+  GIFTING_INTRO_IMAGE_SIZES,
+} from "@/features/gifting/utils/giftingPageImage";
 import type { NormalizedGiftingIntro } from "@/services/gifting/gifting-page.types";
 
 type GiftingWithLoveSectionProps = {
@@ -39,8 +43,8 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
                 alt={imageAlt}
                 width={intro.background.width ?? 354}
                 height={intro.background.height ?? 354}
-                quality={80}
-                sizes="(max-width: 1536px) 300px, 400px"
+                quality={GIFTING_CONTENT_IMAGE_QUALITY}
+                sizes={GIFTING_INTRO_IMAGE_SIZES}
                 className="object-contain object-center lg:object-cover"
               />
             </ScrollReveal>

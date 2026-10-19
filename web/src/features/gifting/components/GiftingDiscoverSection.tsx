@@ -9,6 +9,7 @@ import Reveal from "@/shared/Animation/Reveal";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedGiftingGiftFinder } from "@/services/gifting/gifting-page.types";
+import { GIFTING_CONTENT_IMAGE_QUALITY } from "@/features/gifting/utils/giftingPageImage";
 import { giftingPageContent } from "../data/content";
 import {
   buildGiftFinderHref,
@@ -140,6 +141,8 @@ const GiftingDiscoverSection = ({
             fill
             className="object-cover object-center md:object-[82%_center] lg:object-center"
             sizes="(max-width: 768px) 100vw, 732px"
+            quality={GIFTING_CONTENT_IMAGE_QUALITY}
+            loading="lazy"
           />
         </Reveal>
       }

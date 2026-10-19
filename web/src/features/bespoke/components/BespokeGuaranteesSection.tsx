@@ -35,7 +35,7 @@ const BespokeGuaranteesSection = ({ guarantees }: BespokeGuaranteesSectionProps)
               >
                 <Image
                   src={item.iconSrc}
-                  alt=""
+                  alt={item.alt}
                   width={64}
                   height={64}
                   quality={BESPOKE_GUARANTEE_ICON_QUALITY}
