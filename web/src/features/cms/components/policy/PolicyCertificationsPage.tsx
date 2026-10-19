@@ -21,26 +21,18 @@ import type {
   PolicyDocument,
   PolicyNavGroup,
 } from "@/features/cms/data/policyCertificationsContent";
-import { getPolicyFromPage } from "@/services/policy/policy-certifications-page.mapper";
+import {
+  getPolicyFromPage,
+  resolveActivePolicyId,
+} from "@/services/policy/policy-certifications-page.mapper";
 import type { NormalizedPolicyCertificationsPage } from "@/services/policy/policy-certifications-page.types";
 
 type PolicyCertificationsPageProps = {
   page: NormalizedPolicyCertificationsPage;
   initialPolicyId?: string;
+  /** Server mirror of `Boolean(?policy=)` for first paint — client logic unchanged after hydrate. */
+  initialMobileShowDetail?: boolean;
 };
-
-function resolveActivePolicyId(
-  page: NormalizedPolicyCertificationsPage,
-  candidate: string | undefined,
-): string {
-  if (candidate && getPolicyFromPage(page, candidate)) {
-    return candidate;
-  }
-  if (getPolicyFromPage(page, page.defaultPolicyId)) {
-    return page.defaultPolicyId;
-  }
-  return page.navGroups[0]?.items[0]?.id ?? page.defaultPolicyId;
-}
 
 function PolicyDesktopSidebar({
   navGroups,
@@ -435,6 +427,7 @@ function PolicySupportSection({
 const PolicyCertificationsPage = ({
   page,
   initialPolicyId,
+  initialMobileShowDetail,
 }: PolicyCertificationsPageProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -446,7 +439,9 @@ const PolicyCertificationsPage = ({
   const [activePolicyId, setActivePolicyId] = useState(() =>
     resolveActivePolicyId(page, policyFromUrl ?? initialPolicyId),
   );
-  const [mobileShowDetail, setMobileShowDetail] = useState(Boolean(policyFromUrl));
+  const [mobileShowDetail, setMobileShowDetail] = useState(
+    initialMobileShowDetail ?? Boolean(policyFromUrl),
+  );
 
   /** Keep the address bar on the CMS policy slug (`?policy=`). */
   const syncPolicySlugToUrl = useCallback(
