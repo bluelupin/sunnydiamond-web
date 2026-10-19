@@ -45,6 +45,45 @@ export function normalizeOrderStatus(status: string): string {
     .replace(/\s+/g, " ");
 }
 
+/** Figma: refund in progress — order was delivered before return; header uses "Delivered On". */
+export function isRefundInProgressOrder(order: { subState?: string }): boolean {
+  return order.subState === "return_in_progress";
+}
+
+/** Refund-in-progress stepper grey bar — label + window copy (Figma order detail / listing). */
+export function resolveRefundInProgressTimelineEstimatedMeta(
+  order: { estimatedDeliveryValue?: string },
+  estimatedRefundLabel: string,
+  fallbackWindowLabel: string,
+): { estimatedLabel: string; estimatedValue: string } {
+  const fromOrder = order.estimatedDeliveryValue?.trim();
+  return {
+    estimatedLabel: estimatedRefundLabel,
+    estimatedValue: fromOrder || fallbackWindowLabel,
+  };
+}
+
+/** Cancelled orders must not show header "Delivery by" from stale sunny_delivery estimates. */
+export function shouldShowOrderDeliveryByMeta(order: {
+  category: string;
+  deliveryBy?: string;
+  status: string;
+}): boolean {
+  if (!order.deliveryBy?.trim()) {
+    return false;
+  }
+
+  if (order.category === "cancelled") {
+    return false;
+  }
+
+  if (normalizeOrderStatus(order.status).includes("cancel")) {
+    return false;
+  }
+
+  return true;
+}
+
 /** When `sunny_actions` is absent, infer cancel eligibility from the Magento status label. */
 export function canCancelInProgressOrderFromStatus(status: string): boolean {
   const normalized = normalizeOrderStatus(status);

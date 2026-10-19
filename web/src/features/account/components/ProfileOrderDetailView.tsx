@@ -35,6 +35,9 @@ import {
   isActiveDigitalGiftCardOrder,
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
+  isRefundInProgressOrder,
+  resolveRefundInProgressTimelineEstimatedMeta,
+  shouldShowOrderDeliveryByMeta,
 } from "../utils/orderDeliveryTimeline.utils";
 import { ProfileOrderDetailItemsSection } from "./ProfileOrderDetailItemsSection";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
@@ -194,10 +197,25 @@ export function ProfileOrderDetailView({
   const hasDiscount = priceBreakdown.orderDiscount > 0;
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
   const isDelivered = order.category === "delivered";
+  const showDeliveryByMeta = shouldShowOrderDeliveryByMeta(order);
+  const isCancelledOrder = order.category === "cancelled";
+  const isRefundInProgress = isRefundInProgressOrder(order);
   const showReturnDeadlineNote = isDelivered && !isGiftCardProfileOrder(order);
-  const deliveryMetaValueLabel = isDelivered
-    ? detailContent.deliveredOnMetaLabel
-    : detailContent.deliveryByMetaLabel;
+  const deliveryMetaValueLabel =
+    isDelivered || isRefundInProgress
+      ? detailContent.deliveredOnMetaLabel
+      : detailContent.deliveryByMetaLabel;
+  const deliveryDateHeaderLabel =
+    isDelivered || isRefundInProgress
+      ? content.deliveredOnLabel
+      : content.deliveryByLabel;
+  const refundInProgressTimelineEstimated = isRefundInProgress
+    ? resolveRefundInProgressTimelineEstimatedMeta(
+        order,
+        content.estimatedRefundLabel,
+        content.estimatedDeliveryRangePlaceholder,
+      )
+    : null;
   const giftCardDeliveredBadge =
     order.category === "delivered" && isGiftCardProfileOrder(order);
   const mobileStatusLabel =
@@ -208,12 +226,19 @@ export function ProfileOrderDetailView({
       return [];
     }
 
+    if (order.category === "cancelled" || order.category === "returned") {
+      return order.timeline ?? [];
+    }
+
     return resolveProfileOrderTimelineSteps(
       order.status,
       order.timeline,
       order.timelineFromServer ? order.timeline : null,
     );
   }, [order]);
+
+  const detailTimelineSteps =
+    isCancelledOrder && (order.timeline?.length ?? 0) <= 1 ? [] : timelineSteps;
 
   const detailActionCount = countProfileOrderVisibleActions(order);
   const singleDetailAction = detailActionCount === 1;
@@ -284,7 +309,7 @@ export function ProfileOrderDetailView({
             </span>
           </div>
 
-          {order.deliveryBy ? (
+          {showDeliveryByMeta ? (
             <>
               <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
               <div className={PROFILE_ORDER_DETAIL_MOBILE_META_COLUMN_CLASS}>
@@ -292,7 +317,7 @@ export function ProfileOrderDetailView({
                   {deliveryMetaValueLabel}
                 </span>
                 <span className={PROFILE_ORDER_DETAIL_MOBILE_META_VALUE_CLASS}>
-                  {formatOrderDateMobileMeta(order.deliveryBy)}
+                  {formatOrderDateMobileMeta(order.deliveryBy!)}
                 </span>
               </div>
             </>
@@ -320,12 +345,10 @@ export function ProfileOrderDetailView({
             </span>
           </div>
 
-          {order.deliveryBy ? (
+          {showDeliveryByMeta ? (
             <span className="font-gill text-base leading-110 text-darkblack">
-              <span className="font-light">
-                {isDelivered ? content.deliveredOnLabel : content.deliveryByLabel}{" "}
-              </span>
-              <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
+              <span className="font-light">{deliveryDateHeaderLabel} </span>
+              <span className="font-normal">{formatOrderDate(order.deliveryBy!)}</span>
             </span>
           ) : null}
         </div>
@@ -337,11 +360,17 @@ export function ProfileOrderDetailView({
         ) : null}
       </div>
 
-      {timelineSteps.length > 0 ? (
+      {!isCancelledOrder && detailTimelineSteps.length > 0 ? (
         <ProfileOrderTimeline
-          estimatedLabel={order.estimatedDeliveryLabel}
-          estimatedValue={order.estimatedDeliveryValue}
-          steps={timelineSteps}
+          estimatedLabel={
+            refundInProgressTimelineEstimated?.estimatedLabel ??
+            order.estimatedDeliveryLabel
+          }
+          estimatedValue={
+            refundInProgressTimelineEstimated?.estimatedValue ??
+            order.estimatedDeliveryValue
+          }
+          steps={detailTimelineSteps}
           className="bg-gray300"
         />
       ) : null}

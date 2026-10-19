@@ -176,16 +176,19 @@ export function mapTrackedOrderToProfileDetailUi(
     items,
     priceBreakdown,
     paymentMethod: order.paymentMethods[0]?.name,
-    shippingAddress: order.shippingAddress
-      ? {
-          fullName: order.shippingAddress.fullName,
-          streetLines: order.shippingAddress.streetLines,
-          city: order.shippingAddress.city,
-          region: order.shippingAddress.region,
-          pincode: order.shippingAddress.pincode,
-          phone: order.shippingAddress.phone,
-        }
-      : undefined,
+    shippingAddress:
+      category === "cancelled"
+        ? undefined
+        : order.shippingAddress
+          ? {
+              fullName: order.shippingAddress.fullName,
+              streetLines: order.shippingAddress.streetLines,
+              city: order.shippingAddress.city,
+              region: order.shippingAddress.region,
+              pincode: order.shippingAddress.pincode,
+              phone: order.shippingAddress.phone,
+            }
+          : undefined,
     showCancel,
     showReturn: isGiftCardProfileOrder({ items })
       ? false
@@ -222,18 +225,14 @@ export function mapTrackedOrderToProfileDetailUi(
       ...base,
       showDownloadInvoice: false,
       showContactUs: true,
-      ...(category === "cancelled"
-        ? {
-            estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,
-            estimatedDeliveryValue: resolveCancellationRefundEstimate(order.sunnyRefund),
-          }
-        : {
-            estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-            estimatedDeliveryValue: resolveRefundEstimateValue(
+      estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,
+      estimatedDeliveryValue:
+        category === "cancelled"
+          ? resolveCancellationRefundEstimate(order.sunnyRefund)
+          : resolveRefundEstimateValue(
               order.sunnyRefund,
               ordersContent.estimatedDeliveryPlaceholder,
             ),
-          }),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
@@ -261,9 +260,13 @@ export function mapTrackedOrderToProfileDetailUi(
   }
 
   if (deliveryTimeline.length > 0) {
+    const showEstimatedDelivery =
+      category === "in_progress" &&
+      categorizeOrder(order.sunnyStatus, order.status).category !== "cancelled";
+
     return {
       ...base,
-      ...(category === "in_progress"
+      ...(showEstimatedDelivery
         ? {
             estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
             estimatedDeliveryValue: resolveEstimatedDeliveryValue(order.sunnyDelivery),

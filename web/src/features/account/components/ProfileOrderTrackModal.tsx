@@ -193,6 +193,10 @@ export function ProfileOrderTrackModal({
 
   const activeStatus = trackedOrder?.status ?? order.status;
   const timelineSteps = useMemo(() => {
+    if (order.category === "cancelled" || order.category === "returned") {
+      return order.timeline ?? [];
+    }
+
     const trackedSteps = mapSunnyTrackingToTimeline(trackedOrder?.sunnyTracking ?? null);
     const serverSteps =
       trackedSteps.length > 0
@@ -202,7 +206,7 @@ export function ProfileOrderTrackModal({
           : null;
 
     return resolveProfileOrderTimelineSteps(activeStatus, order.timeline, serverSteps);
-  }, [activeStatus, order.timeline, order.timelineFromServer, trackedOrder?.sunnyTracking]);
+  }, [activeStatus, order.category, order.timeline, order.timelineFromServer, trackedOrder?.sunnyTracking]);
   const trackingId = resolveTrackingId(order, trackedOrder);
   const badgeLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;

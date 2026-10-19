@@ -25,6 +25,8 @@ import {
   isActiveDigitalGiftCardOrder,
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
+  isRefundInProgressOrder,
+  shouldShowOrderDeliveryByMeta,
 } from "../utils/orderDeliveryTimeline.utils";
 import { ProfileOrderMobileThumbnails } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
@@ -75,13 +77,6 @@ function getMobileDeliveryMeta(order: ProfileOrderUi) {
     };
   }
 
-  if (order.category === "cancelled" && order.deliveryBy) {
-    return {
-      label: content.deliveredOn,
-      value: formatOrderDate(order.deliveryBy),
-    };
-  }
-
   return null;
 }
 
@@ -117,9 +112,9 @@ export function ProfileOrderCard({
     if (order.category === "delivered" || isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
-    // Cancelled COD orders carry no refund steps; never fall back to the delivery stepper.
-    if (order.category === "cancelled" && !order.timeline?.length) {
-      return [];
+    // Cancelled/returned: refund steps only — never rebuild a delivery stepper from status.
+    if (order.category === "cancelled" || order.category === "returned") {
+      return order.timeline ?? [];
     }
 
     return resolveProfileOrderTimelineSteps(
@@ -130,6 +125,17 @@ export function ProfileOrderCard({
   }, [order, resolvedStatus, localResolvedStatus]);
 
   const mobileDeliveryMeta = getMobileDeliveryMeta(order);
+  const showDeliveryByMeta = shouldShowOrderDeliveryByMeta(order);
+  const isCancelledOrder = order.category === "cancelled";
+  const isRefundInProgress = isRefundInProgressOrder(order);
+  const cardTimelineSteps = isCancelledOrder ? [] : timelineSteps;
+  const deliveryDateHeaderLabel =
+    order.category === "delivered" || isRefundInProgress
+      ? content.deliveredOnLabel
+      : content.deliveryByLabel;
+  const timelineEstimatedLabel = isRefundInProgress
+    ? content.estimatedRefundLabel
+    : order.estimatedDeliveryLabel;
   const mobileStatusLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
@@ -355,24 +361,20 @@ export function ProfileOrderCard({
                 </span>
               </div>
 
-              {order.deliveryBy ? (
+              {showDeliveryByMeta ? (
                 <span className="font-gill text-base leading-110 text-darkblack">
-                  <span className="font-light">
-                    {order.category === "delivered"
-                      ? content.deliveredOnLabel
-                      : content.deliveryByLabel}{" "}
-                  </span>
-                  <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
+                  <span className="font-light">{deliveryDateHeaderLabel} </span>
+                  <span className="font-normal">{formatOrderDate(order.deliveryBy!)}</span>
                 </span>
               ) : null}
             </div>
           </div>
 
-          {timelineSteps.length > 0 ? (
+          {!isCancelledOrder && cardTimelineSteps.length > 0 ? (
             <ProfileOrderTimeline
-              estimatedLabel={order.estimatedDeliveryLabel}
+              estimatedLabel={timelineEstimatedLabel}
               estimatedValue={order.estimatedDeliveryValue}
-              steps={timelineSteps}
+              steps={cardTimelineSteps}
             />
           ) : null}
 

@@ -116,11 +116,28 @@ export function categorizeOrder(
   sunnyStatus: SunnyOrderStatus | null,
   statusLabel: string,
 ): { category: OrderFilterKey; subState?: ProfileOrderSubState } {
+  const fromLabel = categorizeOrderStatusFromLabel(statusLabel);
+
+  // Magento "Canceled" must win over a stale sunny_status (e.g. still IN_PROGRESS).
+  if (fromLabel === "cancelled") {
+    if (sunnyStatus === "CANCELLATION_IN_PROGRESS") {
+      return { category: "cancelled", subState: "cancellation_in_progress" };
+    }
+    return { category: "cancelled" };
+  }
+
+  if (fromLabel === "returned") {
+    if (sunnyStatus === "RETURN_IN_PROGRESS") {
+      return { category: "returned", subState: "return_in_progress" };
+    }
+    return { category: "returned" };
+  }
+
   if (sunnyStatus) {
     return CATEGORY_BY_SUNNY_STATUS[sunnyStatus];
   }
 
-  return { category: categorizeOrderStatusFromLabel(statusLabel) };
+  return { category: fromLabel };
 }
 
 /** "Delivery by" is a real delivery date or nothing at all — never the order date. */
@@ -579,10 +596,7 @@ export function mapCustomerOrderToProfileUi(
       ...(category === "returned" ? { showTrack: false } : {}),
       showDownloadInvoice: false,
       showContactUs: true,
-      estimatedDeliveryLabel:
-        category === "cancelled"
-          ? ordersContent.estimatedRefundLabel
-          : ordersContent.estimatedDeliveryLabel,
+      estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,
       estimatedDeliveryValue:
         category === "cancelled"
           ? resolveCancellationRefundEstimate(order.sunnyRefund)
@@ -623,9 +637,13 @@ export function mapCustomerOrderToProfileUi(
   }
 
   if (deliveryTimeline.length > 0) {
+    const showEstimatedDelivery =
+      category === "in_progress" &&
+      categorizeOrderStatusFromLabel(order.status) !== "cancelled";
+
     return {
       ...base,
-      ...(category === "in_progress"
+      ...(showEstimatedDelivery
         ? {
             estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
             estimatedDeliveryValue: resolveEstimatedDeliveryValue(order.sunnyDelivery),
