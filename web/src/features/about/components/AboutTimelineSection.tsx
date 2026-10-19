@@ -10,6 +10,7 @@ import { useAboutTimelineScroll } from "../hooks/useAboutTimelineScroll";
 import AboutTimelineContent from "./AboutTimelineContent";
 import AboutTimelineNav from "./AboutTimelineNav";
 import Reveal from "@/shared/Animation/Reveal";
+import { ABOUT_SECTION_IMAGE_QUALITY } from "../utils/aboutPageImage";
 
 type AboutTimelineSectionProps = NormalizedAboutTimeline;
 
@@ -52,7 +53,7 @@ const AboutTimelineSection = ({
               alt={backgroundImage.alt}
               width={backgroundImage.width ?? 1440}
               height={backgroundImage.height ?? 810}
-              quality={80}
+              quality={ABOUT_SECTION_IMAGE_QUALITY}
               sizes="(max-width: 1024px) 100vw, 1440px"
               className="object-cover object-center"
             />

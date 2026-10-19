@@ -11,6 +11,7 @@ import type {
 } from "@/services/about/about-page.types";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
 import Reveal from "@/shared/Animation/Reveal";
+import { ABOUT_SECTION_IMAGE_QUALITY } from "../utils/aboutPageImage";
 
 type AboutSince1997SectionProps = {
   title: string;
@@ -54,7 +55,7 @@ function GalleryImage({
             alt={image.alt}
             width={image.width}
             height={image.height}
-            quality={80}
+            quality={ABOUT_SECTION_IMAGE_QUALITY}
             sizes={sizes}
             className="size-full object-cover"
           />
@@ -195,7 +196,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 image={founder.image}
                 caption={founder.caption}
                 description={founder.description}
-                sizes="549px"
+                sizes="100vw"
                 figureClassName="w-full"
                 frameClassName="md:h-600 h-[426px] w-full"
                 captionClassName="text-sm md:text-base"
@@ -217,7 +218,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       image={event!.image}
                       caption={event!.caption}
                       description={event!.description}
-                      sizes="320px"
+                      sizes="(max-width: 639px) 256px, (max-width: 1023px) 550px, 400px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px] mt-[19px]"
                       frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
                       captionClassName="md:text-base text-sm"
@@ -226,7 +227,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       image={attending!.image}
                       caption={attending!.caption}
                       description={attending!.description}
-                      sizes="463px"
+                      sizes="(max-width: 639px) 256px, (max-width: 1023px) 550px, 400px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[277px] md:h-[560px] sm:h-[520px] h-[277px]"
                       captionClassName="md:text-base text-sm"

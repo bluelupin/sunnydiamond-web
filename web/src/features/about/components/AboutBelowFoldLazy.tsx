@@ -11,6 +11,9 @@ import AboutFacesSkeleton from "./skeletons/AboutFacesSkeleton";
 import AboutHandcraftedSkeleton from "./skeletons/AboutHandcraftedSkeleton";
 import AboutSince1997Skeleton from "./skeletons/AboutSince1997Skeleton";
 import AboutTimelineSkeleton from "./skeletons/AboutTimelineSkeleton";
+import { LazyInView } from "@/shared/ui/LazyInView";
+
+const ABOUT_LAZY_ROOT_MARGIN = "240px 0px 240px 0px";
 
 const AboutSince1997Section = dynamic(
   () => import("./AboutSince1997Section"),
@@ -45,15 +48,29 @@ const AboutBelowFoldLazy = ({
   timeline,
 }: AboutBelowFoldLazyProps) => (
   <>
-    {legacy ? <AboutSince1997Section {...legacy} /> : null}
-    {team ? <AboutFacesSection {...team} /> : null}
-    {craft ? (
-      <AboutHandcraftedSection
-        {...craft}
-        showTimelineScrollLine={Boolean(timeline)}
-      />
+    {legacy ? (
+      <LazyInView fallback={<AboutSince1997Skeleton />} rootMargin={ABOUT_LAZY_ROOT_MARGIN}>
+        <AboutSince1997Section {...legacy} />
+      </LazyInView>
     ) : null}
-    {timeline ? <AboutTimelineSection {...timeline} /> : null}
+    {team ? (
+      <LazyInView fallback={<AboutFacesSkeleton />} rootMargin={ABOUT_LAZY_ROOT_MARGIN}>
+        <AboutFacesSection {...team} />
+      </LazyInView>
+    ) : null}
+    {craft ? (
+      <LazyInView fallback={<AboutHandcraftedSkeleton />} rootMargin={ABOUT_LAZY_ROOT_MARGIN}>
+        <AboutHandcraftedSection
+          {...craft}
+          showTimelineScrollLine={Boolean(timeline)}
+        />
+      </LazyInView>
+    ) : null}
+    {timeline ? (
+      <LazyInView fallback={<AboutTimelineSkeleton />} rootMargin={ABOUT_LAZY_ROOT_MARGIN}>
+        <AboutTimelineSection {...timeline} />
+      </LazyInView>
+    ) : null}
   </>
 );
 

@@ -13,18 +13,20 @@ import { buildAboutJsonLd, resolveAboutSeoMetadata } from "@/shared/lib/seo/abou
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 
 /** Refresh CMS-driven about content without a full redeploy. */
-// export const revalidate = 300;
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const page = await getAboutPage();
-    const { title, description, canonicalPath, keywords } = resolveAboutSeoMetadata(page);
+    const { title, description, canonicalPath, keywords, image } =
+      resolveAboutSeoMetadata(page);
 
     return constructMetadata({
       title,
       description,
       canonicalPath,
       ...(keywords ? { keywords } : {}),
+      ...(image ? { image } : {}),
     });
   } catch {
     return constructMetadata({

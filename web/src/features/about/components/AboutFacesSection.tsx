@@ -13,6 +13,7 @@ import Reveal from "@/shared/Animation/Reveal";
 import { DetailDarkLink } from "@/features/products/components/detail/shared";
 import { ALL_DIRECTORS_PATH } from "@/features/about/constants/aboutRoutes";
 import { allDirectorsPageContent } from "@/features/about/data/content";
+import { ABOUT_SECTION_IMAGE_QUALITY } from "../utils/aboutPageImage";
 
 const hideScrollbarStyle: CSSProperties = {
   scrollbarWidth: "none",
@@ -61,7 +62,7 @@ const TeamMemberFigure = ({ member }: TeamMemberFigureProps) => (
           alt={member.image.alt}
           width={member.image.width ?? 478}
           height={member.image.height ?? 600}
-          quality={80}
+          quality={ABOUT_SECTION_IMAGE_QUALITY}
           sizes="(max-width: 1023px) 343px, 33vw"
           className="h-full w-full object-cover object-center object-top"
         />
