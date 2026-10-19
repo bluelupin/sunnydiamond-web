@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
+import { BESPOKE_GUARANTEE_ICON_QUALITY } from "@/features/bespoke/utils/bespokePageImage";
 import type { NormalizedBespokeGuarantee } from "@/services/bespoke/contact-bespoke-page.types";
 
 type BespokeGuaranteesSectionProps = {
@@ -28,12 +29,16 @@ const BespokeGuaranteesSection = ({ guarantees }: BespokeGuaranteesSectionProps)
                 "flex lg:w-[260px] md:w-[235px] w-full shrink-0 flex-col items-center justify-center md:gap-3 gap-2 md:p-3 p-4 text-center",
               )}
             >
-              <div className="flex lg:size-16 size-10 items-center justify-center">
+              <div
+                aria-hidden
+                className="flex lg:size-16 size-10 items-center justify-center"
+              >
                 <Image
                   src={item.iconSrc}
-                  alt={item.alt}
+                  alt=""
                   width={64}
                   height={64}
+                  quality={BESPOKE_GUARANTEE_ICON_QUALITY}
                   className="size-full"
                 />
               </div>

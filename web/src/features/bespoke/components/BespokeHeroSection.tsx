@@ -1,6 +1,10 @@
 "use client";
 
 import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
+import {
+  BESPOKE_HERO_IMAGE_QUALITY,
+  BESPOKE_HERO_IMAGE_SIZES,
+} from "@/features/bespoke/utils/bespokePageImage";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import type { NormalizedBespokeHero } from "@/services/bespoke/contact-bespoke-page.types";
 
@@ -22,6 +26,9 @@ const BespokeHeroSection = ({ hero }: BespokeHeroSectionProps) => {
           mobileImageUrl={hero.image?.mobileUrl}
           desktopAlt={imageAlt}
           mobileAlt={imageAlt}
+          priority
+          quality={BESPOKE_HERO_IMAGE_QUALITY}
+          sizes={BESPOKE_HERO_IMAGE_SIZES}
         />
         <MediaContentOverlay gradient="bottom-strong" />
       </div>

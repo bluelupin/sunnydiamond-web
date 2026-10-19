@@ -2,6 +2,10 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { bespokePageFigmaSpec } from "@/features/bespoke/data/content";
+import {
+  BESPOKE_SECTION_BACKGROUND_SIZES,
+  BESPOKE_SECTION_IMAGE_QUALITY,
+} from "@/features/bespoke/utils/bespokePageImage";
 import type { NormalizedBespokeGetInTouch } from "@/services/bespoke/contact-bespoke-page.types";
 
 type BespokeInterestedSectionProps = {
@@ -25,7 +29,8 @@ const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps)
             alt={interested.image.alt}
             width={1440}
             height={bespokePageFigmaSpec.interestedHeight}
-            sizes="100vw"
+            sizes={BESPOKE_SECTION_BACKGROUND_SIZES}
+            quality={BESPOKE_SECTION_IMAGE_QUALITY}
             className="absolute inset-0 size-full object-cover object-center"
           />
           <div aria-hidden className="absolute inset-0 bg-black/50" />
