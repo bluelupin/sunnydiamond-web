@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { seoContent } from "@/features/cms/data/content";
+import BespokeDocumentPreload from "@/features/bespoke/components/BespokeDocumentPreload";
 import BespokePage from "@/features/bespoke/components/BespokePage";
 import {
   EMPTY_CONTACT_BESPOKE_PAGE,
@@ -16,13 +17,15 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const page = await getContactBespokePage();
-    const { title, description, canonicalPath, keywords } = resolveBespokeSeoMetadata(page);
+    const { title, description, canonicalPath, keywords, image } =
+      resolveBespokeSeoMetadata(page);
 
     return constructMetadata({
       title,
       description,
       canonicalPath,
       ...(keywords ? { keywords } : {}),
+      ...(image ? { image } : {}),
     });
   } catch {
     return constructMetadata({
@@ -44,6 +47,7 @@ export default async function Page() {
 
   return (
     <>
+      <BespokeDocumentPreload page={page} />
       <JsonLd data={buildBespokeJsonLd(page)} />
       <BespokePage page={page} />
     </>

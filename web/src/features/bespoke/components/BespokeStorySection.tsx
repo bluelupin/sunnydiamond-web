@@ -7,6 +7,7 @@ import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { cn } from "@/shared/utils/cn";
 import { useSince1997HorizontalScroll } from "@/features/about/hooks/useSince1997HorizontalScroll";
 import { bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
+import { BESPOKE_CONTENT_IMAGE_QUALITY } from "@/features/bespoke/utils/bespokePageImage";
 import BespokeShareVisionPanel from "@/features/bespoke/components/BespokeShareVisionPanel";
 import { DetailDarkButton } from "@/features/products/components/detail/shared";
 import type {
@@ -82,8 +83,9 @@ const BespokeStoryStepMedia = ({
           alt={step.image.alt}
           fill
           sizes={isDesktop ? "658px" : "(max-width: 767px) 100vw, 658px"}
+          quality={BESPOKE_CONTENT_IMAGE_QUALITY}
+          loading="lazy"
           className="object-cover object-center"
-          priority={isDesktop}
         />
       ) : (
         <video

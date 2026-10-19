@@ -21,6 +21,11 @@ import {
   resolvePastCreationStory,
   type BespokePastCreationImage,
 } from "@/features/bespoke/data/content";
+import {
+  BESPOKE_CONTENT_IMAGE_QUALITY,
+  BESPOKE_SECTION_BACKGROUND_SIZES,
+  BESPOKE_SECTION_IMAGE_QUALITY,
+} from "@/features/bespoke/utils/bespokePageImage";
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
 import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
@@ -229,6 +234,7 @@ const FeaturedGallerySlide = ({ slide, onClick }: FeaturedGallerySlideProps) => 
         alt={slide.alt}
         fill
         sizes="(max-width: 768px) 80vw, 33vw"
+        quality={BESPOKE_CONTENT_IMAGE_QUALITY}
         loading="lazy"
         className="h-full w-full object-cover object-center"
       />
@@ -262,8 +268,9 @@ const FeaturedGalleryBackground = ({
               src={slide.src}
               alt={index === safeIndex ? slide.alt : ""}
               fill
-              sizes="100vw"
-              priority={index === safeIndex}
+              sizes={BESPOKE_SECTION_BACKGROUND_SIZES}
+              quality={BESPOKE_SECTION_IMAGE_QUALITY}
+              loading={index === safeIndex ? undefined : "lazy"}
               className={cn(
                 "object-cover object-top transition-opacity duration-500 ease-in-out",
                 index === safeIndex ? "opacity-100" : "opacity-0",
@@ -275,8 +282,8 @@ const FeaturedGalleryBackground = ({
             src={fallbackBgSrc}
             alt={backgroundImage?.alt ?? ""}
             fill
-            priority
-            sizes="100vw"
+            sizes={BESPOKE_SECTION_BACKGROUND_SIZES}
+            quality={BESPOKE_SECTION_IMAGE_QUALITY}
             className="object-cover object-top"
           />
         ) : null}
