@@ -307,6 +307,8 @@ const AppointmentContactFields = ({
             value={date}
             minDate={minDate}
             maxDate={maxDate}
+            availabilitySlots={hasTimeSlotPicker ? slots : undefined}
+            minNoticeMinutes={minNoticeMinutes}
             placeholder={datePlaceholder}
             onChange={onDateChange}
             onBlur={() => markTouched("date")}

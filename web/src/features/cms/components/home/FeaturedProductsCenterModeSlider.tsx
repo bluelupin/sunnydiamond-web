@@ -144,36 +144,15 @@ export default function FeaturedProductsCenterModeSlider({
                   isGiftingPage && "xl:h-[259px] xl:w-[600px]",
                 )}
               >
-                {isGiftingPage && item.href ? (
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "relative z-10 block h-full w-full cursor-pointer",
-                      productLinkClassName,
-                    )}
-                    aria-label={item.name}
-                  >
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={300}
-                      height={300}
-                      quality={75}
-                      className="h-full w-full object-contain"
-                      sizes="(max-width: 767px) 170px, 300px"
-                    />
-                  </Link>
-                ) : (
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={300}
-                    height={300}
-                    quality={75}
-                    className="h-full w-full object-contain"
-                    sizes="(max-width: 767px) 170px, 300px"
-                  />
-                )}
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  width={300}
+                  height={300}
+                  quality={75}
+                  className="h-full w-full object-contain"
+                  sizes="(max-width: 767px) 170px, 300px"
+                />
               </div>
             </div>
           </div>

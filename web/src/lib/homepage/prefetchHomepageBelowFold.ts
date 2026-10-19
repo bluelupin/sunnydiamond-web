@@ -42,7 +42,7 @@ export async function prefetchAlankaraCollectionFromShopping(
     });
 
     return {
-      products: mapped.length > 0 ? mapped : null,
+      products: mapped,
       defaultActiveIndex: collectionProps.defaultActiveIndex,
     };
   } catch {

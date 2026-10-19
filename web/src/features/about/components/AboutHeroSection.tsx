@@ -4,13 +4,16 @@ import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMe
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import {
   getHeroScrollCollapseFrameStyle,
-  getHeroScrollCollapseTitleStyle,
   heroScrollCollapseFrameBaseClass,
   heroScrollCollapseTitleBaseClass,
 } from "@/shared/ui/heroScrollCollapseStyles";
 import { cn } from "@/shared/utils/cn";
 import { aboutHeroFigmaSpec } from "../data/content";
 import { useAboutHeroLoadAnimation } from "../hooks/useAboutHeroLoadAnimation";
+import {
+  ABOUT_HERO_IMAGE_QUALITY,
+  ABOUT_HERO_IMAGE_SIZES,
+} from "../utils/aboutPageImage";
 import type { NormalizedAboutHero } from "@/services/about/about-page.types";
 
 type AboutHeroSectionProps = NormalizedAboutHero;
@@ -24,8 +27,6 @@ const AboutHeroSection = ({ title, image, videoUrl }: AboutHeroSectionProps) => 
   const frameStyle = reducedMotion
     ? { top: 0, right: 0, bottom: 0, left: 0 }
     : getHeroScrollCollapseFrameStyle(progress);
-  const titleStyle = reducedMotion ? { bottom: 0 } : getHeroScrollCollapseTitleStyle(progress);
-
   return (
     <section
       id="about-hero"
@@ -43,14 +44,13 @@ const AboutHeroSection = ({ title, image, videoUrl }: AboutHeroSectionProps) => 
             desktopAlt={image?.alt ?? title}
             mobileAlt={image?.alt ?? title}
             cmsVideoUrl={videoUrl}
+            quality={ABOUT_HERO_IMAGE_QUALITY}
+            sizes={ABOUT_HERO_IMAGE_SIZES}
           />
           <MediaContentOverlay
             gradient={hasMedia ? aboutHeroFigmaSpec.overlay.gradient : "bottom-strong"}
           />
-          <div
-            className={cn(heroScrollCollapseTitleBaseClass, "pb-10 lg:pb-16")}
-          // style={titleStyle}
-          >
+          <div className={cn(heroScrollCollapseTitleBaseClass, "pb-10 lg:pb-16")}>
             <h1
               id="about-hero-title"
               className="w-full max-w-886 text-center font-larken font-light leading-110 text-white lg:text-6xl md:text-5xl text-4xl"

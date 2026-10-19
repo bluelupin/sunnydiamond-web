@@ -58,7 +58,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  // Above-the-fold only: Alankara/Magento loads when the lazy FeaturedCollectionSection mounts.
   const prefetched = await prefetchHomepageCms();
   const hero = resolveHeroContent(prefetched.shell);
   const craftingRarity = resolveCraftingRarityContent(

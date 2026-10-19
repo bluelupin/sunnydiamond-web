@@ -11,7 +11,9 @@ import {
 } from "@/shared/ui/dialog";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
+import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
+import { pickResponsiveDialogCopy } from "../utils/pickResponsiveDialogCopy";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import FormRadioOption from "@/shared/ui/FormRadioOption";
 
@@ -34,6 +36,9 @@ type ProfileOrderCancelReasonDialogBodyProps = {
   isSubmitting: boolean;
   commentMissing: boolean;
   errorMessage?: string | null;
+  description: string;
+  isMobile: boolean;
+  includeConfirmButton?: boolean;
   onSelectReason: (code: string) => void;
   onCommentsChange: (value: string) => void;
   onConfirm: () => void;
@@ -48,14 +53,33 @@ function ProfileOrderCancelReasonDialogBody({
   isSubmitting,
   commentMissing,
   errorMessage,
+  description,
+  isMobile,
+  includeConfirmButton = true,
   onSelectReason,
   onCommentsChange,
   onConfirm,
 }: ProfileOrderCancelReasonDialogBodyProps) {
+  const confirmButton = (
+    <DetailDarkButton
+      type="button"
+      className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+      onClick={onConfirm}
+      disabled={isSubmitting || commentMissing || !selectedReason}
+    >
+      {isSubmitting ? "Submitting..." : dialog.confirmLabel}
+    </DetailDarkButton>
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <p className="font-gill text-base font-light leading-110 text-neutral500">
-        {dialog.description}
+      <p
+        className={cn(
+          "font-gill text-base leading-110",
+          isMobile ? "font-normal text-darkblack" : "font-light text-neutral500",
+        )}
+      >
+        {description}
       </p>
 
       <div className="flex flex-col gap-4">
@@ -87,22 +111,18 @@ function ProfileOrderCancelReasonDialogBody({
         className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]"
       />
 
-      {commentMissing ? (
+      {commentMissing && includeConfirmButton ? (
         <p className="font-gill text-sm font-light leading-110 text-neutral500">
           {ordersContent.otherReasonRequiredMessage}
         </p>
       ) : null}
 
-      <FormFieldError message={errorMessage ?? undefined} />
-
-      <DetailDarkButton
-        type="button"
-        className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-        onClick={onConfirm}
-        disabled={isSubmitting || commentMissing || !selectedReason}
-      >
-        {isSubmitting ? "Submitting..." : dialog.confirmLabel}
-      </DetailDarkButton>
+      {includeConfirmButton ? (
+        <>
+          <FormFieldError message={errorMessage ?? undefined} />
+          {confirmButton}
+        </>
+      ) : null}
     </div>
   );
 }
@@ -119,6 +139,7 @@ export function ProfileOrderCancelReasonDialog({
   const isMobile = useIsMobile();
   const ordersContent = profileTabsContent.orders;
   const dialog = ordersContent.cancelReasonDialog;
+  const description = pickResponsiveDialogCopy(dialog, "description", isMobile);
   const [selectedCode, setSelectedCode] = useState("");
   const [comments, setComments] = useState("");
 
@@ -152,6 +173,8 @@ export function ProfileOrderCancelReasonDialog({
     isSubmitting,
     commentMissing,
     errorMessage,
+    description,
+    isMobile,
     onSelectReason: setSelectedCode,
     onCommentsChange: setComments,
     onConfirm: handleConfirm,
@@ -166,27 +189,46 @@ export function ProfileOrderCancelReasonDialog({
           className="flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
           <div className="shrink-0 px-4 pt-6">
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between gap-4">
-                <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
-                  {dialog.title}
-                </SheetTitle>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="text-darkblack"
-                  aria-label="Close"
-                  disabled={isSubmitting}
-                >
-                  <X className="size-6" strokeWidth={1.5} aria-hidden />
-                </button>
-              </div>
-              <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="flex items-center justify-between gap-4">
+              <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <span className="md:text-32 text-2xl">{dialog.title}</span>
+              </SheetTitle>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="text-darkblack"
+                aria-label="Close"
+                disabled={isSubmitting}
+              >
+                <X className="size-6" strokeWidth={1.5} aria-hidden />
+              </button>
             </div>
+
+            <div className="mt-6 h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
-            <ProfileOrderCancelReasonDialogBody {...bodyProps} />
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-6">
+            <ProfileOrderCancelReasonDialogBody
+              {...bodyProps}
+              includeConfirmButton={false}
+            />
+          </div>
+
+          <div className="flex shrink-0 flex-col gap-4 border-t-[0.5px] border-neutral300 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
+            {commentMissing ? (
+              <p className="font-gill text-sm font-light leading-110 text-neutral500">
+                {ordersContent.otherReasonRequiredMessage}
+              </p>
+            ) : null}
+            <FormFieldError message={errorMessage ?? undefined} />
+            <DetailDarkButton
+              type="button"
+              className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleConfirm}
+              disabled={isSubmitting || commentMissing || !selectedReason}
+            >
+              {isSubmitting ? "Submitting..." : dialog.confirmLabel}
+            </DetailDarkButton>
           </div>
         </SheetContent>
       </Sheet>

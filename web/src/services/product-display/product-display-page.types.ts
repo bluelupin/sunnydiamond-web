@@ -119,7 +119,7 @@ export type StrapiProductDisplayPage = {
 export type NormalizedProductDisplayBenefit = {
   label: string;
   mobileLabel: string;
-  lines: [string, string];
+  lines: string[];
   icon: string;
 };
 

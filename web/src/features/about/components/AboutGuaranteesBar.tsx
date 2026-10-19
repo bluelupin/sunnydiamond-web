@@ -4,6 +4,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedTrustBadge } from "@/services/about/about-page.types";
 import Reveal from "@/shared/Animation/Reveal";
+import { ABOUT_DECORATIVE_IMAGE_QUALITY } from "../utils/aboutPageImage";
 type AboutGuaranteesBarProps = {
   badges: NormalizedTrustBadge[];
 };
@@ -32,13 +33,15 @@ type GuaranteeIconProps = {
 };
 
 const GuaranteeIcon = ({ icon }: GuaranteeIconProps) => (
-  <div className="md:h-16 md:w-16 h-10 w-10">
+  <div className="md:h-16 md:w-16 h-10 w-10" aria-hidden>
     <ResponsiveImage
       desktopSrc={icon.desktopUrl}
       mobileSrc={icon.mobileUrl}
       alt={icon.alt}
       width={icon.desktopUrl ? 64 : 40}
       height={icon.desktopUrl ? 64 : 40}
+      sizes="(max-width: 768px) 40px, 64px"
+      quality={ABOUT_DECORATIVE_IMAGE_QUALITY}
       className="shrink-0 object-contain md:h-16 md:w-16 h-10 w-10"
     />
   </div>

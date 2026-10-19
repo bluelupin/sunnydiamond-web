@@ -11,17 +11,18 @@ import {
   accordionCollapsePanelClassName,
 } from "@/shared/ui/accordionCollapse";
 import { cn } from "@/shared/utils/cn";
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/shared/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
+import {
+  PROFILE_ORDER_SINGLE_ACTION_ROW_CLASS,
+  PROFILE_ORDER_SINGLE_ACTION_SLOT_CLASS,
+} from "../utils/orderDeliveryTimeline.utils";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
-/** Figma 5849:55203 — dark tooltip below the info icon. */
+const PROFILE_FIELD_INFO_TOOLTIP_BG = "#0A0A0A";
+
+/** Figma 5849:55188 (icon) + 5849:55203 — profile field info tooltip below trigger. */
 export function ProfileFieldInfoTooltip({
   message,
   ariaLabel,
@@ -32,21 +33,38 @@ export function ProfileFieldInfoTooltip({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button type="button" className="text-darkblack" aria-label={ariaLabel}>
-          <InformationIcon
-            className="h-[18px] w-[18px] shrink-0 text-darkblack"
-            aria-hidden
-          />
+        <button
+          type="button"
+          className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+          aria-label={ariaLabel}
+        >
+          <InformationIcon className="size-6 shrink-0 text-darkblack" />
         </button>
       </TooltipTrigger>
       <TooltipContent
         side="bottom"
         align="start"
-        sideOffset={12}
-        className="z-50 max-w-none rounded-none border-0 bg-darkblack px-4 py-3 font-gill text-sm font-normal leading-110 text-gray200 shadow-none"
+        sideOffset={7}
+        collisionPadding={16}
+        style={{ backgroundColor: PROFILE_FIELD_INFO_TOOLTIP_BG, opacity: 1 }}
+        className={cn(
+          "z-50 overflow-visible rounded-none border-0 px-4 py-3 font-gill text-sm font-normal leading-110 text-gray200 shadow-none",
+          "max-w-[min(calc(100vw-2rem),28rem)] !opacity-100 animate-none",
+          "data-[state=delayed-open]:!opacity-100 data-[state=instant-open]:!opacity-100",
+          "data-[state=delayed-open]:animate-none data-[state=closed]:animate-none",
+          "[--tw-enter-opacity:1] [--tw-exit-opacity:1]",
+        )}
       >
-        {message}
-        <TooltipArrow className="fill-darkblack" width={21} height={8} />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-2 left-[14px] block h-2 w-[21px]"
+        >
+          <span
+            className="mx-auto block h-0 w-0 border-x-[10.5px] border-b-[8px] border-x-transparent"
+            style={{ borderBottomColor: PROFILE_FIELD_INFO_TOOLTIP_BG }}
+          />
+        </span>
+        <p className="relative text-center opacity-100">{message}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -247,6 +265,21 @@ export function ProfileOrderCardDivider() {
   return <div className="lg:h-px h-[0.5px] w-full shrink-0 bg-neutral300" aria-hidden />;
 }
 
+/** Order detail / listing — one CTA: half-width of the row, right-aligned (Figma). */
+export function ProfileOrderSingleActionCtaShell({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn(PROFILE_ORDER_SINGLE_ACTION_ROW_CLASS, className)}>
+      <div className={PROFILE_ORDER_SINGLE_ACTION_SLOT_CLASS}>{children}</div>
+    </div>
+  );
+}
+
 /** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
 export function ProfileOrderItemBadge({
   label,
@@ -359,7 +392,8 @@ export function ProfileFilterChips<T extends string>({
 }: {
   options: { key: T; label: string; mobileLabel?: string }[];
   activeKey: T | null;
-  onChange: (key: T) => void;
+  /** Pass `null` to clear the active filter (same chip clicked again). */
+  onChange: (key: T | null) => void;
   scrollOnMobile?: boolean;
   className?: string;
 }) {
@@ -380,7 +414,7 @@ export function ProfileFilterChips<T extends string>({
           <button
             key={option.key}
             type="button"
-            onClick={() => onChange(option.key)}
+            onClick={() => onChange(isActive ? null : option.key)}
             className={cn(
               "shrink-0 px-4 py-2 font-gill md:text-base text-sm text-darkblack transition-colors",
               isActive ? "font-normal bg-lightGold" : "font-light bg-gray300",

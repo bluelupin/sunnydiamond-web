@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
@@ -26,6 +27,100 @@ type ProfileOrderReturnReasonDialogProps = {
   errorMessage?: string | null;
 };
 
+type ProfileOrderReturnReasonDialogBodyProps = {
+  dialog: (typeof profileTabsContent.orders)["returnReasonDialog"];
+  ordersContent: typeof profileTabsContent.orders;
+  reasons: OrderActionReason[];
+  selectedReason: OrderActionReason | undefined;
+  comments: string;
+  isSubmitting: boolean;
+  commentMissing: boolean;
+  errorMessage?: string | null;
+  description: string;
+  isMobile: boolean;
+  getReasonDisplayLabel: (sourceLabel: string) => string;
+  onSelectReason: (code: string) => void;
+  onCommentsChange: (value: string) => void;
+  onConfirm: () => void;
+};
+
+function ProfileOrderReturnReasonDialogBody({
+  dialog,
+  ordersContent,
+  reasons,
+  selectedReason,
+  comments,
+  isSubmitting,
+  commentMissing,
+  errorMessage,
+  description,
+  isMobile,
+  getReasonDisplayLabel,
+  onSelectReason,
+  onCommentsChange,
+  onConfirm,
+}: ProfileOrderReturnReasonDialogBodyProps) {
+  return (
+    <div className="flex flex-col gap-6">
+      <p
+        className={cn(
+          "font-gill text-base leading-110",
+          isMobile ? "font-normal text-darkblack" : "font-light text-neutral500",
+        )}
+      >
+        {description}
+      </p>
+
+      <div className="flex flex-col gap-4">
+        <p className="font-gill text-xl font-normal leading-110 text-darkblack">
+          {dialog.reasonLabel}
+        </p>
+        <div className="flex flex-col gap-4">
+          {reasons.map((reason) => (
+            <FormRadioOption
+              key={reason.code}
+              name="return-order-reason"
+              value={reason.code}
+              label={getReasonDisplayLabel(reason.label)}
+              checked={selectedReason?.code === reason.code}
+              disabled={isSubmitting}
+              onSelect={onSelectReason}
+              labelClassName="text-darkblack"
+            />
+          ))}
+        </div>
+      </div>
+
+      <textarea
+        value={comments}
+        onChange={(event) => onCommentsChange(event.target.value)}
+        placeholder={dialog.commentsPlaceholder}
+        rows={4}
+        disabled={isSubmitting}
+        className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]"
+      />
+
+      {commentMissing ? (
+        <p className="font-gill text-sm font-light leading-110 text-neutral500">
+          {ordersContent.otherReasonRequiredMessage}
+        </p>
+      ) : null}
+
+      <FormFieldError message={errorMessage ?? undefined} />
+
+      <DetailDarkButton
+        type="button"
+        className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={onConfirm}
+        disabled={isSubmitting || commentMissing || !selectedReason}
+      >
+        {isSubmitting ? "Submitting..." : dialog.confirmLabel}
+      </DetailDarkButton>
+    </div>
+  );
+}
+
+/** Return reason bottom sheet on mobile, centered dialog on desktop */
 export function ProfileOrderReturnReasonDialog({
   open,
   onOpenChange,
@@ -47,6 +142,7 @@ export function ProfileOrderReturnReasonDialog({
 
     return mobileReasonLabels[sourceLabel as keyof typeof mobileReasonLabels] ?? sourceLabel;
   };
+
   const [selectedCode, setSelectedCode] = useState("");
   const [comments, setComments] = useState("");
 
@@ -61,6 +157,8 @@ export function ProfileOrderReturnReasonDialog({
     onOpenChange(nextOpen);
   };
 
+  const handleClose = () => handleOpenChange(false);
+
   const handleConfirm = () => {
     if (!selectedReason) {
       return;
@@ -69,11 +167,64 @@ export function ProfileOrderReturnReasonDialog({
     onConfirm({ reason: selectedReason.label, comments: comments.trim() });
   };
 
+  const bodyProps: ProfileOrderReturnReasonDialogBodyProps = {
+    dialog,
+    ordersContent,
+    reasons,
+    selectedReason,
+    comments,
+    isSubmitting,
+    commentMissing,
+    errorMessage,
+    description,
+    isMobile,
+    getReasonDisplayLabel,
+    onSelectReason: setSelectedCode,
+    onCommentsChange: setComments,
+    onConfirm: handleConfirm,
+  };
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetContent
+          side="bottom"
+          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          className="flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
+        >
+          <div className="shrink-0 px-4 pt-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between gap-4">
+                <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
+                  {dialog.title}
+                </SheetTitle>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="text-darkblack"
+                  aria-label="Close"
+                  disabled={isSubmitting}
+                >
+                  <X className="size-6" strokeWidth={1.5} aria-hidden />
+                </button>
+              </div>
+              <div className="h-px w-full bg-neutral300" aria-hidden />
+            </div>
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
+            <ProfileOrderReturnReasonDialogBody {...bodyProps} />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         hideCloseButton
-        className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
+        className="max-h-[90vh] max-w-[520px] gap-6 overflow-y-auto border-neutral300 bg-white p-6 sm:rounded-none"
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
@@ -82,7 +233,7 @@ export function ProfileOrderReturnReasonDialog({
             </DialogTitle>
             <button
               type="button"
-              onClick={() => handleOpenChange(false)}
+              onClick={handleClose}
               className="text-darkblack"
               aria-label="Close"
               disabled={isSubmitting}
@@ -93,60 +244,7 @@ export function ProfileOrderReturnReasonDialog({
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <p
-          className={cn(
-            "font-gill text-base leading-110",
-            isMobile ? "font-normal text-darkblack" : "font-light text-neutral500",
-          )}
-        >
-          {description}
-        </p>
-
-        <div className="flex flex-col gap-4">
-          <p className="font-gill text-xl font-normal leading-110 text-darkblack">
-            {dialog.reasonLabel}
-          </p>
-          <div className="flex flex-col gap-4">
-            {reasons.map((reason) => (
-              <FormRadioOption
-                key={reason.code}
-                name="return-order-reason"
-                value={reason.code}
-                label={getReasonDisplayLabel(reason.label)}
-                checked={selectedReason?.code === reason.code}
-                disabled={isSubmitting}
-                onSelect={setSelectedCode}
-                labelClassName="text-darkblack"
-              />
-            ))}
-          </div>
-        </div>
-
-        <textarea
-          value={comments}
-          onChange={(event) => setComments(event.target.value)}
-          placeholder={dialog.commentsPlaceholder}
-          rows={4}
-          disabled={isSubmitting}
-          className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]"
-        />
-
-        {commentMissing ? (
-          <p className="font-gill text-sm font-light leading-110 text-neutral500">
-            {ordersContent.otherReasonRequiredMessage}
-          </p>
-        ) : null}
-
-        <FormFieldError message={errorMessage ?? undefined} />
-
-        <DetailDarkButton
-          type="button"
-          className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={handleConfirm}
-          disabled={isSubmitting || commentMissing || !selectedReason}
-        >
-          {isSubmitting ? "Submitting..." : dialog.confirmLabel}
-        </DetailDarkButton>
+        <ProfileOrderReturnReasonDialogBody {...bodyProps} />
       </DialogContent>
     </Dialog>
   );

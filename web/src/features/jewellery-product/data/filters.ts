@@ -1,5 +1,6 @@
 import type { JewelleryFilterState, JewellerySortOption } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import { readJewelleryListingUrlParams } from "../utils/jewelleryRoutes";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 
 export const DESKTOP_PAGE_SIZE = 10;
@@ -29,6 +30,15 @@ export function isValidJewelleryListingSort(value: string | null | undefined): b
 
 export function parseJewelleryListingSortParam(value: string | null | undefined): string {
   return isValidJewelleryListingSort(value) ? value!.trim() : DEFAULT_JEWELLERY_LISTING_SORT;
+}
+
+/** Reads `sort` from the live browser URL when available (PLP/search use replaceState). */
+export function readJewelleryListingSortFromUrl(
+  fallbackSearch?: URLSearchParams | string | null,
+): string {
+  return parseJewelleryListingSortParam(
+    readJewelleryListingUrlParams(fallbackSearch).get("sort"),
+  );
 }
 
 export function applyJewelleryListingSortParam(

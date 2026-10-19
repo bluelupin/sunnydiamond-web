@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckoutField,
   CheckoutSelectField,
@@ -10,6 +10,7 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
+import { usePincodeCityStateAutofill } from "@/shared/hooks/use-pincode-city-state-autofill";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { RIGHT_PANEL_SCROLL_AREA_CLASS } from "@/shared/ui/RightPanelScrollLayout";
@@ -106,6 +107,26 @@ export function ProfileAddressFormSheet({
 
     wasOpenRef.current = open;
   }, [open, initialValues, accountPhone]);
+
+  const applyPincodeLookup = useCallback((lookup: { city: string; state: string }, pin: string) => {
+    setForm((current) => {
+      if (current.pincode.trim() !== pin) {
+        return current;
+      }
+
+      return {
+        ...current,
+        ...(lookup.city ? { city: lookup.city } : {}),
+        ...(lookup.state ? { state: lookup.state } : {}),
+      };
+    });
+  }, []);
+
+  usePincodeCityStateAutofill({
+    pincode: form.pincode,
+    enabled: open,
+    onApply: applyPincodeLookup,
+  });
 
   const errors = useMemo(() => {
     const fieldErrors = getProfileAddressFormErrors(form, INDIAN_STATES);
@@ -241,7 +262,7 @@ export function ProfileAddressFormSheet({
             <CheckoutField
               id="profile-address-name"
               label={addressContent.fullNameLabel}
-              placeholder="Enter your full name"
+              placeholder="Enter Your Full Name"
               value={form.name}
               onChange={(value) => handleChange("name", value)}
               onBlur={() => markTouched("name")}
@@ -252,7 +273,7 @@ export function ProfileAddressFormSheet({
             <CheckoutField
               id="profile-address-line-1"
               label="Address Line 1"
-              placeholder="Enter House Number and Street Name"
+              placeholder="Enter House Number And Street Name"
               value={form.addressLine1}
               onChange={(value) => handleChange("addressLine1", value)}
               onBlur={() => markTouched("addressLine1")}
@@ -277,7 +298,7 @@ export function ProfileAddressFormSheet({
               <CheckoutField
                 id="profile-address-pincode"
                 label="Pincode"
-                placeholder="Enter Pin code"
+                placeholder="Enter Pin Code"
                 value={form.pincode}
                 onChange={(value) => handleChange("pincode", value)}
                 onBlur={() => markTouched("pincode")}
@@ -300,14 +321,15 @@ export function ProfileAddressFormSheet({
             <CheckoutSelectField
               id="profile-address-state"
               label="State"
+              variant="inlineCustom"
+              listPlacement="inline"
+              placeholder="Select State"
               value={form.state}
               onChange={(value) => handleChange("state", value)}
               onBlur={() => markTouched("state")}
               invalid={showError("state")}
               error={showError("state") ? errors.state : undefined}
               options={stateOptions}
-              placeholder="Select State"
-              triggerClassName="data-[placeholder]:text-gray600"
               disabled={isSaving}
             />
             <FormFieldError message={formError ?? undefined} />

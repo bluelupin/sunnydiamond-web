@@ -1,6 +1,10 @@
 "use client";
 
 import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
+import {
+  GIFTING_HERO_IMAGE_QUALITY,
+  GIFTING_HERO_IMAGE_SIZES,
+} from "@/features/gifting/utils/giftingPageImage";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import type { NormalizedGiftingHero } from "@/services/gifting/gifting-page.types";
 
@@ -22,6 +26,9 @@ const GiftingHeroSection = ({ hero }: GiftingHeroSectionProps) => {
           mobileImageUrl={hero.image?.mobileUrl}
           desktopAlt={imageAlt}
           mobileAlt={imageAlt}
+          priority
+          quality={GIFTING_HERO_IMAGE_QUALITY}
+          sizes={GIFTING_HERO_IMAGE_SIZES}
         />
         <MediaContentOverlay gradient="bottom-strong" />
       </div>

@@ -12,8 +12,6 @@ type LoginIdentifierFieldProps = {
   countryCode: string;
   error?: string;
   emailOnly?: boolean;
-  /** Dial codes that can get an SMS code — the picker offers only these. */
-  countryCodes: readonly string[];
   inputRef?: RefObject<HTMLInputElement | null>;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
@@ -24,7 +22,6 @@ const LoginIdentifierField = ({
   countryCode,
   error,
   emailOnly = false,
-  countryCodes,
   inputRef,
   onIdentifierChange,
   onCountryCodeChange,
@@ -70,7 +67,6 @@ const LoginIdentifierField = ({
           <PhoneCountryCodeSelect
             id="login-country-code"
             value={countryCode || DEFAULT_COUNTRY_CODE}
-            codes={countryCodes}
             onChange={(nextCode) => {
               onCountryCodeChange(nextCode);
               onIdentifierChange(limitLoginIdentifier(identifier, nextCode, emailOnly));
@@ -85,7 +81,7 @@ const LoginIdentifierField = ({
           value={identifier}
           onChange={(event) => onIdentifierChange(limitLoginIdentifier(event.target.value, countryCode, emailOnly))}
           placeholder={
-            emailOnly ? "Enter your email address." : "Enter your phone number or email address."
+            emailOnly ? "Enter Your Email Address." : "Enter Your Phone Number Or Email Address."
           }
           autoComplete={isEmailMode ? "username" : "tel-national"}
           required

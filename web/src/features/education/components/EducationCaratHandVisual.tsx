@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { educationCaratVisualSpec } from "../data/content";
+import EducationPanelCrossfadeImage from "./EducationPanelCrossfadeImage";
 
 type EducationCaratHandVisualProps = {
   activeCarat: number;
@@ -76,14 +76,14 @@ const EducationCaratHandVisual = ({
             transformOrigin: "center center",
           }}
         >
-          <Image
-            key={diamondImageUrl}
-            src={diamondImageUrl}
-            alt={diamondImageAlt ?? ""}
-            fill
-            className="object-contain"
-            sizes="80px"
-          />
+          <div className="relative size-full overflow-hidden">
+            <EducationPanelCrossfadeImage
+              src={diamondImageUrl}
+              alt={diamondImageAlt ?? ""}
+              className="object-contain"
+              sizes="80px"
+            />
+          </div>
         </div>
       ) : null}
     </div>

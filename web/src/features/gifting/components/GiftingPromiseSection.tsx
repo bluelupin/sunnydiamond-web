@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { GIFTING_CONTENT_IMAGE_QUALITY } from "@/features/gifting/utils/giftingPageImage";
 import type { NormalizedGiftingFinishingItem, NormalizedGiftingFinishingTouch } from "@/services/gifting/gifting-page.types";
 
 const FinishingTouchCard = ({ item }: { item: NormalizedGiftingFinishingItem }) => {
@@ -14,6 +15,8 @@ const FinishingTouchCard = ({ item }: { item: NormalizedGiftingFinishingItem }) 
           fill
           className="object-cover object-center"
           sizes="(max-width: 767px) 328px, (max-width: 1440px) 33vw, 474px"
+          quality={GIFTING_CONTENT_IMAGE_QUALITY}
+          loading="lazy"
         />
       </div>
       <div className="flex max-w-[296px] flex-col items-start gap-2 text-left text-darkblack md:max-w-none md:items-center md:gap-3 md:px-4 md:text-center">

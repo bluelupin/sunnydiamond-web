@@ -9,8 +9,8 @@ import { ProfileOrderItemBadge } from "./profileUi";
 
 /** Figma mobile order listing — gift card thumbnail (100×100 square, 15.5px side inset). */
 const MOBILE_GIFT_CARD_THUMB_CLASS =
-  "box-border size-[100px] px-[15.5px] py-7";
-const MOBILE_GIFT_CARD_IMAGE_FRAME_CLASS = "relative mx-auto h-11 w-full max-w-[70px]";
+  "box-border size-[100px] px-[15.5px] py-7 w-full";
+const MOBILE_GIFT_CARD_IMAGE_FRAME_CLASS = "relative h-11 w-full max-w-[70px]";
 
 function ProfileOrderThumbnailImage({ item }: { item: ProfileOrderItemUi }) {
   const isGiftCardItem = Boolean(item.subtitle?.trim());
@@ -43,7 +43,7 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
         const isGiftCardItem = Boolean(item.subtitle?.trim());
 
         return (
-          <div key={item.id} className="relative shrink-0">
+          <div key={item.id} className={cn(isGiftCardItem && "w-full", "relative shrink-0")}>
             {item.isGift ? <ProfileOrderItemBadge label="Gift" /> : null}
             <div
               className={cn(

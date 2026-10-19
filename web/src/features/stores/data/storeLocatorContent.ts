@@ -30,7 +30,7 @@ export const storeLocatorSearchFigmaSpec = {
 } as const;
 
 /** Default when CMS omits searchPlaceholder (Figma 4903:141277). */
-export const storeLocatorDefaultSearchPlaceholder = "Search by location or pin code";
+export const storeLocatorDefaultSearchPlaceholder = "Search by Location or Pincode";
 
 export const storeLocatorSearchMobileFigmaSpec = {
   /** Figma node 1480:175894 — mobile search + state filters */

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { footerPages } from "@/features/cms/data/footerPages";
 import GiftCardPageLauncher from "@/features/gift-card/components/GiftCardPageLauncher";
+import GiftingDocumentPreload from "@/features/gifting/components/GiftingDocumentPreload";
 import GiftingPage from "@/features/gifting/components/GiftingPage";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import {
@@ -25,6 +26,7 @@ async function GiftCardPageContent() {
   const page = await getGiftingPage();
   return (
     <>
+      <GiftingDocumentPreload page={page} />
       <GiftingPage page={page} />
       <GiftCardPageLauncher />
     </>

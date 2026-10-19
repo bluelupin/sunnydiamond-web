@@ -41,6 +41,12 @@ export type StrapiProductForm = {
   dynamicFields?: StrapiProductFormDynamicField[] | null;
 };
 
+/** Strapi form `stateOptions` relation: UI label vs value CMS APIs accept (often `code`). */
+export type CmsStateRelationOption = {
+  label: string;
+  submitValue: string;
+};
+
 export type NormalizedProductForm = {
   formName: string;
   formTag: string;
@@ -50,6 +56,7 @@ export type NormalizedProductForm = {
   isMultiStep: boolean;
   timeSlots: string[];
   stateOptions: string[];
+  stateRelationOptions: CmsStateRelationOption[];
   nameLabel?: string;
   namePlaceholder?: string;
   phoneLabel?: string;

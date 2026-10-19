@@ -10,6 +10,8 @@ import {
   authLoginWebBackgroundImageClassName,
 } from "../constants/authLoginBackground";
 import AuthFlowSteps from "./AuthFlowSteps";
+import { cn } from "@/shared/utils/cn";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 type AuthStandalonePageProps = {
   returnUrl: string;
@@ -47,7 +49,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
 
   const titleClassName = isMobile ? "text-2xl" : undefined;
   const flowLabel = getAuthFlowLabel(step);
-
+  const { windows } = useUiPlatform();
   return (
     <div className="relative flex h-full min-h-0 flex-col">
       <div className="absolute inset-0">
@@ -76,7 +78,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
       </div>
 
       <div
-        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(64px+env(safe-area-inset-top,0px))] md:px-8 md:landscape:justify-center md:landscape:pt-104 md:landscape:py-6 justify-end lg:items-end items-center lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]"
+        className={cn(!windows && "max-md:!pb-24", "relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(64px+env(safe-area-inset-top,0px))] md:px-8 md:landscape:justify-center md:landscape:pt-104 md:landscape:py-6 justify-end lg:items-end items-center lg:pr-[max(2.5rem,calc((100vw-1440px)/2+2.5rem))]")}
       >
         <div
           role="region"

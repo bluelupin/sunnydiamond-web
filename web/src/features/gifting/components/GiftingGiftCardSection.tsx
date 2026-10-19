@@ -3,6 +3,11 @@
 import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
 import { useGiftCardFlow } from "@/features/gift-card/context/GiftCardFlowContext";
+import {
+  GIFTING_CONTENT_IMAGE_QUALITY,
+  GIFTING_SECTION_BACKGROUND_SIZES,
+  GIFTING_SECTION_IMAGE_QUALITY,
+} from "@/features/gifting/utils/giftingPageImage";
 import type { NormalizedGiftingGiftCard } from "@/services/gifting/gifting-page.types";
 
 type GiftingGiftCardSectionProps = {
@@ -37,7 +42,9 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
             alt={giftCard.background.alt?.trim() || giftCard.title}
             fill
             className="object-cover object-center"
-            sizes="100vw"
+            sizes={GIFTING_SECTION_BACKGROUND_SIZES}
+            quality={GIFTING_SECTION_IMAGE_QUALITY}
+            loading="lazy"
             aria-hidden
           />
         }
@@ -87,6 +94,8 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
               fill
               className="scale-[1.2] object-contain object-center md:scale-100 md:object-right-bottom"
               sizes="(max-width: 768px) 100vw, 791px"
+              quality={GIFTING_CONTENT_IMAGE_QUALITY}
+              loading="lazy"
             />
           </Reveal>
         }

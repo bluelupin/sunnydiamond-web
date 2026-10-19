@@ -1,6 +1,7 @@
 import type { JewelleryCategorySlug } from "../types";
 
 export const JEWELLERY_PATH = "/jewellery";
+export const JEWELLERY_SEARCH_PATH = "/search";
 
 const VALID_CATEGORY_SLUGS: readonly JewelleryCategorySlug[] = [
   "all",
@@ -80,6 +81,16 @@ export function isJewelleryCategoryPath(pathname: string): boolean {
   }
 
   return isJewelleryCategoryUrlKey(segment);
+}
+
+export function isJewellerySearchPath(pathname: string): boolean {
+  const normalized = pathname.replace(/\/$/, "") || "/";
+  return normalized === JEWELLERY_SEARCH_PATH;
+}
+
+/** PLP shell shared by /jewellery, category routes, and /search results. */
+export function isJewelleryListingPath(pathname: string): boolean {
+  return isJewelleryCategoryPath(pathname) || isJewellerySearchPath(pathname);
 }
 
 /** Query params preserved when switching PLP category tabs (collection, gift-finder, etc.). */

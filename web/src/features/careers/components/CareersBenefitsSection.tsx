@@ -246,7 +246,7 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
                       alt={isActive ? image.alt : ""}
                       fill
                       sizes="(min-width: 768px) 60vw, 100vw"
-                      className="object-cover object-center md:object-top"
+                      className="object-cover object-center"
                     />
                   </div>
                 );

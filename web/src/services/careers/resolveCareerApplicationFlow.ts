@@ -49,7 +49,7 @@ const APPLICATION_FORM_FIELD_FALLBACKS: NormalizedCareerApplicationFlow["applica
     emailLabel: "Email*",
     dateOfBirthLabel: "Date of Birth*",
     dateOfBirthPlaceholder: "DD / MM / YYYY",
-    fieldPlaceholder: "Enter here",
+    fieldPlaceholder: "Enter Here",
     selectPlaceholder: "Select",
     genderLabel: "Gender*",
     highestDegreeLabel: "Highest Degree*",

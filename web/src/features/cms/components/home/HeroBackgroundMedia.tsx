@@ -16,6 +16,7 @@ type HeroBackgroundMediaProps = {
   cmsVideoUrl?: string;
   priority?: boolean;
   quality?: number;
+  sizes?: string;
 };
 
 function getVideoMimeType(url: string): string | undefined {
@@ -32,6 +33,7 @@ const HeroBackgroundMedia = ({
   cmsVideoUrl,
   priority = true,
   quality = PLP_HERO_IMAGE_QUALITY,
+  sizes = "100vw",
 }: HeroBackgroundMediaProps) => {
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -100,7 +102,7 @@ const HeroBackgroundMedia = ({
           priority={priority}
           width={1920}
           height={1080}
-          sizes="100vw"
+          sizes={sizes}
           quality={quality}
           className="absolute inset-0 h-full w-full object-cover"
         />

@@ -3,6 +3,15 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { BESPOKE_JEWELLERY_PATH } from "@/shared/utils/navigation";
 import type { NormalizedContactBespokePage } from "@/services/bespoke/contact-bespoke-page.types";
 
+export function resolveBespokeOpenGraphImage(
+  page: NormalizedContactBespokePage | null,
+): string | undefined {
+  const heroImage = page?.hero?.image;
+  const candidate =
+    heroImage?.desktopUrl?.trim() || heroImage?.mobileUrl?.trim() || undefined;
+  return candidate;
+}
+
 export function resolveBespokeSeoMetadata(page: NormalizedContactBespokePage | null) {
   const cmsSeo = page?.seo;
   const cmsCanonical = cmsSeo?.canonicalPath?.replace(/\/$/, "") || "";
@@ -12,6 +21,7 @@ export function resolveBespokeSeoMetadata(page: NormalizedContactBespokePage | n
 
   const cmsTitle = cmsSeo?.metaTitle?.trim();
   const cmsDescription = cmsSeo?.metaDescription?.trim();
+  const image = resolveBespokeOpenGraphImage(page);
 
   return {
     // Prefer CMS exactly; static fallbacks only when CMS SEO is missing.
@@ -19,6 +29,7 @@ export function resolveBespokeSeoMetadata(page: NormalizedContactBespokePage | n
     description: cmsDescription || seoContent.bespoke.description,
     canonicalPath,
     keywords: cmsSeo?.metaKeywords,
+    ...(image ? { image } : {}),
   };
 }
 

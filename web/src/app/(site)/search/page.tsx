@@ -4,14 +4,8 @@ import { redirect } from "next/navigation";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import SearchNoResults from "@/features/search/SearchNoResults";
 import { cleanSearchQuery } from "@/features/search/quickSearch";
-import { getContactPage } from "@/services/contact/contact-page.service";
-import {
-  getMagentoTrendingProducts,
-  mapJewelleryListingToFeaturedCarouselItems,
-} from "@/services/magento/products/trendingProducts.service";
 import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
-import PageContainer from "@/shared/ui/layout/PageContainer";
 
 type PageProps = {
   searchParams: Promise<{ q?: string | string[] }>;
@@ -38,36 +32,18 @@ export default async function Page({ searchParams }: PageProps) {
     redirect("/jewellery");
   }
 
-  const [landing, contact, trending] = await Promise.all([
-    getProductLandingPage(),
-    getContactPage(),
-    getMagentoTrendingProducts(8).catch(() => []),
-  ]);
-  const advisorHref = contact.infoCards
-    .map((card) => card.link.href)
-    .find((href) => href && /wa\.me|whatsapp/i.test(href));
+  const landing = await getProductLandingPage();
 
   return (
-    <>
-      <PageContainer className="pb-6 pt-10 lg:pb-10 lg:pt-16">
-        <h1 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48">
-          Results for &lsquo;{query}&rsquo;
-        </h1>
-      </PageContainer>
-      <Suspense fallback={null}>
-        <JewelleryProductPage
-          key={query}
-          searchQuery={query}
-          trustBadges={landing.trustBadges}
-          noResults={
-            <SearchNoResults
-              query={query}
-              bestsellers={mapJewelleryListingToFeaturedCarouselItems(trending)}
-              advisorHref={advisorHref}
-            />
-          }
-        />
-      </Suspense>
-    </>
+    <Suspense fallback={null}>
+      <JewelleryProductPage
+        key={query}
+        searchQuery={query}
+        hero={landing.hero}
+        trustBadges={landing.trustBadges}
+        listingCards={landing.listingCards}
+        noResults={<SearchNoResults query={query} />}
+      />
+    </Suspense>
   );
 }

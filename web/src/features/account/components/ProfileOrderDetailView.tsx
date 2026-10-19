@@ -29,10 +29,15 @@ import {
 } from "../utils/formatAccountData";
 import {
   DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
+  PROFILE_ORDER_SINGLE_ACTION_CTA_CLASS,
+  countProfileOrderVisibleActions,
   isDigitalGiftCardContactUsOnlyOrder,
   isActiveDigitalGiftCardOrder,
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
+  isRefundInProgressOrder,
+  resolveRefundInProgressTimelineEstimatedMeta,
+  shouldShowOrderDeliveryByMeta,
 } from "../utils/orderDeliveryTimeline.utils";
 import { ProfileOrderDetailItemsSection } from "./ProfileOrderDetailItemsSection";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
@@ -42,7 +47,11 @@ import { ProfileOrderReturnDialog } from "./ProfileOrderReturnDialog";
 import { ProfileOrderReturnReasonDialog } from "./ProfileOrderReturnReasonDialog";
 import { ProfileOrderReturnSuccessDialog } from "./ProfileOrderReturnSuccessDialog";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
-import { ProfileMetaDivider, ProfileOrderMobileStatusBadge } from "./profileUi";
+import {
+  ProfileMetaDivider,
+  ProfileOrderMobileStatusBadge,
+  ProfileOrderSingleActionCtaShell,
+} from "./profileUi";
 
 type ProfileOrderDetailViewProps = {
   order: ProfileOrderDetailUi;
@@ -188,10 +197,25 @@ export function ProfileOrderDetailView({
   const hasDiscount = priceBreakdown.orderDiscount > 0;
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
   const isDelivered = order.category === "delivered";
+  const showDeliveryByMeta = shouldShowOrderDeliveryByMeta(order);
+  const isCancelledOrder = order.category === "cancelled";
+  const isRefundInProgress = isRefundInProgressOrder(order);
   const showReturnDeadlineNote = isDelivered && !isGiftCardProfileOrder(order);
-  const deliveryMetaValueLabel = isDelivered
-    ? detailContent.deliveredOnMetaLabel
-    : detailContent.deliveryByMetaLabel;
+  const deliveryMetaValueLabel =
+    isDelivered || isRefundInProgress
+      ? detailContent.deliveredOnMetaLabel
+      : detailContent.deliveryByMetaLabel;
+  const deliveryDateHeaderLabel =
+    isDelivered || isRefundInProgress
+      ? content.deliveredOnLabel
+      : content.deliveryByLabel;
+  const refundInProgressTimelineEstimated = isRefundInProgress
+    ? resolveRefundInProgressTimelineEstimatedMeta(
+        order,
+        content.estimatedRefundLabel,
+        content.estimatedDeliveryRangePlaceholder,
+      )
+    : null;
   const giftCardDeliveredBadge =
     order.category === "delivered" && isGiftCardProfileOrder(order);
   const mobileStatusLabel =
@@ -202,6 +226,10 @@ export function ProfileOrderDetailView({
       return [];
     }
 
+    if (order.category === "cancelled" || order.category === "returned") {
+      return order.timeline ?? [];
+    }
+
     return resolveProfileOrderTimelineSteps(
       order.status,
       order.timeline,
@@ -209,20 +237,16 @@ export function ProfileOrderDetailView({
     );
   }, [order]);
 
-  const detailActionCount =
-    Number(order.showDownloadInvoice) +
-    Number(order.showCancel) +
-    Number(order.showReturn) +
-    Number(order.showContactUs);
+  const detailTimelineSteps =
+    isCancelledOrder && (order.timeline?.length ?? 0) <= 1 ? [] : timelineSteps;
+
+  const detailActionCount = countProfileOrderVisibleActions(order);
   const singleDetailAction = detailActionCount === 1;
-  const detailActionRowClassName = cn(
-    "flex flex-col gap-4 lg:flex-row lg:gap-6",
-    singleDetailAction && "lg:justify-end",
-  );
+  const detailActionRowClassName = "flex flex-col gap-4 lg:flex-row lg:gap-6";
   const detailMultiActionButtonClassName =
     "h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:flex-1";
   const detailSingleActionButtonClassName = cn(
-    DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
+    PROFILE_ORDER_SINGLE_ACTION_CTA_CLASS,
     "disabled:cursor-not-allowed disabled:opacity-50",
   );
 
@@ -285,7 +309,7 @@ export function ProfileOrderDetailView({
             </span>
           </div>
 
-          {order.deliveryBy ? (
+          {showDeliveryByMeta ? (
             <>
               <span className="w-px shrink-0 self-stretch bg-neutral300" aria-hidden />
               <div className={PROFILE_ORDER_DETAIL_MOBILE_META_COLUMN_CLASS}>
@@ -293,7 +317,7 @@ export function ProfileOrderDetailView({
                   {deliveryMetaValueLabel}
                 </span>
                 <span className={PROFILE_ORDER_DETAIL_MOBILE_META_VALUE_CLASS}>
-                  {formatOrderDateMobileMeta(order.deliveryBy)}
+                  {formatOrderDateMobileMeta(order.deliveryBy!)}
                 </span>
               </div>
             </>
@@ -321,12 +345,10 @@ export function ProfileOrderDetailView({
             </span>
           </div>
 
-          {order.deliveryBy ? (
+          {showDeliveryByMeta ? (
             <span className="font-gill text-base leading-110 text-darkblack">
-              <span className="font-light">
-                {isDelivered ? content.deliveredOnLabel : content.deliveryByLabel}{" "}
-              </span>
-              <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
+              <span className="font-light">{deliveryDateHeaderLabel} </span>
+              <span className="font-normal">{formatOrderDate(order.deliveryBy!)}</span>
             </span>
           ) : null}
         </div>
@@ -338,11 +360,17 @@ export function ProfileOrderDetailView({
         ) : null}
       </div>
 
-      {timelineSteps.length > 0 ? (
+      {!isCancelledOrder && detailTimelineSteps.length > 0 ? (
         <ProfileOrderTimeline
-          estimatedLabel={order.estimatedDeliveryLabel}
-          estimatedValue={order.estimatedDeliveryValue}
-          steps={timelineSteps}
+          estimatedLabel={
+            refundInProgressTimelineEstimated?.estimatedLabel ??
+            order.estimatedDeliveryLabel
+          }
+          estimatedValue={
+            refundInProgressTimelineEstimated?.estimatedValue ??
+            order.estimatedDeliveryValue
+          }
+          steps={detailTimelineSteps}
           className="bg-gray300"
         />
       ) : null}
@@ -479,70 +507,101 @@ export function ProfileOrderDetailView({
         </div>
       ) : (order.showCancel || order.showReturn || order.showDownloadInvoice || order.showContactUs) ? (
         <div className="flex flex-col gap-4">
-            <div className={detailActionRowClassName}>
-              {order.showDownloadInvoice ? (
-                <DetailDarkButton
-                  type="button"
-                  className={
-                    singleDetailAction
-                      ? detailSingleActionButtonClassName
-                      : cn(
-                          "order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1",
-                          isActiveDigitalGiftCardOrder(order) &&
-                            "lg:ml-auto lg:w-[414px] lg:max-w-[414px] lg:flex-none",
-                        )
-                  }
-                  onClick={handleDownloadInvoice}
-                  disabled={invoiceDisabled}
-                >
-                  {isDownloadingInvoice
-                    ? content.downloadingInvoiceLabel
-                    : content.downloadInvoiceLabel}
-                </DetailDarkButton>
-              ) : null}
+            {singleDetailAction ? (
+              <ProfileOrderSingleActionCtaShell>
+                {order.showDownloadInvoice ? (
+                  <DetailDarkButton
+                    type="button"
+                    className={detailSingleActionButtonClassName}
+                    onClick={handleDownloadInvoice}
+                    disabled={invoiceDisabled}
+                  >
+                    {isDownloadingInvoice
+                      ? content.downloadingInvoiceLabel
+                      : content.downloadInvoiceLabel}
+                  </DetailDarkButton>
+                ) : null}
 
-              {order.showCancel ? (
-                <DetailOutlineButton
-                  type="button"
-                  className={
-                    singleDetailAction
-                      ? detailSingleActionButtonClassName
-                      : cn(detailMultiActionButtonClassName, "order-2 lg:order-1")
-                  }
-                  onClick={handleCancelOrder}
-                >
-                  {content.cancelOrderLabel}
-                </DetailOutlineButton>
-              ) : null}
+                {order.showCancel ? (
+                  <DetailOutlineButton
+                    type="button"
+                    className={detailSingleActionButtonClassName}
+                    onClick={handleCancelOrder}
+                  >
+                    {content.cancelOrderLabel}
+                  </DetailOutlineButton>
+                ) : null}
 
-              {order.showReturn ? (
-                <DetailOutlineButton
-                  type="button"
-                  className={
-                    singleDetailAction
-                      ? detailSingleActionButtonClassName
-                      : cn(detailMultiActionButtonClassName, "order-3 lg:order-1")
-                  }
-                  onClick={handleReturnOrder}
-                >
-                  {content.returnOrderLabel}
-                </DetailOutlineButton>
-              ) : null}
+                {order.showReturn ? (
+                  <DetailOutlineButton
+                    type="button"
+                    className={detailSingleActionButtonClassName}
+                    onClick={handleReturnOrder}
+                  >
+                    {content.returnOrderLabel}
+                  </DetailOutlineButton>
+                ) : null}
 
-              {order.showContactUs ? (
-                <DetailDarkButton
-                  type="button"
-                  className={
-                    singleDetailAction
-                      ? detailSingleActionButtonClassName
-                      : detailMultiActionButtonClassName
-                  }
-                  onClick={handleContactSupport}
-                >
-                  {content.contactUsLabel}
-                </DetailDarkButton>
-              ) : null}
-            </div>
+                {order.showContactUs ? (
+                  <DetailDarkButton
+                    type="button"
+                    className={detailSingleActionButtonClassName}
+                    onClick={handleContactSupport}
+                  >
+                    {content.contactUsLabel}
+                  </DetailDarkButton>
+                ) : null}
+              </ProfileOrderSingleActionCtaShell>
+            ) : (
+              <div className={detailActionRowClassName}>
+                {order.showDownloadInvoice ? (
+                  <DetailDarkButton
+                    type="button"
+                    className={cn(
+                      "order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1",
+                      isActiveDigitalGiftCardOrder(order) &&
+                        "lg:ml-auto lg:w-[414px] lg:max-w-[414px] lg:flex-none",
+                    )}
+                    onClick={handleDownloadInvoice}
+                    disabled={invoiceDisabled}
+                  >
+                    {isDownloadingInvoice
+                      ? content.downloadingInvoiceLabel
+                      : content.downloadInvoiceLabel}
+                  </DetailDarkButton>
+                ) : null}
+
+                {order.showCancel ? (
+                  <DetailOutlineButton
+                    type="button"
+                    className={cn(detailMultiActionButtonClassName, "order-2 lg:order-1")}
+                    onClick={handleCancelOrder}
+                  >
+                    {content.cancelOrderLabel}
+                  </DetailOutlineButton>
+                ) : null}
+
+                {order.showReturn ? (
+                  <DetailOutlineButton
+                    type="button"
+                    className={cn(detailMultiActionButtonClassName, "order-3 lg:order-1")}
+                    onClick={handleReturnOrder}
+                  >
+                    {content.returnOrderLabel}
+                  </DetailOutlineButton>
+                ) : null}
+
+                {order.showContactUs ? (
+                  <DetailDarkButton
+                    type="button"
+                    className={detailMultiActionButtonClassName}
+                    onClick={handleContactSupport}
+                  >
+                    {content.contactUsLabel}
+                  </DetailDarkButton>
+                ) : null}
+              </div>
+            )}
 
           {(order.showCancelNote || showReturnDeadlineNote) && order.footnote ? (
             <div className="flex items-center gap-2">

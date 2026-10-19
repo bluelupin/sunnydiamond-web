@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerAddresses } from "@/features/account/hooks/useCustomerAddresses";
 import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
@@ -12,6 +12,7 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
+import { usePincodeCityStateAutofill } from "@/shared/hooks/use-pincode-city-state-autofill";
 import { cn } from "@/shared/utils/cn";
 import {
   invalidFieldClassName,
@@ -96,6 +97,25 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
     isAuthenticated,
     setDeliveryAddress,
   ]);
+
+  const pincodeRef = useRef(deliveryAddress.pincode);
+  pincodeRef.current = deliveryAddress.pincode;
+
+  const applyPincodeLookup = useCallback(
+    (lookup: { city: string; state: string }, pin: string) => {
+      if (pincodeRef.current.trim() !== pin) {
+        return;
+      }
+
+      setDeliveryAddress({
+        ...(lookup.city ? { city: lookup.city } : {}),
+        ...(lookup.state ? { state: lookup.state } : {}),
+      });
+    },
+    [setDeliveryAddress],
+  );
+
+  usePincodeCityStateAutofill({ pincode: deliveryAddress.pincode, onApply: applyPincodeLookup });
 
   const errors = useMemo(() => {
     const pincodeValidation = validateIndianPincode(deliveryAddress.pincode);

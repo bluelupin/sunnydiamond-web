@@ -9,6 +9,10 @@ import type { NormalizedCraftCard } from "@/services/about/about-page.types";
 import {
   aboutHandcraftedAssets,
 } from "../data/content";
+import {
+  ABOUT_DECORATIVE_IMAGE_QUALITY,
+  ABOUT_MOSAIC_IMAGE_SIZES,
+} from "../utils/aboutPageImage";
 import Reveal from "@/shared/Animation/Reveal";
 
 type AboutHandcraftedTileGridProps = {
@@ -83,8 +87,10 @@ function CraftPhotoTile({
           src={resolvedUrl}
           alt={imageAlt?.trim() || ""}
           fill
+          loading="lazy"
+          quality={ABOUT_DECORATIVE_IMAGE_QUALITY}
           className="object-cover object-center"
-          sizes="(max-width: 768px) 50vw, 25vw"
+          sizes={ABOUT_MOSAIC_IMAGE_SIZES}
         />
       ) : (
         <>

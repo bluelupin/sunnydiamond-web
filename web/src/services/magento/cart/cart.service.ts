@@ -251,6 +251,7 @@ export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
       // A network failure or cancellation must not replace the shopper's cart.
       const unavailable = error instanceof MagentoGraphqlError && (
         /could not find a cart|cart.*(?:isn't|is not|not) active|current user cannot perform|customerCart/i.test(error.message)
+        || /\(403\)$/.test(error.message)
         || error.errors.some((entry) => entry.extensions?.category === "graphql-authorization")
       );
       if (!unavailable || signal?.aborted) {
@@ -286,6 +287,10 @@ type AddProductToGuestCartInput = {
   lineOptions?: CartLineOptions;
   productCustomOptions?: ProductCustomOptions;
   configurableOptionUids?: string[];
+  /** Configurable axis attribute codes, so custom options are suppressed only when duplicated by an axis. */
+  configurableOptionCodes?: string[];
+  /** When > 0, parent SKU must use addProductsToCart with configurable UIDs — never addSimpleProductsToCart. */
+  configurableAxisCount?: number;
   lineMetadata: StoredCartLineMetadata;
   signal?: AbortSignal;
 };
@@ -297,18 +302,33 @@ export async function addProductToGuestCart({
   lineOptions = {},
   productCustomOptions,
   configurableOptionUids = [],
+  configurableOptionCodes = [],
+  configurableAxisCount = 0,
   lineMetadata,
   signal,
 }: AddProductToGuestCartInput): Promise<GuestCartState> {
   const configurableUids = configurableOptionUids.map((uid) => uid.trim()).filter(Boolean);
+  const configurableCodes = configurableOptionCodes.map((code) => code.trim().toLowerCase());
+  const hasConfigurableMetal = configurableCodes.some(
+    (code) => /metal/.test(code) && !/purity/.test(code),
+  );
+  const hasConfigurableSize = configurableCodes.some((code) => /size|length/.test(code));
   const optionPayload = buildMagentoCartItemOptionPayload(
     lineOptions,
     configurableUids.length > 0 && productCustomOptions
-      ? { ...productCustomOptions, metal: undefined }
+      ? {
+          ...productCustomOptions,
+          ...(hasConfigurableMetal ? { metal: undefined } : {}),
+          ...(hasConfigurableSize ? { ringSize: undefined } : {}),
+        }
       : productCustomOptions,
   );
   const selectedOptions = [...(optionPayload?.selectedOptions ?? []), ...configurableUids];
   const enteredOptions = optionPayload?.enteredOptions ?? [];
+
+  if (configurableAxisCount > 0 && configurableUids.length < configurableAxisCount) {
+    throw new Error("Please select all product options before adding to bag.");
+  }
 
   if (!optionPayload && configurableUids.length === 0) {
     return addSimpleProductToGuestCart(cartId, sku, quantity, lineMetadata, signal);

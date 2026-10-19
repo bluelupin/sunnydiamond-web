@@ -10,6 +10,7 @@ import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlis
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { cn } from "@/shared/utils/cn";
+import { getImageSrc } from "@/shared/utils/image";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistCardLayout = "default" | "profile";
@@ -29,12 +30,22 @@ const WishlistCard = ({
 }: WishlistCardProps) => {
   const href = getWishlistProductHref(product);
   const isProfileLayout = layout === "profile";
+  const hasProductImage = Boolean(getImageSrc(product.primaryImage));
+
+  const imageLinkClassName = cn(
+    "pointer-events-auto mx-auto block shrink-0",
+    isProfileLayout
+      ? "aspect-[400/300] h-auto w-full max-w-[155px] sm:max-w-[240px] md:max-w-[300px] lg:max-w-[400px]"
+      : hasProductImage
+        ? "h-auto w-full max-w-[155px] max-h-[155px] sm:max-w-[240px] sm:max-h-[240px] md:max-w-[300px] md:max-h-[300px] lg:max-w-[426px] lg:max-h-[426px]"
+        : "aspect-square w-full max-w-[155px] sm:max-w-[240px] md:max-w-[300px] lg:max-w-[426px]",
+  );
 
   return (
     <article
       className={cn(
-        "relative grid grid-cols-1 grid-rows-1 overflow-hidden md:gap-6 gap-4",
-        isProfileLayout ? "bg-gray200 px-4 py-10 md:py-10" : "py-6 md:py-10 md:px-6 px-4 md:py-10 py-6",
+        "relative flex h-full flex-col overflow-hidden gap-4 md:gap-6",
+        isProfileLayout ? "bg-gray200 px-4 py-10 md:py-10" : "px-4 py-6 md:px-6 md:py-10",
       )}
     >
       <button
@@ -45,29 +56,30 @@ const WishlistCard = ({
       >
         <DeleteIcon className="size-6 text-darkblack" />
       </button>
-      <Link
-        href={href}
+      <Link href={href} className={imageLinkClassName}>
+        {hasProductImage ? (
+          <OptimizedImage
+            src={product.primaryImage}
+            alt={product.name}
+            width={372}
+            height={287}
+            className="size-full object-cover"
+          />
+        ) : (
+          <span className="block size-full" aria-hidden />
+        )}
+      </Link>
+      <div
         className={cn(
-          "pointer-events-auto mx-auto block",
-          isProfileLayout
-            ? "h-auto w-full lg:max-w-[400px] md:max-w-[300px] sm:max-w-[240px] max-w-[155px] aspect-[400/300]"
-            : "h-auto w-full lg:max-w-[426px] md:max-w-[300px] sm:max-w-[240px] max-w-[155px]",
+          "pointer-events-auto flex min-h-0 w-full flex-1 flex-col items-center justify-start gap-6 lg:gap-6",
+          isProfileLayout && "gap-6",
         )}
       >
-        <OptimizedImage
-          src={product.primaryImage}
-          alt={product.name}
-          width={372}
-          height={287}
-          className="h-full w-full object-cover"
-        />
-      </Link>
-      <div className={cn("pointer-events-auto flex flex-col items-center gap-6 lg:gap-6", isProfileLayout && "gap-6")}>
-        <div className="flex flex-col items-center gap-2 md:gap-3">
+        <div className="flex w-full shrink-0 flex-col items-center justify-start gap-2 md:gap-3">
           <Link
             href={href}
             className={cn(
-              "md:line-clamp-2 line-clamp-1 max-w-[153px] text-center font-gill text-base font-light md:leading-110 leading-[115%] text-darkblack md:max-w-none md:min-h-0 md:text-xl",
+              "block line-clamp-2 max-w-[153px] text-center font-gill text-sm font-light leading-[115%] text-darkblack md:max-w-none md:text-base md:leading-110 lg:text-xl",
               isProfileLayout && "lg:text-xl",
               productNameDisplayClassName,
             )}
@@ -84,7 +96,7 @@ const WishlistCard = ({
             {formatJewelleryPrice(product.price)}
           </p>
         </div>
-        <div className="flex items-center justify-center md:gap-6">
+        <div className="mt-auto flex items-center justify-center md:gap-6">
           <span
             onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}
             onFocus={() => prefetchWishlistProductDetail(product.urlKey)}

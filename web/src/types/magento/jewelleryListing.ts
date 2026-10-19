@@ -4,7 +4,11 @@ export type JewelleryFilterFacetOption = {
   label: string;
   value: string;
   count?: number;
+  /** Hex swatch for PLP metal color variant chips (from Magento or PDP fallbacks). */
+  swatchColor?: string;
 };
+
+export type JewelleryMetalTypeFilterAttribute = "sd_metal_color" | "sd_metal_type";
 
 /** Magento `price` aggregation buckets (gift-finder / experimental consumers). */
 export type JewelleryPriceBucket = {
@@ -20,6 +24,8 @@ export type JewelleryFilterFacets = {
   priceBuckets: JewelleryPriceBucket[];
   categories: JewelleryFilterFacetOption[];
   metalTypes: JewelleryFilterFacetOption[];
+  /** Magento attribute used for drawer metal type / color filtering. */
+  metalTypeAttributeCode: JewelleryMetalTypeFilterAttribute;
   metalPurities: JewelleryFilterFacetOption[];
   gemstoneTypes: JewelleryFilterFacetOption[];
   occasions: JewelleryFilterFacetOption[];

@@ -268,7 +268,7 @@ const OffersAndDealsExpandedContent = ({
             if (errorMessage) setErrorMessage(null);
           }}
           onApply={() => void handleApplyGiftCard()}
-          placeholder="Enter code"
+          placeholder="Enter Code"
           applyLabel={giftCardBusy ? "Applying..." : "Apply"}
           disabled={giftCardBusy}
           hasError={Boolean(errorMessage)}

@@ -58,6 +58,15 @@ function mapMagentoProductDetailSections(
     }
   }
 
+  const metalWeight = getMagentoCustomAttributeValue(items, "sd_metal_weight");
+  const parsedMetalWeight = metalWeight == null ? Number.NaN : Number(metalWeight.trim());
+  if (Number.isFinite(parsedMetalWeight) && parsedMetalWeight > 0) {
+    const weightLine = `Metal Weight: ${parsedMetalWeight.toFixed(3).replace(/\.?0+$/, "")} g`;
+    sections.specifications = sections.specifications
+      ? `${sections.specifications}\n${weightLine}`
+      : weightLine;
+  }
+
   return Object.keys(sections).length > 0 ? sections : undefined;
 }
 
@@ -211,6 +220,26 @@ function mapConfigurableVariant(
   }
 
   const priceBreakup = resolveMagentoProductPriceBreakup(child.custom_attributesV2?.items);
+  const childAttributes = getAttributeMap(child.custom_attributesV2?.items);
+  const childClarity = getAttributeValue(childAttributes, "sd_diamond_clarity");
+  const childCarat = getAttributeValue(childAttributes, "sd_diamond_carat");
+  const childGemstone = getAttributeValue(childAttributes, "sd_gemstone_type");
+  const detailAttributes = [
+    childClarity ? `${childClarity} Grade` : null,
+    childPurity ? `${childPurity} Metal` : null,
+    childCarat ? formatCaratLabel(childCarat) : null,
+    childGemstone ? `Gemstone: ${childGemstone}` : null,
+  ].filter((attribute): attribute is string => Boolean(attribute));
+  let detailSections = mapMagentoProductDetailSections(child.custom_attributesV2?.items);
+  if (childGemstone) {
+    const gemstoneLine = `Gemstone Type: ${childGemstone}`;
+    detailSections = {
+      ...detailSections,
+      specifications: detailSections?.specifications
+        ? `${detailSections.specifications}\n${gemstoneLine}`
+        : gemstoneLine,
+    };
+  }
 
   return {
     sku,
@@ -222,6 +251,8 @@ function mapConfigurableVariant(
     attributes,
     optionUids,
     ...(priceBreakup ? { priceBreakup } : {}),
+    ...(detailAttributes.length ? { detailAttributes } : {}),
+    ...(detailSections ? { detailSections } : {}),
   };
 }
 

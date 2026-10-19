@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { apiFetch } from "@/api/fetchClient";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
@@ -24,20 +25,29 @@ const ABOUT_PAGE_POPULATE_QUERY =
   "&populate[teamSection][populate][teamMember][populate][image][populate][desktopImage]=true" +
   "&populate[teamSection][populate][teamMember][populate][image][populate][mobileImage]=true";
 
-export const getAboutPage = cache(
-  async (signal?: AbortSignal): Promise<NormalizedAboutPage> => {
-    try {
-      const raw = await apiFetch<StrapiAboutPageEntity>(
-        `${STRAPI_ENDPOINTS.aboutPage}?${ABOUT_PAGE_POPULATE_QUERY}`,
-        { signal },
-      );
+async function fetchAboutPageFromCms(): Promise<NormalizedAboutPage> {
+  const raw = await apiFetch<StrapiAboutPageEntity>(
+    `${STRAPI_ENDPOINTS.aboutPage}?${ABOUT_PAGE_POPULATE_QUERY}`,
+    { next: { revalidate: 300, tags: ["about-page"] } },
+  );
 
-      return mapAboutPageData(raw);
-    } catch {
-      return EMPTY_ABOUT_PAGE;
-    }
-  },
+  return mapAboutPageData(raw);
+}
+
+const getCachedAboutPage = unstable_cache(
+  fetchAboutPageFromCms,
+  ["about-page-normalized"],
+  { revalidate: 300, tags: ["about-page"] },
 );
+
+/** Request-scoped dedupe (metadata + page) plus cross-request CMS cache. */
+export const getAboutPage = cache(async (): Promise<NormalizedAboutPage> => {
+  try {
+    return await getCachedAboutPage();
+  } catch {
+    return EMPTY_ABOUT_PAGE;
+  }
+});
 
 export { EMPTY_ABOUT_PAGE } from "./about-page.types";
 export type { NormalizedAboutPage } from "./about-page.types";

@@ -131,7 +131,12 @@ function ProfileOrderTimelineHorizontal({
           </>
         ) : null}
 
-        <ol className="relative flex justify-between">
+        <ol
+          className={cn(
+            "relative flex",
+            stepCount === 1 ? "justify-center" : "justify-between",
+          )}
+        >
           {steps.map((step) => {
             const isCompleted = step.status === "completed";
             const isCurrent = step.status === "current";
@@ -141,7 +146,10 @@ function ProfileOrderTimelineHorizontal({
             return (
               <li
                 key={`${step.step}-${step.label}`}
-                className="flex min-w-0 flex-1 flex-col items-center gap-3"
+                className={cn(
+                  "flex min-w-0 flex-col items-center gap-3",
+                  stepCount === 1 ? "max-w-full" : "flex-1",
+                )}
               >
                 <span
                   className={cn(
@@ -187,21 +195,28 @@ export function ProfileOrderTimeline({
   className,
   variant = "default",
 }: ProfileOrderTimelineProps) {
-  if (!steps || steps.length === 0) {
+  const hasHeader = Boolean(estimatedLabel?.trim() && estimatedValue?.trim());
+  const hasSteps = Boolean(steps?.length);
+
+  if (!hasHeader && !hasSteps) {
     return null;
   }
 
   return (
     <div className={cn("bg-white", className)}>
-      {estimatedLabel && estimatedValue ? (
+      {hasHeader ? (
         <ProfileOrderTimelineEstimatedHeader
-          estimatedLabel={estimatedLabel}
-          estimatedValue={estimatedValue}
+          estimatedLabel={estimatedLabel!}
+          estimatedValue={estimatedValue!}
         />
       ) : null}
 
-      <ProfileOrderTimelineVertical steps={steps} />
-      <ProfileOrderTimelineHorizontal steps={steps} variant={variant} />
+      {hasSteps ? (
+        <>
+          <ProfileOrderTimelineVertical steps={steps!} />
+          <ProfileOrderTimelineHorizontal steps={steps!} variant={variant} />
+        </>
+      ) : null}
     </div>
   );
 }

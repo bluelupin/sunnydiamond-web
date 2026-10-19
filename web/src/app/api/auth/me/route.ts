@@ -31,6 +31,10 @@ export type AuthMeResponse = {
  * narrow — the old broad regex (authentication|login|token) matched unrelated
  * Magento errors and destroyed valid sessions on transient failures (QA bug #18).
  */
+function isMagentoVerifiedFlag(value: unknown): boolean {
+  return value === true || value === 1 || value === "1";
+}
+
 function isAuthorizationFailure(error: unknown, message: string): boolean {
   if (
     error instanceof MagentoGraphqlError &&
@@ -43,9 +47,13 @@ function isAuthorizationFailure(error: unknown, message: string): boolean {
     return true;
   }
 
-  // An expired/revoked token makes Magento answer HTTP 401 before GraphQL runs;
-  // the client surfaces that as "... request failed (401)" with no error entries.
-  return /isn'?t authorized|not authorized|unauthorized/i.test(message) || /\(401\)$/.test(message);
+  // An expired/revoked token makes Magento answer HTTP 401/403 before GraphQL runs;
+  // the client surfaces that as "... request failed (401|403)" with no error entries.
+  return (
+    /isn'?t authorized|not authorized|unauthorized|forbidden/i.test(message) ||
+    /\(401\)$/.test(message) ||
+    /\(403\)$/.test(message)
+  );
 }
 
 export async function GET() {
@@ -109,8 +117,8 @@ export async function GET() {
         phone:
           customer.custom_attributes?.find((attribute) => attribute.code === "mobile_number")
             ?.value || null,
-        phoneVerified: customer.sd_mobile_verified === true,
-        emailVerified: customer.sd_email_verified === true,
+        phoneVerified: isMagentoVerifiedFlag(customer.sd_mobile_verified),
+        emailVerified: isMagentoVerifiedFlag(customer.sd_email_verified),
         signupMethod: customer.sd_signup_method || "unknown",
       },
     } satisfies AuthMeResponse);

@@ -94,7 +94,9 @@ const OverlaySelectField = ({
             triggerClassName,
           )}
         >
-          <SelectValue placeholder={selectPlaceholder} />
+          <SelectValue placeholder={selectPlaceholder}>
+            {value ? value : undefined}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent
           position="popper"

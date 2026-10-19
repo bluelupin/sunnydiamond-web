@@ -13,7 +13,7 @@ export const profileDetailsContent = {
   phoneInfo: "Choose your country code and enter your mobile number. It can be used to sign in with an OTP.",
   phoneRegisteredTooltip:
     "This was used to register your profile and can't be changed",
-  phonePlaceholder: "Mobile number",
+  phonePlaceholder: "Mobile Number",
   phoneInvalidMessage: "Enter a valid mobile number.",
   phoneSuccessToastMessage: "Your mobile number has been updated.",
   phoneErrorToastMessage: "We could not update your mobile number. Please try again.",
@@ -52,7 +52,7 @@ export const profileDetailsContent = {
         "I had a poor shopping experience",
         "Other",
       ],
-      commentsPlaceholder: "Additional comments",
+      commentsPlaceholder: "Additional Comments",
       confirmLabel: "CONFIRM",
     },
     successDialog: {
@@ -94,7 +94,7 @@ export const profileTabsContent = {
       title: "Track Order?",
       trackingIdLabel: "Tracking ID:",
       shipmentUpdatesTitle: "Shipment Updates",
-      trackingPlaceholder: "Tracking details will appear here once available.",
+      trackingPlaceholder: "Tracking Details Will Appear Here Once Available.",
       loadingLabel: "Loading tracking details...",
     },
     cancelDialog: {
@@ -112,6 +112,8 @@ export const profileTabsContent = {
       title: "Cancel Order?",
       description:
         "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+      descriptionMobile:
+        "We're sorry to see you go. Let us know what changed. Your feedback helps us do better.",
       reasonLabel: "Select Reason",
       reasons: [
         "Expected delivery timeline no longer works for me",
@@ -119,13 +121,20 @@ export const profileTabsContent = {
         "My requirements have changed",
         "Other",
       ],
-      commentsPlaceholder: "Additional comments",
+      commentsPlaceholder: "Additional Comments",
       confirmLabel: "CONFIRM CANCELLATION",
     },
     cancelSuccessDialog: {
       title: "Order Cancellation",
+      titleMobile: "Order Cancelled",
       description:
         "Order cancelled successfully. You can track your refund status from your order summary.",
+      descriptionDesktopLines: [
+        "Order cancelled successfully. You can track your refund status from your",
+        "order summary.",
+      ],
+      descriptionMobile:
+        "Your order has been successfully cancelled. You can track your refund status from your order summary.",
     },
     returnDialog: {
       title: "Return Order?",
@@ -154,7 +163,7 @@ export const profileTabsContent = {
         "My requirements have changed",
         "Other",
       ],
-      commentsPlaceholder: "Additional comments",
+      commentsPlaceholder: "Additional Comments",
       confirmLabel: "CONFIRM RETURN",
       /** Mobile radio labels only — submit payload still uses the source reason label. */
       reasonLabelMobileBySourceLabel: {
@@ -201,7 +210,7 @@ export const profileTabsContent = {
     returnWindowClosedNote: "Order return window has now closed",
     estimatedDeliveryLabel: "Estimated Delivery",
     estimatedDeliveryPlaceholder: "2 June 2026",
-    estimatedDeliveryRangePlaceholder: "Within 5-7 business days",
+    estimatedDeliveryRangePlaceholder: "Within 5-7 Business Days",
     estimatedRefundLabel: "Estimated Refund Time",
     estimatedRefundWindowTemplate: "Within {window}",
     statusInProgress: "Order in Progress",

@@ -310,3 +310,17 @@ export function getPolicyFromPage(
     .flatMap((group) => group.items)
     .find((policy) => policy.id === policyId);
 }
+
+/** Same rules as the policy hub client — used by the route for SSR only. */
+export function resolveActivePolicyId(
+  page: NormalizedPolicyCertificationsPage,
+  candidate: string | undefined,
+): string {
+  if (candidate && getPolicyFromPage(page, candidate)) {
+    return candidate;
+  }
+  if (getPolicyFromPage(page, page.defaultPolicyId)) {
+    return page.defaultPolicyId;
+  }
+  return page.navGroups[0]?.items[0]?.id ?? page.defaultPolicyId;
+}

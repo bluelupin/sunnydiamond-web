@@ -22,6 +22,7 @@ import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import EngravingPreviewImage from "./EngravingPreviewImage";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 type MetalEngravingPanelProps = {
   open: boolean;
@@ -137,6 +138,7 @@ const MetalEngravingPanel = ({
     onClose();
   };
 
+  const { windows } = useUiPlatform();
   return (
     <>
       <ProductDetailSidePanelShell
@@ -205,8 +207,12 @@ const MetalEngravingPanel = ({
                 ) : null}
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Info size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                  <div className="flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-[2px]", "shrink-0 text-darkblack")}>
+                      <path d="M9.375 9.375C9.54076 9.375 9.69973 9.44085 9.81694 9.55806C9.93415 9.67527 10 9.83424 10 10V13.125C10 13.2908 10.0658 13.4497 10.1831 13.5669C10.3003 13.6842 10.4592 13.75 10.625 13.75" stroke="#0A0A0A" strokeWidth="0.9375" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M9.6875 7.34375C10.119 7.34375 10.4688 6.99397 10.4688 6.5625C10.4688 6.13103 10.119 5.78125 9.6875 5.78125C9.25603 5.78125 8.90625 6.13103 8.90625 6.5625C8.90625 6.99397 9.25603 7.34375 9.6875 7.34375Z" fill="#0A0A0A" />
+                      <path d="M10 17.5C14.1421 17.5 17.5 14.1421 17.5 10C17.5 5.85786 14.1421 2.5 10 2.5C5.85786 2.5 2.5 5.85786 2.5 10C2.5 14.1421 5.85786 17.5 10 17.5Z" stroke="#0A0A0A" strokeWidth="0.9375" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                     <p className="font-gill text-base font-light leading-110 text-darkblack">
                       For more options or special requests,
                     </p>

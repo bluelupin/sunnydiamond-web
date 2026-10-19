@@ -8,6 +8,7 @@ import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollR
 import type { NormalizedBrillianceSection } from "@/services/about/about-page.types";
 import Reveal from "@/shared/Animation/Reveal";
 import VerticalScrollLine from "./VerticalScrollLine";
+import { ABOUT_DECORATIVE_IMAGE_QUALITY } from "../utils/aboutPageImage";
 
 const { image: imageSpec } = aboutCraftingRarityFigmaSpec;
 
@@ -49,7 +50,8 @@ const AboutBrillianceSection = ({
                   alt={image.alt}
                   width={image.width ?? imageSpec.width}
                   height={image.height ?? imageSpec.height}
-                  quality={80}
+                  quality={ABOUT_DECORATIVE_IMAGE_QUALITY}
+                  sizes="(max-width: 768px) 156px, 265px"
                   className="object-cover"
                 />
               </Reveal>

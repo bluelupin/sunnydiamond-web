@@ -1,4 +1,5 @@
 const STORAGE_KEY = "sunny_recent_searches";
+/** Client spec: show the 3–4 most recent terms; no clear/remove UI (Figma). */
 const MAX_RECENT = 4;
 
 export function readRecentSearches(): string[] {
@@ -22,13 +23,5 @@ export function addRecentSearch(query: string): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next.slice(0, MAX_RECENT)));
   } catch {
     // Private mode or blocked storage: recents are a convenience, search still works.
-  }
-}
-
-export function clearRecentSearches(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
   }
 }

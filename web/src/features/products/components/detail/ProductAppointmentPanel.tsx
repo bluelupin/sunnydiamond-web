@@ -11,7 +11,7 @@ import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-c
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import {
   appointmentFieldClassName,
@@ -94,7 +94,7 @@ const ProductAppointmentForm = ({
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(open);
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
-    getAuthLoginIdentifierKind(),
+    signupMethodToContactLockKind(customer?.signupMethod),
   );
 
   const [name, setName] = useState("");
@@ -567,11 +567,12 @@ const ProductAppointmentPanel = ({
   };
 
   const handleLegacySuccess = (message: string) => {
-    if (variant === "personalise" || variant === "schedule-video-call") {
+    if (variant === "schedule-video-call") {
       showStatusToast(message);
       return;
     }
 
+    // Personalise closes and unmounts the panel, so the toast has to live on the global status toast.
     toast(config.successToast);
   };
 

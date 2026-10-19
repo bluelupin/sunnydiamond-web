@@ -58,21 +58,21 @@ export function ProfileOrderCancelDialog({
               </button>
             </div>
 
-            <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
+            <div className="mt-6 h-[1px] w-full bg-neutral300" aria-hidden />
 
             <p className="mt-6 font-gill text-base font-light leading-110 text-neutral500">
               {content.description}
             </p>
           </div>
 
-          <div className="mt-12 border-t border-neutral300 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
+          <div className="mt-12 border-t-[0.5px] border-neutral300 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
             <div className="flex flex-col gap-4">
-              <DetailOutlineButton type="button" className="w-full" onClick={onContactSupport}>
-                {content.contactSupportLabel}
-              </DetailOutlineButton>
               <DetailDarkButton type="button" className="w-full" onClick={onProceedToCancel}>
                 {content.proceedLabel}
               </DetailDarkButton>
+              <DetailOutlineButton type="button" className="w-full" onClick={onContactSupport}>
+                {content.contactSupportLabel}
+              </DetailOutlineButton>
             </div>
           </div>
         </SheetContent>

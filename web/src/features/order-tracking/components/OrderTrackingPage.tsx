@@ -178,7 +178,7 @@ const OrderTrackingPage = () => {
                   label="Last Name"
                   value={form.lastname}
                   onChange={(value) => setForm((current) => ({ ...current, lastname: value }))}
-                  placeholder="As used during checkout"
+                  placeholder="As Used During Checkout"
                 />
               </>
             )}

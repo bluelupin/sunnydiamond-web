@@ -224,7 +224,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
             }
             onBlur={() => markTouched("phone")}
             autoComplete="tel-national"
-            placeholder={form.fields.phonePlaceholder ?? "Phone number"}
+            placeholder={form.fields.phonePlaceholder ?? "Phone Number"}
             aria-invalid={showError("phone") || undefined}
             aria-describedby={showError("phone") ? "contact-phone-error" : undefined}
             className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
@@ -252,7 +252,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
         onChange={(event) => setEmail(event.target.value)}
         onBlur={() => markTouched("email")}
         autoComplete="email"
-        placeholder={form.fields.emailPlaceholder ?? "Email address"}
+        placeholder={form.fields.emailPlaceholder ?? "Email Address"}
         aria-invalid={showError("email") || undefined}
         aria-describedby={showError("email") ? "contact-email-error" : undefined}
         className={cn(

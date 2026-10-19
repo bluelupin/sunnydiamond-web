@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { pickTryAtHomeStateForCmsApi } from "@/features/products/data/tryAtHomeContent";
 import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
 import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 import {
@@ -6,6 +7,9 @@ import {
   rescheduleCustomerAppointment,
   type RescheduleCustomerAppointmentInput,
 } from "@/services/customer/customer-appointments.service";
+import { getProductFormByTag } from "@/services/forms/product-form.service";
+import { lookupIndianPincodeGeo } from "@/services/pincode/pincodeLookup.server";
+import { validateIndianPincode } from "@/shared/utils/formValidation";
 
 type RouteContext = {
   params: Promise<{ documentId: string }>;
@@ -18,6 +22,8 @@ type RescheduleBody = {
   customerPhone?: string;
   customerEmail?: string;
   requestDetails?: string;
+  /** BFF-only: load CMS state allowlists for address normalization. */
+  formTag?: string;
   address?: {
     addressLine1?: string;
     addressLine2?: string;
@@ -26,6 +32,8 @@ type RescheduleBody = {
     state?: string;
   };
 };
+
+const TRY_AT_HOME_FORM_TAGS = ["try-at-home-form", "try-at-home"] as const;
 
 function toRescheduleAddress(
   address: RescheduleBody["address"],
@@ -91,6 +99,61 @@ function toRescheduleInput(body: RescheduleBody): RescheduleCustomerAppointmentI
   };
 }
 
+async function loadTryAtHomeProductForm(formTag?: string) {
+  const tags = [
+    ...(formTag?.trim() ? [formTag.trim()] : []),
+    ...TRY_AT_HOME_FORM_TAGS,
+  ];
+
+  for (const tag of tags) {
+    const form = await getProductFormByTag(tag);
+    if (form) {
+      return form;
+    }
+  }
+
+  return null;
+}
+
+async function normalizeRescheduleAddress(
+  address: NonNullable<RescheduleCustomerAppointmentInput["address"]>,
+  formTag?: string,
+): Promise<NonNullable<RescheduleCustomerAppointmentInput["address"]>> {
+  let pincodeGeoState = "";
+
+  if (validateIndianPincode(address.pincode).valid) {
+    try {
+      const geo = await lookupIndianPincodeGeo(address.pincode);
+      if (!("notFound" in geo)) {
+        pincodeGeoState = geo.state;
+        if (!address.city.trim() && geo.city) {
+          address = { ...address, city: geo.city };
+        }
+      }
+    } catch {
+      // Pin lookup is best-effort; keep client-entered city/state.
+    }
+  }
+
+  const form = await loadTryAtHomeProductForm(formTag);
+  const picked = pickTryAtHomeStateForCmsApi(
+    address.state ?? pincodeGeoState,
+    form,
+    pincodeGeoState,
+  );
+
+  if (picked) {
+    return { ...address, state: picked };
+  }
+
+  if (pincodeGeoState) {
+    return { ...address, state: pincodeGeoState };
+  }
+
+  const { state: _state, ...rest } = address;
+  return rest;
+}
+
 /**
  * POST /api/customer/appointments/:documentId/reschedule
  * Body: requestedDate, selectedTimeSlot, optional customerName/Phone/Email/requestDetails/address.
@@ -121,12 +184,17 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  const formTag = body.formTag?.trim();
   const input = toRescheduleInput(body);
   if (!input) {
     return NextResponse.json(
       { error: "Date and time slot are required" },
       { status: 400 },
     );
+  }
+
+  if (input.address) {
+    input.address = await normalizeRescheduleAddress(input.address, formTag);
   }
 
   try {

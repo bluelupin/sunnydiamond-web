@@ -26,14 +26,16 @@ export const APPOINTMENT_TIME_SLOTS = [
   "04:00 PM - 05:00 PM",
 ] as const;
 
-export const APPOINTMENT_COUNTRY_CODES = [
-  { code: "+91", country: "IN" },
-  { code: "+1", country: "US" },
-  { code: "+44", country: "GB" },
-] as const;
+import {
+  DEFAULT_COUNTRY_CODE,
+  PHONE_COUNTRY_ENTRIES,
+  type PhoneCountryEntry,
+} from "./phoneCountryCodes";
 
-/** Default country code for phone inputs (India). */
-export const DEFAULT_COUNTRY_CODE = APPOINTMENT_COUNTRY_CODES[0].code;
+export { DEFAULT_COUNTRY_CODE };
+
+/** Phone country dropdown (195 sovereign states; ISO + E.164). India is listed first. */
+export const APPOINTMENT_COUNTRY_CODES: readonly PhoneCountryEntry[] = PHONE_COUNTRY_ENTRIES;
 
 /** Figma 4903:44932 — Neutrals/200 fill; Neutrals/600 1px border on focus. */
 export const appointmentFieldClassName =

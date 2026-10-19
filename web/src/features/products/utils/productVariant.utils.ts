@@ -180,8 +180,36 @@ export function applySelectedMetalVariant(
     inStock: variant.inStock,
     metal,
     metalColorValue: normalizeMetalKey(metalId),
-    ...(purity ? { detailAttributes: overlayMetalPurityAttributes(product, purity) } : {}),
+    ...(purity || variant.detailAttributes
+      ? {
+          detailAttributes:
+            variant.detailAttributes ?? overlayMetalPurityAttributes(product, purity!),
+        }
+      : {}),
     ...(variant.priceBreakup ? { priceBreakup: variant.priceBreakup } : {}),
+    ...(variant.detailSections
+      ? { detailSections: { ...product.detailSections, ...variant.detailSections } }
+      : {}),
+  };
+}
+
+/** Overlay the selected size child data onto the PDP display model. */
+export function applySelectedSizeVariant(
+  product: Product,
+  variant: ProductConfigurableVariant | undefined,
+): Product {
+  if (!variant) return product;
+
+  return {
+    ...product,
+    productSku: variant.sku,
+    price: variant.price,
+    originalPrice: variant.originalPrice,
+    ...(variant.priceBreakup ? { priceBreakup: variant.priceBreakup } : {}),
+    ...(variant.detailAttributes ? { detailAttributes: variant.detailAttributes } : {}),
+    ...(variant.detailSections
+      ? { detailSections: { ...product.detailSections, ...variant.detailSections } }
+      : {}),
   };
 }
 
@@ -191,6 +219,78 @@ export function getConfigurableOptionUidsForMetal(
   preferredPurities: readonly string[] = [],
 ): string[] {
   return findConfigurableVariantForMetal(product, metalId, preferredPurities)?.optionUids ?? [];
+}
+
+function resolveConfigurableUidsFromAxes(
+  product: Product,
+  metalId: string,
+  ringSizeLabel: string | undefined,
+): string[] {
+  const axes = product.configurable?.options ?? [];
+  const uids: string[] = [];
+
+  const metalOption = getConfigurableMetalOption(product);
+  if (metalOption && metalId.trim()) {
+    const normalizedMetal = normalizeMetalKey(metalId);
+    const metalValue = metalOption.values.find(
+      (value) =>
+        normalizeMetalKey(value.id) === normalizedMetal ||
+        normalizeMetalKey(value.label) === normalizedMetal,
+    );
+    if (metalValue?.uid) {
+      uids.push(metalValue.uid);
+    }
+  }
+
+  const sizeAxis = axes.find((option) => /size|length/i.test(option.attributeCode));
+  const sizeLabel = ringSizeLabel?.trim();
+  if (sizeAxis && sizeLabel) {
+    const sizeValue = sizeAxis.values.find((value) => value.label === sizeLabel);
+    if (sizeValue?.uid) {
+      uids.push(sizeValue.uid);
+    }
+  }
+
+  return uids;
+}
+
+/**
+ * Magento `addProductsToCart` needs one configurable value UID per axis (metal, ring size, …).
+ * Resolve from configurable option metadata first (stable for dual-axis rings); fall back to variant rows.
+ */
+export function getConfigurableOptionUidsForCartItem(
+  product: Product,
+  metalId: string,
+  ringSizeLabel: string | undefined,
+  sizeVariant: ProductConfigurableVariant | undefined,
+  preferredPurities: readonly string[] = [],
+): string[] {
+  const axisCount = product.configurable?.options.length ?? 0;
+  if (axisCount === 0) {
+    return [];
+  }
+
+  const fromAxes = resolveConfigurableUidsFromAxes(product, metalId, ringSizeLabel);
+  if (fromAxes.length >= axisCount) {
+    return fromAxes;
+  }
+
+  const fromSizeRow = sizeVariant?.optionUids ?? [];
+  if (fromSizeRow.length >= axisCount) {
+    return fromSizeRow;
+  }
+
+  const fromMetal = getConfigurableOptionUidsForMetal(product, metalId, preferredPurities);
+  const merged = [...new Set([...fromAxes, ...fromSizeRow, ...fromMetal])];
+  if (merged.length >= axisCount) {
+    return merged;
+  }
+
+  if (fromMetal.length >= axisCount) {
+    return fromMetal;
+  }
+
+  return merged;
 }
 
 export function getDefaultMetalColorIdForPurities(

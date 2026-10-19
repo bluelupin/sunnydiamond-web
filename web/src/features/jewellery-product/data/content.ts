@@ -52,9 +52,15 @@ export const jewelleryListingPaginationSpec = {
 } as const;
 
 export const jewelleryListingEmptyStateContent = {
-  filterTitle: "No products found",
-  filterDescription: "Try adjusting your filters to see more products.",
-  clearFiltersLabel: "Clear All Filters",
+  filterTitle: "No Results Found",
+  filterDescription: "Try different filters or explore the full collection",
+  clearFiltersLabel: "CONTINUE SHOPPING",
+} as const;
+
+/** /search PLP — same empty title as filter empty; clear action mirrors filter empty. */
+export const searchListingEmptyStateContent = {
+  title: jewelleryListingEmptyStateContent.filterTitle,
+  clearSearchLabel: "Clear Search",
 } as const;
 
 export const jewelleryListingErrorStateContent = {

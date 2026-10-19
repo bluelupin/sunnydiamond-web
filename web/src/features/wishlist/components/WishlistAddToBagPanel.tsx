@@ -29,14 +29,14 @@ import {
   getCachedWishlistProductDetail,
 } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
-import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
+import { getRingSizeOptions } from "@/features/products/utils/ringSizeOptions.utils";
 import {
   getDefaultMetalColorId,
   isMetalColorSelectable,
 } from "@/features/products/utils/metalColorOptions.utils";
 import {
   applySelectedMetalVariant,
-  getConfigurableOptionUidsForMetal,
+  getConfigurableOptionUidsForCartItem,
 } from "@/features/products/utils/productVariant.utils";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
@@ -133,7 +133,10 @@ const WishlistAddToBagPanel = ({
 
   const content = detailProduct ? getProductDetailContent(detailProduct) : null;
   const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
-  const sizeLabels = detailProduct && content ? getRingSizeLabels(detailProduct, sizeGuide) : [];
+  const sizeOptions =
+    detailProduct && content ? getRingSizeOptions(detailProduct, sizeGuide, selectedMetal) : [];
+  const sizeLabels = sizeOptions.map((option) => option.label);
+  const unavailableSizes = sizeOptions.filter((option) => !option.inStock).map((option) => option.label);
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = detailProduct ? isMetalColorSelectable(detailProduct) : false;
   const showMetalColor = (content?.metalColors.length ?? 0) > 0;
@@ -180,12 +183,24 @@ const WishlistAddToBagPanel = ({
       return;
     }
 
+    const selectedSize = sizeOptions.find((option) => option.label === ringSize);
+
     if (showSizeSelector && !ringSize.trim()) {
       setRingSizeError("Please select a ring size.");
       return;
     }
 
-    const configurableOptionUids = getConfigurableOptionUidsForMetal(detailProduct, selectedMetal);
+    if (showSizeSelector && (!selectedSize || !selectedSize.inStock)) {
+      setRingSizeError("This size is out of stock. Please choose another size.");
+      return;
+    }
+
+    const configurableOptionUids = getConfigurableOptionUidsForCartItem(
+      detailProduct,
+      selectedMetal,
+      ringSize || undefined,
+      selectedSize?.variant,
+    );
 
     onAddToBag({
       product: displayProduct ?? detailProduct,
@@ -324,8 +339,12 @@ const WishlistAddToBagPanel = ({
                     labelClassName="sr-only"
                     value={ringSize}
                     options={sizeLabels}
+                    unavailableOptions={unavailableSizes}
                     placeholder="Select"
                     onChange={(value) => {
+                      if (value && unavailableSizes.includes(value)) {
+                        return;
+                      }
                       setRingSize(value);
                       if (value) {
                         setRingSizeError(null);

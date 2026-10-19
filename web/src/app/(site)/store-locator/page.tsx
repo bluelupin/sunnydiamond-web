@@ -42,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function StoreLocatorPageContent() {
   const page = await getStoreLocatorPage();
+
   const stores = (page.showrooms ?? []).map(mapStoreLocatorShowroomToBookStoreVisit);
   const storeLocatorJsonLd = buildStoreLocatorJsonLd(stores);
 

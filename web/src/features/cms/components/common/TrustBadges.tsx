@@ -62,7 +62,7 @@ function TrustBadgeMarqueeItem({
     <div className="flex items-center font-normal text-sm tracking-[0%] leading-110 uppercase font-gill">
       <span className={cn("text-neutral500", itemClassName)}>{item.label}</span>
       {showSeparator ? (
-        <span className="px-60 text-gray600" aria-hidden>
+        <span className="px-[52px] text-gray600" aria-hidden>
           •
         </span>
       ) : null}

@@ -24,12 +24,16 @@ function readCachedState<T>(key: AppDataCacheKey): CmsSectionState<T> | null {
 export function useCmsSection<T>(
   queryKey: AppDataCacheKey,
   fetcher: (signal: AbortSignal) => Promise<T>,
-  options?: { staleTimeMs?: number },
+  options?: { staleTimeMs?: number; enabled?: boolean },
 ): CmsSectionState<T> {
   const staleTimeMs = options?.staleTimeMs ?? 60_000;
+  const enabled = options?.enabled !== false;
   const key = queryKey;
 
   const [state, setState] = useState<CmsSectionState<T>>(() => {
+    if (!enabled) {
+      return { data: undefined, isLoading: false, error: undefined };
+    }
     const cached = readCachedState<T>(key);
     if (cached) return cached;
     return { data: undefined, isLoading: true, error: undefined };
@@ -44,6 +48,10 @@ export function useCmsSection<T>(
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const controller = new AbortController();
 
     const existing = getCmsCacheEntry<T>(key);
@@ -121,7 +129,7 @@ export function useCmsSection<T>(
         });
       }
     };
-  }, [key, staleTimeMs, fetcher]);
+  }, [enabled, key, staleTimeMs, fetcher]);
 
   return state;
 }

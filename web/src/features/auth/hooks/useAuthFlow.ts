@@ -69,7 +69,6 @@ export type AuthFlowContentProps = {
     identifierError?: string;
     emailOnly: boolean;
     otpBlockedForCountry: boolean;
-    otpCountryCodes: readonly string[];
     offerEmailFallback: boolean;
     /** No code channel and no social provider is available — nothing here can work. */
     noSignInMethod: boolean;
@@ -109,7 +108,6 @@ export type AuthFlowContentProps = {
     missingIdentifier: "email" | "phone";
     phone: string;
     countryCode: string;
-    otpCountryCodes: readonly string[];
     termsAccepted: boolean;
     marketingOptIn: boolean;
     fullNameError?: string;
@@ -788,7 +786,6 @@ export function useAuthFlow({
       identifierError,
       emailOnly,
       otpBlockedForCountry,
-      otpCountryCodes: flags.otpCountryCodes,
       offerEmailFallback,
       noSignInMethod,
       showGoogle,
@@ -827,7 +824,6 @@ export function useAuthFlow({
       missingIdentifier: createAccountMissingIdentifier,
       phone: createAccountPhone,
       countryCode,
-      otpCountryCodes: flags.otpCountryCodes,
       termsAccepted,
       marketingOptIn,
       fullNameError,

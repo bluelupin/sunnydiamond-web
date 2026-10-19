@@ -1,6 +1,7 @@
 import {
   formatMetalColorLabel,
   metalSlugFromOrderProductSku,
+  ringSizeFromOrderProductSku,
 } from "@/features/products/utils/metalColorOptions.utils";
 import { classifyCustomOptionLabel } from "@/services/magento/products/productCustomOptions.mapper";
 import type {
@@ -47,6 +48,17 @@ function isSizeLabel(label: string): boolean {
   return classifyCustomOptionLabel(label) === "ringSize";
 }
 
+function metalFromOrderOptions(options: CustomerOrderItemOption[]): string | undefined {
+  const fromClassifier = options
+    .find((option) => classifyCustomOptionLabel(option.label) === "metal")
+    ?.value.trim();
+  if (fromClassifier) {
+    return fromClassifier;
+  }
+
+  return findOptionValue(options, ["metal color", "metal colour", "metal", "color"]);
+}
+
 function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption[]): boolean {
   const sku = item.productSku?.toLowerCase() ?? "";
   const name = item.productName.toLowerCase();
@@ -69,10 +81,11 @@ export function mapCustomerOrderItemToDisplayFields(
   giftMetadata?: OrderGiftMetadata,
 ) {
   const options = getAllOptions(item);
-  const size = options.find((option) => isSizeLabel(option.label))?.value.trim();
+  const size =
+    options.find((option) => isSizeLabel(option.label))?.value.trim() ??
+    ringSizeFromOrderProductSku(item.productSku);
   const metalRaw =
-    findOptionValue(options, ["metal color", "metal", "color"]) ??
-    metalSlugFromOrderProductSku(item.productSku);
+    metalFromOrderOptions(options) ?? metalSlugFromOrderProductSku(item.productSku);
   const metal = metalRaw ? formatMetalColorLabel(metalRaw) || metalRaw : undefined;
   const engraving = options
     .find((option) => classifyCustomOptionLabel(option.label) === "engravingText")

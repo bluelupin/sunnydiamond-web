@@ -6,6 +6,10 @@ import AboutHandcraftedTileGrid from "./AboutHandcraftedTileGrid";
 import VerticalScrollLine from "./VerticalScrollLine";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
+import {
+  ABOUT_SECTION_HERO_SIZES,
+  ABOUT_SECTION_IMAGE_QUALITY,
+} from "../utils/aboutPageImage";
 
 type AboutHandcraftedSectionProps = NormalizedAboutCraft & {
   /** Decorative line before the timeline — hidden when timeline is inactive. */
@@ -42,6 +46,9 @@ const AboutHandcraftedSection = ({
                   desktopAlt={image?.alt ?? title}
                   mobileAlt={image?.alt ?? title}
                   cmsVideoUrl={videoUrl}
+                  priority={false}
+                  quality={ABOUT_SECTION_IMAGE_QUALITY}
+                  sizes={ABOUT_SECTION_HERO_SIZES}
                 />
               </div>
               <MediaContentOverlay

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { cn } from "@/shared/utils/cn";
 import { FeatureErrorBoundary } from "@/shared/ui/FeatureErrorBoundary";
 import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
+import { FeaturedCarouselSkeleton } from "@/features/cms/components/home/FeaturedProductsSection";
 import { lazyImportWithRetry } from "@/shared/utils/lazyImportWithRetry";
 
 const DiamondSourcingSection = lazyImportWithRetry(
@@ -50,18 +51,27 @@ type LazyHomeSectionProps = {
   featureName: string;
   minHeight: string;
   animate?: boolean;
+  fallback?: React.ReactNode;
   children: React.ReactNode;
 };
 
-function LazyHomeSection({ featureName, minHeight, animate = false, children }: LazyHomeSectionProps) {
+function LazyHomeSection({
+  featureName,
+  minHeight,
+  animate = false,
+  fallback,
+  children,
+}: LazyHomeSectionProps) {
+  const sectionFallback = fallback ?? <SectionFallback minHeight={minHeight} />;
+
   return (
     <LazyAnimatedSection
       animate={animate}
-      fallback={<SectionFallback minHeight={minHeight} />}
+      fallback={sectionFallback}
       className={minHeight}
     >
       <FeatureErrorBoundary featureName={featureName}>
-        <Suspense fallback={<SectionFallback minHeight={minHeight} />}>{children}</Suspense>
+        <Suspense fallback={sectionFallback}>{children}</Suspense>
       </FeatureErrorBoundary>
     </LazyAnimatedSection>
   );
@@ -82,7 +92,11 @@ export default function HomeBelowFoldSections() {
         <OccasionsTeaserSection id="categories" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="FeaturedProductsSection" minHeight="">
+      <LazyHomeSection
+        featureName="FeaturedProductsSection"
+        minHeight="min-h-[480px]"
+        fallback={<FeaturedCarouselSkeleton />}
+      >
         <FeaturedProductsSection id="diamond-awaits" />
       </LazyHomeSection>
 
@@ -102,7 +116,8 @@ export default function HomeBelowFoldSections() {
         <DiamondsForEveryoneSection id="diamonds-for-everyone" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="CraftsmanshipProcess" minHeight="">
+      {/* ScrollReveal transform on the wrapper breaks sticky + scroll-scrub in this section. */}
+      <LazyHomeSection featureName="CraftsmanshipProcess" minHeight="min-h-[750px]" animate={false}>
         <CraftsmanshipProcess id="craftsmanship" />
       </LazyHomeSection>
 

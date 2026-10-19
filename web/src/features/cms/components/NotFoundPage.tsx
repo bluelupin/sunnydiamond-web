@@ -2,7 +2,7 @@ import { DetailDarkLink } from "@/features/products/components/detail/shared";
 
 const NotFoundPage = () => {
   return (
-    <div className="flex items-center justify-center min-h-[60vh] text-center px-4">
+    <div className="flex items-center justify-center min-h-[100vh] text-center px-4">
         <div>
           <h1 className="font-heading text-6xl font-semibold text-foreground mb-4">404</h1>
           <p className="font-body text-lg text-muted-foreground mb-6">

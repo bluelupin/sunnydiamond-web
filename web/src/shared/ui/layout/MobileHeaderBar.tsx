@@ -16,7 +16,7 @@ type MobileHeaderBarProps = {
 const MobileHeaderBar = ({
   leading,
   cartCount,
-  logoClassName = "text-darkMagenta",
+  logoClassName = "text-darkblack",
   iconClassName = "text-darkblack",
   onNavigate,
 }: MobileHeaderBarProps) => {

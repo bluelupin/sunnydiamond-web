@@ -19,7 +19,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
         <Reveal direction="up" className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
             src="/icons/flourishIcon.svg"
-            alt={quote}
+            alt="flourish Icon"
             width={flourishSpec.width}
             height={flourishSpec.height}
             aria-hidden
@@ -36,7 +36,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
 
           <Image
             src="/icons/flourishIcon.svg"
-            alt={quote}
+            alt="flourish Icon"
             width={flourishSpec.width}
             height={flourishSpec.height}
             aria-hidden

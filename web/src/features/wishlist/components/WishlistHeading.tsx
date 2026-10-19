@@ -37,7 +37,7 @@ const WishlistHeading = ({
           <DetailTextLink onClick={() => requestAuth({ returnUrl: "/wishlist" })} className="md:text-base text-sm">
             Sign in
           </DetailTextLink>
-          <p className="text-sm font-light leading-100 tracking-[0%] text-darkblack sm:text-base sm:tracking-[1%] md:text-[18px]">
+          <p className="text-sm font-light leading-100 tracking-[0%] text-darkblack sm:text-base sm:tracking-[1%] md:text-[18px] max-sm:text-center">
             To save your pieces and return to your Wishlist anytime.
           </p>
         </div>

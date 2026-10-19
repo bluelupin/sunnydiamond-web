@@ -86,7 +86,7 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
                   productNameDisplayClassName,
                 )}
               >
-                {item.name}
+                {item.name} 
               </Link>
             ) : (
               <p
@@ -95,13 +95,13 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
                   productNameDisplayClassName,
                 )}
               >
-                {item.name}
+                {item.name} 
               </p>
             )}
 
             {item.subtitle ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
-                {item.subtitle}
+                {item.subtitle} 
               </p>
             ) : null}
 

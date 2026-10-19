@@ -47,9 +47,14 @@ export async function getCustomerAppointments(
   return (await response.json()) as CustomerAppointmentsPage;
 }
 
+export type RescheduleCustomerAppointmentClientInput = RescheduleCustomerAppointmentInput & {
+  /** BFF-only — selects CMS form for address state normalization. */
+  formTag?: string;
+};
+
 export async function rescheduleCustomerAppointment(
   documentId: string,
-  input: RescheduleCustomerAppointmentInput,
+  input: RescheduleCustomerAppointmentClientInput,
 ): Promise<CustomerAppointment> {
   const response = await fetch(
     `/api/customer/appointments/${encodeURIComponent(documentId)}/reschedule`,

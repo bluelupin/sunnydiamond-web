@@ -20,10 +20,13 @@ import type { ProfileOrderUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
 import {
   DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
+  PROFILE_ORDER_SINGLE_ACTION_CTA_CLASS,
   isDigitalGiftCardContactUsOnlyOrder,
   isActiveDigitalGiftCardOrder,
   isGiftCardProfileOrder,
   resolveProfileOrderTimelineSteps,
+  isRefundInProgressOrder,
+  shouldShowOrderDeliveryByMeta,
 } from "../utils/orderDeliveryTimeline.utils";
 import { ProfileOrderMobileThumbnails } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
@@ -39,6 +42,7 @@ import {
   ProfileMetaDivider,
   ProfileOrderCardDivider,
   ProfileOrderMobileStatusBadge,
+  ProfileOrderSingleActionCtaShell,
   ProfileStatusBadge,
 } from "./profileUi";
 
@@ -70,13 +74,6 @@ function getMobileDeliveryMeta(order: ProfileOrderUi) {
     return {
       label: content.refundTimeline,
       value: content.refundTimelineValue,
-    };
-  }
-
-  if (order.category === "cancelled" && order.deliveryBy) {
-    return {
-      label: content.deliveredOn,
-      value: formatOrderDate(order.deliveryBy),
     };
   }
 
@@ -115,9 +112,9 @@ export function ProfileOrderCard({
     if (order.category === "delivered" || isActiveDigitalGiftCardOrder(order)) {
       return [];
     }
-    // Cancelled COD orders carry no refund steps; never fall back to the delivery stepper.
-    if (order.category === "cancelled" && !order.timeline?.length) {
-      return [];
+    // Cancelled/returned: refund steps only — never rebuild a delivery stepper from status.
+    if (order.category === "cancelled" || order.category === "returned") {
+      return order.timeline ?? [];
     }
 
     return resolveProfileOrderTimelineSteps(
@@ -128,17 +125,30 @@ export function ProfileOrderCard({
   }, [order, resolvedStatus, localResolvedStatus]);
 
   const mobileDeliveryMeta = getMobileDeliveryMeta(order);
+  const showDeliveryByMeta = shouldShowOrderDeliveryByMeta(order);
+  const isCancelledOrder = order.category === "cancelled";
+  const isRefundInProgress = isRefundInProgressOrder(order);
+  const cardTimelineSteps = isCancelledOrder ? [] : timelineSteps;
+  const deliveryDateHeaderLabel =
+    order.category === "delivered" || isRefundInProgress
+      ? content.deliveredOnLabel
+      : content.deliveryByLabel;
+  const timelineEstimatedLabel = isRefundInProgress
+    ? content.estimatedRefundLabel
+    : order.estimatedDeliveryLabel;
   const mobileStatusLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
   const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
   const showDesktopContactUs = Boolean(order.showContactUs) || order.category === "delivered";
-  const hasOtherDesktopAction =
-    Boolean(order.showCancel) ||
-    (Boolean(order.showTrack) && order.category !== "delivered") ||
-    Boolean(order.showReturn);
-  // Figma: Contact Us alone sits right-aligned at half width.
-  const contactUsAlignedRight =
-    giftCardDeliveredBadge || (showDesktopContactUs && !hasOtherDesktopAction);
+  const showDesktopTrack = Boolean(order.showTrack) && order.category !== "delivered";
+  const desktopActionCount =
+    Number(order.showCancel) +
+    Number(showDesktopTrack) +
+    Number(order.showReturn) +
+    Number(showDesktopContactUs);
+  const singleDesktopAction = desktopActionCount === 1;
+  const desktopMultiActionButtonClassName = "flex-1";
+  const desktopSingleActionButtonClassName = PROFILE_ORDER_SINGLE_ACTION_CTA_CLASS;
 
   const handleCopyOrderId = async () => {
     try {
@@ -289,10 +299,21 @@ export function ProfileOrderCard({
             </div>
 
             {order.items.length > 0 ? (
-              <>
-                <ProfileOrderCardDivider />
-                <ProfileOrderMobileThumbnails items={order.items} />
-              </>
+              isGiftCardProfileOrder(order) ? (
+                <>
+                  <ProfileOrderCardDivider />
+                  <div className="flex flex-col gap-4">
+                    {order.items.map((item) => (
+                      <ProfileOrderItemRow key={item.id} item={item} />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ProfileOrderCardDivider />
+                  <ProfileOrderMobileThumbnails items={order.items} />
+                </>
+              )
             ) : null}
 
             <ProfileOrderCardDivider />
@@ -340,24 +361,20 @@ export function ProfileOrderCard({
                 </span>
               </div>
 
-              {order.deliveryBy ? (
+              {showDeliveryByMeta ? (
                 <span className="font-gill text-base leading-110 text-darkblack">
-                  <span className="font-light">
-                    {order.category === "delivered"
-                      ? content.deliveredOnLabel
-                      : content.deliveryByLabel}{" "}
-                  </span>
-                  <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
+                  <span className="font-light">{deliveryDateHeaderLabel} </span>
+                  <span className="font-normal">{formatOrderDate(order.deliveryBy!)}</span>
                 </span>
               ) : null}
             </div>
           </div>
 
-          {timelineSteps.length > 0 ? (
+          {!isCancelledOrder && cardTimelineSteps.length > 0 ? (
             <ProfileOrderTimeline
-              estimatedLabel={order.estimatedDeliveryLabel}
+              estimatedLabel={timelineEstimatedLabel}
               estimatedValue={order.estimatedDeliveryValue}
-              steps={timelineSteps}
+              steps={cardTimelineSteps}
             />
           ) : null}
 
@@ -394,22 +411,34 @@ export function ProfileOrderCard({
                 {content.contactUsLabel}
               </DetailDarkButton>
             </div>
-          ) : (
-            <div className={cn("flex gap-6", contactUsAlignedRight && "justify-end")}>
+          ) : singleDesktopAction ? (
+            <ProfileOrderSingleActionCtaShell>
               {order.showCancel ? (
-                <DetailOutlineButton type="button" className="flex-1" onClick={handleCancelOrder}>
+                <DetailOutlineButton
+                  type="button"
+                  className={desktopSingleActionButtonClassName}
+                  onClick={handleCancelOrder}
+                >
                   {content.cancelOrderLabel}
                 </DetailOutlineButton>
               ) : null}
 
-              {order.showTrack && order.category !== "delivered" ? (
-                <DetailDarkButton type="button" className="flex-1" onClick={handleTrackOrder}>
+              {showDesktopTrack ? (
+                <DetailDarkButton
+                  type="button"
+                  className={desktopSingleActionButtonClassName}
+                  onClick={handleTrackOrder}
+                >
                   {content.trackOrderLabel}
                 </DetailDarkButton>
               ) : null}
 
               {order.showReturn ? (
-                <DetailOutlineButton type="button" className="flex-1" onClick={handleReturnOrder}>
+                <DetailOutlineButton
+                  type="button"
+                  className={desktopSingleActionButtonClassName}
+                  onClick={handleReturnOrder}
+                >
                   {content.returnOrderLabel}
                 </DetailOutlineButton>
               ) : null}
@@ -417,9 +446,49 @@ export function ProfileOrderCard({
               {showDesktopContactUs ? (
                 <DetailDarkButton
                   type="button"
-                  className={
-                    contactUsAlignedRight ? DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS : "flex-1"
-                  }
+                  className={desktopSingleActionButtonClassName}
+                  onClick={handleContactSupport}
+                >
+                  {content.contactUsLabel}
+                </DetailDarkButton>
+              ) : null}
+            </ProfileOrderSingleActionCtaShell>
+          ) : (
+            <div className="flex gap-6">
+              {order.showCancel ? (
+                <DetailOutlineButton
+                  type="button"
+                  className={desktopMultiActionButtonClassName}
+                  onClick={handleCancelOrder}
+                >
+                  {content.cancelOrderLabel}
+                </DetailOutlineButton>
+              ) : null}
+
+              {showDesktopTrack ? (
+                <DetailDarkButton
+                  type="button"
+                  className={desktopMultiActionButtonClassName}
+                  onClick={handleTrackOrder}
+                >
+                  {content.trackOrderLabel}
+                </DetailDarkButton>
+              ) : null}
+
+              {order.showReturn ? (
+                <DetailOutlineButton
+                  type="button"
+                  className={desktopMultiActionButtonClassName}
+                  onClick={handleReturnOrder}
+                >
+                  {content.returnOrderLabel}
+                </DetailOutlineButton>
+              ) : null}
+
+              {showDesktopContactUs ? (
+                <DetailDarkButton
+                  type="button"
+                  className={desktopMultiActionButtonClassName}
                   onClick={handleContactSupport}
                 >
                   {content.contactUsLabel}

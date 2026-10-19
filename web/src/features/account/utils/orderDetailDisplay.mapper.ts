@@ -12,6 +12,7 @@ import {
 } from "./orderGiftDetection.utils";
 import {
   buildOrderDeliveryTimelineFromStatus,
+  canCancelInProgressOrderFromStatus,
   formatOrderStatusLabel,
   giftCardNameForSku,
   giftCardSubtitleForSku,
@@ -24,6 +25,7 @@ import {
   formatReturnDeadlineNote,
   LEGACY_CANCELLED_REFUND_STEPS,
   LEGACY_RETURN_REFUND_STEPS,
+  resolveCancellationRefundEstimate,
   resolveEstimatedDeliveryValue,
   resolveOrderDeliveryBy,
   resolveRefundEstimateValue,
@@ -145,10 +147,16 @@ export function mapTrackedOrderToProfileDetailUi(
   const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapDetailItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
-  const deliveryBy = isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
-    ? undefined
-    : resolveOrderDeliveryBy(order.sunnyDelivery);
+  const deliveryBy =
+    category === "cancelled"
+      ? undefined
+      : isDigitalGiftCardProfileOrder({ items }) && category !== "delivered"
+        ? undefined
+        : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
+  const showCancel = actions
+    ? actions.canCancel
+    : category === "in_progress" && canCancelInProgressOrderFromStatus(order.status);
   const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
   const deliveryTimeline =
     trackingTimeline.length > 0
@@ -168,17 +176,20 @@ export function mapTrackedOrderToProfileDetailUi(
     items,
     priceBreakdown,
     paymentMethod: order.paymentMethods[0]?.name,
-    shippingAddress: order.shippingAddress
-      ? {
-          fullName: order.shippingAddress.fullName,
-          streetLines: order.shippingAddress.streetLines,
-          city: order.shippingAddress.city,
-          region: order.shippingAddress.region,
-          pincode: order.shippingAddress.pincode,
-          phone: order.shippingAddress.phone,
-        }
-      : undefined,
-    showCancel: actions ? actions.canCancel : category === "in_progress",
+    shippingAddress:
+      category === "cancelled"
+        ? undefined
+        : order.shippingAddress
+          ? {
+              fullName: order.shippingAddress.fullName,
+              streetLines: order.shippingAddress.streetLines,
+              city: order.shippingAddress.city,
+              region: order.shippingAddress.region,
+              pincode: order.shippingAddress.pincode,
+              phone: order.shippingAddress.phone,
+            }
+          : undefined,
+    showCancel,
     showReturn: isGiftCardProfileOrder({ items })
       ? false
       : actions
@@ -186,14 +197,23 @@ export function mapTrackedOrderToProfileDetailUi(
         : category === "delivered",
     showDownloadInvoice: true,
     ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
-    showCancelNote: category === "in_progress",
+    showCancelNote: category === "in_progress" && showCancel,
     footnote:
-      category === "in_progress"
+      category === "in_progress" && showCancel
         ? ordersContent.cancelNote
         : category === "delivered"
           ? formatReturnDeadlineNote(order.sunnyDelivery?.returnableTill)
           : undefined,
   };
+
+  // Figma: cancelled COD was never paid — no refund stepper (match order listing).
+  if (category === "cancelled" && isCashOnDeliveryOrder(order)) {
+    return {
+      ...base,
+      showDownloadInvoice: false,
+      showContactUs: true,
+    };
+  }
 
   if (category === "returned" || category === "cancelled") {
     const refundTimeline = resolveRefundTimeline(
@@ -204,16 +224,15 @@ export function mapTrackedOrderToProfileDetailUi(
     return {
       ...base,
       showDownloadInvoice: false,
-      showContactUs: category === "cancelled",
-      ...(category === "cancelled"
-        ? {
-            estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-            estimatedDeliveryValue: resolveRefundEstimateValue(
+      showContactUs: true,
+      estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,
+      estimatedDeliveryValue:
+        category === "cancelled"
+          ? resolveCancellationRefundEstimate(order.sunnyRefund)
+          : resolveRefundEstimateValue(
               order.sunnyRefund,
-              ordersContent.estimatedDeliveryRangePlaceholder,
+              ordersContent.estimatedDeliveryPlaceholder,
             ),
-          }
-        : {}),
       timeline: refundTimeline.steps,
       ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
@@ -241,9 +260,13 @@ export function mapTrackedOrderToProfileDetailUi(
   }
 
   if (deliveryTimeline.length > 0) {
+    const showEstimatedDelivery =
+      category === "in_progress" &&
+      categorizeOrder(order.sunnyStatus, order.status).category !== "cancelled";
+
     return {
       ...base,
-      ...(category === "in_progress"
+      ...(showEstimatedDelivery
         ? {
             estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
             estimatedDeliveryValue: resolveEstimatedDeliveryValue(order.sunnyDelivery),

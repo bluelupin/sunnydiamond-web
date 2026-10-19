@@ -1,9 +1,8 @@
 import type { NormalizedAboutPage } from "@/services/about/about-page.types";
 import AboutBelowFoldLazy from "./AboutBelowFoldLazy";
-import AboutBrillianceSection from "./AboutBrillianceSection";
+import AboutBrillianceLazy from "./AboutBrillianceLazy";
+import AboutFooterLazy from "./AboutFooterLazy";
 import AboutHeroSection from "./AboutHeroSection";
-import AboutGuaranteesBar from "./AboutGuaranteesBar";
-import AboutHeirloomQuoteSection from "./AboutHeirloomQuoteSection";
 
 type AboutPageProps = {
   page: NormalizedAboutPage;
@@ -14,7 +13,7 @@ const AboutPage = ({ page }: AboutPageProps) => {
     <>
       {page.hero ? <AboutHeroSection {...page.hero} /> : null}
       {page.brillianceSection ? (
-        <AboutBrillianceSection {...page.brillianceSection} />
+        <AboutBrillianceLazy {...page.brillianceSection} />
       ) : null}
       <AboutBelowFoldLazy
         legacy={page.legacy}
@@ -22,10 +21,10 @@ const AboutPage = ({ page }: AboutPageProps) => {
         craft={page.craft}
         timeline={page.timeline}
       />
-      {page.trustBadges ? <AboutGuaranteesBar badges={page.trustBadges} /> : null}
-      {page.brandTagline ? (
-        <AboutHeirloomQuoteSection {...page.brandTagline} />
-      ) : null}
+      <AboutFooterLazy
+        trustBadges={page.trustBadges}
+        brandTagline={page.brandTagline}
+      />
     </>
   );
 };

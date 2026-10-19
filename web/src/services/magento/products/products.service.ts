@@ -11,6 +11,7 @@ import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "./productsBySkus.query";
 import {
   mapJewellerySortToMagento,
   mapMagentoProductsToJewelleryListing,
+  sortJewelleryListingProducts,
 } from "./products.mapper";
 import {
   buildMagentoProductsFilter,
@@ -19,12 +20,14 @@ import {
   enrichFacetsWithNavCategories,
   mapMagentoAggregationsToFacets,
   mergeGemstoneTypeFacetOptions,
+  mergeMetalTypeFacetOptions,
 } from "./products.filters.mapper";
 import {
   getMagentoProductAttributeOptions,
   mergeFacetOptions,
 } from "./productAttributeOptions.service";
 import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils/collectionListing";
+import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/utils/diamondShapeListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import { MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
@@ -283,6 +286,31 @@ async function enrichFacetsWithGemstoneAttributeOptions(
   }
 }
 
+async function enrichFacetsWithDiamondShapeAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const diamondShape = filters.diamondShape.trim();
+  if (!diamondShape) {
+    return facets;
+  }
+
+  if (resolveDiamondShapeFacetOption(diamondShape, facets.diamondShapes)) {
+    return facets;
+  }
+
+  try {
+    const magentoShapes = await getMagentoProductAttributeOptions("sd_diamond_shape", signal);
+    return {
+      ...facets,
+      diamondShapes: mergeFacetOptions(facets.diamondShapes, magentoShapes),
+    };
+  } catch {
+    return facets;
+  }
+}
+
 async function enrichFacetsWithDrawerAttributeOptions(
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
@@ -294,7 +322,8 @@ async function enrichFacetsWithDrawerAttributeOptions(
     withOccasions,
     signal,
   );
-  return enrichFacetsWithGemstoneAttributeOptions(filters, withCollections, signal);
+  const withGemstones = await enrichFacetsWithGemstoneAttributeOptions(filters, withCollections, signal);
+  return enrichFacetsWithDiamondShapeAttributeOptions(filters, withGemstones, signal);
 }
 
 async function fetchMagentoJewelleryProducts({
@@ -371,7 +400,11 @@ async function fetchMagentoJewelleryProducts({
       category: categoryUrlKey ?? "all",
     });
     const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
-    const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
+    const products = applySearchListingSort(
+      refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter),
+      search,
+      sortValue,
+    );
     const pageInfo = data.products?.page_info;
 
     return {
@@ -398,7 +431,10 @@ async function fetchMagentoJewelleryProducts({
     includeDrawerFilters: false,
   });
 
-  const [data, facetScopeData] = await Promise.all([
+  const fetchMetalColorCatalogOptions = () =>
+    getMagentoProductAttributeOptions("sd_metal_color", signal).catch(() => []);
+
+  const [data, facetScopeData, metalColorCatalogOptions] = await Promise.all([
     measureJewelleryPlpGraphql("products", fetchProducts, {
       page,
       pageSize,
@@ -419,14 +455,27 @@ async function fetchMagentoJewelleryProducts({
         }),
       { category: categoryUrlKey ?? "all" },
     ),
+    measureJewelleryPlpGraphql(
+      "metal-color-options",
+      fetchMetalColorCatalogOptions,
+      { category: categoryUrlKey ?? "all" },
+    ),
   ]);
 
   const mappedFacets = mapMagentoAggregationsToFacets(facetScopeData.products?.aggregations);
+  const mappedFacetsWithMetalColors: JewelleryFilterFacets = {
+    ...mappedFacets,
+    metalTypes: mergeMetalTypeFacetOptions(mappedFacets.metalTypes, metalColorCatalogOptions),
+  };
   const responseFacets = categoryUrlKey
-    ? enrichFacetsWithCategoryChildren(mappedFacets, navCategories, categoryUrlKey)
-    : enrichFacetsWithNavCategories(mappedFacets, navCategories);
+    ? enrichFacetsWithCategoryChildren(mappedFacetsWithMetalColors, navCategories, categoryUrlKey)
+    : enrichFacetsWithNavCategories(mappedFacetsWithMetalColors, navCategories);
   const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
-  const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
+  const products = applySearchListingSort(
+    refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter),
+    search,
+    sortValue,
+  );
   const pageInfo = data.products?.page_info;
 
   return {
@@ -444,6 +493,10 @@ async function fetchMagentoJewelleryProducts({
     // Keep Magento attribute options available for URL slug → option id sync.
     facets: {
       ...responseFacets,
+      metalTypes: mergeMetalTypeFacetOptions(
+        responseFacets.metalTypes,
+        facetsForFilter.metalTypes,
+      ),
       occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
       collections: mergeFacetOptions(responseFacets.collections, facetsForFilter.collections),
       gemstoneTypes: mergeGemstoneTypeFacetOptions(
@@ -458,6 +511,18 @@ export type MagentoJewelleryInitialListingResult = {
   listing: JewelleryListingProductsData;
   pendingProducts: JewelleryListingProduct[];
 };
+
+function applySearchListingSort(
+  products: JewelleryListingProduct[],
+  search: string,
+  sortValue: string,
+): JewelleryListingProduct[] {
+  if (!search.trim() || sortValue === "featured") {
+    return products;
+  }
+
+  return sortJewelleryListingProducts(products, sortValue);
+}
 
 function refineListingProductsForExactPrice(
   products: JewelleryListingProduct[],

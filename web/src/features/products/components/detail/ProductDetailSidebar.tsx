@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, type ReactNode } from "react"
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   AttributeSeparator,
   DetailDarkButton,
@@ -22,6 +22,7 @@ import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
+import { getProductDetailContent, getProductDetailPricing } from "@/features/products/data/productDetailContent";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import {
@@ -47,8 +48,9 @@ import type { NormalizedProductDisplayPage } from "@/services/product-display/pr
 import { getRingSizeOptions } from "@/features/products/utils/ringSizeOptions.utils";
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
 import {
+  applySelectedSizeVariant,
   findConfigurableVariantForMetal,
-  getConfigurableOptionUidsForMetal,
+  getConfigurableOptionUidsForCartItem,
 } from "@/features/products/utils/productVariant.utils";
 import {
   resolveHereForYouButtonVariant,
@@ -195,18 +197,26 @@ const ProductDetailSidebar = ({
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
   const [isAddingToBag, setIsAddingToBag] = useState(false);
-  const router = useRouter();
   const pathname = usePathname() ?? "/";
   const { status } = useAuth();
   const { openLoginModal } = useLoginModal();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
+  const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
+  const displayedWishlisted = optimisticWishlisted ?? wishlisted;
   const engravingConfig = resolveProductEngravingConfig(product);
   const engravingEnabled = isProductEngravingEnabled(engravingConfig);
   const sizeOptions = getRingSizeOptions(product, sizeGuide, selectedMetal, preferredPurities);
   const sizeLabels = sizeOptions.map(option => option.label);
   const unavailableSizes = sizeOptions.filter(option => !option.inStock).map(option => option.label);
   const selectedSize = sizeOptions.find(option => option.label === ringSize);
+  const sizeDisplayProduct = applySelectedSizeVariant(displayProduct, selectedSize?.variant);
+  const sizePricing = selectedSize?.variant
+    ? getProductDetailPricing(sizeDisplayProduct)
+    : pricing;
+  const sizeContent = selectedSize?.variant
+    ? getProductDetailContent(sizeDisplayProduct)
+    : content;
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = isMetalColorSelectable(product);
   const showMetalColor = content.metalColors.length > 0;
@@ -240,6 +250,10 @@ const ProductDetailSidebar = ({
     },
     [openLoginModal, pathname, status],
   );
+
+  useEffect(() => {
+    setOptimisticWishlisted(null);
+  }, [wishlisted]);
 
   useEffect(() => {
     if (status !== "authenticated" || !pendingHereForYouPanel) {
@@ -407,22 +421,25 @@ const ProductDetailSidebar = ({
   }, [product.id]);
 
   useEffect(() => {
-    if (hasHydratedEngravingRef.current) {
+    if (initialEngravingSelection == null) {
       return;
     }
 
-    if (initialEngravingSelection == null) {
+    // Late cart hydration (edit from bag): apply when local state is still empty.
+    if (hasHydratedEngravingRef.current && engravingSelection?.text?.trim()) {
       return;
     }
 
     setEngravingSelection(initialEngravingSelection);
     hasHydratedEngravingRef.current = true;
-  }, [initialEngravingSelection]);
+  }, [initialEngravingSelection, engravingSelection?.text]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
-  const configurableOptionUids = selectedSize?.variant?.optionUids ?? getConfigurableOptionUidsForMetal(
+  const configurableOptionUids = getConfigurableOptionUidsForCartItem(
     product,
     selectedMetal,
+    ringSize || undefined,
+    selectedSize?.variant,
     preferredPurities,
   );
 
@@ -434,7 +451,7 @@ const ProductDetailSidebar = ({
     preferredPurities,
   )?.sku?.trim();
   const stockAlertSku = selectedVariantSku || product.id;
-  const showNotifyWhenAvailable = stockAlertEnabled && !displayProduct.inStock;
+  const showNotifyWhenAvailable = stockAlertEnabled && !sizeDisplayProduct.inStock;
   const addingToBagLabel = addToBagLabel === "Update Bag" ? "Updating…" : "Adding…";
 
   const scrollToRingSizeField = useCallback(() => {
@@ -499,16 +516,16 @@ const ProductDetailSidebar = ({
               isMobileSticky ? "gap-0 text-xl font-normal" : "gap-3 text-xl md:text-2xl",
             )}
           >
-            <span>₹{formatJewelleryPrice(pricing.price)}</span>
+            <span>₹{formatJewelleryPrice(sizePricing.price)}</span>
             {!isMobileSticky &&
-            pricing.originalPrice != null &&
-            pricing.originalPrice > pricing.price ? (
+              sizePricing.originalPrice != null &&
+              sizePricing.originalPrice > sizePricing.price ? (
               <span className="text-gray600 line-through">
-                ₹{formatJewelleryPrice(pricing.originalPrice)}
+                ₹{formatJewelleryPrice(sizePricing.originalPrice)}
               </span>
             ) : null}
           </div>
-          {pricing.breakup ? (
+          {sizePricing.breakup ? (
             <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="shrink-0 uppercase">
               View Price Breakup
             </DetailTextLink>
@@ -531,22 +548,19 @@ const ProductDetailSidebar = ({
           )}
           <button
             type="button"
-            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            aria-pressed={wishlisted}
+            aria-label={displayedWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={displayedWishlisted}
             onClick={() => {
-              if (status !== "authenticated") {
-                router.push("/wishlist");
-                return;
-              }
+              setOptimisticWishlisted(!displayedWishlisted);
               toggleWishlist(product.id);
             }}
             className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
           >
             <WishlistIcon
-              filled={wishlisted}
+              filled={displayedWishlisted}
               className={cn(
                 "size-6 transition-colors duration-200",
-                wishlisted ? "text-linkGold" : "text-darkblack",
+                displayedWishlisted ? "text-linkGold" : "text-darkblack",
               )}
             />
           </button>
@@ -561,7 +575,7 @@ const ProductDetailSidebar = ({
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-              {content.attributes.slice(0, 3).map((attribute, index, attributes) => (
+              {sizeContent.attributes.slice(0, 3).map((attribute, index, attributes) => (
                 <li key={attribute} className="flex items-center gap-3">
                   {index > 0 ? (
                     <AttributeSeparator className={cn(!windows && "-translate-y-0.5")}
@@ -617,61 +631,67 @@ const ProductDetailSidebar = ({
               </div>
             </div>
           ) : null}
-
-          <div className="flex flex-col gap-6">
-            {showSizeSelector ? (
-              <div
-                ref={ringSizeSectionRef}
-                className="flex scroll-mt-28 flex-col gap-2"
-                style={{ scrollMarginBottom: clearancePx }}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
-                    {sizeGuide?.sizeFieldLabel ?? "Size"}
-                  </p>
-                  {showFindYourSizeLink ? (
-                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
-                      {findYourSizeLabel}
-                    </DetailTextLink>
-                  ) : null}
+          {(showSizeSelector || (engravingEnabled && engravingConfig)) ? (
+            <div className="flex flex-col gap-6">
+              {showSizeSelector ? (
+                <div
+                  ref={ringSizeSectionRef}
+                  className="flex scroll-mt-28 flex-col gap-2"
+                  style={{ scrollMarginBottom: clearancePx }}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+                      {sizeGuide?.sizeFieldLabel ?? "Size"}
+                    </p>
+                    {showFindYourSizeLink ? (
+                      <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
+                        {findYourSizeLabel}
+                      </DetailTextLink>
+                    ) : null}
+                  </div>
+                  <InlineCustomSelect
+                    id="product-ring-size"
+                    label={sizeGuide?.sizeFieldLabel ?? "Size"}
+                    labelClassName="sr-only"
+                    value={ringSize}
+                    options={sizeLabels}
+                    unavailableOptions={unavailableSizes}
+                    placeholder="Select"
+                    invalid={ringSizeError != null}
+                    onChange={(value) => {
+                      if (value && unavailableSizes.includes(value)) {
+                        return;
+                      }
+                      setRingSize(value);
+                      if (value) {
+                        setRingSizeError(null);
+                      }
+                    }}
+                    triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+                    placeholderClassName="font-normal text-gray600"
+                    listClassName="bg-aboutInactive"
+                    optionClassName="text-base"
+                  />
+                  <FormFieldError message={ringSizeError ?? undefined} />
                 </div>
-                <InlineCustomSelect
-                  id="product-ring-size"
-                  label={sizeGuide?.sizeFieldLabel ?? "Size"}
-                  labelClassName="sr-only"
-                  value={ringSize}
-                  options={sizeLabels}
-                  unavailableOptions={unavailableSizes}
-                  placeholder="Select"
-                  invalid={ringSizeError != null}
-                  onChange={(value) => {
-                    setRingSize(value);
-                    if (value) {
-                      setRingSizeError(null);
-                    }
-                  }}
-                  triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
-                  placeholderClassName="font-normal text-gray600"
-                  listClassName="bg-aboutInactive"
-                  optionClassName="text-base"
-                />
-                <FormFieldError message={ringSizeError ?? undefined} />
-              </div>
-            ) : null}
-
-            {engravingEnabled && engravingConfig ? (
-              <button
-                type="button"
-                onClick={() => setIsEngravingOpen(true)}
-                className="flex h-14 items-center justify-between gap-4 bg-aboutInactive p-3 text-left"
-              >
-                <span className="font-gill text-base leading-110 text-darkblack">
-                  {engravingSelection?.text ?? "Metal Engraving (Optional)"}
-                </span>
-                <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
-              </button>
-            ) : null}
-          </div>
+              ) : null}
+              {engravingEnabled && engravingConfig ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEngravingOpen(true)}
+                  className="flex h-14 items-center justify-between gap-4 bg-aboutInactive p-3 text-left"
+                >
+                  <span className="font-gill text-base leading-110 text-darkblack">
+                    {engravingSelection?.text ?? "Metal Engraving (Optional)"}
+                  </span>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack">
+                    <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="hidden md:block">{renderPurchaseActionsBar("desktop")}</div>
@@ -746,7 +766,7 @@ const ProductDetailSidebar = ({
                 target={strip.tnc.openInNewTab ? "_blank" : undefined}
                 rel={strip.tnc.openInNewTab ? "noopener noreferrer" : undefined}
               >
-                {strip.tnc.label}
+                {strip.tnc.label} 
               </DetailTextLink>
             ) : null}
           </div>
@@ -760,7 +780,7 @@ const ProductDetailSidebar = ({
                       "flex w-full shrink-0 flex-col items-center justify-center text-center",
                       "max-md:gap-2 max-md:px-3 max-md:py-4",
                       "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
-                      "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
+                      "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-2",
                       index > 0 && "md:landscape:border-l-[0.5px] md:landscape:border-neutral300 border-gray600",
                     )}
                   >
@@ -774,17 +794,15 @@ const ProductDetailSidebar = ({
                         className="size-10 object-contain"
                       />
                     </div>
-                    <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
-                      {benefit.mobileLabel}
-                    </span>
-                    <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
-                      {benefit.lines[0]}
-                      {benefit.lines[1] ? (
-                        <>
-                          <br />
-                          {benefit.lines[1]}
-                        </>
-                      ) : null}
+                    <span className="font-gill text-base leading-110 text-darkblack">
+                      <span className="md:landscape:hidden">{benefit.mobileLabel}</span>
+                      <span className="hidden md:landscape:block">
+                        {benefit.lines.map((line, lineIndex) => (
+                          <span key={`${benefit.label}-${lineIndex}`} className="block">
+                            {line}
+                          </span>
+                        ))}
+                      </span>
                     </span>
                   </li>
                 );
@@ -830,7 +848,7 @@ const ProductDetailSidebar = ({
         </section>
       ) : null}
 
-      <ProductDetailAccordions items={content.accordions} />
+      <ProductDetailAccordions items={sizeContent.accordions} />
 
       {personalise.isActive ? (
         <section
@@ -943,31 +961,31 @@ const ProductDetailSidebar = ({
         <ScheduleVideoCallPanel
           open
           onClose={() => setIsVideoCallOpen(false)}
-          product={displayProduct}
+          product={sizeDisplayProduct}
         />
       ) : null}
 
       {isTryAtHomeOpen ? (
-        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={displayProduct} />
+        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={sizeDisplayProduct} />
       ) : null}
 
       {isPersonaliseOpen ? (
         <PersonaliseProductPanel
           open
           onClose={() => setIsPersonaliseOpen(false)}
-          product={displayProduct}
+          product={sizeDisplayProduct}
         />
       ) : null}
 
-      {isPriceBreakupOpen && pricing.breakup ? (
+      {isPriceBreakupOpen && sizePricing.breakup ? (
         <PriceBreakupPanel
           open
           onClose={() => setIsPriceBreakupOpen(false)}
-          productName={displayProduct.name}
-          productImage={displayProduct.image}
+          productName={sizeDisplayProduct.name}
+          productImage={sizeDisplayProduct.image}
           metalLabel={activeMetal?.label}
           ringSize={ringSize || undefined}
-          pricing={pricing}
+          pricing={sizePricing}
         />
       ) : null}
     </>

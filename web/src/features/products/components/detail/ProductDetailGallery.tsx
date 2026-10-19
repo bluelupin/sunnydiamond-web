@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type RefObject } from "react";
+import { useCallback, useEffect, useState, type RefObject } from "react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
@@ -45,6 +45,14 @@ const ProductDetailGallery = ({ product, galleryRef }: ProductDetailGalleryProps
     onPrevious: goToPreviousSlide,
   });
 
+  useEffect(() => {
+    setActiveSlide(0);
+  }, [product.id, product.image]);
+
+  const slideCount = carouselImages.length;
+  const slideOffsetPercent =
+    slideCount > 0 ? (activeSlide * 100) / slideCount : 0;
+
   return (
     <>
       <div
@@ -53,13 +61,29 @@ const ProductDetailGallery = ({ product, galleryRef }: ProductDetailGalleryProps
       >
         <div className="grid h-full min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
           <div className="relative h-full min-h-0 w-full overflow-hidden bg-gray300">
-            <OptimizedImage
-              src={carouselImages[activeSlide]}
-              alt={`${product.name} — view ${activeSlide + 1}`}
-              priority={activeSlide === 0}
-              sizes="100vw"
-              className="size-full object-cover object-center"
-            />
+            <div
+              className="flex h-full transition-transform duration-300 ease-out motion-reduce:transition-none"
+              style={{
+                width: `${slideCount * 100}%`,
+                transform: `translateX(-${slideOffsetPercent}%)`,
+              }}
+            >
+              {carouselImages.map((src, index) => (
+                <div
+                  key={`${String(src)}-${index}`}
+                  className="relative h-full shrink-0"
+                  style={{ width: `${slideCount > 0 ? 100 / slideCount : 100}%` }}
+                >
+                  <OptimizedImage
+                    src={src}
+                    alt={`${product.name} — view ${index + 1}`}
+                    priority={index === 0}
+                    sizes="100vw"
+                    className="size-full object-cover object-center"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
           <div className="pointer-events-none relative z-10 flex min-h-0 items-center justify-end px-4">
             <button

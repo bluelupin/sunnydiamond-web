@@ -20,7 +20,6 @@ import {
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import {
-  APPOINTMENT_COUNTRY_CODES,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
@@ -34,7 +33,7 @@ import { ProfileDeleteAccountSuccessDialog } from "./ProfileDeleteAccountSuccess
 import { ProfileEmailVerifiedBadge, ProfileFieldInfoTooltip } from "./profileUi";
 import {
   getAppointmentContactLocks,
-  type AuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 
@@ -42,21 +41,10 @@ type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
 };
 
-function signupMethodToContactLockKind(customer: AuthCustomer): AuthLoginIdentifierKind | null {
-  const method = customer.signupMethod?.trim().toLowerCase();
-  if (method === "phone") return "phone";
-  if (method === "email") return "email";
-  return null;
-}
-
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { logout, refresh } = useAuth();
-  const { otpLoginEnabled, otpCountryCodes } = useAuthFeatures();
-  // With SMS OTP on, a new number is verified by SMS, so only SMS countries are offered.
-  const phoneCountryCodes = otpLoginEnabled
-    ? otpCountryCodes
-    : APPOINTMENT_COUNTRY_CODES.map((entry) => entry.code);
+  const { otpLoginEnabled } = useAuthFeatures();
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -134,7 +122,9 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const phoneChanged = phone !== initialPhone || (Boolean(phone) && phoneCountryCode !== initialCountryCode);
   const hasChanges = nameChanged || phoneChanged;
   const phoneE164 = formatLoginPhoneForMagento(phoneCountryCode, phone);
-  const { phoneLocked, emailLocked } = getAppointmentContactLocks(signupMethodToContactLockKind(customer));
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    signupMethodToContactLockKind(customer.signupMethod),
+  );
   // The phone OTP info tooltip is not in Figma; only the sign-in lock tooltip is shown.
   // const phoneInfoTooltip = phoneLocked
   //   ? content.phoneRegisteredTooltip
@@ -340,7 +330,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className={cn("flex flex-col gap-2", phoneLocked && "opacity-50")}>
               <div className="flex items-center gap-2">
                 <label htmlFor="profile-phone" className={appointmentLabelClassName}>
                   {content.fields.phone}
@@ -360,7 +350,6 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                 <PhoneCountryCodeSelect
                   id="profile-phone-country-code"
                   value={phoneCountryCode}
-                  codes={phoneCountryCodes}
                   onChange={(code) => {
                     setPhoneCountryCode(code);
                     setPhone((current) => sanitizePhoneInput(current, code));
@@ -379,7 +368,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   aria-readonly={phoneLocked || undefined}
                   className={cn(
                     "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]",
-                    phoneLocked && "cursor-not-allowed opacity-70",
+                    phoneLocked && "cursor-not-allowed",
                   )}
                 />
                 {/* Only a number proven with a code signs in; offer the code for one typed in without it. */}

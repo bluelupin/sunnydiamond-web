@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { cn } from "@/shared/utils/cn";
@@ -67,39 +67,16 @@ type InlineCustomSelectProps = {
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
-  <span
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
     className={cn(
-      "pointer-events-none inline-flex size-[24px] shrink-0 items-center justify-center overflow-visible text-darkblack",
+      "block shrink-0 overflow-visible inline-flex items-center justify-center overflow-visible motion-safe:origin-center motion-safe:transform-gpu",
+      "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out",
+      open ? "rotate-180" : "",
     )}
     aria-hidden
   >
-    <span
-      className={cn(
-        "inline-flex size-[16px] items-center justify-center overflow-visible motion-safe:origin-center motion-safe:transform-gpu",
-        "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out",
-        open ? "-rotate-90" : "rotate-90",
-      )}
-    >
-      <svg
-        width="7.038"
-        height="14.651"
-        viewBox="-0.5 -0.5 8.03817 15.6508"
-        fill="none"
-        overflow="visible"
-        xmlns="http://www.w3.org/2000/svg"
-        className="block shrink-0 overflow-visible"
-        aria-hidden
-      >
-        <path
-          d="M0.379628 0.325396L6.37963 7.3254L0.379628 14.3254"
-          stroke="currentColor"
-          strokeWidth="1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  </span>
+    <path d="M20 8L12.5 15.5L5 8" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
 );
 
 const InlineCustomSelect = ({
@@ -136,6 +113,16 @@ const InlineCustomSelect = ({
   const labelId = `${id}-label`;
   const listboxId = `${id}-listbox`;
   const valueId = `${id}-value`;
+
+  const unavailableOptionSet = useMemo(
+    () => new Set(unavailableOptions),
+    [unavailableOptions],
+  );
+
+  const isOptionUnavailable = useCallback(
+    (option: string) => unavailableOptionSet.has(option),
+    [unavailableOptionSet],
+  );
 
   const updateListLayout = useCallback(() => {
     const trigger = triggerRef.current;
@@ -246,7 +233,16 @@ const InlineCustomSelect = ({
     };
   }, [isOpen, onBlur]);
 
-  const selectedOption = options.find((option) => option === value);
+  useEffect(() => {
+    if (!value || !isOptionUnavailable(value)) {
+      return;
+    }
+
+    onChange("");
+  }, [isOptionUnavailable, onChange, value]);
+
+  const selectedOption =
+    value && !isOptionUnavailable(value) ? options.find((option) => option === value) : undefined;
   const triggerLabel = selectedOption ?? placeholder;
   const showPlaceholder = !selectedOption;
 
@@ -257,6 +253,10 @@ const InlineCustomSelect = ({
   };
 
   const selectOption = (option: string) => {
+    if (isOptionUnavailable(option)) {
+      return;
+    }
+
     onChange(option);
     closeListAfterSelection();
   };
@@ -279,12 +279,12 @@ const InlineCustomSelect = ({
           isInlineList
             ? { maxHeight: inlineListMaxHeight }
             : {
-                position: "fixed",
-                top: listPosition!.top,
-                left: listPosition!.left,
-                width: listPosition!.width,
-                maxHeight: listPosition!.maxHeight,
-              }
+              position: "fixed",
+              top: listPosition!.top,
+              left: listPosition!.left,
+              width: listPosition!.width,
+              maxHeight: listPosition!.maxHeight,
+            }
         }
         onClick={(event) => {
           event.stopPropagation();
@@ -300,11 +300,11 @@ const InlineCustomSelect = ({
           "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
           isInlineList
             ? cn(
-                "absolute left-0 z-[80] w-full",
-                inlineListOpenUpward
-                  ? "bottom-[calc(100%-20px)] motion-safe:origin-bottom"
-                  : "top-[calc(100%+4px)] motion-safe:origin-top",
-              )
+              "absolute left-0 z-[80] w-full",
+              inlineListOpenUpward
+                ? "bottom-[calc(100%-20px)] motion-safe:origin-bottom"
+                : "top-[calc(100%+4px)] motion-safe:origin-top",
+            )
             : cn("z-[100] fixed motion-safe:origin-top"),
           isListVisible
             ? "motion-safe:translate-y-0 motion-safe:opacity-100"
@@ -338,8 +338,36 @@ const InlineCustomSelect = ({
           </button>
         ) : null}
         {options.map((option) => {
-          const selected = value === option;
-          const unavailable = unavailableOptions.includes(option);
+          const selected = value === option && !isOptionUnavailable(option);
+          const unavailable = isOptionUnavailable(option);
+
+          const optionRowClassName = cn(
+            "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110",
+            "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
+            unavailable
+              ? "cursor-not-allowed justify-between bg-neutral300 opacity-50"
+              : selected
+                ? "bg-gold300 font-normal text-darkblack"
+                : "font-normal text-neutral500 hover:bg-gold300 hover:text-darkblack",
+            optionClassName,
+          );
+
+          if (unavailable) {
+            return (
+              <div
+                key={option}
+                role="option"
+                aria-selected={false}
+                aria-disabled="true"
+                className={optionRowClassName}
+              >
+                <span className="text-base text-darkblack">{option}</span>
+                <span className="shrink-0 pl-4 font-gill text-sm font-normal leading-110 text-neutral500">
+                  Out of Stock
+                </span>
+              </div>
+            );
+          }
 
           return (
             <button
@@ -347,26 +375,14 @@ const InlineCustomSelect = ({
               type="button"
               role="option"
               aria-selected={selected}
-              disabled={unavailable}
-              aria-disabled={unavailable || undefined}
               onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 selectOption(option);
               }}
-              className={cn(
-                "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110",
-                "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
-                unavailable
-                  ? "cursor-not-allowed bg-[#E8E8E8] font-normal text-[#999999]"
-                  : selected
-                  ? "bg-[#DECAA0] font-normal text-darkblack"
-                  : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
-                optionClassName,
-              )}
+              className={optionRowClassName}
             >
               <span>{option}</span>
-              {unavailable ? <span className="ml-auto pl-4 font-gill text-sm font-normal text-[#999999]">Out of Stock</span> : null}
             </button>
           );
         })}

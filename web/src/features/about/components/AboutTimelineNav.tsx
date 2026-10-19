@@ -46,7 +46,20 @@ const AboutTimelineNav = ({
     const activeButton = list.querySelector<HTMLElement>(
       `[data-timeline-year="${activeYear}"]`,
     );
-    activeButton?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    if (!activeButton) return;
+
+    if (list.scrollHeight <= list.clientHeight + 1) {
+      return;
+    }
+
+    const listRect = list.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+
+    if (buttonRect.top < listRect.top) {
+      list.scrollTop -= listRect.top - buttonRect.top;
+    } else if (buttonRect.bottom > listRect.bottom) {
+      list.scrollTop += buttonRect.bottom - listRect.bottom;
+    }
   }, [activeYear]);
 
   const handleYearSelect = (year: TimelineYear) => {

@@ -43,8 +43,6 @@ type CheckoutFormStepProps = {
   showVerify?: boolean;
   /** Mobile sign-in is off, so the guest contact field takes an email address only. */
   emailOnly?: boolean;
-  /** Countries the guest contact number can be verified in (SMS OTP countries). */
-  contactCountryCodes?: readonly string[];
   /** Guest email blur — checks if the account already exists. */
   onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
@@ -54,8 +52,6 @@ type CheckoutFormStepProps = {
   fieldsDisabled?: boolean;
   /** Signed-in contact on file is already verified (email or phone). */
   contactVerified?: boolean;
-  /** Signed-in customer whose identity is their mobile number may change the order email. */
-  contactEmailEditable?: boolean;
 };
 
 type AddressFieldConfig = {
@@ -230,7 +226,6 @@ export const CheckoutFormStep = ({
   onVerifyPhone,
   showVerify = true,
   emailOnly = false,
-  contactCountryCodes,
   onContactBlur,
   validation,
   isAuthenticated = false,
@@ -238,7 +233,6 @@ export const CheckoutFormStep = ({
   onSelectSavedShippingAddress,
   fieldsDisabled = false,
   contactVerified = false,
-  contactEmailEditable = false,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col md:gap-6 gap-4">
     <CheckoutSectionCard id="checkout-personal-information">
@@ -268,7 +262,7 @@ export const CheckoutFormStep = ({
             error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
             disabled={fieldsDisabled}
             verified={contactVerified}
-            readOnly={!contactEmailEditable}
+            readOnly
           />
         ) : (
           <CheckoutPhoneField
@@ -283,7 +277,6 @@ export const CheckoutFormStep = ({
               onContactBlur?.();
             }}
             countryCode={form.contactCountryCode}
-            countryCodes={contactCountryCodes}
             onCountryCodeChange={(code) => onChange("contactCountryCode", code)}
             verified={phoneVerified}
             onVerify={onVerifyPhone}

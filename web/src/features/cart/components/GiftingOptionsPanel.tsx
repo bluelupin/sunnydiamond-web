@@ -34,6 +34,7 @@ import {
   CartPrimaryButton,
   CartTextLink,
 } from "./CartFlowUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { giftingContent } from "../data/giftingContent";
 import { cartFlowSpec } from "../data/cartFlowSpec";
 import {
@@ -160,16 +161,19 @@ const GiftingNoteField = ({
   value,
   onChange,
   placeholder = "Add Gift Note",
-  variant = "single",
+  canAddNote,
+  blockedMessage,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  variant?: "single" | "separate";
+  canAddNote: boolean;
+  blockedMessage: string;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(() => value.trim().length > 0);
+  const [showSelectionError, setShowSelectionError] = useState(false);
 
   useEffect(() => {
     if (value.trim().length > 0) {
@@ -177,39 +181,59 @@ const GiftingNoteField = ({
     }
   }, [value]);
 
+  useEffect(() => {
+    if (canAddNote) {
+      setShowSelectionError(false);
+    }
+  }, [canAddNote]);
+
   const activateField = () => {
+    if (!canAddNote) {
+      setShowSelectionError(true);
+      return;
+    }
+
+    setShowSelectionError(false);
     setIsEditing(true);
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   return (
-    <div className="flex h-14 items-center gap-4 bg-aboutInactive px-3">
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        value={value}
-        readOnly={!isEditing}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className={cn(
-          "h-14 min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-          !isEditing && "cursor-default",
-        )}
+    <div className="flex flex-col gap-2">
+      <div className="flex h-14 items-center gap-4 bg-aboutInactive px-3">
+        <input
+          ref={inputRef}
+          id={id}
+          type="text"
+          value={value}
+          readOnly={!isEditing}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          aria-invalid={showSelectionError}
+          aria-describedby={showSelectionError ? `${id}-error` : undefined}
+          className={cn(
+            "h-14 min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+            !isEditing && "cursor-default",
+          )}
+        />
+        {!isEditing ? (
+          <button
+            type="button"
+            onClick={activateField}
+            aria-label="Add gift note"
+            className="flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        ) : null}
+      </div>
+      <FormFieldError
+        id={`${id}-error`}
+        message={showSelectionError ? blockedMessage : undefined}
       />
-      {!isEditing ? (
-        <button
-          type="button"
-          onClick={activateField}
-          aria-label="Add gift note"
-          className="flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      ) : null}
     </div>
   );
 };
@@ -253,16 +277,15 @@ const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => {
         {isSeparate ? copy.separateBags : copy.singleBag}
       </p>
       <div
-        className="relative w-full overflow-hidden bg-gray200"
-        style={{ height: cartFlowSpec.gifting.personalise.heroImageHeight }}
+        className="relative w-full overflow-hidden bg-gray200 lg:h-[140px] md:h-[200px] h-[120px]"
       >
         <Image
           src={isSeparate ? bagHero.separate : bagHero.single}
           alt={bagHero.alt}
           width={bagHero.width}
           height={bagHero.height}
-          className="absolute inset-x-0 w-full object-cover"
-          style={{ top: bagHero.offsetTop, height: bagHero.height }}
+          className="absolute inset-x-0 w-full object-cover md:h-auto h-fit"
+          style={{ top: bagHero.offsetTop}}
           sizes={`${bagHero.width}px`}
         />
       </div>
@@ -328,6 +351,8 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   }, [cartItemIdsKey]);
 
   const isSeparate = wrapMode === "separate";
+  const hasSelectedGiftItem = selectedItemIds.size > 0;
+  const { copy: giftingCopy } = giftingContent;
 
   const toggleItemSelection = (itemId: string, checked: boolean) => {
     setSelectedItemIds((prev) => {
@@ -420,6 +445,8 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
               id="gift-note"
               value={giftNote}
               onChange={setGiftNote}
+              canAddNote={hasSelectedGiftItem}
+              blockedMessage={giftingCopy.giftNoteRequiresSelection}
             />
           ) : null}
 
@@ -462,7 +489,8 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
                       onChange={(value) =>
                         setItemNotes((prev) => ({ ...prev, [item.id]: value }))
                       }
-                      variant="separate"
+                      canAddNote={selectedItemIds.has(item.id)}
+                      blockedMessage={giftingCopy.giftNoteRequiresItemSelection}
                     />
                   </div>
                 ))}

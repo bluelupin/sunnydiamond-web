@@ -4,6 +4,13 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 import type { NormalizedAboutPage } from "@/services/about/about-page.types";
 
+export function resolveAboutOpenGraphImage(page: NormalizedAboutPage | null): string | undefined {
+  const heroImage = page?.hero?.image;
+  const candidate =
+    heroImage?.desktopUrl?.trim() || heroImage?.mobileUrl?.trim() || undefined;
+  return candidate;
+}
+
 export function resolveAboutSeoMetadata(page: NormalizedAboutPage | null) {
   const cmsSeo = page?.seo;
   const normalizedCanonical = normalizeCanonicalPath(
@@ -15,6 +22,7 @@ export function resolveAboutSeoMetadata(page: NormalizedAboutPage | null) {
 
   const cmsTitle = cmsSeo?.metaTitle?.trim();
   const cmsDescription = cmsSeo?.metaDescription?.trim();
+  const image = resolveAboutOpenGraphImage(page);
 
   return {
     // Prefer CMS exactly; static fallbacks only when CMS SEO is missing.
@@ -22,6 +30,7 @@ export function resolveAboutSeoMetadata(page: NormalizedAboutPage | null) {
     description: cmsDescription || seoContent.about.description,
     canonicalPath,
     keywords: cmsSeo?.metaKeywords,
+    ...(image ? { image } : {}),
   };
 }
 

@@ -26,12 +26,9 @@ const JewelleryProductCardSkeleton = () => (
   </article>
 );
 
-const plpGridCellBorderClassName =
-  "[&>*]:border-b [&>*]:border-solid [&>*]:border-neutral300 max-md:[&>*:not(:nth-child(2n))]:border-r md:[&>*:not(:nth-child(3n))]:border-r md:[&>*:nth-child(-n+3)]:border-t";
-
 const JewelleryProductGridSkeleton = ({ count = PAGE_SIZE }: JewelleryProductGridSkeletonProps) => (
   <div
-    className={`grid w-full min-w-0 grid-cols-2 items-stretch md:grid-cols-3 ${plpGridCellBorderClassName}`}
+    className="grid w-full min-w-0 grid-cols-2 items-stretch md:grid-cols-3"
     aria-busy="true"
     aria-label="Loading products"
   >

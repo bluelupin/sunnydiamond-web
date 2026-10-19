@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
@@ -14,9 +14,10 @@ import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisi
 import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { normalizeAppointmentDateInput } from "@/features/products/utils/tryAtHomeBooking";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   getAppointmentContactLocks,
-  getAuthLoginIdentifierKind,
+  signupMethodToContactLockKind,
 } from "@/features/auth/utils/authLoginIdentifier";
 import {
   getProductFormByTag,
@@ -36,6 +37,7 @@ import {
 import type { AppointmentBookingWindow } from "@/shared/utils/appointmentTimeSlots";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
+import { usePincodeCityStateAutofill } from "@/shared/hooks/use-pincode-city-state-autofill";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -60,6 +62,7 @@ import {
   getTryAtHomeStateSelectOptions,
   matchTryAtHomeStateSelectOption,
 } from "@/features/products/data/tryAtHomeContent";
+import { INDIAN_STATES_AND_UTS } from "@/shared/constants/indianStatesAndUts";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 
@@ -172,6 +175,7 @@ export function ProfileAppointmentReschedulePanel({
   onClose,
   onRescheduled,
 }: ProfileAppointmentReschedulePanelProps) {
+  const { customer } = useAuth();
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [step, setStep] = useState<RescheduleStep>("details");
   const [name, setName] = useState("");
@@ -191,6 +195,7 @@ export function ProfileAppointmentReschedulePanel({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const syncedAppointmentIdRef = useRef<string | null>(null);
 
   const product = appointment?.products[0] ?? null;
   const timeSlots = cmsForm?.timeSlots?.length ? cmsForm.timeSlots : undefined;
@@ -203,7 +208,7 @@ export function ProfileAppointmentReschedulePanel({
   const hasAddressStep = isTryAtHome && Boolean(address);
   const isAddressStep = hasAddressStep && step === "address";
   const { phoneLocked, emailLocked } = getAppointmentContactLocks(
-    getAuthLoginIdentifierKind(),
+    signupMethodToContactLockKind(customer?.signupMethod),
   );
   const { detectAddress, isLocating } = useCurrentLocationAddress();
 
@@ -232,25 +237,47 @@ export function ProfileAppointmentReschedulePanel({
   const { errors, markTouched, showError, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
-  const cmsStateOptionSource = useMemo(() => {
-    if (!cmsForm) {
-      return undefined;
-    }
-
-    return cmsForm.stateFieldOptions.length > 0
-      ? cmsForm.stateFieldOptions
-      : cmsForm.stateOptions;
-  }, [cmsForm]);
+  const cmsStateOptions = cmsForm?.stateFieldOptions;
 
   const stateOptions = useMemo(
-    () => getTryAtHomeStateSelectOptions(cmsStateOptionSource, address?.state),
-    [address?.state, cmsStateOptionSource],
+    () => getTryAtHomeStateSelectOptions(cmsStateOptions, addressState || address?.state),
+    [address?.state, addressState, cmsStateOptions],
   );
+
+  const stateOptionsRef = useRef(stateOptions);
+  stateOptionsRef.current = stateOptions;
 
   const selectedAddressState = useMemo(
     () => matchTryAtHomeStateSelectOption(addressState, stateOptions),
     [addressState, stateOptions],
   );
+
+  const pincodeRef = useRef(pincode);
+  pincodeRef.current = pincode;
+
+  const applyPincodeLookup = useCallback((lookup: { city: string; state: string }, pin: string) => {
+    if (pincodeRef.current.trim() !== pin) {
+      return;
+    }
+
+    if (lookup.city) {
+      setCity(lookup.city);
+    }
+    if (lookup.state) {
+      const raw = lookup.state.trim();
+      const matched =
+        matchTryAtHomeStateSelectOption(raw, stateOptionsRef.current) ||
+        matchTryAtHomeStateSelectOption(raw, INDIAN_STATES_AND_UTS) ||
+        raw;
+      setAddressState(matched);
+    }
+  }, []);
+
+  usePincodeCityStateAutofill({
+    pincode,
+    enabled: isAddressStep,
+    onApply: applyPincodeLookup,
+  });
 
   const isAddressChanged =
     isTryAtHome &&
@@ -323,9 +350,20 @@ export function ProfileAppointmentReschedulePanel({
   };
 
   useEffect(() => {
-    if (!open || !appointment) {
+    if (!open) {
+      syncedAppointmentIdRef.current = null;
       return;
     }
+
+    if (!appointment) {
+      return;
+    }
+
+    // Hydrate once per open + appointment; avoid wiping in-progress pincode edits on re-render.
+    if (syncedAppointmentIdRef.current === appointment.id) {
+      return;
+    }
+    syncedAppointmentIdRef.current = appointment.id;
 
     const parts = splitStoredPhone(appointment.customerPhone);
     setStep("details");
@@ -393,8 +431,12 @@ export function ProfileAppointmentReschedulePanel({
         const appointmentIds = appointment.type === 'video_call'
           ? [appointment.id]
           : [...new Set([appointment.id, ...(appointment.clubbedAppointmentIds ?? [])])];
+        const formTag = appointment.formTag || DEFAULT_FORM_TAGS[appointment.type];
+        const stateForSubmit = (selectedAddressState || addressState).trim();
+
         for (const appointmentId of appointmentIds) {
           await rescheduleCustomerAppointment(appointmentId, {
+            formTag,
             requestedDate: date,
             selectedTimeSlot: selectedSlot ?? "",
             ...(customerName ? { customerName } : {}),
@@ -408,9 +450,7 @@ export function ProfileAppointmentReschedulePanel({
                   pincode: pincode.trim(),
                   city: city.trim(),
                   ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
-                  ...(selectedAddressState.trim()
-                    ? { state: selectedAddressState.trim() }
-                    : {}),
+                  ...(stateForSubmit ? { state: stateForSubmit } : {}),
                 },
               }
               : {}),

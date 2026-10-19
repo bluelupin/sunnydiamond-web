@@ -1,13 +1,21 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import Image from "next/image";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { createPortal } from "react-dom";
 import { History } from "lucide-react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
-import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { cn } from "@/shared/utils/cn";
 import {
   MAX_SEARCH_LENGTH,
@@ -16,9 +24,10 @@ import {
   type QuickSearchProduct,
   type SearchLink,
 } from "./quickSearch";
-import { searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
-import { addRecentSearch, clearRecentSearches, readRecentSearches } from "./recentSearches";
-import { useQuickSearch, useSearchSuggestions } from "./useQuickSearch";
+import { SearchDesktopMegaMenu } from "./SearchDesktopMegaMenu";
+import { HEADER_SEARCH_TRIGGER_ATTR, searchOverlayFigmaSpec } from "./searchOverlayFigmaSpec";
+import { addRecentSearch, readRecentSearches } from "./recentSearches";
+import { useQuickSearch } from "./useQuickSearch";
 
 type Option = {
   id: string;
@@ -39,65 +48,79 @@ type Group = {
 };
 
 function TypeaheadLabel({ label }: { label: string }) {
-  return <span className="min-w-0 flex-1 truncate font-normal text-darkblack">{label}</span>;
+  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{label}</span>;
 }
 
 type SearchOverlayProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Header icon toggle — full dismiss (clears query + closes Radix). */
+  onRegisterDismiss?: (dismiss: (() => void) | null) => void;
+  /** WorldOfSunnyMegaMenu — keep panel open while pointer is over dropdown. */
+  onDesktopMouseEnter?: () => void;
+  onDesktopMouseLeave?: () => void;
 };
-
-const productRowClassName =
-  "flex w-full items-center gap-3 py-1 text-left font-gill text-sm font-normal leading-110 text-darkblack";
 
 const suggestionRowClassName = "flex w-full items-center gap-2 py-0 text-left";
 
 function ProductRow({ product }: { product: QuickSearchProduct }) {
-  return (
-    <>
-      <span className="relative size-14 shrink-0 overflow-hidden bg-gray300">
-        {product.image ? <Image src={product.image} alt="" fill sizes="56px" className="object-cover" /> : null}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-1 font-gill text-sm leading-110">
-        <span className="truncate font-normal text-darkblack">{product.name}</span>
-        <span className="font-normal text-darkblack">
-          {product.fromPrice ? "From " : ""}₹ {formatJewelleryPrice(product.price)}
-        </span>
-      </span>
-    </>
-  );
+  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{product.name}</span>;
 }
 
 function LinkRow({ link }: { link: SearchLink }) {
-  if (link.detail) {
-    return (
-      <span className="flex min-w-0 flex-1 items-baseline gap-1">
-        <span className="truncate font-normal text-darkblack">{link.label}</span>
-        <span className="shrink-0 font-light text-neutral500">{link.detail}</span>
-      </span>
-    );
-  }
-
-  return <span className="min-w-0 flex-1 truncate font-light text-neutral500">{link.label}</span>;
+  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{link.label}</span>;
 }
 
-export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
+export default function SearchOverlay({
+  open,
+  onOpenChange,
+  onRegisterDismiss,
+  onDesktopMouseEnter,
+  onDesktopMouseLeave,
+}: SearchOverlayProps) {
   const router = useRouter();
+  const isMobileHeader = useMobileHeaderLayout();
+  const searchPanelRef = useRef<HTMLDivElement>(null);
   const baseId = useId();
   const listId = `${baseId}-list`;
   const [text, setText] = useState("");
   const [highlight, setHighlight] = useState({ key: "", index: -1 });
   const [recent, setRecent] = useState(() => readRecentSearches());
   const { query, active, result, loading, failed } = useQuickSearch(text);
-  const { popular } = useSearchSuggestions(open);
   const lastTracked = useRef("");
   // Radix returns focus to a Dialog.Trigger; the header icons are plain buttons, so remember
   // what had focus when search opened and give it back on close.
   const returnFocus = useRef<HTMLElement | null>(null);
+  /** After navigating to results, do not focus the header search control (Enter would reopen search). */
+  const skipReturnFocusRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     setRecent(readRecentSearches());
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const frame = requestAnimationFrame(() => {
+      searchPanelRef.current?.querySelector("input")?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+
+  // Desktop mega menu stays mounted while collapsed; blur so keystrokes do not hit a hidden input.
+  useEffect(() => {
+    if (open) return;
+    const input = searchPanelRef.current?.querySelector("input");
+    if (input instanceof HTMLElement && document.activeElement === input) {
+      input.blur();
+    }
+    if (!skipReturnFocusRef.current) return;
+    skipReturnFocusRef.current = false;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.getAttribute("aria-label") === "Search") {
+      active.blur();
+    }
   }, [open]);
 
   // A new result set starts with nothing highlighted, so Enter goes to the results page.
@@ -124,15 +147,14 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
   );
 
   const prefixTypeahead = useMemo(() => {
-    if (!active) return { recent: [] as SearchLink[], popular: [] as SearchLink[] };
+    if (!active) return { recent: [] as SearchLink[] };
     const recentLinks = recent
       .filter((label) => searchTermMatchesInput(label, query))
       .map((label) => ({ label, href: searchResultsHref(label) }));
-    const popularLinks = popular.filter((link) => searchTermMatchesInput(link.label, query));
-    return { recent: recentLinks, popular: popularLinks };
-  }, [active, query, recent, popular]);
+    return { recent: recentLinks };
+  }, [active, query, recent]);
 
-  const hasPrefixTypeahead = prefixTypeahead.recent.length > 0 || prefixTypeahead.popular.length > 0;
+  const hasPrefixTypeahead = prefixTypeahead.recent.length > 0;
 
   const showEmptyState =
     active && Boolean(result) && !loading && !hasResults && !hasPrefixTypeahead && !failed;
@@ -157,12 +179,10 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
         ...linkOptions("recent", prefixTypeahead.recent, (link) => link.label, (link) => (
           <TypeaheadLabel label={link.label} />
         )),
-        ...linkOptions("popular", prefixTypeahead.popular, (link) => link.label, (link) => (
-          <TypeaheadLabel label={link.label} />
-        )),
       ];
-      if (result?.query === query && result.products.length) {
+      if (result?.query === query) {
         options.push(
+          ...linkOptions("categories", result.categories, () => result.query),
           ...result.products.map((product, index) => ({
             id: `${baseId}-products-${index}`,
             href: product.href,
@@ -170,6 +190,8 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             group: "products",
             render: <ProductRow product={product} />,
           })),
+          ...linkOptions("articles", result.articles, () => result.query),
+          ...linkOptions("services", result.services, () => result.query),
         );
       }
       if (options.length === 0) return [];
@@ -177,57 +199,71 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
     };
 
     if (!active) {
-      const options: Option[] = [
-        ...linkOptions(
-          "recent",
-          recent.map((label) => ({ label, href: searchResultsHref(label) })),
-          (link) => link.label,
-          (link) => <TypeaheadLabel label={link.label} />,
-        ),
-        ...linkOptions("popular", popular, (link) => link.label, (link) => (
-          <TypeaheadLabel label={link.label} />
-        )),
-      ];
+      const options: Option[] = linkOptions(
+        "recent",
+        recent.map((label) => ({ label, href: searchResultsHref(label) })),
+        (link) => link.label,
+        (link) => <TypeaheadLabel label={link.label} />,
+      );
       if (options.length === 0) return [];
-      const hasRecents = recent.length > 0;
       return [
         {
           key: "default",
           title: "",
-          flat: !hasRecents,
+          flat: true,
           options,
-          action: hasRecents ? (
-            <button
-              type="button"
-              className="font-gill text-sm uppercase leading-110 text-darkblack underline underline-offset-4"
-              onClick={() => {
-                clearRecentSearches();
-                setRecent([]);
-              }}
-            >
-              Clear
-            </button>
-          ) : undefined,
         },
       ];
     }
 
-    // Figma typing — flat recent/popular + API products (no Categories / Learn / Services section UI).
+    // Typing — recent prefix matches, then API categories, products, blogs, services (flat list).
     return flatTypingOptions();
-  }, [active, query, result, hasResults, popular, recent, baseId, prefixTypeahead]);
+  }, [active, query, result, hasResults, recent, baseId, prefixTypeahead]);
 
   const showListbox = !showEmptyState && groups.some((group) => group.options.length > 0);
 
   const options = useMemo(() => groups.flatMap((group) => group.options), [groups]);
   const activeOption = activeIndex >= 0 ? options[activeIndex] : undefined;
 
-  const close = () => {
+  const close = useCallback(() => {
     onOpenChange(false);
     setText("");
     // The overlay stays mounted between openings; a row highlighted last time must not
     // come back when the same words are typed again, or Enter would open it.
     setHighlight({ key: "", index: -1 });
-  };
+  }, [onOpenChange]);
+
+  useEffect(() => {
+    if (!isMobileHeader) return;
+    onRegisterDismiss?.(close);
+    return () => onRegisterDismiss?.(null);
+  }, [close, isMobileHeader, onRegisterDismiss]);
+
+  useEffect(() => {
+    if (!open || !isMobileHeader) return;
+    const onKeyDown = (event: WindowEventMap["keydown"]) => {
+      if (event.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [close, isMobileHeader, open]);
+
+  useEffect(() => {
+    if (!open || !isMobileHeader) return;
+
+    const headerSearchTriggerSelector = `[${HEADER_SEARCH_TRIGGER_ATTR}]`;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.closest(headerSearchTriggerSelector)) return;
+      if (searchPanelRef.current?.contains(target)) return;
+      close();
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [close, isMobileHeader, open]);
 
   const go = (href: string, recentText: string, option?: Option) => {
     if (recentText) {
@@ -237,11 +273,14 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
     if (option) {
       trackEvent("select_item", { item_list_name: `search_${option.group}`, search_term: query, href });
     }
+    skipReturnFocusRef.current = true;
     close();
     router.push(href);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!open) return;
+
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       if (!options.length) return;
       event.preventDefault();
@@ -263,53 +302,36 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
 
   let optionIndex = -1;
 
-  return (
-    <DialogPrimitive.Root open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className={searchOverlayFigmaSpec.overlayScrimClassName} />
-        <DialogPrimitive.Content
-          aria-describedby={undefined}
-          className={searchOverlayFigmaSpec.panelShellClassName}
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-            returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-            (event.currentTarget as HTMLElement).querySelector("input")?.focus();
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            if (returnFocus.current?.isConnected) returnFocus.current.focus();
-          }}
-        >
-          <DialogPrimitive.Title className="sr-only">Search Sunny Diamonds</DialogPrimitive.Title>
-
-          <div
-            className={cn(
-              searchOverlayFigmaSpec.panelSurfaceClassName,
-              searchOverlayFigmaSpec.panelSurfaceMinHeightClassName,
-              searchOverlayFigmaSpec.panelSurfaceMaxHeightClassName,
-            )}
-          >
-            {/* Figma 4903:69973 — 1040 column: 40px below header rule, then search + 24px gap + suggestions */}
-            <div
-              className={cn(
-                searchOverlayFigmaSpec.contentTopPaddingClassName,
-                searchOverlayFigmaSpec.sectionGapClassName,
-                searchOverlayFigmaSpec.contentColumnClassName,
-              )}
-              style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
-            >
+  const searchPanelBody = (
+    <div
+      ref={searchPanelRef}
+      className={cn(
+        isMobileHeader
+          ? searchOverlayFigmaSpec.panelSurfaceClassName
+          : searchOverlayFigmaSpec.desktopPanelSurfaceClassName,
+      )}
+    >
+      <div
+        className={cn(
+          searchOverlayFigmaSpec.contentTopPaddingClassName,
+          searchOverlayFigmaSpec.sectionGapClassName,
+          searchOverlayFigmaSpec.contentColumnClassName,
+        )}
+        style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
+      >
             <div className={cn("w-full shrink-0", searchOverlayFigmaSpec.searchBarClassName)}>
-              <SearchIcon className="size-6 shrink-0 text-darkblack" />
+              <SearchIcon className={searchOverlayFigmaSpec.searchBarIconClassName} aria-hidden />
               <input
                 type="search"
                 value={text}
                 maxLength={MAX_SEARCH_LENGTH}
                 onChange={(event) => setText(event.target.value)}
                 onKeyDown={onKeyDown}
+                tabIndex={open ? 0 : -1}
                 placeholder={searchOverlayFigmaSpec.searchPlaceholder}
                 role="combobox"
                 aria-label="Search"
-                aria-expanded={showListbox}
+                aria-expanded={open && showListbox}
                 aria-controls={listId}
                 aria-autocomplete="list"
                 aria-activedescendant={activeOption?.id}
@@ -322,8 +344,8 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             {active && !result && loading && !hasPrefixTypeahead ? (
               <div className={cn("flex flex-col", searchOverlayFigmaSpec.suggestionGapClassName)} aria-hidden>
                 {[0, 1, 2].map((row) => (
-                  <div key={row} className="flex items-center gap-3">
-                    <div className="size-14 animate-pulse bg-gray300" />
+                  <div key={row} className="flex items-center gap-2">
+                    <div className="size-6 shrink-0 animate-pulse rounded-sm bg-gray300" />
                     <div className="h-4 w-1/2 animate-pulse bg-gray300" />
                   </div>
                 ))}
@@ -384,7 +406,6 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                       {group.options.map((option) => {
                         optionIndex += 1;
                         const index = optionIndex;
-                        const isProduct = option.group === "products";
                         const isRecentRow = option.group === "recent";
                         return (
                           <div
@@ -393,7 +414,7 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                             role="option"
                             aria-selected={index === activeIndex}
                             className={cn(
-                              isProduct ? productRowClassName : suggestionRowClassName,
+                              suggestionRowClassName,
                               "cursor-pointer rounded-sm font-gill text-sm leading-110 hover:bg-gray200",
                               index === activeIndex && "bg-gray200",
                             )}
@@ -401,13 +422,11 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
                             onMouseDown={(event) => event.preventDefault()}
                             onClick={() => go(option.href, option.recent, option)}
                           >
-                            {!isProduct ? (
-                              isRecentRow ? (
-                                <History className="size-6 shrink-0 text-darkblack" strokeWidth={1.25} aria-hidden />
-                              ) : (
-                                <SearchIcon className="size-6 shrink-0 text-darkblack" />
-                              )
-                            ) : null}
+                            {isRecentRow ? (
+                              <History className="size-6 shrink-0 text-neutral500" strokeWidth={1.25} aria-hidden />
+                            ) : (
+                              <SearchIcon className={searchOverlayFigmaSpec.suggestionSearchIconClassName} aria-hidden />
+                            )}
                             {option.render}
                           </div>
                         );
@@ -429,15 +448,50 @@ export default function SearchOverlay({ open, onOpenChange }: SearchOverlayProps
             ) : null}
             */}
             </div>
-          </div>
-          <div
-            data-search-overlay-scrim
-            className={searchOverlayFigmaSpec.panelScrimClassName}
-            aria-hidden
-            onClick={() => close()}
-          />
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+    </div>
+  );
+
+  if (!isMobileHeader) {
+    return (
+      <SearchDesktopMegaMenu
+        open={open}
+        onMouseEnter={onDesktopMouseEnter}
+        onMouseLeave={onDesktopMouseLeave}
+      >
+        <span className="sr-only">Search Sunny Diamonds</span>
+        {searchPanelBody}
+      </SearchDesktopMegaMenu>
+    );
+  }
+
+  if (!open) {
+    return null;
+  }
+
+  return createPortal(
+    <>
+      <div
+        aria-hidden
+        data-state="open"
+        className={cn(
+          searchOverlayFigmaSpec.mobileOverlayScrimClassName,
+          searchOverlayFigmaSpec.mobileOverlayFadeTransitionClassName,
+        )}
+        onClick={() => close()}
+      />
+      <div
+        role="dialog"
+        aria-modal={false}
+        aria-label="Search Sunny Diamonds"
+        data-state="open"
+        className={cn(
+          searchOverlayFigmaSpec.mobilePanelShellClassName,
+          searchOverlayFigmaSpec.mobilePanelExpandTransitionClassName,
+        )}
+      >
+        {searchPanelBody}
+      </div>
+    </>,
+    document.body,
   );
 }

@@ -72,8 +72,8 @@ const ProductDetailVisitUsSection = ({
         aria-labelledby="visit-us-heading"
         className={cn(
           isContactVariant
-            ? "relative h-[320px] w-full overflow-hidden md:h-[387px]"
-            : "relative h-361 w-full overflow-hidden md:h-600 lg:h-804",
+            ? "relative h-[400px] w-full overflow-hidden"
+            : "mt-16 lg:mt-104 relative w-full overflow-hidden h-[400px]",
         )}
       >
         {/* Absolute media layer so non-banner showroom crops don't expand the section and clip copy */}
@@ -85,7 +85,7 @@ const ProductDetailVisitUsSection = ({
               alt={visitUs.imageAlt ?? ""}
               fill
               sizes="100vw"
-              className="object-cover object-center"
+              className="object-cover object-top"
             />
           ) : null}
         </div>
@@ -144,7 +144,7 @@ const ProductDetailVisitUsSection = ({
         submissionFormTag={bookVisitFormTag}
         productName={productName}
         productId={productId}
-      submissionProduct={submissionProduct}
+        submissionProduct={submissionProduct}
       />
     </>
   );
