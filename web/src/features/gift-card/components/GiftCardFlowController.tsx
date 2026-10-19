@@ -6,11 +6,9 @@ import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { getMagentoProductAttributeOptions } from "@/services/magento/products/productAttributeOptions.service";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { mapMagentoOccasionsToGiftCardOptions } from "../utils/giftCardOccasions.utils";
-import { usePathname } from "next/navigation";
 
 /** Loads Magento occasions and resumes the flow after guest authentication. */
 const GiftCardFlowController = () => {
-  const pathname = usePathname() ?? "/";
   const { status } = useAuth();
   const { isLoginModalOpen } = useLoginModal();
   const {
@@ -22,6 +20,7 @@ const GiftCardFlowController = () => {
     setIsOccasionsLoading,
   } = useGiftCardFlow();
   const hasResumedAfterAuthRef = useRef(false);
+  const hasLoadedOccasionsRef = useRef(false);
 
   useEffect(() => {
     if (pendingAuthAfterConfigure) {
@@ -30,6 +29,8 @@ const GiftCardFlowController = () => {
   }, [openPanel, pendingAuthAfterConfigure]);
 
   useEffect(() => {
+    if (!isPanelOpen || hasLoadedOccasionsRef.current) return;
+
     let cancelled = false;
     const controller = new AbortController();
 
@@ -46,6 +47,7 @@ const GiftCardFlowController = () => {
         }
       } finally {
         if (!cancelled) {
+          hasLoadedOccasionsRef.current = true;
           setIsOccasionsLoading(false);
         }
       }
@@ -55,7 +57,7 @@ const GiftCardFlowController = () => {
       cancelled = true;
       controller.abort();
     };
-  }, [setIsOccasionsLoading, setOccasionOptions]);
+  }, [isPanelOpen, setIsOccasionsLoading, setOccasionOptions]);
 
   useEffect(() => {
     if (!isPanelOpen) {

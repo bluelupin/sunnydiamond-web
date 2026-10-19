@@ -161,6 +161,7 @@ function ShowroomExpandedPanel({
             width={2500}
             height={1797}
             quality={90}
+            eager
             className="h-full w-full object-cover"
           />
         </div>
@@ -287,7 +288,7 @@ function ShowroomsMobileAccordion({
         </div>
       ) : null}
 
-      <ScrollReveal delayMs={80} className="w-full" aria-label="Showroom locations">
+      <div className="w-full" aria-label="Showroom locations">
         {locations.length === 0 ? (
           emptyMessage ? (
             <p className="px-4 py-6 font-gill text-center text-base font-light leading-110 text-neutral500">
@@ -327,7 +328,7 @@ function ShowroomsMobileAccordion({
             );
           })
         )}
-      </ScrollReveal>
+      </div>
     </div>
   );
 }
@@ -461,8 +462,7 @@ function ShowroomsDesktopLayout({
         </div>
       </ScrollReveal>
 
-      <ScrollReveal
-        delayMs={200}
+      <div
         className="relative h-full min-w-0 overflow-hidden"
         style={{ minHeight: figma.heroMinHeight }}
       >
@@ -476,11 +476,12 @@ function ShowroomsDesktopLayout({
               alt={imageAlt}
               sizes="(min-width: 1024px) 50vw, 100vw"
               quality={90}
+              eager
               className="object-cover object-center"
             />
           </div>
         ) : null}
-      </ScrollReveal>
+      </div>
     </div>
   );
 }

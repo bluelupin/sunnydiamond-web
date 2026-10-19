@@ -18,7 +18,6 @@ import {
 import type { JewelleryListingPrefetchFilters } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
 import JsonLd from "@/shared/lib/seo/JsonLd";
-import { preloadPlpHeroLcpImages } from "@/lib/preloadPlpHeroLcpImages";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
 type JewelleryCategoryRoutePageProps = {
@@ -88,10 +87,6 @@ export async function JewelleryCategoryRoutePage({
     getMagentoJewelleryNavCategories(),
   ]);
 
-  preloadPlpHeroLcpImages({
-    desktopUrl: page.hero?.image?.desktopUrl,
-    mobileUrl: page.hero?.image?.mobileUrl,
-  });
 
   const category = nav.categories.find((item) => item.urlKey === categoryUrlKey);
   const seo = resolveJewelleryCategorySeoMetadata(page, categoryUrlKey, category?.label);

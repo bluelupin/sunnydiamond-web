@@ -16,7 +16,6 @@ import {
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import JsonLd from "@/shared/lib/seo/JsonLd";
-import { preloadPlpHeroLcpImages } from "@/lib/preloadPlpHeroLcpImages";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
 type JewelleryListingSearchParams = {
@@ -66,10 +65,6 @@ export default async function Page({ searchParams }: PageProps) {
     sort: params.sort,
   });
   const page = await getProductLandingPage();
-  preloadPlpHeroLcpImages({
-    desktopUrl: page.hero?.image?.desktopUrl,
-    mobileUrl: page.hero?.image?.mobileUrl,
-  });
   const seo = resolveJewellerySeoMetadata(page);
 
   const jsonLdProducts =

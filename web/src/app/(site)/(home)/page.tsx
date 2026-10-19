@@ -9,7 +9,6 @@ import {
 } from "@/lib/homepage/prefetchHomepageCms";
 import { getHomepageSeo } from "@/services/homepage/seo.service";
 import {
-  preloadHeroLcpImages,
   resolveCraftingRarityContent,
   resolveHeroContent,
 } from "@/lib/homepage/resolveHomepageAboveFold";
@@ -67,8 +66,6 @@ export default async function Page() {
     prefetched.editorial,
     prefetched.shopping,
   );
-
-  preloadHeroLcpImages(hero);
 
   const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(
     prefetched.shell ?? {},

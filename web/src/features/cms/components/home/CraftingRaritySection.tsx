@@ -56,11 +56,10 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
                   alt={cutoutDesktopAlt ?? cutoutAlt ?? ""}
                   desktopAlt={cutoutDesktopAlt}
                   mobileAlt={cutoutMobileAlt}
-                  width={664}
-                  height={850}
+                  fill
                   quality={IMAGE_QUALITY}
                   sizes="(max-width: 1024px) 346px, 664px"
-                  className="size-full object-contain"
+                  className="object-contain"
                 />
               </div>
             </Reveal>

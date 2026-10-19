@@ -15,6 +15,8 @@ interface ResponsiveImageProps {
   fill?: boolean;
   className?: string;
   priority?: boolean;
+  /** Load an above-fold image eagerly without inserting a preload link. */
+  eager?: boolean;
   sizes?: string;
   quality?: number;
 }
@@ -31,6 +33,7 @@ const ResponsiveImage = ({
   fill = false,
   className,
   priority = false,
+  eager = false,
   quality,
   sizes = "100vw",
 }: ResponsiveImageProps) => {
@@ -48,8 +51,8 @@ const ResponsiveImage = ({
   const commonProps = {
     alt,
     priority,
-    loading: priority ? ("eager" as const) : ("lazy" as const),
-    fetchPriority: priority ? ("high" as const) : undefined,
+    loading: priority || eager ? ("eager" as const) : ("lazy" as const),
+    fetchPriority: priority || eager ? ("high" as const) : undefined,
     sizes,
     quality,
     ...(fill
@@ -84,11 +87,13 @@ const ResponsiveImage = ({
       <>
         <Image
           {...commonProps}
+          alt={alt}
           src={desktopImage}
           className={cn(imageClassName, "md:hidden")}
         />
         <Image
           {...commonProps}
+          alt={alt}
           src={retinaImage}
           className={cn(imageClassName, "hidden md:block")}
         />
@@ -96,7 +101,7 @@ const ResponsiveImage = ({
     );
   }
 
-  return <Image {...commonProps} src={desktopImage} className={imageClassName} />;
+  return <Image {...commonProps} alt={alt} src={desktopImage} className={imageClassName} />;
 };
 
 export default ResponsiveImage;

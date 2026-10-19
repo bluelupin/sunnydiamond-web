@@ -1,18 +1,14 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { AppStatusToastProvider } from '@/shared/context/AppStatusToastContext';
 import { AuthProvider } from '@/features/auth/context/AuthContext';
 import { CartProvider } from '@/features/cart/context/CartContext';
 import { CartUIProvider } from '@/features/cart/context/CartUIContext';
-import GiftingOptionsPanel from '@/features/cart/components/GiftingOptionsPanel';
-import GuestCheckoutModal from '@/features/cart/components/GuestCheckoutModal';
 import { FeatureErrorBoundary } from '@/shared/ui/FeatureErrorBoundary';
 import { SavedInspirationsProvider } from '@/features/bespoke/context/SavedInspirationsContext';
 import { WishlistProvider } from '@/features/wishlist/context/WishlistContext';
 import { LoginModalProvider } from '@/features/auth/context/LoginModalContext';
-import LoginModal from '@/features/auth/components/LoginModal';
 import { PageLoadingProvider } from '@/shared/context/PageLoadingContext';
 import { AuthFeaturesProvider } from '@/features/auth/context/AuthFeaturesContext';
 import {
@@ -22,11 +18,7 @@ import {
 import GiftingGiftCardFlowRoot from '@/features/gift-card/components/GiftingGiftCardFlowRoot';
 import { UiPlatformProvider } from '@/shared/context/UiPlatformContext';
 import type { UiPlatform } from '@/shared/utils/detectUiPlatform';
-
-const CartBagDrawer = dynamic(
-  () => import('@/features/cart/components/CartBagDrawer'),
-  { ssr: false },
-);
+import DeferredGlobalOverlays from './DeferredGlobalOverlays';
 
 export default function AppProvider({
   children,
@@ -54,18 +46,7 @@ export default function AppProvider({
                       </PageLoadingProvider>
                     </GiftingGiftCardFlowRoot>
                   </FeatureErrorBoundary>
-                  <FeatureErrorBoundary featureName="CartBagDrawer">
-                    <CartBagDrawer />
-                  </FeatureErrorBoundary>
-                  <FeatureErrorBoundary featureName="GiftingOptionsPanel">
-                    <GiftingOptionsPanel />
-                  </FeatureErrorBoundary>
-                  <FeatureErrorBoundary featureName="GuestCheckoutModal">
-                    <GuestCheckoutModal />
-                  </FeatureErrorBoundary>
-                  <FeatureErrorBoundary featureName="LoginModal">
-                    <LoginModal />
-                  </FeatureErrorBoundary>
+                  <DeferredGlobalOverlays />
                   </SavedInspirationsProvider>
                 </WishlistProvider>
               </LoginModalProvider>

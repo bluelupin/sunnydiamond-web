@@ -1,4 +1,3 @@
-import { preload } from "react-dom";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.service";
@@ -159,15 +158,3 @@ export function resolveCraftingRarityContent(
   };
 }
 
-export function preloadHeroLcpImages(hero: ResolvedHeroContent | null): void {
-  if (!hero) return;
-
-  const mobileLcp = hero.mobileImageUrl || hero.desktopImageUrl;
-  if (mobileLcp) {
-    preload(mobileLcp, { as: "image", fetchPriority: "high" });
-  }
-
-  if (hero.desktopImageUrl && hero.desktopImageUrl !== mobileLcp) {
-    preload(hero.desktopImageUrl, { as: "image", fetchPriority: "high" });
-  }
-}
