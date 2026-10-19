@@ -5,7 +5,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ResolvedCraftingRarityContent } from "@/lib/homepage/resolveHomepageAboveFold";
 
-const IMAGE_QUALITY = 75;
+import { HOMEPAGE_CRAFTING_IMAGE_QUALITY } from "@/lib/homepage/homepagePageImage";
 
 type CraftingRaritySectionProps = {
   id?: string;
@@ -58,7 +58,7 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
                   mobileAlt={cutoutMobileAlt}
                   width={664}
                   height={850}
-                  quality={IMAGE_QUALITY}
+                  quality={HOMEPAGE_CRAFTING_IMAGE_QUALITY}
                   sizes="(max-width: 1024px) 346px, 664px"
                   className="size-full object-contain"
                 />

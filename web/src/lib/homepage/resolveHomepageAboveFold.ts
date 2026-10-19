@@ -145,6 +145,10 @@ export function resolveCraftingRarityContent(
   };
 }
 
+/**
+ * @deprecated Prefer `HomepageDocumentPreload` — viewport-specific `<link rel="preload">`
+ * avoids fetching both mobile and desktop hero URLs on every device.
+ */
 export function preloadHeroLcpImages(hero: ResolvedHeroContent | null): void {
   if (!hero) return;
 

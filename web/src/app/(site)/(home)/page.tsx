@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
+import HomepageDocumentPreload from "@/features/cms/components/home/HomepageDocumentPreload";
 import HomePageView from "@/features/cms/components/HomePage";
 import { HomepageCmsProvider } from "@/shared/lib/providers/HomepageCmsProvider";
 import {
@@ -10,7 +11,6 @@ import {
 import { prefetchHomepageBelowFold } from "@/lib/homepage/prefetchHomepageBelowFold";
 import { getHomepageSeo } from "@/services/homepage/seo.service";
 import {
-  preloadHeroLcpImages,
   resolveCraftingRarityContent,
   resolveHeroContent,
 } from "@/lib/homepage/resolveHomepageAboveFold";
@@ -70,8 +70,6 @@ export default async function Page() {
     prefetched.shopping,
   );
 
-  preloadHeroLcpImages(hero);
-
   const [{ title, description, canonicalUrl, imageUrl }, belowFold] = await Promise.all([
     Promise.resolve(resolveHomepageSeoMetadata(prefetched.shell ?? {})),
     belowFoldPromise,
@@ -84,6 +82,7 @@ export default async function Page() {
       shopping={prefetched.shopping}
       alankara={belowFold.alankara ?? undefined}
     >
+      <HomepageDocumentPreload hero={hero} />
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
       <HomePageView hero={hero} craftingRarity={craftingRarity} />
     </HomepageCmsProvider>

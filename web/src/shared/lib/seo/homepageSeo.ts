@@ -1,3 +1,4 @@
+import type { NormalizedHomepageHero } from "@/services/homepage/homepage.mapper";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type { HomepageSeo } from "@/types/homepage/seo";
@@ -12,7 +13,8 @@ export interface HomepageSeoMetadata {
 }
 
 export type HomepageShellData = {
-  homepage?: { seo?: HomepageSeo | null } | null;
+  homepage?: { seo?: HomepageSeo | null; hero?: NormalizedHomepageHero | null } | null;
+  hero?: NormalizedHomepageHero | null;
   global?: { defaultSeo?: HomepageSeo | null } | null;
 };
 
@@ -27,12 +29,29 @@ function buildAbsoluteUrl(rawUrl?: string | null): string | undefined {
   }
 }
 
-function resolveSeoImage(homepageSeo?: HomepageSeo | null, globalSeo?: HomepageSeo | null): string {
+function resolveHeroShareImage(shellData: HomepageShellData): string | undefined {
+  const hero = shellData?.homepage?.hero ?? shellData?.hero;
+  const heroImage = hero?.image;
+  if (!heroImage) return undefined;
+
+  return (
+    resolveCmsMediaUrl(heroImage.desktopImage ?? heroImage) ??
+    resolveCmsMediaUrl(heroImage.mobileImage) ??
+    undefined
+  );
+}
+
+function resolveSeoImage(
+  homepageSeo?: HomepageSeo | null,
+  globalSeo?: HomepageSeo | null,
+  shellData?: HomepageShellData | null,
+): string {
   return (
     resolveCmsMediaUrl(homepageSeo?.shareImage) ??
     resolveCmsMediaUrl(homepageSeo?.ogImage) ??
     resolveCmsMediaUrl(globalSeo?.shareImage) ??
     resolveCmsMediaUrl(globalSeo?.ogImage) ??
+    resolveHeroShareImage(shellData ?? {}) ??
     buildAbsoluteUrl(siteConfig.seo.ogImage) ??
     ""
   );
@@ -61,7 +80,7 @@ export function resolveHomepageSeoMetadata(shellData: HomepageShellData): Homepa
     buildAbsoluteUrl(homepageSeo?.canonicalURL ?? homepageSeo?.canonicalUrl) ??
     buildAbsoluteUrl(globalSeo?.canonicalURL ?? globalSeo?.canonicalUrl) ??
     siteConfig.seo.siteUrl;
-  const imageUrl = resolveSeoImage(homepageSeo, globalSeo);
+  const imageUrl = resolveSeoImage(homepageSeo, globalSeo, shellData);
   const noIndex = homepageSeo?.noIndex === true;
   const keywords = resolveSeoString(
     homepageSeo?.metaKeywords,

@@ -1,9 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { HomepageTrustBadgeSection } from "../common/TrustBadges";
 import HeroBackgroundMedia from "./HeroBackgroundMedia";
 import HeroSectionOverlay from "./HeroSectionOverlay";
 import { HeroDiamondIcon } from "./HeroDiamondIcon";
+import {
+  HOMEPAGE_HERO_IMAGE_QUALITY,
+  HOMEPAGE_HERO_IMAGE_SIZES,
+} from "@/lib/homepage/homepagePageImage";
 import type { ResolvedHeroContent } from "@/lib/homepage/resolveHomepageAboveFold";
 
 type HeroSectionProps = {
@@ -28,6 +31,9 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
           desktopAlt={hero.desktopHeroAlt}
           mobileAlt={hero.mobileHeroAlt}
           cmsVideoUrl={hero.heroVideoUrl}
+          priority
+          quality={HOMEPAGE_HERO_IMAGE_QUALITY}
+          sizes={HOMEPAGE_HERO_IMAGE_SIZES}
         />
         <HeroSectionOverlay />
         <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-10 py-6 md:px-6 px-4">
