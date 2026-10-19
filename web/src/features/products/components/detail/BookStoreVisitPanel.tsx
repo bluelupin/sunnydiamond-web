@@ -145,7 +145,10 @@ const BookStoreVisitPanel = ({
   const profileEnabled = variant !== "modal" || open;
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(profileEnabled);
-  const { data: editorialData } = useHomepageEditorialBlocks();
+  // Store locator (`variant="page"`) uses server `initialStores` only — editorial CMS is unused.
+  const { data: editorialData } = useHomepageEditorialBlocks({
+    enabled: variant !== "page",
+  });
   const editorialShowrooms = useMemo(
     () => editorialData?.showroomSection?.showrooms ?? [],
     [editorialData?.showroomSection?.showrooms],
@@ -371,26 +374,49 @@ const BookStoreVisitPanel = ({
     setPurposePlaceholder("Select");
     setNotesLabel("What are you looking for?");
 
+    const resolvedStores = resolveBookStoreVisitStoresForPanel(
+      variant,
+      initialStores,
+      [],
+      editorialShowrooms,
+    );
+
+    const hasPrefetchedShowrooms =
+      variant === "page" && (initialStores?.length ?? 0) > 0;
+
+    if (hasPrefetchedShowrooms) {
+      setStores(resolvedStores);
+      setSelectedStoreId((current) =>
+        resolvedStores.some((store) => store.id === current)
+          ? current
+          : getDefaultBookStoreVisitStoreId(resolvedStores),
+      );
+      setIsResolvingStores(false);
+
+      // Store locator list view: defer store-visit form CMS until user opens booking.
+      if (step === "select-store") {
+        return;
+      }
+    }
+
     const controller = new AbortController();
 
     void (async () => {
       try {
         const activeFormTag = submissionFormTag ?? STORE_VISIT_FORM_TAG;
         const form = await getProductFormByTag(activeFormTag, controller.signal);
-        const resolvedStores = resolveBookStoreVisitStoresForPanel(
-          variant,
-          initialStores,
-          [],
-          editorialShowrooms,
-        );
 
-        if (!form) {
-          setStores(resolvedStores);
-          setSelectedStoreId((current) =>
-            resolvedStores.some((store) => store.id === current)
-              ? current
-              : getDefaultBookStoreVisitStoreId(resolvedStores),
-          );
+        if (!hasPrefetchedShowrooms) {
+          if (!form) {
+            setStores(resolvedStores);
+            setSelectedStoreId((current) =>
+              resolvedStores.some((store) => store.id === current)
+                ? current
+                : getDefaultBookStoreVisitStoreId(resolvedStores),
+            );
+            return;
+          }
+        } else if (!form) {
           return;
         }
 
@@ -432,32 +458,30 @@ const BookStoreVisitPanel = ({
         );
         setPurposeRequired(form.purposeRequired);
 
-        setStores(resolvedStores);
-        setSelectedStoreId((current) =>
-          resolvedStores.some((store) => store.id === current)
-            ? current
-            : getDefaultBookStoreVisitStoreId(resolvedStores),
-        );
+        if (!hasPrefetchedShowrooms) {
+          setStores(resolvedStores);
+          setSelectedStoreId((current) =>
+            resolvedStores.some((store) => store.id === current)
+              ? current
+              : getDefaultBookStoreVisitStoreId(resolvedStores),
+          );
+        }
       } catch {
-        const resolvedStores = resolveBookStoreVisitStoresForPanel(
-          variant,
-          initialStores,
-          [],
-          editorialShowrooms,
-        );
-        setStores(resolvedStores);
-        setSelectedStoreId((current) =>
-          resolvedStores.some((store) => store.id === current)
-            ? current
-            : getDefaultBookStoreVisitStoreId(resolvedStores),
-        );
+        if (!hasPrefetchedShowrooms) {
+          setStores(resolvedStores);
+          setSelectedStoreId((current) =>
+            resolvedStores.some((store) => store.id === current)
+              ? current
+              : getDefaultBookStoreVisitStoreId(resolvedStores),
+          );
+        }
       } finally {
         setIsResolvingStores(false);
       }
     })();
 
     return () => controller.abort();
-  }, [open, variant, editorialShowrooms, submissionFormTag, initialStores]);
+  }, [open, variant, editorialShowrooms, submissionFormTag, initialStores, step]);
 
   useEffect(() => {
     setFormTag(submissionFormTag ?? STORE_VISIT_FORM_TAG);

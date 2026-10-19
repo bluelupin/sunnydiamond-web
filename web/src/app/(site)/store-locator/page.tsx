@@ -7,6 +7,7 @@ import StoreLocatorPageSkeleton from "@/features/stores/components/skeletons/Sto
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { mapStoreLocatorShowroomToBookStoreVisit } from "@/features/products/utils/bookStoreVisitStores";
 import { buildStoreLocatorJsonLd } from "@/shared/lib/seo/storeLocatorSeo";
+import { preloadPlpHeroLcpImages } from "@/lib/preloadPlpHeroLcpImages";
 import { getStoreLocatorPage } from "@/services/store-locator/store-locator-page.service";
 
 export const revalidate = 300;
@@ -42,6 +43,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function StoreLocatorPageContent() {
   const page = await getStoreLocatorPage();
+
+  preloadPlpHeroLcpImages({
+    desktopUrl: page.hero?.desktopImageUrl,
+    mobileUrl: page.hero?.mobileImageUrl,
+  });
+
   const stores = (page.showrooms ?? []).map(mapStoreLocatorShowroomToBookStoreVisit);
   const storeLocatorJsonLd = buildStoreLocatorJsonLd(stores);
 
