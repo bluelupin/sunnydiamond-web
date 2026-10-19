@@ -22,6 +22,7 @@ import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
+import { getProductDetailContent, getProductDetailPricing } from "@/features/products/data/productDetailContent";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import {
@@ -47,6 +48,7 @@ import type { NormalizedProductDisplayPage } from "@/services/product-display/pr
 import { getRingSizeOptions } from "@/features/products/utils/ringSizeOptions.utils";
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
 import {
+  applySelectedSizeVariant,
   findConfigurableVariantForMetal,
   getConfigurableOptionUidsForCartItem,
 } from "@/features/products/utils/productVariant.utils";
@@ -208,6 +210,13 @@ const ProductDetailSidebar = ({
   const sizeLabels = sizeOptions.map(option => option.label);
   const unavailableSizes = sizeOptions.filter(option => !option.inStock).map(option => option.label);
   const selectedSize = sizeOptions.find(option => option.label === ringSize);
+  const sizeDisplayProduct = applySelectedSizeVariant(displayProduct, selectedSize?.variant);
+  const sizePricing = selectedSize?.variant
+    ? getProductDetailPricing(sizeDisplayProduct)
+    : pricing;
+  const sizeContent = selectedSize?.variant
+    ? getProductDetailContent(sizeDisplayProduct)
+    : content;
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = isMetalColorSelectable(product);
   const showMetalColor = content.metalColors.length > 0;
@@ -442,7 +451,7 @@ const ProductDetailSidebar = ({
     preferredPurities,
   )?.sku?.trim();
   const stockAlertSku = selectedVariantSku || product.id;
-  const showNotifyWhenAvailable = stockAlertEnabled && !displayProduct.inStock;
+  const showNotifyWhenAvailable = stockAlertEnabled && !sizeDisplayProduct.inStock;
   const addingToBagLabel = addToBagLabel === "Update Bag" ? "Updating…" : "Adding…";
 
   const scrollToRingSizeField = useCallback(() => {
@@ -507,16 +516,16 @@ const ProductDetailSidebar = ({
               isMobileSticky ? "gap-0 text-xl font-normal" : "gap-3 text-xl md:text-2xl",
             )}
           >
-            <span>₹{formatJewelleryPrice(pricing.price)}</span>
+            <span>₹{formatJewelleryPrice(sizePricing.price)}</span>
             {!isMobileSticky &&
-              pricing.originalPrice != null &&
-              pricing.originalPrice > pricing.price ? (
+              sizePricing.originalPrice != null &&
+              sizePricing.originalPrice > sizePricing.price ? (
               <span className="text-gray600 line-through">
-                ₹{formatJewelleryPrice(pricing.originalPrice)}
+                ₹{formatJewelleryPrice(sizePricing.originalPrice)}
               </span>
             ) : null}
           </div>
-          {pricing.breakup ? (
+          {sizePricing.breakup ? (
             <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="shrink-0 uppercase">
               View Price Breakup
             </DetailTextLink>
@@ -566,7 +575,7 @@ const ProductDetailSidebar = ({
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-              {content.attributes.slice(0, 3).map((attribute, index, attributes) => (
+              {sizeContent.attributes.slice(0, 3).map((attribute, index, attributes) => (
                 <li key={attribute} className="flex items-center gap-3">
                   {index > 0 ? (
                     <AttributeSeparator className={cn(!windows && "-translate-y-0.5")}
@@ -839,7 +848,7 @@ const ProductDetailSidebar = ({
         </section>
       ) : null}
 
-      <ProductDetailAccordions items={content.accordions} />
+      <ProductDetailAccordions items={sizeContent.accordions} />
 
       {personalise.isActive ? (
         <section
@@ -952,31 +961,31 @@ const ProductDetailSidebar = ({
         <ScheduleVideoCallPanel
           open
           onClose={() => setIsVideoCallOpen(false)}
-          product={displayProduct}
+          product={sizeDisplayProduct}
         />
       ) : null}
 
       {isTryAtHomeOpen ? (
-        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={displayProduct} />
+        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={sizeDisplayProduct} />
       ) : null}
 
       {isPersonaliseOpen ? (
         <PersonaliseProductPanel
           open
           onClose={() => setIsPersonaliseOpen(false)}
-          product={displayProduct}
+          product={sizeDisplayProduct}
         />
       ) : null}
 
-      {isPriceBreakupOpen && pricing.breakup ? (
+      {isPriceBreakupOpen && sizePricing.breakup ? (
         <PriceBreakupPanel
           open
           onClose={() => setIsPriceBreakupOpen(false)}
-          productName={displayProduct.name}
-          productImage={displayProduct.image}
+          productName={sizeDisplayProduct.name}
+          productImage={sizeDisplayProduct.image}
           metalLabel={activeMetal?.label}
           ringSize={ringSize || undefined}
-          pricing={pricing}
+          pricing={sizePricing}
         />
       ) : null}
     </>

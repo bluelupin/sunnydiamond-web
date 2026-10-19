@@ -287,6 +287,8 @@ type AddProductToGuestCartInput = {
   lineOptions?: CartLineOptions;
   productCustomOptions?: ProductCustomOptions;
   configurableOptionUids?: string[];
+  /** Configurable axis attribute codes, so custom options are suppressed only when duplicated by an axis. */
+  configurableOptionCodes?: string[];
   /** When > 0, parent SKU must use addProductsToCart with configurable UIDs — never addSimpleProductsToCart. */
   configurableAxisCount?: number;
   lineMetadata: StoredCartLineMetadata;
@@ -300,15 +302,25 @@ export async function addProductToGuestCart({
   lineOptions = {},
   productCustomOptions,
   configurableOptionUids = [],
+  configurableOptionCodes = [],
   configurableAxisCount = 0,
   lineMetadata,
   signal,
 }: AddProductToGuestCartInput): Promise<GuestCartState> {
   const configurableUids = configurableOptionUids.map((uid) => uid.trim()).filter(Boolean);
+  const configurableCodes = configurableOptionCodes.map((code) => code.trim().toLowerCase());
+  const hasConfigurableMetal = configurableCodes.some(
+    (code) => /metal/.test(code) && !/purity/.test(code),
+  );
+  const hasConfigurableSize = configurableCodes.some((code) => /size|length/.test(code));
   const optionPayload = buildMagentoCartItemOptionPayload(
     lineOptions,
     configurableUids.length > 0 && productCustomOptions
-      ? { ...productCustomOptions, metal: undefined, ringSize: undefined }
+      ? {
+          ...productCustomOptions,
+          ...(hasConfigurableMetal ? { metal: undefined } : {}),
+          ...(hasConfigurableSize ? { ringSize: undefined } : {}),
+        }
       : productCustomOptions,
   );
   const selectedOptions = [...(optionPayload?.selectedOptions ?? []), ...configurableUids];

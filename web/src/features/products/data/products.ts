@@ -37,6 +37,8 @@ export type ProductConfigurableVariant = {
   /** Configurable value UIDs required when adding the parent SKU to cart. */
   optionUids: string[];
   priceBreakup?: ProductPriceBreakupComponents;
+  detailAttributes?: string[];
+  detailSections?: Product["detailSections"];
 };
 
 export type ProductConfigurable = {

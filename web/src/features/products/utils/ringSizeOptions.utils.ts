@@ -3,6 +3,10 @@ import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types
 import { findConfigurableVariantForMetal } from "./productVariant.utils";
 import { getCustomOptionDisplayLabels } from "@/services/magento/products/productCustomOptions.mapper";
 
+function getSizeAxis(product: Product) {
+  return product.configurable?.options.find(option => /size|length/i.test(option.attributeCode));
+}
+
 /**
  * Size dropdown labels for PDP / wishlist.
  * Prefer Magento custom-option titles when present so selected values resolve to
@@ -12,7 +16,7 @@ export function getRingSizeLabels(
   product: Product,
   sizeGuide: NormalizedSizeGuide | null | undefined,
 ): string[] {
-  const configurableSize = product.configurable?.options.find(option => option.attributeCode === "sd_ring_size");
+  const configurableSize = getSizeAxis(product);
   if (configurableSize) return configurableSize.values.map(value => value.label);
   const magentoLabels = getCustomOptionDisplayLabels(product.customOptions?.ringSize);
 
@@ -30,7 +34,7 @@ export function getRingSizeOptions(
   metalId = "",
   preferredPurities: readonly string[] = [],
 ) {
-  const axis = product.configurable?.options.find(option => option.attributeCode === "sd_ring_size");
+  const axis = getSizeAxis(product);
   if (!axis) return getRingSizeLabels(product, sizeGuide).map(label => ({ label, inStock: true, variant: undefined }));
   const reference = findConfigurableVariantForMetal(product, metalId, preferredPurities);
   const sizeUids = new Set(axis.values.map(value => value.uid));

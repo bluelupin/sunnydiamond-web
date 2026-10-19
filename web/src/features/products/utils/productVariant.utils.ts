@@ -180,8 +180,36 @@ export function applySelectedMetalVariant(
     inStock: variant.inStock,
     metal,
     metalColorValue: normalizeMetalKey(metalId),
-    ...(purity ? { detailAttributes: overlayMetalPurityAttributes(product, purity) } : {}),
+    ...(purity || variant.detailAttributes
+      ? {
+          detailAttributes:
+            variant.detailAttributes ?? overlayMetalPurityAttributes(product, purity!),
+        }
+      : {}),
     ...(variant.priceBreakup ? { priceBreakup: variant.priceBreakup } : {}),
+    ...(variant.detailSections
+      ? { detailSections: { ...product.detailSections, ...variant.detailSections } }
+      : {}),
+  };
+}
+
+/** Overlay the selected size child data onto the PDP display model. */
+export function applySelectedSizeVariant(
+  product: Product,
+  variant: ProductConfigurableVariant | undefined,
+): Product {
+  if (!variant) return product;
+
+  return {
+    ...product,
+    productSku: variant.sku,
+    price: variant.price,
+    originalPrice: variant.originalPrice,
+    ...(variant.priceBreakup ? { priceBreakup: variant.priceBreakup } : {}),
+    ...(variant.detailAttributes ? { detailAttributes: variant.detailAttributes } : {}),
+    ...(variant.detailSections
+      ? { detailSections: { ...product.detailSections, ...variant.detailSections } }
+      : {}),
   };
 }
 
@@ -214,7 +242,7 @@ function resolveConfigurableUidsFromAxes(
     }
   }
 
-  const sizeAxis = axes.find((option) => option.attributeCode === "sd_ring_size");
+  const sizeAxis = axes.find((option) => /size|length/i.test(option.attributeCode));
   const sizeLabel = ringSizeLabel?.trim();
   if (sizeAxis && sizeLabel) {
     const sizeValue = sizeAxis.values.find((value) => value.label === sizeLabel);

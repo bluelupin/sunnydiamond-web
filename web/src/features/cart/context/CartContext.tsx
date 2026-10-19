@@ -582,6 +582,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         lineOptions: options,
         productCustomOptions,
         configurableOptionUids,
+        configurableOptionCodes: product.configurable?.options.map((option) => option.attributeCode),
         configurableAxisCount: product.configurable?.options.length ?? 0,
         lineMetadata: lineMetadataRef.current,
       });
