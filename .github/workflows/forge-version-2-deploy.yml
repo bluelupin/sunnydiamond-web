@@ -1,0 +1,37 @@
+name: Deploy Version-2.0 to Forge
+
+on:
+  push:
+    branches:
+      - Version-2.0
+
+permissions: {}
+
+concurrency:
+  group: forge-version-2-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Trigger Forge deployment
+    runs-on: ubuntu-latest
+    env:
+      FORGE_DEPLOY_HOOK_URL: ${{ secrets.FORGE_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Call Forge deployment trigger
+        shell: bash
+        run: |
+          if [[ -z "$FORGE_DEPLOY_HOOK_URL" ]]; then
+            echo "Missing repository secret: FORGE_DEPLOY_HOOK_URL" >&2
+            exit 1
+          fi
+
+          curl --fail --silent --show-error \
+            --connect-timeout 10 --max-time 30 \
+            --output /dev/null \
+            --get \
+            --data-urlencode "forge_deploy_branch=$GITHUB_REF_NAME" \
+            --data-urlencode "forge_deploy_commit=$GITHUB_SHA" \
+            "$FORGE_DEPLOY_HOOK_URL"
+
+          echo "Forge deployment requested for $GITHUB_REF_NAME at $GITHUB_SHA"
