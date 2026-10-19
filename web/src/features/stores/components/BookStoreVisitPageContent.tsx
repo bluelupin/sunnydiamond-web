@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
+import StoreLocatorBookStoreVisitPanelLazy from "./StoreLocatorBookStoreVisitPanelLazy";
 import StoreLocatorHeroSection from "./StoreLocatorHeroSection";
 import StoreLocatorSearchSection from "./StoreLocatorSearchSection";
 import { mapStoreLocatorShowroomToBookStoreVisit } from "@/features/products/utils/bookStoreVisitStores";
@@ -121,7 +121,7 @@ const BookStoreVisitPageContent = ({
           pincodeError={pincodeError}
         />
       ) : null}
-      <BookStoreVisitPanel
+      <StoreLocatorBookStoreVisitPanelLazy
         variant="page"
         onBack={() => router.back()}
         storeSearchQuery={searchQuery}
