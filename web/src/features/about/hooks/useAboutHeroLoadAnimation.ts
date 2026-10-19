@@ -13,5 +13,6 @@ const { animation } = aboutHeroFigmaSpec;
 export function useAboutHeroLoadAnimation() {
   return useHeroScrollCollapseAnimation({
     titleDelayMs: animation.titleDelayMs,
+    deferScrollListener: true,
   });
 }

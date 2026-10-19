@@ -16,6 +16,8 @@ export interface HeroScrollCollapseAnimationState {
 
 type UseHeroScrollCollapseAnimationOptions = {
   titleDelayMs: number;
+  /** Wait for idle before scroll listeners — lowers main-thread work right after load. */
+  deferScrollListener?: boolean;
 };
 
 function clampProgress(value: number) {
@@ -27,6 +29,7 @@ function clampProgress(value: number) {
  */
 export function useHeroScrollCollapseAnimation({
   titleDelayMs,
+  deferScrollListener = false,
 }: UseHeroScrollCollapseAnimationOptions): HeroScrollCollapseAnimationState {
   const [progress, setProgress] = useState(0);
   const [titleVisible, setTitleVisible] = useState(true);
@@ -83,17 +86,55 @@ export function useHeroScrollCollapseAnimation({
       return;
     }
 
-    syncFromScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    let scrollAttached = false;
+    let cancelled = false;
+
+    const attachScrollListener = () => {
+      if (scrollAttached || cancelled) return;
+      scrollAttached = true;
+      syncFromScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+    };
+
+    if (deferScrollListener) {
+      if (typeof window.requestIdleCallback === "function") {
+        const idleId = window.requestIdleCallback(() => attachScrollListener(), {
+          timeout: 2000,
+        });
+        return () => {
+          cancelled = true;
+          window.cancelIdleCallback(idleId);
+          window.removeEventListener("scroll", onScroll);
+          if (rafRef.current) {
+            window.cancelAnimationFrame(rafRef.current);
+          }
+          clearTitleTimer();
+        };
+      }
+
+      const timeoutId = window.setTimeout(() => attachScrollListener(), 1200);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timeoutId);
+        window.removeEventListener("scroll", onScroll);
+        if (rafRef.current) {
+          window.cancelAnimationFrame(rafRef.current);
+        }
+        clearTitleTimer();
+      };
+    }
+
+    attachScrollListener();
 
     return () => {
+      cancelled = true;
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current) {
         window.cancelAnimationFrame(rafRef.current);
       }
       clearTitleTimer();
     };
-  }, [titleDelayMs]);
+  }, [titleDelayMs, deferScrollListener]);
 
   return {
     progress,

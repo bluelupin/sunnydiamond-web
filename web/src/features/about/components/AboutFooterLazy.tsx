@@ -7,9 +7,7 @@ import type {
 } from "@/services/about/about-page.types";
 import AboutGuaranteesSkeleton from "./skeletons/AboutGuaranteesSkeleton";
 import AboutHeirloomSkeleton from "./skeletons/AboutHeirloomSkeleton";
-import { LazyInView } from "@/shared/ui/LazyInView";
-
-const ABOUT_LAZY_ROOT_MARGIN = "240px 0px 240px 0px";
+import AboutLazyInView from "./AboutLazyInView";
 
 const AboutGuaranteesBar = dynamic(() => import("./AboutGuaranteesBar"), {
   loading: () => <AboutGuaranteesSkeleton />,
@@ -28,14 +26,14 @@ type AboutFooterLazyProps = {
 const AboutFooterLazy = ({ trustBadges, brandTagline }: AboutFooterLazyProps) => (
   <>
     {trustBadges ? (
-      <LazyInView fallback={<AboutGuaranteesSkeleton />} rootMargin={ABOUT_LAZY_ROOT_MARGIN}>
+      <AboutLazyInView fallback={<AboutGuaranteesSkeleton />}>
         <AboutGuaranteesBar badges={trustBadges} />
-      </LazyInView>
+      </AboutLazyInView>
     ) : null}
     {brandTagline ? (
-      <LazyInView fallback={<AboutHeirloomSkeleton />} rootMargin={ABOUT_LAZY_ROOT_MARGIN}>
+      <AboutLazyInView fallback={<AboutHeirloomSkeleton />}>
         <AboutHeirloomQuoteSection {...brandTagline} />
-      </LazyInView>
+      </AboutLazyInView>
     ) : null}
   </>
 );

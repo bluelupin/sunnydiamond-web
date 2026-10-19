@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { seoContent } from "@/features/cms/data/content";
+import AboutDocumentPreload from "@/features/about/components/AboutDocumentPreload";
 import AboutPageView from "@/features/about/components/AboutPage";
 import AboutPageSkeleton from "@/features/about/components/skeletons/AboutPageSkeleton";
 import {
@@ -48,6 +49,7 @@ async function WorldOfSunnyPageContent() {
 
   return (
     <>
+      <AboutDocumentPreload page={page} />
       <JsonLd data={buildAboutJsonLd(page)} />
       <AboutPageView page={page} />
     </>
