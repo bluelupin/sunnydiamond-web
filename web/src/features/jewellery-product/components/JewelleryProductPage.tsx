@@ -763,6 +763,7 @@ const JewelleryProductPage = ({
       <JewelleryProductToolbar
         productCount={totalCount}
         isSearching={isSearching}
+        isSearchListing={Boolean(searchQuery)}
         sortValue={sortValue}
         onSortChange={handleSortChange}
         onFilterOpen={handleOpenFilters}

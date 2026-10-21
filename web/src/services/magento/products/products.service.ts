@@ -5,6 +5,7 @@ import {
 } from "../categories/categories.service";
 import {
   MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
+  MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY,
   MAGENTO_JEWELLERY_PRODUCTS_QUERY,
 } from "./products.query";
 import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "./productsBySkus.query";
@@ -381,14 +382,12 @@ async function fetchMagentoJewelleryProducts({
 
   const fetchProducts = () =>
     magentoGraphqlFetch<MagentoProductsResponse>({
-      query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
-      variables: {
-        search,
-        filter: magentoFilter,
-        pageSize,
-        currentPage: page,
-        sort,
-      },
+      query: sortValue === "latest" && !search.trim()
+        ? MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY
+        : MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+      variables: sortValue === "latest" && !search.trim()
+        ? { filter: magentoFilter, pageSize, currentPage: page }
+        : { search, filter: magentoFilter, pageSize, currentPage: page, sort },
       headers: searchLogHeaders,
       signal,
     });

@@ -16,6 +16,11 @@ export const sortOptions: JewellerySortOption[] = [
   { value: "featured", label: "Featured" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
+  { value: "latest", label: "Latest" },
+];
+
+export const searchSortOptions: JewellerySortOption[] = [
+  ...sortOptions.filter((option) => option.value !== "latest"),
   { value: "name-asc", label: "Name: A to Z" },
 ];
 
@@ -25,7 +30,8 @@ export function isValidJewelleryListingSort(value: string | null | undefined): b
     return false;
   }
 
-  return sortOptions.some((option) => option.value === trimmed);
+  return sortOptions.some((option) => option.value === trimmed)
+    || searchSortOptions.some((option) => option.value === trimmed);
 }
 
 export function parseJewelleryListingSortParam(value: string | null | undefined): string {

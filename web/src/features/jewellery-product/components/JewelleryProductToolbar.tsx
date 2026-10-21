@@ -5,7 +5,8 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
-import { sortOptions } from "../data/filters";
+import { searchSortOptions, sortOptions } from "../data/filters";
+import type { JewellerySortOption } from "../types";
 import {
   jewelleryListingMobileFooterSpec,
   jewelleryListingToolbarSpec,
@@ -15,6 +16,7 @@ import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 interface JewelleryProductToolbarProps {
   productCount: number;
   isSearching?: boolean;
+  isSearchListing?: boolean;
   sortValue: string;
   onSortChange: (value: string) => void;
   onFilterOpen: () => void;
@@ -69,6 +71,7 @@ const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterContro
 };
 
 type SortControlProps = {
+  options: JewellerySortOption[];
   iconSize: number;
   fontSize: number;
   gap: number;
@@ -79,6 +82,7 @@ type SortControlProps = {
 };
 
 const SortControl = ({
+  options,
   iconSize,
   fontSize,
   gap,
@@ -168,7 +172,7 @@ const SortControl = ({
             aria-label="Sort products"
             className="absolute right-0 top-full z-[90] mt-2 flex min-w-[188px] flex-col bg-[#F2F2F2]"
           >
-            {sortOptions.map((option) => {
+            {options.map((option) => {
               const selected = sortValue === option.value;
 
               return (
@@ -228,13 +232,14 @@ const SortControl = ({
 };
 
 type SortDrawerProps = {
+  options: JewellerySortOption[];
   open: boolean;
   sortValue: string;
   onClose: () => void;
   onSelect: (value: string) => void;
 };
 
-const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => {
+const SortDrawer = ({ options, open, sortValue, onClose, onSelect }: SortDrawerProps) => {
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       onClose();
@@ -268,7 +273,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
               </button>
             </div>
             <ul className="m-0 flex list-none flex-col p-0">
-              {sortOptions.map((option) => {
+              {options.map((option) => {
                 const selected = sortValue === option.value;
                 return (
                   <li key={option.value} className="border-b border-neutral300/40 last:border-b-0">
@@ -302,11 +307,13 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
 const JewelleryProductToolbar = ({
   productCount,
   isSearching = false,
+  isSearchListing = false,
   sortValue,
   onSortChange,
   onFilterOpen,
   isFilterOpen = false,
 }: JewelleryProductToolbarProps) => {
+  const options = isSearchListing ? searchSortOptions : sortOptions;
   const [isSortOpen, setIsSortOpen] = useState(false);
   const hideMobileBar = isFilterOpen || isSortOpen;
 
@@ -355,6 +362,7 @@ const JewelleryProductToolbar = ({
               onClick={handleFilterOpen}
             />
             <SortControl
+              options={options}
               iconSize={desktopSpec.iconSize}
               fontSize={desktopSpec.controlFontSize}
               gap={desktopSpec.controlInnerGap}
@@ -388,6 +396,7 @@ const JewelleryProductToolbar = ({
               onClick={handleFilterOpen}
             />
             <SortControl
+              options={options}
               iconSize={mobileSpec.iconSize}
               fontSize={mobileSpec.fontSize}
               gap={mobileSpec.controlGap}
@@ -401,6 +410,7 @@ const JewelleryProductToolbar = ({
       ) : null}
 
       <SortDrawer
+        options={options}
         open={isSortOpen}
         sortValue={sortValue}
         onClose={() => setIsSortOpen(false)}

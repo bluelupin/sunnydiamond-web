@@ -42,6 +42,32 @@ export const MAGENTO_JEWELLERY_PRODUCTS_QUERY = `
   }
 ` as const;
 
+/** Latest PLP order is resolved by Magento without adding created_at to full-text search. */
+export const MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY = `
+  query JewelleryLatestProducts(
+    $filter: ProductAttributeFilterInput
+    $pageSize: Int!
+    $currentPage: Int!
+  ) {
+    products: sunnyLatestProducts(
+      filter: $filter
+      pageSize: $pageSize
+      currentPage: $currentPage
+      direction: DESC
+    ) {
+      total_count
+      page_info {
+        current_page
+        page_size
+        total_pages
+      }
+      items {
+        ${MAGENTO_PLP_PRODUCT_FIELDS}
+      }
+    }
+  }
+` as const;
+
 /** Filter facet options scoped to the active PLP category tab. */
 export const MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY = `
   query JewelleryProductFacets(
