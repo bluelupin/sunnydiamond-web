@@ -1,11 +1,11 @@
 "use client";
 
-import { Fragment, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
-import { ProfileMetaDivider, ProfileOrderItemBadge } from "./profileUi";
+import { ProfileOrderItemBadge } from "./profileUi";
+import { ProfileOrderItemAttributes } from "./ProfileOrderItemAttributes";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
@@ -13,38 +13,6 @@ type ProfileOrderItemRowProps = {
   item: ProfileOrderItemUi;
   price?: string;
 };
-
-/** Figma order listing — `Size: 14 | White Gold | Engraving: DIYA` on one line. */
-function ProfileOrderItemAttributeLine({ item }: { item: ProfileOrderItemUi }) {
-  const segments: ReactNode[] = [];
-
-  if (item.size) {
-    segments.push(<span key="size">Size: {item.size}</span>);
-  }
-
-  if (item.metal) {
-    segments.push(<span key="metal">{item.metal}</span>);
-  }
-
-  if (item.engraving) {
-    segments.push(<span key="engraving">Engraving: {item.engraving}</span>);
-  }
-
-  if (segments.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="flex flex-wrap items-center gap-2 font-gill text-sm font-light leading-110 text-darkblack">
-      {segments.map((segment, index) => (
-        <Fragment key={index}>
-          {index > 0 ? <ProfileMetaDivider className="h-4" /> : null}
-          {segment}
-        </Fragment>
-      ))}
-    </div>
-  );
-}
 
 export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
   const badgeLabel = item.isGift ? "Gift" : item.isBespoke ? "Bespoke" : null;
@@ -105,7 +73,7 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
               </p>
             ) : null}
 
-            <ProfileOrderItemAttributeLine item={item} />
+            <ProfileOrderItemAttributes item={item} />
 
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
