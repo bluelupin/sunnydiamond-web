@@ -1,5 +1,10 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
-import type { MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
+import {
+  getDefaultMetalColorId,
+  getMetalColorOptions,
+} from "@/features/products/utils/metalColorOptions.utils";
+import { applySelectedMetalVariant } from "@/features/products/utils/productVariant.utils";
+import type { MagentoProductDetailItem, MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
 import {
   formatMagentoFacetLabel,
   getMagentoCustomAttributeValue,
@@ -8,6 +13,7 @@ import {
   normalizeGemstoneTypeLabel,
   resolveMagentoModelWearImageUrl,
 } from "./magentoAttribute.utils";
+import { mapMagentoProductDetailToProduct } from "./productDetail.mapper";
 
 function getActiveGalleryUrls(mediaGallery: MagentoMediaGalleryItem[] | null | undefined): string[] {
   return (mediaGallery ?? [])
@@ -71,13 +77,34 @@ function resolveProductCategory(categories: MagentoProductListItem["categories"]
   return jewelleryCategory?.name?.trim() || categories?.[0]?.name?.trim() || "";
 }
 
+/** Match PDP initial view: default metal variant price, image, and purity on PLP cards. */
+function resolveListingDisplayFromDefaultMetalVariant(product: MagentoProductListItem) {
+  if (!product.variants?.length) {
+    return null;
+  }
+
+  const mapped = mapMagentoProductDetailToProduct({
+    ...product,
+    stock_status: "IN_STOCK",
+  } as MagentoProductDetailItem);
+
+  if (!mapped?.configurable?.variants.length) {
+    return null;
+  }
+
+  const defaultMetalId = getDefaultMetalColorId(mapped, getMetalColorOptions(mapped));
+  return applySelectedMetalVariant(mapped, defaultMetalId);
+}
+
 export function mapMagentoProductToJewelleryListing(
   product: MagentoProductListItem,
 ): JewelleryListingProduct | null {
   const sku = product.sku?.trim();
   const name = product.name?.trim();
   const urlKey = product.url_key?.trim();
-  const price = product.price_range?.minimum_price?.final_price?.value;
+  const defaultVariantDisplay = resolveListingDisplayFromDefaultMetalVariant(product);
+  const price =
+    defaultVariantDisplay?.price ?? product.price_range?.minimum_price?.final_price?.value;
 
   if (!sku || !name || !urlKey || price == null) {
     return null;
@@ -90,14 +117,18 @@ export function mapMagentoProductToJewelleryListing(
   );
 
   // Keep products that only have Magento's Luma placeholder so PLP count matches the grid.
-  const primaryImage = resolvedPrimaryImage;
+  const variantPrimaryImage =
+    typeof defaultVariantDisplay?.image === "string" ? defaultVariantDisplay.image.trim() : "";
+  const primaryImage = variantPrimaryImage || resolvedPrimaryImage;
 
   const customAttributes = product.custom_attributesV2?.items;
   const isBestseller = isMagentoBestSeller(customAttributes);
   const metalType = formatMagentoFacetLabel(
     getMagentoCustomAttributeValue(customAttributes, "sd_metal_type"),
   );
-  const metalPurity = getMagentoCustomAttributeValue(customAttributes, "sd_metal_purity");
+  const metalPurity =
+    defaultVariantDisplay?.metalPurity?.trim() ||
+    getMagentoCustomAttributeValue(customAttributes, "sd_metal_purity");
   const gemstoneType = normalizeGemstoneTypeLabel(
     getMagentoCustomAttributeValue(customAttributes, "sd_gemstone_type"),
   );

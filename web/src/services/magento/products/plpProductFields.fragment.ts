@@ -5,6 +5,10 @@ export const MAGENTO_PLP_PRODUCT_FIELDS = `
   url_key
   price_range {
     minimum_price {
+      regular_price {
+        value
+        currency
+      }
       final_price {
         value
         currency
@@ -37,6 +41,79 @@ export const MAGENTO_PLP_PRODUCT_FIELDS = `
           selected_options {
             label
             value
+          }
+        }
+      }
+    }
+  }
+  ... on ConfigurableProduct {
+    custom_attributesV2 {
+      items {
+        code
+        ... on AttributeValue {
+          value
+        }
+        ... on AttributeSelectedOptions {
+          selected_options {
+            label
+            value
+          }
+        }
+      }
+    }
+    configurable_options {
+      attribute_code
+      uid
+      label
+      values {
+        uid
+        label
+      }
+    }
+    variants {
+      attributes {
+        code
+        uid
+        label
+        value_index
+      }
+      product {
+        sku
+        stock_status
+        special_price
+        price_range {
+          minimum_price {
+            regular_price {
+              value
+              currency
+            }
+            final_price {
+              value
+              currency
+            }
+          }
+        }
+        image {
+          url
+        }
+        media_gallery {
+          url
+          label
+          position
+          disabled
+        }
+        custom_attributesV2 {
+          items {
+            code
+            ... on AttributeValue {
+              value
+            }
+            ... on AttributeSelectedOptions {
+              selected_options {
+                label
+                value
+              }
+            }
           }
         }
       }
