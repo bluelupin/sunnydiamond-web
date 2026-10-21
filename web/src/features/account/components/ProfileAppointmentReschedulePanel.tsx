@@ -49,6 +49,7 @@ import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import {
+  formatRequiredFieldLabel,
   invalidFieldClassName,
   sanitizePincodeInput,
   validateAddressLine1,
@@ -629,7 +630,9 @@ export function ProfileAppointmentReschedulePanel({
                       htmlFor="reschedule-appointment-address-line-1"
                       className={appointmentLabelClassName}
                     >
-                      {cmsForm?.addressLine1Label ?? "Address Line 1"}
+                      {formatRequiredFieldLabel(
+                        cmsForm?.addressLine1Label?.trim() || "Address Line 1",
+                      )}
                     </label>
                     <input
                       id="reschedule-appointment-address-line-1"
@@ -684,7 +687,7 @@ export function ProfileAppointmentReschedulePanel({
                         htmlFor="reschedule-appointment-pincode"
                         className={appointmentLabelClassName}
                       >
-                        {cmsForm?.pincodeLabel ?? "Pincode"}
+                        {formatRequiredFieldLabel(cmsForm?.pincodeLabel?.trim() || "Pincode")}
                       </label>
                       <input
                         id="reschedule-appointment-pincode"
@@ -709,7 +712,7 @@ export function ProfileAppointmentReschedulePanel({
                         htmlFor="reschedule-appointment-city"
                         className={appointmentLabelClassName}
                       >
-                        {cmsForm?.cityLabel ?? ""}
+                        {formatRequiredFieldLabel(cmsForm?.cityLabel?.trim() || "City")}
                       </label>
                       <input
                         id="reschedule-appointment-city"
@@ -732,7 +735,7 @@ export function ProfileAppointmentReschedulePanel({
 
                   <OverlaySelectField
                     id="reschedule-appointment-state"
-                    label={cmsForm?.stateLabel ?? "State"}
+                    label={formatRequiredFieldLabel(cmsForm?.stateLabel?.trim() || "State")}
                     value={selectedAddressState}
                     options={stateOptions}
                     placeholder={cmsForm?.statePlaceholder ?? "Select"}

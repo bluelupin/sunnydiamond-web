@@ -440,6 +440,7 @@ const ProductAppointmentForm = ({
               timeSlotRequired={isScheduleVideoCall && config.showTimeSlots}
               noteLabel={notesLabel}
               notePlaceholder={notesPlaceholder}
+              noteRequired={notesRequired}
               noteLabelClassName={config.noteLabelClassName}
               noteTextareaClassName={config.noteTextareaClassName}
               labelClassName={appointmentLabelClassName}

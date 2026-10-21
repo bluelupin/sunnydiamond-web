@@ -238,6 +238,8 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                   showTimeSlots={false}
                   nameLabel={form.fullNameLabel}
                   emailLabel={form.emailLabel}
+                  emailRequired
+                  noteRequired
                   noteLabel={form.visionLabel}
                   noteLabelClassName={appointmentLabelClassName}
                   noteTextareaClassName="font-gill text-base leading-110"

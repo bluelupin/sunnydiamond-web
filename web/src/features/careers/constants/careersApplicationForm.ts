@@ -14,7 +14,7 @@ export const CAREERS_APPLICATION_FIELD_LABELS = {
   currentCtcLabel: "Current CTC",
   expectedCtcLabel: "Expected CTC*",
   noticePeriodLabel: "Notice Period",
-  companyRelationLabel: "Do you have any relation in the company?",
+  companyRelationLabel: "Do you have any relation in the company?*",
   employeeNameLabel: "Employee Name*",
   employeeJobTitleLabel: "Employee Job Title*",
 } as const;

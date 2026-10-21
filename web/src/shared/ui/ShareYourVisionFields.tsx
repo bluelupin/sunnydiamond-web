@@ -15,6 +15,7 @@ import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
+    formatRequiredFieldLabel,
     getMinSelectableDate,
     invalidFieldClassName,
     invalidFieldContainerClassName,
@@ -49,6 +50,8 @@ type ShareYourVisionFieldsProps = {
     showTimeSlots?: boolean;
     nameLabel?: string;
     emailLabel?: string;
+    emailRequired?: boolean;
+    noteRequired?: boolean;
     selectedSlotStyle?: "dark" | "gold";
     showPurpose?: boolean;
     purposeOptions?: readonly string[];
@@ -87,6 +90,8 @@ const ShareYourVisionFields = ({
     showTimeSlots = true,
     nameLabel = "Your Name*",
     emailLabel = "Email",
+    emailRequired = false,
+    noteRequired = false,
     selectedSlotStyle = "dark",
     showPurpose = false,
     purposeOptions = [],
@@ -101,7 +106,7 @@ const ShareYourVisionFields = ({
         <>
             <div className="flex flex-col gap-2">
                 <label htmlFor={`${idPrefix}-name`} className={labelClassName}>
-                    {nameLabel}
+                    {formatRequiredFieldLabel(nameLabel)}
                 </label>
                 <input
                     id={`${idPrefix}-name`}
@@ -162,7 +167,7 @@ const ShareYourVisionFields = ({
 
             <div className="flex flex-col gap-2">
                 <label htmlFor={`${idPrefix}-email`} className={labelClassName}>
-                    {emailLabel}
+                    {emailRequired ? formatRequiredFieldLabel(emailLabel) : emailLabel}
                 </label>
                 <input
                     id={`${idPrefix}-email`}
@@ -253,7 +258,7 @@ const ShareYourVisionFields = ({
 
             <div className="flex flex-col gap-2">
                 <label htmlFor={`${idPrefix}-note`} className={noteLabelClassName ?? labelClassName}>
-                    {noteLabel}
+                    {noteRequired ? formatRequiredFieldLabel(noteLabel) : noteLabel}
                 </label>
                 <textarea
                     id={`${idPrefix}-note`}

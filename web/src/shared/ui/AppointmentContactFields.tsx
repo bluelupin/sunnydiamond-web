@@ -81,8 +81,10 @@ type AppointmentContactFieldsProps = {
   timeSlotRequired?: boolean;
   noteLabel?: string;
   notePlaceholder?: string;
+  noteRequired?: boolean;
   noteLabelClassName?: string;
   noteTextareaClassName?: string;
+  purposeRequired?: boolean;
   phoneLocked?: boolean;
   emailLocked?: boolean;
   /** Prefill-only mode (e.g. reschedule): contact + note are visible but not editable. */
@@ -141,8 +143,10 @@ const AppointmentContactFields = ({
   timeSlotRequired = false,
   noteLabel = "Describe more about your visit",
   notePlaceholder = "Enter",
+  noteRequired = false,
   noteLabelClassName,
   noteTextareaClassName = "font-gill text-base leading-110",
+  purposeRequired = false,
   phoneLocked = false,
   emailLocked = false,
   detailsReadOnly = false,
@@ -200,7 +204,7 @@ const AppointmentContactFields = ({
       <>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-name`} className={labelClassName}>
-          {nameLabel}
+          {formatRequiredFieldLabel(nameLabel)}
         </label>
         <input
           id={`${idPrefix}-name`}
@@ -227,7 +231,7 @@ const AppointmentContactFields = ({
 
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-phone`} className={labelClassName}>
-          {phoneLabel}
+          {formatRequiredFieldLabel(phoneLabel)}
         </label>
         <div
           className={cn(
@@ -385,7 +389,7 @@ const AppointmentContactFields = ({
           <div className="flex flex-col gap-2">
             <InlineCustomSelect
               id={`${idPrefix}-purpose`}
-              label={purposeLabel}
+              label={purposeRequired ? formatRequiredFieldLabel(purposeLabel) : purposeLabel}
               value={purpose}
               options={purposeOptions}
               placeholder={purposePlaceholder}
@@ -406,7 +410,7 @@ const AppointmentContactFields = ({
         ) : (
           <OverlaySelectField
             id={`${idPrefix}-purpose`}
-            label={purposeLabel}
+            label={purposeRequired ? formatRequiredFieldLabel(purposeLabel) : purposeLabel}
             value={purpose}
             options={purposeOptions}
             placeholder={purposePlaceholder}
@@ -424,7 +428,7 @@ const AppointmentContactFields = ({
       {showContactDetails ? (
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-note`} className={noteLabelClassName ?? labelClassName}>
-          {noteLabel}
+          {noteRequired ? formatRequiredFieldLabel(noteLabel) : noteLabel}
         </label>
         <textarea
           id={`${idPrefix}-note`}

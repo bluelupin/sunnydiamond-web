@@ -13,14 +13,14 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
-import { invalidFieldClassName, invalidFieldContainerClassName } from "@/shared/utils/formValidation";
+import {
+  formatRequiredFieldLabel,
+  invalidFieldClassName,
+  invalidFieldContainerClassName,
+} from "@/shared/utils/formValidation";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 import FormRadioButtonIcon from "@/assets/Icons/FormRadioButtonIcon";
-
-function normalizeCheckoutFieldLabel(label: string): string {
-  return label.replace(/\*+$/, "").trimEnd();
-}
 
 type CheckoutFieldLabelProps = {
   id: string;
@@ -31,7 +31,7 @@ type CheckoutFieldLabelProps = {
 
 const CheckoutFieldLabel = ({ id, label, optional, optionalClassName }: CheckoutFieldLabelProps) => (
   <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
-    {optional ? label : normalizeCheckoutFieldLabel(label)}
+    {optional ? label : formatRequiredFieldLabel(label)}
     {optional ? <span className={cn("font-light text-gray600", optionalClassName)}> (Optional)</span> : null}
   </label>
 );

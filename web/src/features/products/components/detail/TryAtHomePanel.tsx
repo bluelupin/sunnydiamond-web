@@ -52,6 +52,7 @@ import { buildProfileSectionHref } from "@/features/account/utils/profileSection
 import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
+  formatRequiredFieldLabel,
   invalidFieldClassName,
   sanitizePincodeInput,
   validateAddressLine1,
@@ -256,6 +257,7 @@ const TryAtHomeDetailsStep = ({
               timeSlotRequired={hasTimeSlots}
               noteLabel={form?.notesLabel ?? ""}
               notePlaceholder={form?.notesPlaceholder ?? ""}
+              noteRequired={form?.notesRequired ?? false}
               phoneLocked={phoneLocked}
               emailLocked={emailLocked}
               bookingWindow={TRY_AT_HOME_BOOKING_WINDOW}
@@ -505,7 +507,7 @@ const TryAtHomeAddressStep = ({
           <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
             <div className="flex flex-col gap-2">
               <label htmlFor="try-at-home-address-line-1" className={appointmentLabelClassName}>
-                {form?.addressLine1Label ?? ""}
+                {formatRequiredFieldLabel(form?.addressLine1Label?.trim() || "Address Line 1")}
               </label>
               <input
                 id="try-at-home-address-line-1"
@@ -562,7 +564,7 @@ const TryAtHomeAddressStep = ({
             <div className="flex gap-6">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <label htmlFor="try-at-home-pincode" className={appointmentLabelClassName}>
-                  {form?.pincodeLabel ?? ""}
+                  {formatRequiredFieldLabel(form?.pincodeLabel?.trim() || "Pincode")}
                 </label>
                 <input
                   id="try-at-home-pincode"
@@ -588,7 +590,7 @@ const TryAtHomeAddressStep = ({
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <label htmlFor="try-at-home-city" className={appointmentLabelClassName}>
-                  {form?.cityLabel ?? ""}
+                  {formatRequiredFieldLabel(form?.cityLabel?.trim() || "City")}
                 </label>
                 <input
                   id="try-at-home-city"
@@ -612,7 +614,7 @@ const TryAtHomeAddressStep = ({
 
             <CheckoutSelectField
               id="try-at-home-state"
-              label={form?.stateLabel ?? "State"}
+              label={formatRequiredFieldLabel(form?.stateLabel?.trim() || "State")}
               variant="inlineCustom"
               listPlacement="inline"
               placeholder={form?.statePlaceholder?.trim() || "Select"}

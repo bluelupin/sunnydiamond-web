@@ -101,7 +101,10 @@ const CheckoutAddressFields = ({
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
   validation: CheckoutFormValidationProps;
   disabled?: boolean;
-}) => (
+}) => {
+  const isBillingAddress = fields.phone === "billingPhone";
+
+  return (
   <div className="space-y-4">
     <CheckoutField
       id={`${idPrefix}-name`}
@@ -129,9 +132,9 @@ const CheckoutAddressFields = ({
     />
     <CheckoutField
       id={`${idPrefix}-address-2`}
-      label="Address Line 2 (Optional)"
+      label="Address Line 2"
+      optional
       placeholder="Enter Address Line 2"
-      // optional
       value={form[fields.addressLine2] as string}
       onChange={(value) => onChange(fields.addressLine2, value)}
       onBlur={() => validation.markTouched(fields.addressLine2)}
@@ -181,6 +184,7 @@ const CheckoutAddressFields = ({
     <CheckoutPhoneField
       id={`${idPrefix}-phone`}
       label="Phone Number"
+      optional={isBillingAddress}
       placeholder="Enter Phone Number"
       value={form[fields.phone] as string}
       onChange={(value) => onChange(fields.phone, value)}
@@ -193,7 +197,8 @@ const CheckoutAddressFields = ({
       disabled={disabled}
     />
   </div>
-);
+  );
+};
 
 const buildAddressLines = ({
   addressLine1,

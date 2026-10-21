@@ -5,6 +5,7 @@ import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext"
 import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
 import CheckoutOtpModal from "@/features/checkout/components/CheckoutOtpModal";
 import {
+  formatRequiredFieldLabel,
   sanitizePhoneInput,
   validatePhone,
   validateRequiredName,
@@ -277,7 +278,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="profile-full-name" className={appointmentLabelClassName}>
-                {content.fields.fullName}
+                {formatRequiredFieldLabel(content.fields.fullName)}
               </label>
               <input
                 id="profile-full-name"
