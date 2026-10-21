@@ -34,6 +34,16 @@ jobs:
         run: npm ci
 
       - name: Verify production build
+        env:
+          NEXT_PUBLIC_STRAPI_URL: https://sunnydiamonds-cms-dev.on-forge.com
+          NEXT_PUBLIC_APP_ENV: qa
+          NEXT_PUBLIC_FRONTEND_URL: https://sunnydiamonds-web-dev.on-forge.com
+          NEXT_PUBLIC_SITE_URL: https://sunnydiamonds-cms-dev.on-forge.com
+          NEXT_PUBLIC_API_DEBUG: false
+          NEXT_PUBLIC_SENTRY_DSN: https://7c8f07734892ce19798997e0ec424a85@o191536.ingest.us.sentry.io/451184094576640
+          NEXT_PUBLIC_MAGENTO_GRAPHQL_URL: https://sunnydiamond-store-dev.on-forge.com/graphql
+          NEXT_PUBLIC_MAGENTO_STORE_CODE: default
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: 1045895424883-qlhgd7r0smh8mj74fuvk5fukkihl45ui.apps.googleusercontent.com
         run: npm run build
 
       - name: Call Forge deployment trigger
