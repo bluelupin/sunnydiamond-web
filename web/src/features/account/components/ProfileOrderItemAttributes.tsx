@@ -27,7 +27,7 @@ function ProfileOrderEngravingValue({
   return (
     <>
       Engraving:{" "}
-      <span className={cn(typography.className)} style={typography.style}>
+      <span className={cn(typography.className, "text-sm font-light leading-110 text-darkblack")} style={typography.style}>
         {displayText}
       </span>
     </>
@@ -51,7 +51,7 @@ export function ProfileOrderItemAttributes({
 
   if (item.engraving?.trim()) {
     segments.push(
-      <span key="engraving">
+      <span key="engraving" className="text-sm font-light leading-110 text-darkblack">
         <ProfileOrderEngravingValue
           engraving={item.engraving}
           engravingFont={item.engravingFont}
