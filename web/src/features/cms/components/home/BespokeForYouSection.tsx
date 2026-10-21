@@ -10,12 +10,28 @@ import { resolveBespokeForYouSection } from "@/shared/utils/resolveBespokeForYou
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
+import BespokePastCreationsGalleryHost from "@/features/bespoke/components/BespokePastCreationsGalleryHost";
+import type {
+  NormalizedBespokeFeaturedStories,
+  NormalizedBespokePastCreations,
+} from "@/services/bespoke/contact-bespoke-page.types";
 
 interface BespokeForYouSectionProps {
   id?: string;
+  pastCreations?: NormalizedBespokePastCreations | null;
+  featuredStories?: Pick<
+    NormalizedBespokeFeaturedStories,
+    "slides" | "defaultSlideIndex" | "modalCtaLabel"
+  > | null;
 }
 
-const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
+const HOME_PATH = "/";
+
+const BespokeForYouSection = ({
+  id,
+  pastCreations = null,
+  featuredStories = null,
+}: BespokeForYouSectionProps) => {
   const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
   const sectionData = useMemo(
@@ -57,7 +73,16 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
     return null;
   }
 
+  const showSecondaryCta =
+    Boolean(secondaryCtaLabel) && Boolean(pastCreations?.images.length);
+
   return (
+    <BespokePastCreationsGalleryHost
+      pastCreations={pastCreations}
+      featuredStories={featuredStories}
+      activePathname={HOME_PATH}
+    >
+      {({ openPastCreationsGallery }) => (
     <section
       id={id}
       aria-label={sectionTitle}
@@ -104,7 +129,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
               </Reveal>
             ) : null}
           </div>
-          {(primaryCtaUrl && primaryCtaLabel) || (secondaryCtaUrl && secondaryCtaLabel) ? (
+          {(primaryCtaUrl && primaryCtaLabel) || showSecondaryCta ? (
             <Reveal direction="up" className="flex shrink-0 flex-col items-center gap-6 md:gap-8">
               {primaryCtaUrl && primaryCtaLabel ? (
                 <Link
@@ -114,9 +139,9 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
                   <span className="relative z-10">{primaryCtaLabel}</span>
                 </Link>
               ) : null}
-              {secondaryCtaUrl && secondaryCtaLabel ? (
+              {showSecondaryCta ? (
                 <DetailTextLink
-                  href={secondaryCtaUrl}
+                  onClick={openPastCreationsGallery}
                   light
                   className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0"
                 >
@@ -128,6 +153,8 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
         </div>
       </div>
     </section>
+      )}
+    </BespokePastCreationsGalleryHost>
   );
 };
 

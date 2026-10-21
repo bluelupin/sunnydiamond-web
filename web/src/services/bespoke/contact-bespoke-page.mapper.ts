@@ -267,10 +267,12 @@ export const mapPastCreations = (
     }
   }
 
-  if (images.length === 0 || !title) return null;
+  if (images.length === 0) return null;
+
+  const resolvedTitle = cleanText(title) || "Past creations";
 
   return {
-    title,
+    title: resolvedTitle,
     images,
   };
 };

@@ -2,6 +2,10 @@
 
 import { Suspense } from "react";
 import { cn } from "@/shared/utils/cn";
+import type {
+  NormalizedBespokeFeaturedStories,
+  NormalizedBespokePastCreations,
+} from "@/services/bespoke/contact-bespoke-page.types";
 import { FeatureErrorBoundary } from "@/shared/ui/FeatureErrorBoundary";
 import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
 import { FeaturedCarouselSkeleton } from "@/features/cms/components/home/FeaturedProductsSection";
@@ -77,7 +81,18 @@ function LazyHomeSection({
   );
 }
 
-export default function HomeBelowFoldSections() {
+type HomeBelowFoldSectionsProps = {
+  pastCreations?: NormalizedBespokePastCreations | null;
+  featuredStories?: Pick<
+    NormalizedBespokeFeaturedStories,
+    "slides" | "defaultSlideIndex" | "modalCtaLabel"
+  > | null;
+};
+
+export default function HomeBelowFoldSections({
+  pastCreations = null,
+  featuredStories = null,
+}: HomeBelowFoldSectionsProps) {
   return (
     <>
       <LazyHomeSection featureName="DiamondSourcingSection" minHeight="bg-white">
@@ -109,7 +124,11 @@ export default function HomeBelowFoldSections() {
       </LazyHomeSection>
 
       <LazyHomeSection featureName="BespokeForYouSection" minHeight="">
-        <BespokeForYouSection id="bespoke-for-you" />
+        <BespokeForYouSection
+          id="bespoke-for-you"
+          pastCreations={pastCreations}
+          featuredStories={featuredStories}
+        />
       </LazyHomeSection>
 
       <LazyHomeSection featureName="DiamondsForEveryoneSection" minHeight="">

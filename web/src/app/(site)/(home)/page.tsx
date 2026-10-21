@@ -14,6 +14,7 @@ import {
 } from "@/lib/homepage/resolveHomepageAboveFold";
 import { buildHomepageJsonLd, resolveHomepageSeoMetadata } from "@/shared/lib/seo/homepageSeo";
 import { siteConfig } from "@/shared/lib/siteConfig";
+import { getContactBespokePage } from "@/services/bespoke/contact-bespoke-page.service";
 
 /** Matches HOMEPAGE_CMS_REVALIDATE_SECONDS — segment config must be a literal. */
 export const revalidate = 300;
@@ -58,7 +59,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const prefetched = await prefetchHomepageCms();
+  const [prefetched, bespokePage] = await Promise.all([
+    prefetchHomepageCms(),
+    getContactBespokePage(),
+  ]);
   const hero = resolveHeroContent(prefetched.shell);
   const craftingRarity = resolveCraftingRarityContent(
     prefetched.shell,
@@ -77,7 +81,12 @@ export default async function Page() {
       shopping={prefetched.shopping}
     >
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
-      <HomePageView hero={hero} craftingRarity={craftingRarity} />
+      <HomePageView
+        hero={hero}
+        craftingRarity={craftingRarity}
+        pastCreations={bespokePage.pastCreations}
+        featuredStories={bespokePage.featuredStories}
+      />
     </HomepageCmsProvider>
   );
 }

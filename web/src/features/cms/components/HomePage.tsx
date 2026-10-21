@@ -7,22 +7,39 @@ import type {
   ResolvedCraftingRarityContent,
   ResolvedHeroContent,
 } from "@/lib/homepage/resolveHomepageAboveFold";
+import type {
+  NormalizedBespokeFeaturedStories,
+  NormalizedBespokePastCreations,
+} from "@/services/bespoke/contact-bespoke-page.types";
 
 const showApiDebug = process.env.NEXT_PUBLIC_API_DEBUG === "true";
 
 type HomePageProps = {
   hero: ResolvedHeroContent | null;
   craftingRarity: ResolvedCraftingRarityContent;
+  pastCreations?: NormalizedBespokePastCreations | null;
+  featuredStories?: Pick<
+    NormalizedBespokeFeaturedStories,
+    "slides" | "defaultSlideIndex" | "modalCtaLabel"
+  > | null;
 };
 
-const HomePage = ({ hero, craftingRarity }: HomePageProps) => {
+const HomePage = ({
+  hero,
+  craftingRarity,
+  pastCreations = null,
+  featuredStories = null,
+}: HomePageProps) => {
   return (
     <>
       <HomepagePerformanceReporter hasHeroContent={Boolean(hero)} />
       {showApiDebug ? <ApiDebugLogger /> : null}
       <HeroSection id="hero" hero={hero} />
       <CraftingRaritySection id="crafting-rarity" content={craftingRarity} />
-      <HomeBelowFoldSections />
+      <HomeBelowFoldSections
+        pastCreations={pastCreations}
+        featuredStories={featuredStories}
+      />
     </>
   );
 };
