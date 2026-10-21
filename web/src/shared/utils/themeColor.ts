@@ -13,6 +13,7 @@ export const THEME_COLORS = {
 type ResolveMobileThemeColorOptions = {
   isCartEmptyPageShell?: boolean;
   isCheckoutSuccessScreen?: boolean;
+  isNotFoundPageShell?: boolean;
 };
 
 export function resolveMobileThemeColor(
@@ -22,6 +23,10 @@ export function resolveMobileThemeColor(
 ): string {
   if (headerVariant === "overlay") {
     return THEME_COLORS.brand;
+  }
+
+  if (options.isNotFoundPageShell) {
+    return THEME_COLORS.gray200;
   }
 
   if (pathname === "/cart" || isCheckoutRoute(pathname)) {

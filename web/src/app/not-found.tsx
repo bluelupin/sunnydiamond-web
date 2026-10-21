@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
-import { constructMetadata } from "@/shared/lib/seo/metadata";
 import NotFoundPageView from "@/features/cms/components/NotFoundPage";
+import { notFoundContent } from "@/features/cms/data/notFoundContent";
+import { constructMetadata } from "@/shared/lib/seo/metadata";
+import Layout from "@/shared/ui/layout/Layout";
 
 export const metadata: Metadata = constructMetadata({
-  title: "Page Not Found",
-  description: "The page you're looking for doesn't exist.",
+  title: notFoundContent.title,
+  description: `${notFoundContent.descriptionLine1} ${notFoundContent.descriptionLine2}`,
   noIndex: true,
 });
 
 export default function NotFoundPage() {
-  return <NotFoundPageView />;
+  return (
+    <Layout notFoundShell>
+      <NotFoundPageView />
+    </Layout>
+  );
 }

@@ -10,9 +10,20 @@ import { clearTransientErrorAutoRetry } from "@/shared/hooks/useTransientErrorAu
 import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { isAuthRoute, isCartOrCheckoutRoute, shouldHideFooter, shouldHideFooterOnMobile, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
 import PwaInstallBanner from "@/shared/pwa/PwaInstallBanner";
+import {
+  NotFoundPageShellProvider,
+  useNotFoundPageShell,
+} from "@/features/cms/context/NotFoundPageShellContext";
 
-const Layout = ({ children }: { children: ReactNode }) => {
+type LayoutProps = {
+  children: ReactNode;
+  /** Figma 7332:67685 — chalk header/content on global 404 only. */
+  notFoundShell?: boolean;
+};
+
+const LayoutInner = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname() ?? "/";
+  const isNotFoundPageShell = useNotFoundPageShell();
   const offsetMain = shouldOffsetMainForHeader(pathname);
   const hideFooter = shouldHideFooter(pathname);
   const hideFooterOnMobile = shouldHideFooterOnMobile(pathname);
@@ -42,6 +53,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             : offsetMain
               ? cn(
                   "flex-1 pt-[calc(64px+env(safe-area-inset-top,0px))] md:landscape:pt-104 lg:landscape:pt-104",
+                  isNotFoundPageShell && "bg-gray200 max-md:bg-gray200",
                   isCartCheckoutPage &&
                     (isCartEmptyPageShell
                       ? "bg-gray200 max-md:bg-gray200"
@@ -57,5 +69,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
     </div>
   );
 };
+
+const Layout = ({ children, notFoundShell = false }: LayoutProps) => (
+  <NotFoundPageShellProvider active={notFoundShell}>
+    <LayoutInner>{children}</LayoutInner>
+  </NotFoundPageShellProvider>
+);
 
 export default Layout;

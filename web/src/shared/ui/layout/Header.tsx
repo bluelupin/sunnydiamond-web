@@ -46,6 +46,7 @@ import {
   CAREERS_ROUTE,
 } from "@/features/careers/constants/careersRoutes";
 import { FeatureErrorBoundary } from "@/shared/ui/FeatureErrorBoundary";
+import { useNotFoundPageShell } from "@/features/cms/context/NotFoundPageShellContext";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -112,6 +113,8 @@ const Header = () => {
   }, []);
   const { totalItems: cartCount } = useCart();
   const isCartEmptyPageShell = useIsCartEmptyPageShell();
+  const isNotFoundPageShell = useNotFoundPageShell();
+  const notFoundHeaderSurfaceClass = "bg-gray200";
   const mounted = useMounted();
   const displayCartCount = mounted ? cartCount : 0;
   const pathname = usePathname() ?? "/";
@@ -157,14 +160,16 @@ const Header = () => {
     isCareersHeaderManagedRoute && careersHeaderMode === "solid"
       ? "solid"
       : pathnameHeaderVariant;
-  const headerSurfaceClass = isScrollReturnSurface
-    ? cn(
-        "motion-safe:transition-colors motion-safe:duration-300",
-        isCartOrCheckoutRoute(pathname) ? responsiveCheckoutHeaderSurfaceClass : "bg-white",
-      )
-    : isCartOrCheckoutRoute(pathname)
-      ? responsiveCheckoutHeaderSurfaceClass
-      : getHeaderSurfaceClass(pathname, headerVariant);
+  const headerSurfaceClass = isNotFoundPageShell
+    ? notFoundHeaderSurfaceClass
+    : isScrollReturnSurface
+      ? cn(
+          "motion-safe:transition-colors motion-safe:duration-300",
+          isCartOrCheckoutRoute(pathname) ? responsiveCheckoutHeaderSurfaceClass : "bg-white",
+        )
+      : isCartOrCheckoutRoute(pathname)
+        ? responsiveCheckoutHeaderSurfaceClass
+        : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
   const isAuthMobileHeroOverlay = isAuthPage && isMobileHeader;
   const isLightOverlay =
@@ -400,6 +405,7 @@ const Header = () => {
         headerVariant={themeHeaderVariant}
         isCartEmptyPageShell={isCartEmptyPageShell}
         isCheckoutSuccessScreen={isCheckoutSuccessScreen}
+        isNotFoundPageShell={isNotFoundPageShell}
       />
       <header
         className={cn(
