@@ -9,7 +9,8 @@ import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileOrderDetailItemUi } from "../types/profileUi.types";
 import { formatOrderTotal } from "../utils/formatAccountData";
-import { ProfileMetaDivider, ProfileOrderItemBadge } from "./profileUi";
+import { ProfileOrderItemAttributes } from "./ProfileOrderItemAttributes";
+import { ProfileOrderItemBadge } from "./profileUi";
 
 type ProfileOrderDetailItemCardProps = {
   item: ProfileOrderDetailItemUi;
@@ -88,12 +89,11 @@ export function ProfileOrderDetailItemCard({
   ) : null;
 
   const attributesElement =
-    item.size || item.metal ? (
-      <div className="flex items-center gap-2 font-gill text-sm font-light leading-110 text-darkblack lg:text-neutral500">
-        {item.size ? <span>Size: {item.size}</span> : null}
-        {item.size && item.metal ? <ProfileMetaDivider className="h-4" /> : null}
-        {item.metal ? <span>{item.metal}</span> : null}
-      </div>
+    item.size || item.metal || item.engraving ? (
+      <ProfileOrderItemAttributes
+        item={item}
+        className="lg:text-neutral500"
+      />
     ) : null;
 
   const priceElement = (

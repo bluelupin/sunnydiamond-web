@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StaticImageData } from "next/image";
-import { Info } from "lucide-react";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import {
   ENGRAVING_CHARSET_MESSAGE,
+  ENGRAVING_FONT_REQUIRED_MESSAGE,
   ENGRAVING_TEXT_PATTERN,
+  ENGRAVING_TEXT_REQUIRED_MESSAGE,
   ENGRAVING_TEXT_SANITIZE_PATTERN,
   clampEngravingText,
   resolveEngravingFonts,
@@ -51,6 +52,8 @@ const MetalEngravingPanel = ({
   const [text, setText] = useState("");
   const [font, setFont] = useState("");
   const [charsetError, setCharsetError] = useState(false);
+  const [textRequiredError, setTextRequiredError] = useState(false);
+  const [fontRequiredError, setFontRequiredError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,6 +99,8 @@ const MetalEngravingPanel = ({
     setText(clampEngravingText(initialValue?.text ?? "", maxCharacters));
     setFont(initialValue?.font ?? "");
     setCharsetError(false);
+    setTextRequiredError(false);
+    setFontRequiredError(false);
     setIsSaving(false);
   }, [open, initialValue, availableFonts, maxCharacters]);
 
@@ -103,8 +108,18 @@ const MetalEngravingPanel = ({
     // Mirror server charset validation: strip disallowed chars, flag the attempt inline.
     const isValid = ENGRAVING_TEXT_PATTERN.test(value);
     setCharsetError(!isValid);
+    if (value.trim()) {
+      setTextRequiredError(false);
+    }
     const sanitized = isValid ? value : value.replace(ENGRAVING_TEXT_SANITIZE_PATTERN, "");
     setText(clampEngravingText(sanitized, maxCharacters));
+  };
+
+  const handleFontChange = (value: string) => {
+    setFont(value);
+    if (value.trim()) {
+      setFontRequiredError(false);
+    }
   };
 
   const handleSave = async () => {
@@ -112,7 +127,21 @@ const MetalEngravingPanel = ({
       return;
     }
 
-    if (requiresFont && !font.trim()) {
+    const trimmedText = clampEngravingText(text.trim(), maxCharacters);
+    const trimmedFont = font.trim();
+    let hasValidationError = false;
+
+    if (!trimmedText) {
+      setTextRequiredError(true);
+      hasValidationError = true;
+    }
+
+    if (requiresFont && !trimmedFont) {
+      setFontRequiredError(true);
+      hasValidationError = true;
+    }
+
+    if (hasValidationError) {
       return;
     }
 
@@ -121,8 +150,7 @@ const MetalEngravingPanel = ({
       return;
     }
 
-    const trimmedText = clampEngravingText(text.trim(), maxCharacters);
-    const value = trimmedText ? { text: trimmedText, font } : null;
+    const value: EngravingSelection = { text: trimmedText, font: trimmedFont };
 
     setIsSaving(true);
 
@@ -134,9 +162,12 @@ const MetalEngravingPanel = ({
       setIsSaving(false);
     }
 
-    showStatusToast(value ? "Engraving saved" : "Engraving removed");
+    showStatusToast("Engraving saved");
     onClose();
   };
+
+  const isSaveDisabled =
+    isSaving || !text.trim() || (requiresFont && !font.trim());
 
   const { windows } = useUiPlatform();
   return (
@@ -168,7 +199,7 @@ const MetalEngravingPanel = ({
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="engraving-text" className={appointmentLabelClassName}>
-                    Type here (Up to {maxCharacters} characters)
+                    Type here* (Up to {maxCharacters} characters)
                   </label>
                   <input
                     id="engraving-text"
@@ -177,13 +208,21 @@ const MetalEngravingPanel = ({
                     maxLength={maxCharacters}
                     onChange={(event) => handleTextChange(event.target.value)}
                     placeholder="Enter"
-                    aria-invalid={charsetError || undefined}
-                    aria-describedby={charsetError ? "engraving-text-error" : undefined}
+                    aria-invalid={charsetError || textRequiredError || undefined}
+                    aria-describedby={
+                      charsetError || textRequiredError ? "engraving-text-error" : undefined
+                    }
                     className={appointmentFieldClassName}
                   />
                   <FormFieldError
                     id="engraving-text-error"
-                    message={charsetError ? ENGRAVING_CHARSET_MESSAGE : undefined}
+                    message={
+                      charsetError
+                        ? ENGRAVING_CHARSET_MESSAGE
+                        : textRequiredError
+                          ? ENGRAVING_TEXT_REQUIRED_MESSAGE
+                          : undefined
+                    }
                   />
                 </div>
 
@@ -195,13 +234,19 @@ const MetalEngravingPanel = ({
                       label="Font*"
                       labelClassName="sr-only"
                       value={font}
-                      onChange={setFont}
+                      onChange={handleFontChange}
                       options={availableFonts}
                       placeholder="Select"
+                      invalid={fontRequiredError}
+                      errorId="engraving-font-error"
                       triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
                       placeholderClassName="font-normal text-gray600"
                       listClassName="bg-aboutInactive"
                       optionClassName="text-base"
+                    />
+                    <FormFieldError
+                      id="engraving-font-error"
+                      message={fontRequiredError ? ENGRAVING_FONT_REQUIRED_MESSAGE : undefined}
                     />
                   </div>
                 ) : null}
@@ -228,7 +273,7 @@ const MetalEngravingPanel = ({
           <PanelFooter contentClassName="flex flex-col items-center gap-4">
             <DetailDarkButton
               onClick={handleSave}
-              disabled={isSaving || (requiresFont && !font.trim())}
+              disabled={isSaveDisabled}
               className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? "Saving.." : "Save"}

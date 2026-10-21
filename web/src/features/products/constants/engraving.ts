@@ -231,6 +231,10 @@ export const ENGRAVING_TEXT_SANITIZE_PATTERN = /[^A-Za-z0-9 ./-]/g;
 export const ENGRAVING_CHARSET_MESSAGE =
   "Only English letters, numbers, spaces, and . / - characters are allowed.";
 
+export const ENGRAVING_TEXT_REQUIRED_MESSAGE = "Please enter engraving text.";
+
+export const ENGRAVING_FONT_REQUIRED_MESSAGE = "Please select a font.";
+
 export type ProductEngravingConfig = {
   enabled: boolean;
   maxCharacters: number;
