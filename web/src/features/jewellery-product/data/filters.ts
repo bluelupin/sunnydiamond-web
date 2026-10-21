@@ -8,15 +8,15 @@ export const MOBILE_PAGE_SIZE = 10;
 /** Server prefetch and default PLP page size (desktop and responsive). */
 export const PAGE_SIZE = DESKTOP_PAGE_SIZE;
 
-export const DEFAULT_JEWELLERY_LISTING_SORT = "featured";
+export const DEFAULT_JEWELLERY_LISTING_SORT = "latest";
 
 export const JEWELLERY_LISTING_SORT_QUERY_PARAM = "sort";
 
 export const sortOptions: JewellerySortOption[] = [
+  { value: "latest", label: "Latest" },
   { value: "featured", label: "Featured" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
-  { value: "latest", label: "Latest" },
 ];
 
 export const searchSortOptions: JewellerySortOption[] = [
