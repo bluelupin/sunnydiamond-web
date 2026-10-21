@@ -46,6 +46,9 @@ export type MagentoProductListItem = {
   custom_attributesV2?: {
     items?: MagentoCustomAttributeItem[] | null;
   } | null;
+  /** Present on configurable PLP payloads when variant-aware listing is required. */
+  configurable_options?: MagentoConfigurableOption[] | null;
+  variants?: MagentoConfigurableVariant[] | null;
 };
 
 export type MagentoConfigurableOptionValue = {
