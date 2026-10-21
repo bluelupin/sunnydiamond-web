@@ -37,6 +37,7 @@ async function loadMagentoProductDetailCore(
     const data = await magentoGraphqlFetch<MagentoProductByUrlKeyResponse>({
       query: MAGENTO_PRODUCT_BY_URL_KEY_QUERY,
       variables: { urlKey: normalizedUrlKey },
+      preferGet: true,
       signal,
     });
 

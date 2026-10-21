@@ -6,10 +6,18 @@ import {
 } from "@/services/magento/config";
 import { CUSTOMER_TOKEN_COOKIE } from "@/services/auth/session";
 import { resolveClientIp } from "@/services/http/clientIp";
+import {
+  MAGENTO_JEWELLERY_LATEST_PRODUCTS_LEGACY_QUERY,
+  MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY,
+  MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
+  MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+} from "@/services/magento/products/products.query";
+import { MAGENTO_PRODUCT_BY_URL_KEY_QUERY } from "@/services/magento/products/productDetail.query";
 
 type GraphqlBody = {
   query?: string;
   variables?: Record<string, unknown>;
+  preferGet?: boolean;
 };
 
 export async function POST(request: NextRequest) {
@@ -32,6 +40,18 @@ export async function POST(request: NextRequest) {
     );
 
   const customerToken = request.cookies.get(CUSTOMER_TOKEN_COOKIE)?.value;
+  const publicCatalogQuery = [
+    MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+    MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY,
+    MAGENTO_JEWELLERY_LATEST_PRODUCTS_LEGACY_QUERY,
+    MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
+    MAGENTO_PRODUCT_BY_URL_KEY_QUERY,
+  ].some((allowedQuery) => allowedQuery === query);
+  const params = new URLSearchParams({ query });
+  if (body.variables) params.set("variables", JSON.stringify(body.variables));
+  const getUrl = `${getMagentoGraphqlUrl()}?${params.toString()}`;
+  const useGet = body.preferGet === true && publicCatalogQuery && !customerToken
+    && !isCartOperation && getUrl.length < 8000;
 
   // Gift card attempts are rate-limited per shopper IP in Magento. Same contract as
   // the OTP route: the IP only counts when it travels with the shared secret, so a
@@ -61,10 +81,10 @@ export async function POST(request: NextRequest) {
   });
 
   const fetchMagento = (includeCustomerToken: boolean) =>
-    fetch(getMagentoGraphqlUrl(), {
-      method: "POST",
+    fetch(useGet ? getUrl : getMagentoGraphqlUrl(), {
+      method: useGet ? "GET" : "POST",
       headers: buildMagentoHeaders(includeCustomerToken),
-      body: JSON.stringify({ query: body.query, variables: body.variables }),
+      ...(!useGet ? { body: JSON.stringify({ query: body.query, variables: body.variables }) } : {}),
       ...(isCartOperation || customerToken
         ? { cache: "no-store" as const }
         : { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }),

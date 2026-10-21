@@ -8,6 +8,8 @@ import { MagentoGraphqlError, type MagentoGraphqlErrorEntry } from "./magento.er
 export type MagentoGraphqlRequest = {
   query: string;
   variables?: Record<string, unknown>;
+  /** Use Magento's public GraphQL cache for safe catalog reads. */
+  preferGet?: boolean;
   signal?: AbortSignal;
   /** When false, skips Next.js fetch cache (client-side refresh). */
   cache?: RequestCache;
@@ -31,6 +33,7 @@ type MagentoGraphqlResponse<T> = {
 export async function magentoGraphqlFetch<T>({
   query,
   variables,
+  preferGet = false,
   signal,
   cache,
   authToken,
@@ -42,11 +45,15 @@ export async function magentoGraphqlFetch<T>({
   const isServer = typeof window === "undefined";
   const endpoint = isServer ? getMagentoGraphqlUrl() : "/api/magento/graphql";
   const effectiveCache = authToken ? "no-store" : cache;
+  const params = new URLSearchParams({ query });
+  if (variables) params.set("variables", JSON.stringify(variables));
+  const getUrl = `${endpoint}?${params.toString()}`;
+  const useGet = isServer && preferGet && !authToken && getUrl.length < 8000;
 
   let response: Response;
   try {
-    response = await fetch(endpoint, {
-      method: "POST",
+    response = await fetch(useGet ? getUrl : endpoint, {
+      method: useGet ? "GET" : "POST",
       headers: {
         Accept: "application/json",
         Store: MAGENTO_DEFAULT_STORE_CODE,
@@ -54,7 +61,13 @@ export async function magentoGraphqlFetch<T>({
         ...headers,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ query, variables }),
+      ...(!useGet ? {
+        body: JSON.stringify({
+          query,
+          variables,
+          ...(preferGet && !isServer ? { preferGet: true } : {}),
+        }),
+      } : {}),
       signal,
       cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
       ...(keepalive ? { keepalive: true } : {}),
