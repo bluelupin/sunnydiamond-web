@@ -23,6 +23,7 @@ import {
   hasMagentoFilterFacets,
   isDefaultPriceRange,
   getSelectedMetalPurityQuery,
+  getSelectedMetalTypeQuery,
   parseJewelleryListingSortParam,
   readJewelleryListingSortFromUrl,
   reconcileJewelleryPriceFilterState,
@@ -728,6 +729,10 @@ const JewelleryProductPage = ({
     () => getSelectedMetalPurityQuery(filters.metalPurities, facets),
     [filters.metalPurities, facets],
   );
+  const metalTypeQuery = useMemo(
+    () => getSelectedMetalTypeQuery(filters.metalTypes, facets),
+    [filters.metalTypes, facets],
+  );
 
   const handleOpenFilters = () => {
     setIsFilterOpen(true);
@@ -784,6 +789,7 @@ const JewelleryProductPage = ({
             isWishlisted={isWishlisted}
             onToggleWishlist={handleToggleWishlist}
             metalPurityQuery={metalPurityQuery}
+            metalTypeQuery={metalTypeQuery}
           />
         )}
       </section>

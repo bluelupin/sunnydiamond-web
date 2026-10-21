@@ -24,7 +24,11 @@ import {
   getDefaultMetalColorId,
   getMetalColorOptions,
 } from "@/features/products/utils/metalColorOptions.utils";
-import { applySelectedMetalVariant, parsePreferredMetalPurities, getDefaultMetalColorIdForPurities } from "@/features/products/utils/productVariant.utils";
+import {
+  applySelectedMetalVariant,
+  parsePreferredMetalPurities,
+  getDefaultMetalColorIdForSelections,
+} from "@/features/products/utils/productVariant.utils";
 import {
   resolveCartLineEngravingSelection,
 } from "@/features/products/constants/engraving";
@@ -41,21 +45,27 @@ type ProductDetailPageProps = {
   alankaraPrefetch?: PrefetchedAlankaraCollection | null;
 };
 
-function useDefaultSelectedMetal(product: Product, preferredPurities: ReturnType<typeof parsePreferredMetalPurities>) {
+function useDefaultSelectedMetal(
+  product: Product,
+  preferredPurities: ReturnType<typeof parsePreferredMetalPurities>,
+  preferredMetalColors: string[],
+) {
   return useMemo(
     () =>
-      getDefaultMetalColorIdForPurities(
+      getDefaultMetalColorIdForSelections(
         product,
         getDefaultMetalColorId(product, getMetalColorOptions(product)),
+        preferredMetalColors,
         preferredPurities,
       ),
-    [product, preferredPurities],
+    [product, preferredMetalColors, preferredPurities],
   );
 }
 
 type ProductDetailPageBodyProps = ProductDetailPageProps & {
   editLineId: string;
   preferredPurities: ReturnType<typeof parsePreferredMetalPurities>;
+  preferredMetalColors: string[];
   onEditLineSaved: (lineId: string) => void;
   mobilePurchaseBar: ReturnType<typeof useMobileStickyFooterClearance>;
 };
@@ -69,6 +79,7 @@ const ProductDetailPageBody = ({
   alankaraPrefetch = null,
   editLineId,
   preferredPurities,
+  preferredMetalColors,
   onEditLineSaved,
   mobilePurchaseBar,
 }: ProductDetailPageBodyProps) => {
@@ -77,7 +88,11 @@ const ProductDetailPageBody = ({
   const editingLineMetadata = editLineId ? getLineItemMetadata(editLineId) : undefined;
   const { addToBagAndOpenDrawer, updateBagAndOpenDrawer } = useAddToBagWithDrawer();
 
-  const defaultSelectedMetal = useDefaultSelectedMetal(product, preferredPurities);
+  const defaultSelectedMetal = useDefaultSelectedMetal(
+    product,
+    preferredPurities,
+    preferredMetalColors,
+  );
   const [selectedMetal, setSelectedMetal] = useState(defaultSelectedMetal);
 
   const content = useMemo(() => getProductDetailContent(product), [product]);
@@ -203,6 +218,11 @@ const ProductDetailPage = ({
     () => parsePreferredMetalPurities(purityParam),
     [purityParam],
   );
+  const metalColorParam = searchParams?.get("metalColor")?.trim() ?? "";
+  const preferredMetalColors = useMemo(
+    () => metalColorParam.split(",").map((color) => color.trim()).filter(Boolean),
+    [metalColorParam],
+  );
 
   const handleEditLineSaved = useCallback(
     (lineId: string) => {
@@ -212,7 +232,7 @@ const ProductDetailPage = ({
     [clearEditLineFromUrl],
   );
 
-  const metalSelectionKey = `${product.id}:${purityParam}`;
+  const metalSelectionKey = `${product.id}:${purityParam}:${metalColorParam}`;
 
   return (
     <ProductDetailPageBody
@@ -227,6 +247,7 @@ const ProductDetailPage = ({
       alankaraPrefetch={alankaraPrefetch}
       editLineId={editLineId}
       preferredPurities={preferredPurities}
+      preferredMetalColors={preferredMetalColors}
       onEditLineSaved={handleEditLineSaved}
       mobilePurchaseBar={mobilePurchaseBar}
     />

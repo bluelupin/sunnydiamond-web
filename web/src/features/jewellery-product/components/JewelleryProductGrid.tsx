@@ -15,6 +15,7 @@ interface JewelleryProductGridProps {
   isWishlisted: (productId: string) => boolean;
   onToggleWishlist?: (productId: string) => void;
   metalPurityQuery?: string;
+  metalTypeQuery?: string;
 }
 
 const JewelleryProductGrid = ({
@@ -23,6 +24,7 @@ const JewelleryProductGrid = ({
   isWishlisted,
   onToggleWishlist,
   metalPurityQuery,
+  metalTypeQuery,
 }: JewelleryProductGridProps) => {
   const viewport = useJewelleryPlpViewport();
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
@@ -44,6 +46,14 @@ const JewelleryProductGrid = ({
     setHoveredProductId(null);
   }, []);
 
+  const productHref = (urlKey: string) => {
+    const params = new URLSearchParams();
+    if (metalPurityQuery) params.set("purity", metalPurityQuery);
+    if (metalTypeQuery) params.set("metalColor", metalTypeQuery);
+    const query = params.toString();
+    return `/product/${urlKey}${query ? `?${query}` : ""}`;
+  };
+
   return (
     <div
       className="grid w-full min-w-0 grid-cols-2 items-stretch md:grid-cols-3"
@@ -63,11 +73,7 @@ const JewelleryProductGrid = ({
             primaryImage={product.primaryImage}
             modalImage={product.modalImage}
             hoverImage={product.hoverImage}
-            href={
-              metalPurityQuery
-                ? `/product/${product.urlKey}?purity=${encodeURIComponent(metalPurityQuery)}`
-                : `/product/${product.urlKey}`
-            }
+            href={productHref(product.urlKey)}
             isBestseller={product.isBestseller}
             isWishlisted={isWishlisted(product.id)}
             isHoverActive={hoveredProductId === product.id}

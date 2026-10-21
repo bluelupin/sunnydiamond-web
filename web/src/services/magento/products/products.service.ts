@@ -406,7 +406,13 @@ async function fetchMagentoJewelleryProducts({
   };
 
   const fetchProducts = async () => {
-    if (sortValue !== "latest" || search.trim()) return fetchStandardProducts();
+    // The custom latest resolver omits configurable products whose selected color is
+    // available on a child variant but differs from the parent product's default color.
+    // Use the standard Magento resolver for metal-color filters so all matching variants
+    // (and their parent products) are included in the results and total count.
+    if (sortValue !== "latest" || search.trim() || magentoFilter?.sd_metal_color) {
+      return fetchStandardProducts();
+    }
     if (Date.now() < legacyLatestSchemaUntil) return fetchLegacyLatest();
     try {
       return await magentoGraphqlFetch<MagentoProductsResponse>({

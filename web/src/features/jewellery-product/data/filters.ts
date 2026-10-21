@@ -180,6 +180,18 @@ export function isAllMetalTypesSelected(
   return metalTypes.length === 0 || metalTypes.length >= available.length;
 }
 
+export function getSelectedMetalTypeQuery(
+  metalTypes: string[],
+  facets: JewelleryFilterFacets,
+): string | undefined {
+  if (isAllMetalTypesSelected(metalTypes, facets)) {
+    return undefined;
+  }
+
+  const selected = metalTypes.map((metalType) => metalType.trim()).filter(Boolean);
+  return selected.length > 0 ? selected.join(",") : undefined;
+}
+
 export function isAllMetalPuritiesSelected(
   metalPurities: string[],
   facets: JewelleryFilterFacets,

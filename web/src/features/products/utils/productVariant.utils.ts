@@ -315,3 +315,39 @@ export function getDefaultMetalColorIdForPurities(
   const metalFromVariant = matching.attributes[attributeCode]?.trim();
   return metalFromVariant ? normalizeMetalKey(metalFromVariant) : fallbackMetalId;
 }
+
+export function getDefaultMetalColorIdForSelections(
+  product: Product,
+  fallbackMetalId: string,
+  preferredMetalColors: readonly string[],
+  preferredPurities: readonly string[],
+): string {
+  if (preferredMetalColors.length === 0) {
+    return getDefaultMetalColorIdForPurities(product, fallbackMetalId, preferredPurities);
+  }
+
+  const metalOption = getConfigurableMetalOption(product);
+  const matchingOption = preferredMetalColors
+    .map((metalColor) =>
+      metalOption?.values.find(
+        (value) =>
+          matchesMetalKey(value.id, metalColor) || matchesMetalKey(value.label, metalColor),
+      ),
+    )
+    .find((value) => value != null);
+  if (matchingOption) {
+    return matchingOption.id;
+  }
+
+  const attributeCode = metalOption?.attributeCode ?? METAL_ATTRIBUTE_CODE;
+  const matchingVariant = product.configurable?.variants.find(
+    (variant) =>
+      preferredMetalColors.some((metalColor) =>
+        variantMatchesMetal(variant, metalColor, attributeCode),
+      ) && variantMatchesAnyPurity(variant, preferredPurities),
+  );
+  const metalFromVariant = matchingVariant?.attributes[attributeCode]?.trim();
+  return metalFromVariant
+    ? normalizeMetalKey(metalFromVariant)
+    : getDefaultMetalColorIdForPurities(product, fallbackMetalId, preferredPurities);
+}
