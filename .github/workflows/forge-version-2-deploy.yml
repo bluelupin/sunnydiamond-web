@@ -1,9 +1,9 @@
-name: Deploy Version-2.0 to Forge
+name: Deploy Staging to Forge
 
 on:
   push:
     branches:
-      - Version-2.0
+      - sunnydiamonds-staging
 
 permissions: {}
 
