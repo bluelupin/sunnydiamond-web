@@ -1,4 +1,5 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
+import { MagentoGraphqlError } from "../magento.errors";
 import {
   EMPTY_JEWELLERY_NAV_CATEGORIES,
   getMagentoJewelleryNavCategories,
@@ -6,6 +7,7 @@ import {
 import {
   MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
   MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY,
+  MAGENTO_JEWELLERY_LATEST_PRODUCTS_LEGACY_QUERY,
   MAGENTO_JEWELLERY_PRODUCTS_QUERY,
 } from "./products.query";
 import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "./productsBySkus.query";
@@ -53,6 +55,7 @@ import {
 import type { JewelleryNavCategoriesData } from "@/types/magento/jewelleryNav";
 
 const WISHLIST_SKU_BATCH_SIZE = 50;
+let legacyLatestSchemaUntil = 0;
 
 type MagentoProductsBySkusResponse = {
   products?: {
@@ -380,17 +383,45 @@ async function fetchMagentoJewelleryProducts({
   const countsAsSearch = page === 1 && sortValue === "featured" && !hasActiveFilters(filters, facets);
   const searchLogHeaders = search && !countsAsSearch ? SEARCH_SUGGEST_HEADERS : undefined;
 
-  const fetchProducts = () =>
-    magentoGraphqlFetch<MagentoProductsResponse>({
-      query: sortValue === "latest" && !search.trim()
-        ? MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY
-        : MAGENTO_JEWELLERY_PRODUCTS_QUERY,
-      variables: sortValue === "latest" && !search.trim()
-        ? { filter: magentoFilter, pageSize, currentPage: page }
-        : { search, filter: magentoFilter, pageSize, currentPage: page, sort },
-      headers: searchLogHeaders,
+  const fetchStandardProducts = () => magentoGraphqlFetch<MagentoProductsResponse>({
+    query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+    variables: { search, filter: magentoFilter, pageSize, currentPage: page, sort },
+    headers: searchLogHeaders,
+    signal,
+  });
+
+  const fetchLegacyLatest = () => {
+    const filterKeys = Object.keys(magentoFilter ?? {});
+    if (filterKeys.some((key) => key !== "category_id")) {
+      // The older resolver cannot apply drawer filters; keep the filtered products visible.
+      return fetchStandardProducts();
+    }
+    return magentoGraphqlFetch<MagentoProductsResponse>({
+      query: MAGENTO_JEWELLERY_LATEST_PRODUCTS_LEGACY_QUERY,
+      variables: { categoryId, pageSize, currentPage: page },
       signal,
     });
+  };
+
+  const fetchProducts = async () => {
+    if (sortValue !== "latest" || search.trim()) return fetchStandardProducts();
+    if (Date.now() < legacyLatestSchemaUntil) return fetchLegacyLatest();
+    try {
+      return await magentoGraphqlFetch<MagentoProductsResponse>({
+        query: MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY,
+        variables: { filter: magentoFilter, pageSize, currentPage: page },
+        revalidateSeconds: 60,
+        signal,
+      });
+    } catch (error) {
+      if (!(error instanceof MagentoGraphqlError)
+        || !error.message.includes('Unknown argument "filter" on field "sunnyLatestProducts"')) {
+        throw error;
+      }
+      legacyLatestSchemaUntil = Date.now() + 60_000;
+      return fetchLegacyLatest();
+    }
+  };
 
   if (!includeFacets) {
     const data = await measureJewelleryPlpGraphql("products", fetchProducts, {

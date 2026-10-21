@@ -68,6 +68,32 @@ export const MAGENTO_JEWELLERY_LATEST_PRODUCTS_QUERY = `
   }
 ` as const;
 
+/** Compatibility with Magento deployments predating the filter argument. */
+export const MAGENTO_JEWELLERY_LATEST_PRODUCTS_LEGACY_QUERY = `
+  query JewelleryLatestProductsLegacy(
+    $categoryId: Int
+    $pageSize: Int!
+    $currentPage: Int!
+  ) {
+    products: sunnyLatestProducts(
+      categoryId: $categoryId
+      pageSize: $pageSize
+      currentPage: $currentPage
+      direction: DESC
+    ) {
+      total_count
+      page_info {
+        current_page
+        page_size
+        total_pages
+      }
+      items {
+        ${MAGENTO_PLP_PRODUCT_FIELDS}
+      }
+    }
+  }
+` as const;
+
 /** Filter facet options scoped to the active PLP category tab. */
 export const MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY = `
   query JewelleryProductFacets(
