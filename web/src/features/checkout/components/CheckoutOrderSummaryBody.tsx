@@ -16,6 +16,7 @@ import OffersAndDealsSection, {
   OffersAndDealsExpandedContent,
 } from "@/shared/ui/OffersAndDealsSection";
 import PriceDetailsBreakdown from "@/features/cart/components/PriceDetailsBreakdown";
+import { reconcileTaxesForPriceDetails } from "@/features/cart/utils/reconcileCartTotals";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
@@ -88,6 +89,14 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
     giftCardDiscount,
     localOfferDiscount,
   );
+  const displayTaxes = reconcileTaxesForPriceDetails({
+    subtotal,
+    taxes,
+    shippingAmount: shippingDisplay.amount ?? 0,
+    offerDiscount: displayOfferDiscount,
+    giftCardDiscount,
+    totalShown: displayTotal,
+  });
 
   const toggleOffers = () => setOffersOpen((open) => !open);
 
@@ -154,7 +163,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             subtotal={subtotal}
             offerDiscount={displayOfferDiscount}
             giftCardDiscount={giftCardDiscount}
-            taxes={taxes}
+            taxes={displayTaxes}
             shippingLabel={shippingDisplay.label}
             total={displayTotal}
           />

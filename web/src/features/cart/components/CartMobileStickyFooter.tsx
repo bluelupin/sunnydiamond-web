@@ -7,6 +7,7 @@ import OffersAndDealsSection, {
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import { GiftCardProblemRow } from "./PriceDetailsBreakdown";
+import { reconcileTaxesForPriceDetails } from "../utils/reconcileCartTotals";
 import { formatCartDiscountPrice, formatCartPrice, getCartShippingDisplay, getCartShippingLabel, resolveCartDisplayTotal } from "../utils/formatCartLine";
 import {
   CartDivider,
@@ -68,6 +69,14 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
     giftCardDiscount,
     localOfferDiscount,
   );
+  const displayTaxes = reconcileTaxesForPriceDetails({
+    subtotal,
+    taxes,
+    shippingAmount: shippingDisplay.amount ?? 0,
+    offerDiscount: displayOfferDiscount,
+    giftCardDiscount,
+    totalShown: displayTotal,
+  });
 
   return (
     <div ref={ref} className="fixed inset-x-0 bottom-0 z-40 md:hidden">
@@ -101,7 +110,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
                   />
                 ) : null}
                 <GiftCardProblemRow />
-                <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
+                <CartPriceRow label="Taxes" value={formatCartPrice(displayTaxes)} />
                 <CartPriceRow label="Shipping" value={shippingLabel} />
                 <CartDivider weight={1} />
               </div>
