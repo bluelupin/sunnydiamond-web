@@ -838,6 +838,10 @@
 }
 
 /* For Verticle Mobile scroll inside .tabScroll */
+.verticleMobileScrollbar {
+  -webkit-overflow-scrolling: touch;
+}
+
 .verticleMobileScrollbar::-webkit-scrollbar {
   width: 0px !important;
   /* Thin horizontal scrollbar */

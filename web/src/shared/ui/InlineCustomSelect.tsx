@@ -286,6 +286,10 @@ const InlineCustomSelect = ({
               maxHeight: listPosition!.maxHeight,
             }
         }
+        onMouseDown={(event) => {
+          // Keep focus on the trigger for mouse; do not use pointerdown — that blocks iOS list scrolling.
+          event.preventDefault();
+        }}
         onClick={(event) => {
           event.stopPropagation();
         }}
@@ -296,7 +300,7 @@ const InlineCustomSelect = ({
           event.stopPropagation();
         }}
         className={cn(
-          "verticleMobileScrollbar flex flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+          "verticleMobileScrollbar flex touch-pan-y flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
           "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
           isInlineList
             ? cn(
@@ -320,7 +324,11 @@ const InlineCustomSelect = ({
             type="button"
             role="option"
             aria-selected={!value}
-            onPointerDown={(event) => {
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
               clearSelection();
@@ -375,7 +383,11 @@ const InlineCustomSelect = ({
               type="button"
               role="option"
               aria-selected={selected}
-              onPointerDown={(event) => {
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 selectOption(option);
