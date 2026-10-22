@@ -30,3 +30,10 @@ export function accordionCollapsePanelClassName(isOpen: boolean) {
     isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] pointer-events-none",
   );
 }
+
+/** Accordion lists: first item expanded on initial render. */
+export function defaultAccordionOpenId<T extends { id: string }>(
+  items: readonly T[],
+): string | null {
+  return items[0]?.id ?? null;
+}

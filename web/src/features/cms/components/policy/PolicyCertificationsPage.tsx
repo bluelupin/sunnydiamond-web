@@ -11,6 +11,7 @@ import { cn } from "@/shared/utils/cn";
 import {
   accordionCollapseInnerClassName,
   accordionCollapsePanelClassName,
+  defaultAccordionOpenId,
 } from "@/shared/ui/accordionCollapse";
 import {
   POLICY_QUERY_PARAM,
@@ -223,22 +224,19 @@ function PolicyAccordions({
   variant?: "desktop" | "mobile";
 }) {
   const isMobile = variant === "mobile";
-  // Mobile (Figma): all accordion items start collapsed; expand on tap.
-  // Desktop: first item open by default.
-  const [openSectionId, setOpenSectionId] = useState<string | null>(
-    isMobile ? null : (sections[0]?.id ?? null),
+  const [openSectionId, setOpenSectionId] = useState<string | null>(() =>
+    defaultAccordionOpenId(sections),
   );
 
-  // If the open section disappears (policy switch), fall back appropriately.
-  // `null` means collapsed — do not force-reopen.
+  // If the open section disappears (policy switch), fall back to the first item.
   useEffect(() => {
     if (openSectionId == null) {
       return;
     }
     if (!sections.some((section) => section.id === openSectionId)) {
-      setOpenSectionId(isMobile ? null : (sections[0]?.id ?? null));
+      setOpenSectionId(defaultAccordionOpenId(sections));
     }
-  }, [openSectionId, sections, isMobile]);
+  }, [openSectionId, sections]);
 
   if (sections.length === 0) {
     return null;
