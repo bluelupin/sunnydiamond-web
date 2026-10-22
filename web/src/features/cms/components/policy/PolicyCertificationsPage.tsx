@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import PolicyAccordionSectionContent from "./PolicyAccordionSectionContent";
-import "@/shared/styles/editor-content.css";
 import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import Link from "next/link";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
