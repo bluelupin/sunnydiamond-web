@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import { History } from "lucide-react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { useCanHover } from "@/shared/hooks/use-can-hover";
 import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
@@ -92,6 +93,7 @@ export default function SearchOverlay({
 }: SearchOverlayProps) {
   const router = useRouter();
   const isMobileHeader = useMobileHeaderLayout();
+  const canHoverNav = useCanHover();
   const searchPanelRef = useRef<HTMLDivElement>(null);
   const baseId = useId();
   const listId = `${baseId}-list`;
@@ -265,7 +267,8 @@ export default function SearchOverlay({
   }, [close, isMobileHeader, open]);
 
   useEffect(() => {
-    if (!open || !isMobileHeader) return;
+    const useDocumentDismiss = open && (isMobileHeader || !canHoverNav);
+    if (!useDocumentDismiss) return;
 
     const headerSearchTriggerSelector = `[${HEADER_SEARCH_TRIGGER_ATTR}]`;
 
@@ -279,7 +282,7 @@ export default function SearchOverlay({
 
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [close, isMobileHeader, open]);
+  }, [canHoverNav, close, isMobileHeader, open]);
 
   const go = (href: string, recentText: string, option?: Option) => {
     if (recentText) {

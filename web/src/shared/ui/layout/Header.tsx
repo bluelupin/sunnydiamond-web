@@ -132,10 +132,6 @@ const Header = () => {
       ? "bg-white"
       : cartCheckoutHeaderSurfaceClass;
 
-  const openProfileNav = useCallback(() => {
-    setProfileNavOpen(true);
-  }, []);
-
   const careersHeaderMode = useCareersHeaderMode(pathname);
   const isAboutTimelineHeaderSuppressed = useAboutTimelineHeaderSuppressed(pathname);
 
@@ -191,16 +187,6 @@ const Header = () => {
     [headerNavigationLinks],
   );
 
-  useLayoutEffect(() => {
-    setMobileMenuOpen(false);
-    setJewelleryMenuOpen(false);
-    setJewelleryMenuMounted(false);
-    jewelleryMenuMountedRef.current = false;
-    setWorldOfSunnyMenuOpen(false);
-    setWorldOfSunnyMenuMounted(false);
-    worldOfSunnyMenuMountedRef.current = false;
-  }, [pathname]);
-
   const closeWorldOfSunnyMenuNow = useCallback(() => {
     if (worldOfSunnyCloseTimerRef.current) clearTimeout(worldOfSunnyCloseTimerRef.current);
     setWorldOfSunnyMenuOpen(false);
@@ -215,6 +201,33 @@ const Header = () => {
     if (searchCloseTimerRef.current) clearTimeout(searchCloseTimerRef.current);
     setSearchOpen(false);
   }, []);
+
+  /** Full search dismiss (clears mobile query via overlay) before other nav actions. */
+  const dismissSearchPanel = useCallback(() => {
+    if (!searchOpen) {
+      return;
+    }
+    if (searchCloseTimerRef.current) {
+      clearTimeout(searchCloseTimerRef.current);
+    }
+    searchDismissRef.current?.() ?? closeSearchNow();
+  }, [closeSearchNow, searchOpen]);
+
+  const openProfileNav = useCallback(() => {
+    dismissSearchPanel();
+    setProfileNavOpen(true);
+  }, [dismissSearchPanel]);
+
+  useLayoutEffect(() => {
+    setMobileMenuOpen(false);
+    setJewelleryMenuOpen(false);
+    setJewelleryMenuMounted(false);
+    jewelleryMenuMountedRef.current = false;
+    setWorldOfSunnyMenuOpen(false);
+    setWorldOfSunnyMenuMounted(false);
+    worldOfSunnyMenuMountedRef.current = false;
+    closeSearchNow();
+  }, [closeSearchNow, pathname]);
 
   const scheduleCloseSearch = useCallback(() => {
     searchCloseTimerRef.current = setTimeout(() => closeSearchNow(), 150);
@@ -393,6 +406,7 @@ const Header = () => {
       href="/"
       aria-label={siteConfig.brand.name}
       className={cn("inline-flex shrink-0 items-center justify-center leading-none", logoClass)}
+      onClick={dismissSearchPanel}
     >
       <SDLogo className="!h-16 !w-20 max-[340px]:mr-9 md:landscape:!h-14 md:landscape:!w-14 lg:landscape:!h-[62px] lg:landscape:!w-[62px]" />
     </Link>
@@ -408,6 +422,7 @@ const Header = () => {
         isNotFoundPageShell={isNotFoundPageShell}
       />
       <header
+        data-site-header
         className={cn(
           "fixed top-0 inset-x-0",
           isMobileHeader && searchOpen ? "z-[70]" : "z-50",
@@ -434,7 +449,10 @@ const Header = () => {
               <button
                 type="button"
                 className={cn(iconButtonClass, textClass, hoverClass)}
-                onClick={() => setMobileMenuOpen(true)}
+                onClick={() => {
+                  dismissSearchPanel();
+                  setMobileMenuOpen(true);
+                }}
                 aria-label="Open menu"
                 aria-expanded={mobileMenuOpen}
               >
@@ -476,7 +494,10 @@ const Header = () => {
                           aria-current={isActive ? "page" : undefined}
                           aria-expanded={jewelleryMenuOpen}
                           aria-haspopup="true"
-                          onClick={handleJewelleryNavClick}
+                          onClick={(event) => {
+                            handleJewelleryNavClick(event);
+                            dismissSearchPanel();
+                          }}
                         >
                           {link.label}
                         </Link>
@@ -497,7 +518,10 @@ const Header = () => {
                           aria-current={isActive ? "page" : undefined}
                           aria-expanded={worldOfSunnyMenuOpen}
                           aria-haspopup="true"
-                          onClick={handleWorldOfSunnyNavClick}
+                          onClick={(event) => {
+                            handleWorldOfSunnyNavClick(event);
+                            dismissSearchPanel();
+                          }}
                         >
                           {link.label}
                         </Link>
@@ -510,6 +534,7 @@ const Header = () => {
                       href={resolveHeaderNavHref(link.label, link.url)}
                       className={navLinkClass(isActive)}
                       aria-current={isActive ? "page" : undefined}
+                      onClick={dismissSearchPanel}
                     >
                       {link.label}
                     </Link>
@@ -521,6 +546,7 @@ const Header = () => {
                     onClick={() => {
                       closeJewelleryMenuNow();
                       closeWorldOfSunnyMenuNow();
+                      dismissSearchPanel();
                       openAppointmentPanel();
                     }}
                     className={navLinkClass(isAppointmentActive || appointmentPanelOpen)}
@@ -553,12 +579,16 @@ const Header = () => {
                 </button>
               </div>
 
-              <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
+              <WishlistNavLink
+                className={cn(iconButtonClass, hoverClass)}
+                onNavigate={dismissSearchPanel}
+              />
 
               <Link
                 href="/cart"
                 className={cn("relative md:!inline-flex !hidden", iconButtonClass, hoverClass)}
                 aria-label={displayCartCount > 0 ? `Cart, ${displayCartCount} items` : "Cart"}
+                onClick={dismissSearchPanel}
               >
                 <ShoppingBagIcon className="size-6" />
                 <HeaderIconBadge count={displayCartCount} />
@@ -566,12 +596,14 @@ const Header = () => {
 
               <AccountMenu
                 className={cn("inline-flex", iconButtonClass, hoverClass)}
+                onNavigate={dismissSearchPanel}
                 onProfileOpen={isMobileHeader ? openProfileNav : undefined}
               />
               <Link
                 href="/cart"
                 className={cn("relative md:!hidden !inline-flex", iconButtonClass, hoverClass)}
                 aria-label={displayCartCount > 0 ? `Cart, ${displayCartCount} items` : "Cart"}
+                onClick={dismissSearchPanel}
               >
                 <ShoppingBagIcon className="size-6" />
                 <HeaderIconBadge count={displayCartCount} />
