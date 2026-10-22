@@ -1,11 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import type { StaticImageData } from "next/image";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
+import { getImageSrc } from "@/shared/utils/image";
+import {
+  accordionCollapseInnerClassName,
+  accordionCollapsePanelClassName,
+} from "@/shared/ui/accordionCollapse";
 import { ShowroomsLayoutSkeleton } from "./ShowroomsLayoutSkeleton";
 import {
   StoreLocatorAddressIcon,
@@ -28,11 +32,6 @@ import { formatAddressWithPincode } from "../utils/storeLocatorFilters";
 const figma = storeLocatorShowroomsFigmaSpec;
 const expandedPanelFigma = storeLocatorExpandedPanelFigmaSpec;
 
-function toShowroomTelHref(phone: string): string | undefined {
-  const digits = phone.replace(/[^\d+]/g, "");
-  return digits ? `tel:${digits}` : undefined;
-}
-
 export type ShowroomLayoutItem = {
   id: string;
   name: string;
@@ -43,6 +42,81 @@ export type ShowroomLayoutItem = {
   mobileImage?: string | StaticImageData;
   imageAlt: string;
 };
+
+function usePreloadShowroomHeroImages(locations: ShowroomLayoutItem[]) {
+  const heroImageUrlsKey = useMemo(() => {
+    return locations
+      .map((location) => getImageSrc(location.desktopImage) ?? "")
+      .filter(Boolean)
+      .join("\u0001");
+  }, [locations]);
+
+  useEffect(() => {
+    for (const src of heroImageUrlsKey.split("\u0001")) {
+      if (!src) continue;
+      const img = new window.Image();
+      img.src = src;
+    }
+  }, [heroImageUrlsKey]);
+}
+
+/** All hero images stay mounted; active layer toggles instantly (no opacity animation). */
+function ShowroomHeroStack({
+  locations,
+  activeId,
+  className,
+  imageSizes = "(min-width: 1024px) 50vw, 100vw",
+}: {
+  locations: ShowroomLayoutItem[];
+  activeId: string | null;
+  className?: string;
+  imageSizes?: string;
+}) {
+  const layers = useMemo(
+    () => locations.filter((location) => location.desktopImage),
+    [locations],
+  );
+  const resolvedActiveId = activeId ?? layers[0]?.id ?? null;
+
+  if (layers.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={cn("relative overflow-hidden bg-gray100", className)}>
+      {layers.map((location) => {
+        const isActive = location.id === resolvedActiveId;
+
+        return (
+          <div
+            key={location.id}
+            className={cn(
+              "absolute inset-0",
+              isActive ? "opacity-100" : "pointer-events-none opacity-0",
+            )}
+            aria-hidden={!isActive}
+          >
+            <ResponsiveImage
+              fill
+              desktopSrc={location.desktopImage!}
+              mobileSrc={location.mobileImage ?? location.desktopImage!}
+              alt={location.imageAlt}
+              sizes={imageSizes}
+              quality={90}
+              eager
+              className="object-cover object-center"
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function toShowroomTelHref(phone: string): string | undefined {
+  const digits = phone.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : undefined;
+}
 
 export type ShowroomsLayoutProps = {
   locations: ShowroomLayoutItem[];
@@ -153,7 +227,7 @@ function ShowroomExpandedPanel({
       <p className={storeLocatorShowroomCityClassName}>{location.name}</p>
       <div className="h-[0.5px] w-full bg-neutral300" aria-hidden />
       {includeMobileImage && location.desktopImage ? (
-        <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+        <div className="relative aspect-[2500/1797] w-full overflow-hidden bg-gray100">
           <ResponsiveImage
             desktopSrc={location.desktopImage}
             mobileSrc={location.mobileImage ?? location.desktopImage}
@@ -185,7 +259,7 @@ function ShowroomCollapsedRow({
       type="button"
       aria-pressed={false}
       onClick={() => onSelect(location.id)}
-      className={cn("flex w-full items-center text-left", storeLocatorShowroomCityClassName)}
+      className={cn("flex w-full items-center text-left hover:bg-[#F2F2F2]/60", storeLocatorShowroomCityClassName)}
       style={{
         paddingLeft: horizontalPadding,
         paddingRight: horizontalPadding,
@@ -244,6 +318,82 @@ function ShowroomNoAreaListLead({
   );
 }
 
+function ShowroomMobileAccordionItem({
+  location,
+  isSelected,
+  onSelect,
+  getDirectionsLabel,
+  horizontalPadding,
+}: {
+  location: ShowroomLayoutItem;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+  getDirectionsLabel?: string;
+  horizontalPadding: number;
+}) {
+  return (
+    <div
+      className="w-full"
+      style={isSelected ? { backgroundColor: figma.expandedPanelBackground } : undefined}
+    >
+      <button
+        type="button"
+        aria-expanded={isSelected}
+        onClick={() => onSelect(location.id)}
+        className={cn(
+          "flex w-full items-center text-left",
+          storeLocatorShowroomCityClassName,
+          !isSelected && "hover:bg-[#F2F2F2]/60",
+        )}
+        style={{
+          paddingLeft: horizontalPadding,
+          paddingRight: horizontalPadding,
+          paddingTop: isSelected ? figma.expandedPanelPaddingY : figma.collapsedRowPaddingY,
+          paddingBottom: isSelected ? 0 : figma.collapsedRowPaddingY,
+        }}
+      >
+        {location.name}
+      </button>
+
+      <div
+        aria-hidden={!isSelected}
+        className={accordionCollapsePanelClassName(isSelected)}
+      >
+        <div className={accordionCollapseInnerClassName}>
+          <div
+            className="flex w-full flex-col"
+            style={{
+              gap: expandedPanelFigma.sectionGap,
+              paddingLeft: horizontalPadding,
+              paddingRight: horizontalPadding,
+              paddingBottom: figma.expandedPanelPaddingY,
+            }}
+          >
+            <div className="h-[0.5px] w-full bg-neutral300" aria-hidden />
+            {location.desktopImage ? (
+              <div className="relative aspect-[2500/1797] w-full overflow-hidden bg-gray100">
+                <ResponsiveImage
+                  desktopSrc={location.desktopImage}
+                  mobileSrc={location.mobileImage ?? location.desktopImage}
+                  alt={location.imageAlt}
+                  width={2500}
+                  height={1797}
+                  quality={90}
+                  eager
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : null}
+            <ShowroomLocationDetailsFigma
+              location={location}
+              getDirectionsLabel={getDirectionsLabel}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ShowroomsMobileAccordion({
   locations,
@@ -288,28 +438,16 @@ function ShowroomsMobileAccordion({
             </p>
           ) : null
         ) : (
-          locations.map((location) => {
-            const isSelected = location.id === activeId;
-
-            return (
-              <div key={location.id} className="w-full">
-                {isSelected ? (
-                  <ShowroomExpandedPanel
-                    location={location}
-                    getDirectionsLabel={getDirectionsLabel}
-                    includeMobileImage
-                    horizontalPadding={mobilePadding}
-                  />
-                ) : (
-                  <ShowroomCollapsedRow
-                    location={location}
-                    onSelect={onSelect}
-                    horizontalPadding={mobilePadding}
-                  />
-                )}
-              </div>
-            );
-          })
+          locations.map((location) => (
+            <ShowroomMobileAccordionItem
+              key={location.id}
+              location={location}
+              isSelected={location.id === activeId}
+              onSelect={onSelect}
+              getDirectionsLabel={getDirectionsLabel}
+              horizontalPadding={mobilePadding}
+            />
+          ))
         )}
       </div>
     </div>
@@ -326,10 +464,6 @@ function ShowroomsDesktopLayout({
   emptyMessage,
   matchedStoreIds,
   nearbyStoresLabel,
-  activeLocation,
-  desktopImage,
-  mobileImage,
-  imageAlt,
 }: Pick<
   ShowroomsLayoutProps,
   | "locations"
@@ -341,18 +475,12 @@ function ShowroomsDesktopLayout({
   | "emptyMessage"
   | "matchedStoreIds"
   | "nearbyStoresLabel"
-> & {
-  activeLocation: ShowroomLayoutItem | undefined;
-  desktopImage?: string | StaticImageData;
-  mobileImage?: string | StaticImageData;
-  imageAlt: string;
-}) {
+>) {
   const matchedIdSet = new Set(matchedStoreIds ?? []);
   const matchedCount = matchedStoreIds?.length ?? 0;
   const showNearbyLabel = Boolean(
     nearbyStoresLabel?.trim() && matchedCount > 0 && locations.length > matchedCount,
   );
-  // In-place list: divider before the first row after the last search hit (not list reorder).
   let lastMatchedIndex = -1;
   if (showNearbyLabel) {
     for (let i = 0; i < locations.length; i += 1) {
@@ -375,11 +503,7 @@ function ShowroomsDesktopLayout({
         paddingBottom: figma.sectionPaddingBottom,
       }}
     >
-      <ScrollReveal
-        delayMs={120}
-        className="flex w-full min-w-0 flex-col"
-        style={{ maxWidth: figma.listMaxWidth }}
-      >
+      <div className="flex w-full min-w-0 flex-col" style={{ maxWidth: figma.listMaxWidth }}>
         {noAreaCopy ? (
           <ShowroomNoAreaListLead copy={noAreaCopy} getDirectionsLabel={getDirectionsLabel} />
         ) : listHeader ? (
@@ -443,27 +567,13 @@ function ShowroomsDesktopLayout({
             })
           )}
         </div>
-      </ScrollReveal>
+      </div>
 
       <div
         className="relative h-full min-w-0 overflow-hidden"
         style={{ minHeight: figma.heroMinHeight }}
       >
-        {activeLocation && desktopImage ? (
-          <div className="absolute inset-0">
-            <ResponsiveImage
-              key={activeLocation.id}
-              fill
-              desktopSrc={desktopImage}
-              mobileSrc={mobileImage ?? desktopImage}
-              alt={imageAlt}
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              quality={90}
-              eager
-              className="object-cover object-center"
-            />
-          </div>
-        ) : null}
+        <ShowroomHeroStack locations={locations} activeId={activeId} className="absolute inset-0" />
       </div>
     </div>
   );
@@ -482,6 +592,8 @@ export function ShowroomsLayout({
   className,
   isLoading = false,
 }: ShowroomsLayoutProps) {
+  usePreloadShowroomHeroImages(locations);
+
   if (isLoading) {
     return (
       <ShowroomsLayoutSkeleton
@@ -490,13 +602,6 @@ export function ShowroomsLayout({
       />
     );
   }
-
-  const activeLocation =
-    locations.find((location) => location.id === activeId) ?? locations[0];
-
-  const desktopImage = activeLocation?.desktopImage;
-  const mobileImage = activeLocation?.mobileImage ?? desktopImage;
-  const imageAlt = activeLocation?.imageAlt ?? "";
 
   return (
     <section className={cn("bg-white pb-16 lg:pb-0", className)}>
@@ -519,10 +624,6 @@ export function ShowroomsLayout({
         emptyMessage={emptyMessage}
         matchedStoreIds={matchedStoreIds}
         nearbyStoresLabel={nearbyStoresLabel}
-        activeLocation={activeLocation}
-        desktopImage={desktopImage}
-        mobileImage={mobileImage}
-        imageAlt={imageAlt}
       />
     </section>
   );

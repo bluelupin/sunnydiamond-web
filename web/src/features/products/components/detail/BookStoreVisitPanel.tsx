@@ -836,6 +836,11 @@ const StoreSelectionStep = ({
   isShowroomsLoading = false,
   nearbyStores,
 }: StoreSelectionStepProps) => {
+  const layoutLocations = useMemo(
+    () => stores.map(mapBookStoreVisitStoreToLayoutItem),
+    [stores],
+  );
+
   if (layout === "page") {
     const listHeader = (
       <StoreLocatorListStatusHeader
@@ -857,7 +862,7 @@ const StoreSelectionStep = ({
 
     return (
       <ShowroomsLayout
-        locations={stores.map(mapBookStoreVisitStoreToLayoutItem)}
+        locations={layoutLocations}
         activeId={selectedStoreId || null}
         onSelect={onSelectStore}
         getDirectionsLabel={getDirectionsLabel ?? undefined}
