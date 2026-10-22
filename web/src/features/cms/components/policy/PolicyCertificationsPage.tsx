@@ -50,35 +50,38 @@ function PolicyDesktopSidebar({
       className="box-border hidden w-full shrink-0 border-r border-neutral300 lg:block lg:w-[calc(465px-40px-1.5rem)] lg:max-w-[29.5%] 2xl:w-[calc(465px-60px-1.5rem)]"
     >
       <div className="flex w-full flex-col gap-6">
-        {navGroups.map((group) => (
-          <div key={group.id} className="flex w-full flex-col items-start gap-4">
-            <p className="whitespace-nowrap font-gill text-xl font-light leading-110 text-darkblack">
-              {group.label}
-            </p>
-            <ul className="flex w-full flex-col items-start">
-              {group.items.map((policy) => {
-                const isActive = policy.id === activePolicyId;
+        {navGroups.map((group, index) => (
+          <>
+            <div key={group.id} className="flex w-full flex-col items-start gap-4">
+              <p className="whitespace-nowrap font-gill text-xl font-light leading-110 text-darkblack">
+                {group.label}
+              </p>
+              <ul className="flex w-full flex-col items-start">
+                {group.items.map((policy) => {
+                  const isActive = policy.id === activePolicyId;
 
-                return (
-                  <li key={policy.id} className="w-full">
-                    <button
-                      type="button"
-                      onClick={() => onSelect(policy.id)}
-                      className={cn(
-                        "flex h-[70px] w-full items-center p-6 text-left transition-colors",
-                        isActive
-                          ? "border-r-2 border-darkblack bg-gray300 font-gill text-xl font-normal leading-110 text-darkblack"
-                          : "font-gill text-xl font-light leading-110 text-darkblack hover:bg-gray300/60",
-                      )}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      <span className="min-w-0 whitespace-normal">{policy.navLabel}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+                  return (
+                    <li key={policy.id} className="w-full">
+                      <button
+                        type="button"
+                        onClick={() => onSelect(policy.id)}
+                        className={cn(
+                          "flex h-[70px] w-full items-center p-6 text-left transition-colors",
+                          isActive
+                            ? "border-r-2 border-darkblack bg-gray300 font-gill text-xl font-normal leading-110 text-darkblack"
+                            : "font-gill text-xl font-light leading-110 text-darkblack hover:bg-gray300/60",
+                        )}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <span className="min-w-0 whitespace-normal">{policy.navLabel}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            {index === 0 && <hr className="border-neutral300" />}
+          </>
         ))}
       </div>
     </nav>

@@ -33,7 +33,7 @@ const StepDescription = ({
   <p className={cn(className)}>
     {step.label && <span className="font-light">{step.label}</span>}
     {step.description && (
-      <span className={step.label ? "font-normal pl-2" : "font-light pl-2"}>{step.description}</span>
+      <span className={step.label ? "font-normal pl-1" : "font-light pl-1"}>{step.description}</span>
     )}
   </p>
 );
