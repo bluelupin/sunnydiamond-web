@@ -1,5 +1,8 @@
 import { buildGiftFinderListingFiltersFromUrl } from "@/features/gifting/utils/giftFinderRoutes";
-import { createEmptyFilterState } from "@/features/jewellery-product/data/filters";
+import {
+  createEmptyFilterState,
+  isDefaultPriceRange,
+} from "@/features/jewellery-product/data/filters";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
@@ -10,6 +13,9 @@ export type DiscoverJourneyPriceRange = {
 
 /** Align with PLP client listing cache — facets are stable for the panel session. */
 const DISCOVER_JOURNEY_FACET_CACHE_TTL_MS = 60_000;
+
+/** Sample enough products that display-price refinement is unlikely to false-negative. */
+const DISCOVER_JOURNEY_AVAILABILITY_PAGE_SIZE = 12;
 
 type DiscoverJourneyFacetCacheEntry = {
   facets: JewelleryFilterFacets;
@@ -184,10 +190,19 @@ export async function discoverJourneyHasMatchingProducts({
 
   const filters = buildDiscoverJourneyListingFilters(range, diamondShapeSlug, scopedFacets);
 
+  // Step 1 only: full-catalog price range cannot be empty if the slider bounds loaded.
+  if (
+    categoryUrlKey == null &&
+    !diamondShapeSlug.trim() &&
+    isDefaultPriceRange(filters, scopedFacets)
+  ) {
+    return { hasProducts: true, listingFacets: scopedFacets };
+  }
+
   const data = await getMagentoJewelleryProducts({
     categoryUrlKey,
     page: 1,
-    pageSize: 1,
+    pageSize: DISCOVER_JOURNEY_AVAILABILITY_PAGE_SIZE,
     filters,
     facets: scopedFacets,
     includeFacets: false,
@@ -195,7 +210,7 @@ export async function discoverJourneyHasMatchingProducts({
   });
 
   return {
-    hasProducts: data.totalCount > 0,
+    hasProducts: data.totalCount > 0 || data.products.length > 0,
     listingFacets: scopedFacets,
   };
 }

@@ -609,6 +609,12 @@ function resolveListingTotalCount(
   // Magento price filters use ex-tax index values; client refine aligns to display price.
   // Use Magento's total_count, scaled when page-1 refinement drops products from the page.
   if (rawProductCount > 0 && products.length < rawProductCount && apiTotalCount > 0) {
+    if (products.length === 0) {
+      // Avoid reporting zero when every hit on this page failed display-price refine
+      // but Magento still reports matches in range (common on small pageSize probes).
+      return apiTotalCount;
+    }
+
     return Math.max(
       products.length,
       Math.round(apiTotalCount * (products.length / rawProductCount)),
