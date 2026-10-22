@@ -80,6 +80,9 @@ export const storeLocatorNoAreaSubtitleClassName =
 /** Figma / Spec — malformed pincode under the search field. */
 export const storeLocatorInvalidPincodeMessage = "Please enter a valid pin code";
 
+/** Digits-only query committed (blur / Enter / idle) with fewer than 6 digits. */
+export const storeLocatorIncompletePincodeMessage = "Please enter at least 6 digits";
+
 /** Figma node 4903:141297 — explore showrooms list + hero image */
 export const storeLocatorShowroomsFigmaSpec = {
   sectionPaddingTop: 40,

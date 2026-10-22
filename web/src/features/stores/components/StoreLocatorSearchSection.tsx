@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
@@ -20,16 +21,41 @@ type StoreLocatorSearchSectionProps = {
   locationFilters?: NormalizedStoreLocatorLocationFilter[];
   /** Figma invalid-pincode error under the search field. */
   pincodeError?: string | null;
+  /** Blur, Enter, or idle while digits-only length is 1–5. */
+  onPincodeValidationCommit?: () => void;
 };
+
+const INCOMPLETE_PINCODE_IDLE_MS = 800;
 
 const StoreLocatorSearchSection = ({
   searchQuery,
   onSearchQueryChange,
   pincodeError,
+  onPincodeValidationCommit,
 }: StoreLocatorSearchSectionProps) => {
   const placeholder = storeLocatorDefaultSearchPlaceholder;
   const errorMessage = pincodeError?.trim() || undefined;
   const { searchMaxWidth, searchHeight } = storeLocatorSearchFigmaSpec;
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!/^\d+$/.test(query) || query.length === 0 || query.length >= 6) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      onPincodeValidationCommit?.();
+    }, INCOMPLETE_PINCODE_IDLE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [searchQuery, onPincodeValidationCommit]);
+
+  const commitIncompletePincodeValidation = () => {
+    const query = searchQuery.trim();
+    if (/^\d+$/.test(query) && query.length >= 1 && query.length < 6) {
+      onPincodeValidationCommit?.();
+    }
+  };
 
   return (
     <section
@@ -58,6 +84,12 @@ const StoreLocatorSearchSection = ({
                 onChange={(event) =>
                   onSearchQueryChange(sanitizeStoreLocatorSearchInput(event.target.value))
                 }
+                onBlur={commitIncompletePincodeValidation}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    commitIncompletePincodeValidation();
+                  }
+                }}
                 placeholder={placeholder}
                 aria-label={placeholder}
                 aria-invalid={errorMessage ? true : undefined}

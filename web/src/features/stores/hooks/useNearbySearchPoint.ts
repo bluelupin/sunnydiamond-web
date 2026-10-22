@@ -9,7 +9,11 @@ export type NearbySearchState =
   | { status: "loading" }
   | { status: "locating" }
   | { status: "found"; point: GeoPoint }
-  | { status: "pin-failed"; message: string }
+  | {
+      status: "pin-failed";
+      kind: "not-found" | "invalid" | "unavailable";
+      message: string;
+    }
   | { status: "location-failed"; message: string };
 
 const PIN_LOOKUP_TIMEOUT_MS = 10000;
@@ -50,6 +54,12 @@ export function useNearbySearchPoint() {
       // 404 = unknown PIN, 400 = malformed; anything else (busy, upstream down) is temporary.
       setState({
         status: "pin-failed",
+        kind:
+          response.status === 404
+            ? "not-found"
+            : response.status === 400
+              ? "invalid"
+              : "unavailable",
         message:
           response.status === 404
             ? PIN_NOT_FOUND_MESSAGE
@@ -60,7 +70,11 @@ export function useNearbySearchPoint() {
     } catch {
       // Network error or timeout.
       if (requestId === requestIdRef.current) {
-        setState({ status: "pin-failed", message: PIN_UNAVAILABLE_MESSAGE });
+        setState({
+          status: "pin-failed",
+          kind: "unavailable",
+          message: PIN_UNAVAILABLE_MESSAGE,
+        });
       }
     }
   }, []);

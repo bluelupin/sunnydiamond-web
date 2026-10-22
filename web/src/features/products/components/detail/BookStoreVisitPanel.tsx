@@ -99,6 +99,9 @@ type BookStoreVisitPanelProps = {
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
   invalidPincodeMessage?: string | null;
+  pincodeInputCommitted?: boolean;
+  /** Store locator page: merged format + geo existence field error from parent. */
+  storeLocatorPincodeFieldError?: string | null;
   listCopy?: NormalizedStoreLocatorListCopy | null;
   /**
    * Overrides the default `store-visit` form tag.
@@ -133,6 +136,8 @@ const BookStoreVisitPanel = ({
   getDirectionsLabel,
   noResultsMessage,
   invalidPincodeMessage,
+  pincodeInputCommitted = false,
+  storeLocatorPincodeFieldError,
   listCopy,
   submissionFormTag,
   productName,
@@ -219,7 +224,14 @@ const BookStoreVisitPanel = ({
         null,
       );
 
-      if (getStoreLocatorPincodeSearchError(storeSearchQuery, invalidPincodeMessage)) {
+      const pincodeFieldError =
+        storeLocatorPincodeFieldError !== undefined
+          ? storeLocatorPincodeFieldError?.trim() || undefined
+          : getStoreLocatorPincodeSearchError(storeSearchQuery, invalidPincodeMessage, {
+              pincodeInputCommitted,
+            });
+
+      if (pincodeFieldError) {
         // Empty state tab still uses no-area UX; invalid message stays under the field.
         if (storeStateFilter?.trim() && stateMatched.length === 0) {
           return {
@@ -287,7 +299,15 @@ const BookStoreVisitPanel = ({
         listStatus: "default" as StoreLocatorListStatus,
         matchedStores: stateMatched,
       };
-    }, [stores, storeSearchQuery, storeStateFilter, variant, invalidPincodeMessage]);
+    }, [
+      stores,
+      storeSearchQuery,
+      storeStateFilter,
+      variant,
+      invalidPincodeMessage,
+      pincodeInputCommitted,
+      storeLocatorPincodeFieldError,
+    ]);
 
   const pincodeGeoMatchedStores = useMemo((): BookStoreVisitStore[] => {
     const nearest = nearbyStores?.results[0]?.store;

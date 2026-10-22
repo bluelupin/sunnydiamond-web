@@ -1,7 +1,13 @@
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
 import {
+  storeLocatorIncompletePincodeMessage,
   storeLocatorInvalidPincodeMessage,
 } from "@/features/stores/data/storeLocatorContent";
+
+export type StoreLocatorPincodeSearchErrorOptions = {
+  /** Set after blur, Enter, or idle while the query is digits-only and shorter than 6. */
+  pincodeInputCommitted?: boolean;
+};
 
 const INDIAN_PINCODE_PATTERN = /\b(\d{6})\b/;
 
@@ -167,12 +173,24 @@ function isValidIndianPincode(query: string): boolean {
 export function getStoreLocatorPincodeSearchError(
   searchQuery: string,
   invalidPincodeMessage?: string | null,
+  options?: StoreLocatorPincodeSearchErrorOptions,
 ): string | undefined {
+  const query = searchQuery.trim();
+  const isDigitsOnly = /^\d+$/.test(query);
+
+  if (
+    options?.pincodeInputCommitted &&
+    isDigitsOnly &&
+    query.length >= 1 &&
+    query.length < 6
+  ) {
+    return storeLocatorIncompletePincodeMessage;
+  }
+
   if (!isStoreLocatorPincodeSearchQuery(searchQuery)) {
     return undefined;
   }
 
-  const query = searchQuery.trim();
   if (!isValidIndianPincode(query)) {
     return invalidPincodeMessage?.trim() || storeLocatorInvalidPincodeMessage;
   }
@@ -189,6 +207,35 @@ export function shouldSuggestNearbyStores(
 ): boolean {
   const query = searchQuery.trim();
   return isValidIndianPincode(query) && matchingStoreCount === 0;
+}
+
+/** Geo lookup outcome for a format-valid PIN with no showroom text match (State 4 probe). */
+export type StoreLocatorPinGeoLookupOutcome =
+  | "idle"
+  | "loading"
+  | "found"
+  | "unknown-pin"
+  | "unavailable";
+
+/**
+ * Under-field error when the PIN passes format checks but does not exist (India Post / geo).
+ * Uses the same copy as malformed PINs so State 4 nearby UX only runs for real PINs.
+ */
+export function getStoreLocatorPinGeoLookupFieldError(
+  searchQuery: string,
+  matchingStoreCount: number,
+  outcome: StoreLocatorPinGeoLookupOutcome,
+  invalidPincodeMessage?: string | null,
+): string | undefined {
+  if (!shouldSuggestNearbyStores(searchQuery, matchingStoreCount)) {
+    return undefined;
+  }
+
+  if (outcome !== "unknown-pin") {
+    return undefined;
+  }
+
+  return invalidPincodeMessage?.trim() || storeLocatorInvalidPincodeMessage;
 }
 
 /** Valid 6-digit pincode search that matched one or more showrooms. */
