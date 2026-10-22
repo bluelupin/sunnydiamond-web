@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type FormEvent,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -17,6 +18,7 @@ import SearchIcon from "@/assets/Icons/SearchIcon";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import {
   MAX_SEARCH_LENGTH,
   searchResultsHref,
@@ -61,10 +63,20 @@ type SearchOverlayProps = {
   onDesktopMouseLeave?: () => void;
 };
 
-const suggestionRowClassName = "flex w-full items-center gap-2 py-0 text-left";
+const suggestionRowClassName =
+  "flex w-full items-center gap-2 py-0 text-left normal-case";
 
 function ProductRow({ product }: { product: QuickSearchProduct }) {
-  return <span className="min-w-0 flex-1 truncate font-normal text-neutral500">{product.name}</span>;
+  return (
+    <span
+      className={cn(
+        "min-w-0 flex-1 truncate font-normal text-neutral500",
+        productNameDisplayClassName,
+      )}
+    >
+      {product.name}
+    </span>
+  );
 }
 
 function LinkRow({ link }: { link: SearchLink }) {
@@ -123,11 +135,15 @@ export default function SearchOverlay({
     }
   }, [open]);
 
-  // A new result set starts with nothing highlighted, so Enter goes to the results page.
   const listKey = active ? (result?.query ?? "") : "empty";
   const activeIndex = highlight.key === listKey ? highlight.index : -1;
   const setActiveIndex = (update: number | ((index: number) => number)) =>
     setHighlight({ key: listKey, index: typeof update === "function" ? update(activeIndex) : update });
+
+  // Query or result list changes clear highlight — avoids Enter following a stale hovered row.
+  useEffect(() => {
+    setHighlight({ key: listKey, index: -1 });
+  }, [query, listKey]);
 
   useEffect(() => {
     if (!result || lastTracked.current === result.query) return;
@@ -278,6 +294,12 @@ export default function SearchOverlay({
     router.push(href);
   };
 
+  const submitHighlightedOption = () => {
+    if (activeOption) {
+      go(activeOption.href, activeOption.recent, activeOption);
+    }
+  };
+
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!open) return;
 
@@ -292,12 +314,14 @@ export default function SearchOverlay({
     }
     if (event.key === "Enter") {
       event.preventDefault();
-      if (activeOption) {
-        go(activeOption.href, activeOption.recent, activeOption);
-      } else if (active) {
-        go(searchResultsHref(query), query);
-      }
+      event.stopPropagation();
+      submitHighlightedOption();
     }
+  };
+
+  const onSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    submitHighlightedOption();
   };
 
   let optionIndex = -1;
@@ -319,7 +343,10 @@ export default function SearchOverlay({
         )}
         style={{ maxWidth: searchOverlayFigmaSpec.contentMaxWidth }}
       >
-            <div className={cn("w-full shrink-0", searchOverlayFigmaSpec.searchBarClassName)}>
+            <form
+              className={cn("w-full shrink-0", searchOverlayFigmaSpec.searchBarClassName)}
+              onSubmit={onSearchSubmit}
+            >
               <SearchIcon className={searchOverlayFigmaSpec.searchBarIconClassName} aria-hidden />
               <input
                 type="search"
@@ -339,7 +366,7 @@ export default function SearchOverlay({
                 enterKeyHint="search"
                 className={searchOverlayFigmaSpec.searchInputClassName}
               />
-            </div>
+            </form>
 
             {active && !result && loading && !hasPrefixTypeahead ? (
               <div className={cn("flex flex-col", searchOverlayFigmaSpec.suggestionGapClassName)} aria-hidden>
