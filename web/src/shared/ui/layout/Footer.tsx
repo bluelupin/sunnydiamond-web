@@ -257,7 +257,7 @@ const Footer = ({ className }: { className?: string }) => {
                       width={380}
                       height={25}
                       quality={80}
-                      className="object-none"
+                      className="sm:object-cover object-contain"
                     />
                   </div>
                 ))}
