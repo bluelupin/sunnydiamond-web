@@ -1,3 +1,5 @@
+import { iosInputZoomGuardTextClassName } from "@/shared/utils/iosInputZoomGuard";
+
 /** Header mobile search trigger (toggle); kept for tests and future branch wiring. */
 export const HEADER_SEARCH_TRIGGER_ATTR = "data-header-search-trigger";
 
@@ -18,9 +20,9 @@ export const searchOverlayFigmaSpec = {
     "flex h-[46px] w-full shrink-0 items-center gap-2 border border-aboutInactive bg-aboutInactive px-3 py-0",
   /** Figma — magnifier in field + typed query #0A0A0A. */
   searchBarIconClassName: "size-6 shrink-0 text-darkblack",
-  /** Figma typing in field — Gill Sans 14px / Light (300) / #0A0A0A; placeholder styles unchanged. */
+  /** Figma typing in field — Gill Sans 14px / Light (300) on desktop; 16px on touch (iOS zoom guard). */
   searchInputClassName:
-    "min-w-0 flex-1 bg-transparent font-gill text-[14px] font-light font-[300] leading-110 text-darkblack placeholder:font-light placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden",
+    `min-w-0 flex-1 bg-transparent font-gill font-light font-[300] leading-110 text-darkblack placeholder:font-light placeholder:text-gray600 focus:outline-none [&::-webkit-search-cancel-button]:hidden ${iosInputZoomGuardTextClassName}`,
   /** Figma — magnifier on suggestion rows below the field #4D4D4D. */
   suggestionSearchIconClassName: "size-6 shrink-0 text-neutral500",
   /** Mobile — full-height panel below header (portrait / narrow). */

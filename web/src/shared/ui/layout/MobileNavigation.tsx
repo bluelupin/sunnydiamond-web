@@ -10,6 +10,7 @@ import SearchIcon from "@/assets/Icons/SearchIcon";
 import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { cn } from "@/shared/utils/cn";
+import { iosInputZoomGuardTextClassName } from "@/shared/utils/iosInputZoomGuard";
 import {
   resolveHeaderNavHref,
   isHeaderNavLinkActive,
@@ -555,7 +556,10 @@ const MobileNavigation = ({
               aria-label="Search"
               autoComplete="off"
               maxLength={MAX_SEARCH_LENGTH}
-              className="min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill text-sm font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:text-sm placeholder:font-light placeholder:leading-110 placeholder:text-gray600"
+              className={cn(
+                "min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:font-light placeholder:leading-110 placeholder:text-gray600",
+                iosInputZoomGuardTextClassName,
+              )}
             />
             {searchQuery ? (
               <button
