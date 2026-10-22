@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import {
   formatPhoneDialCodeLabel,
@@ -20,6 +21,32 @@ const LIST_MAX_HEIGHT_PX = 280;
 const LIST_GAP_PX = 24;
 const VIEWPORT_PADDING_PX = 8;
 const LIST_MIN_HEIGHT_PX = 112;
+
+/** Portaled list — overlay panels should ignore outside clicks on this node. */
+export const PHONE_COUNTRY_CODE_LISTBOX_SELECTOR = "[data-phone-country-code-listbox]";
+
+const swallowGhostClickAfterListSelection = () => {
+  const swallow = (event: MouseEvent) => {
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target.closest('button[aria-haspopup="listbox"]')
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    document.removeEventListener("click", swallow, true);
+  };
+
+  document.addEventListener("click", swallow, true);
+};
+
+type ListPosition = {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight: number;
+};
 
 const SelectChevron = ({ open }: { open: boolean }) => (
   <span
@@ -64,6 +91,11 @@ type PhoneCountryCodeSelectProps = {
   onBlur?: () => void;
   disabled?: boolean;
   className?: string;
+  /**
+   * `portaled` renders the list in a fixed layer above drawers/modals (Login drawer).
+   * `inline` keeps the list under the trigger for nested sheets that block body clicks.
+   */
+  listPlacement?: "portaled" | "inline";
   /** Restrict to specific E.164 dial codes (rare). Omit for the full sovereign-country list (195). */
   codes?: readonly string[];
 };
@@ -95,8 +127,10 @@ const PhoneCountryCodeSelect = ({
   onBlur,
   disabled = false,
   className,
+  listPlacement = "portaled",
   codes,
 }: PhoneCountryCodeSelectProps) => {
+  const isInlineList = listPlacement === "inline";
   const listEntries = useMemo(
     () => filterPhoneCountryEntriesByDialCodes(codes),
     [codes],
@@ -117,8 +151,10 @@ const PhoneCountryCodeSelect = ({
     left: number;
     width: number;
   } | null>(null);
+  const [listPosition, setListPosition] = useState<ListPosition | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const listboxId = `${id}-listbox`;
 
   const selectedEntry = useMemo(
@@ -163,21 +199,48 @@ const PhoneCountryCodeSelect = ({
     setListMaxHeight(maxHeight);
 
     const isMobileViewport = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH_PX}px)`).matches;
-    if (isMobileViewport && root) {
-      const row = resolvePhoneFieldRow(root);
-      if (row) {
-        const rowRect = row.getBoundingClientRect();
-        const rootRect = root.getBoundingClientRect();
-        setListFieldWidthStyle({
-          left: rowRect.left - rootRect.left,
-          width: rowRect.width,
-        });
-        return;
-      }
+    const row = root ? resolvePhoneFieldRow(root) : null;
+    const rowRect = row?.getBoundingClientRect();
+    const rootRect = root?.getBoundingClientRect();
+
+    let listLeft = rect.left;
+    let listWidth = 280;
+
+    if (isMobileViewport && rowRect) {
+      listLeft = rowRect.left;
+      listWidth = rowRect.width;
+    } else if (rootRect) {
+      listLeft = rootRect.left - 13;
+      listWidth = Math.max(280, rootRect.width + 13);
+    }
+
+    if (!isInlineList) {
+      const top = openUpward
+        ? rect.top - LIST_GAP_PX - maxHeight
+        : rect.bottom + LIST_GAP_PX;
+
+      setListPosition({
+        top,
+        left: listLeft,
+        width: listWidth,
+        maxHeight,
+      });
+      setListFieldWidthStyle(null);
+      return;
+    }
+
+    if (isMobileViewport && row && rowRect && rootRect) {
+      setListFieldWidthStyle({
+        left: rowRect.left - rootRect.left,
+        width: rowRect.width,
+      });
+      setListPosition(null);
+      return;
     }
 
     setListFieldWidthStyle(null);
-  }, []);
+    setListPosition(null);
+  }, [isInlineList]);
 
   useEffect(() => {
     if (isOpen) {
@@ -200,12 +263,15 @@ const PhoneCountryCodeSelect = ({
 
     const timeoutId = window.setTimeout(() => {
       setShouldRenderList(false);
+      if (!isInlineList) {
+        setListPosition(null);
+      }
     }, LIST_ANIMATION_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isOpen, updateListPlacement]);
+  }, [isInlineList, isOpen, updateListPlacement]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -234,7 +300,7 @@ const PhoneCountryCodeSelect = ({
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (rootRef.current?.contains(target)) {
+      if (rootRef.current?.contains(target) || listRef.current?.contains(target)) {
         return;
       }
 
@@ -257,7 +323,105 @@ const PhoneCountryCodeSelect = ({
     onChange(entry.code, entry.country);
     setIsOpen(false);
     onBlur?.();
+    if (!isInlineList) {
+      swallowGhostClickAfterListSelection();
+    }
   };
+
+  const listbox =
+    shouldRenderList && (isInlineList || listPosition) ? (
+      <div
+        ref={listRef}
+        id={listboxId}
+        data-phone-country-code-listbox=""
+        role="listbox"
+        aria-label="Country code"
+        aria-hidden={!isOpen}
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+        onWheel={(event) => {
+          event.stopPropagation();
+        }}
+        onTouchMove={(event) => {
+          event.stopPropagation();
+        }}
+        style={
+          isInlineList
+            ? {
+                maxHeight: listMaxHeight,
+                ...(listFieldWidthStyle
+                  ? { left: listFieldWidthStyle.left, width: listFieldWidthStyle.width }
+                  : {}),
+              }
+            : {
+                position: "fixed",
+                top: listPosition!.top,
+                left: listPosition!.left,
+                width: listPosition!.width,
+                maxHeight: listPosition!.maxHeight,
+              }
+        }
+        className={cn(
+          "verticleMobileScrollbar flex flex-col overflow-y-auto overscroll-contain bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+          "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
+          isInlineList
+            ? cn(
+                "absolute z-[90]",
+                listFieldWidthStyle ? "min-w-0 max-w-none" : "-left-[13px] min-w-[280px]",
+                listOpensUpward ? "bottom-full mb-6 motion-safe:origin-bottom" : "top-full mt-6 motion-safe:origin-top",
+              )
+            : "fixed z-[100] motion-safe:origin-top",
+          isListVisible
+            ? "motion-safe:translate-y-0 motion-safe:opacity-100"
+            : listOpensUpward
+              ? "motion-safe:translate-y-1 motion-safe:opacity-0"
+              : "motion-safe:-translate-y-1 motion-safe:opacity-0",
+          isOpen ? "pointer-events-auto" : "pointer-events-none",
+        )}
+      >
+        {listEntries.map((entry) => {
+          const selected = entry.country === selectedCountryIso;
+          const display = resolvePhoneCountryCodeDisplayFromEntry(entry);
+          const countryLabel = `${display.name} (${display.iso})`;
+          const dialCodeLabel = formatPhoneDialCodeLabel(display.code);
+
+          return (
+            <button
+              key={`${entry.country}-${entry.code}`}
+              type="button"
+              role="option"
+              aria-selected={selected}
+              aria-label={`${countryLabel} ${dialCodeLabel}`}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                selectEntry(entry);
+              }}
+              className={cn(
+                "flex h-14 w-full shrink-0 items-center gap-2 p-3 text-left font-gill text-base font-normal leading-110",
+                "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
+                selected
+                  ? "bg-gold300 text-darkblack"
+                  : "bg-[#F2F2F2] text-neutral500 hover:bg-gold300 hover:text-darkblack",
+              )}
+            >
+              <CountryFlagIcon iso={display.iso} />
+              <span className="min-w-0 flex-1 truncate whitespace-nowrap">
+                {countryLabel} {dialCodeLabel}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    ) : null;
 
   return (
     <div ref={rootRef} className={cn("relative shrink-0", className)}>
@@ -286,75 +450,13 @@ const PhoneCountryCodeSelect = ({
         <span>{triggerDialCode}</span>
         <SelectChevron open={isOpen} />
       </button>
-      {shouldRenderList ? (
-        <div
-          id={listboxId}
-          role="listbox"
-          aria-label="Country code"
-          aria-hidden={!isOpen}
-          onMouseDown={(event) => {
-            event.preventDefault();
-          }}
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-          style={{
-            maxHeight: listMaxHeight,
-            ...(listFieldWidthStyle
-              ? { left: listFieldWidthStyle.left, width: listFieldWidthStyle.width }
-              : {}),
-          }}
-          className={cn(
-            "verticleMobileScrollbar absolute z-[90] flex flex-col overflow-y-auto bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
-            listFieldWidthStyle ? "min-w-0 max-w-none" : "-left-[13px] min-w-[280px]",
-            "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
-            listOpensUpward ? "bottom-full mb-6 motion-safe:origin-bottom" : "top-full mt-6 motion-safe:origin-top",
-            isListVisible
-              ? "motion-safe:translate-y-0 motion-safe:opacity-100"
-              : listOpensUpward
-                ? "motion-safe:translate-y-1 motion-safe:opacity-0"
-                : "motion-safe:-translate-y-1 motion-safe:opacity-0",
-            !isOpen && "pointer-events-none",
-          )}
-        >
-          {listEntries.map((entry) => {
-            const selected = entry.country === selectedCountryIso;
-            const display = resolvePhoneCountryCodeDisplayFromEntry(entry);
-            const countryLabel = `${display.name} (${display.iso})`;
-            const dialCodeLabel = formatPhoneDialCodeLabel(display.code);
-
-            return (
-              <button
-                key={`${entry.country}-${entry.code}`}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                aria-label={`${countryLabel} ${dialCodeLabel}`}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  selectEntry(entry);
-                }}
-                className={cn(
-                  "flex h-14 w-full shrink-0 items-center gap-2 p-3 text-left font-gill text-base font-normal leading-110",
-                  "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-in-out",
-                  selected
-                    ? "bg-gold300 text-darkblack"
-                    : "bg-[#F2F2F2] text-neutral500 hover:bg-gold300 hover:text-darkblack",
-                )}
-              >
-                <CountryFlagIcon iso={display.iso} />
-                <span className="min-w-0 flex-1 truncate whitespace-nowrap">{countryLabel} {dialCodeLabel}</span>
-                {/* <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums">{dialCodeLabel}</span> */}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+      {listbox
+        ? isInlineList
+          ? listbox
+          : typeof document !== "undefined"
+            ? createPortal(listbox, document.body)
+            : null
+        : null}
     </div>
   );
 };
