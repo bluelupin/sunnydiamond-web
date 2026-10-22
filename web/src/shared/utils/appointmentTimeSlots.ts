@@ -75,7 +75,7 @@ export function getAppointmentBookingDateBounds(
   return { minDate: toDateInputValue(earliest), maxDate: toDateInputValue(latest) };
 }
 
-/** True when the slot starts after now plus the required notice for the selected booking date. */
+/** True when the slot starts at or after now plus the required notice for the selected booking date. */
 export function isAppointmentTimeSlotAvailable(
   slot: string,
   bookingDateValue: string,
@@ -110,7 +110,7 @@ export function isAppointmentTimeSlotAvailable(
     0,
   );
 
-  return slotStart.getTime() > referenceDate.getTime() + minNoticeMinutes * 60_000;
+  return slotStart.getTime() >= referenceDate.getTime() + minNoticeMinutes * 60_000;
 }
 
 /**
