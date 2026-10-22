@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import StoreLocatorBookStoreVisitPanelLazy from "./StoreLocatorBookStoreVisitPanelLazy";
-import StoreLocatorHeroSection from "./StoreLocatorHeroSection";
 import StoreLocatorSearchSection from "./StoreLocatorSearchSection";
 import { mapStoreLocatorShowroomToBookStoreVisit } from "@/features/products/utils/bookStoreVisitStores";
 import {
@@ -158,7 +157,6 @@ const BookStoreVisitPageContent = ({
 
   return (
     <>
-      {page?.hero ? <StoreLocatorHeroSection hero={page.hero} /> : null}
       {showSearchSection ? (
         <StoreLocatorSearchSection
           searchQuery={searchQuery}

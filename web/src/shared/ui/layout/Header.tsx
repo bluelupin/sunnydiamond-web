@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,7 +29,7 @@ import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
-import { ProfileMobileNavSheet } from "@/features/account/components/ProfileMobileNavSheet";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { mapProfileNavItems } from "@/services/profile/profile-page.mapper";
 import { useProfilePageCms } from "@/shared/lib/providers/ProfilePageCmsProvider";
 import MenuIcon from "@/assets/Icons/MenuIcon";
@@ -65,6 +65,12 @@ const WorldOfSunnyMegaMenu = dynamic(
 );
 
 const SearchOverlay = dynamic(() => import("@/features/search/SearchOverlay"), { ssr: false, loading: () => null });
+const ProfileMobileNavSheet = dynamic(
+  () => import("@/features/account/components/ProfileMobileNavSheet").then((mod) => ({
+    default: mod.ProfileMobileNavSheet,
+  })),
+  { ssr: false, loading: () => null },
+);
 
 const BookAnAppointmentPanel = dynamic(
   () => import("@/features/appointment/components/BookAnAppointmentPanel"),
@@ -98,6 +104,7 @@ const Header = () => {
     setAppointmentPanelOpen(true);
   }, []);
   const [profileNavOpen, setProfileNavOpen] = useState(false);
+  const [profileNavMounted, setProfileNavMounted] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const [jewelleryMenuMounted, setJewelleryMenuMounted] = useState(false);
   const jewelleryMenuMountedRef = useRef(false);
@@ -123,6 +130,7 @@ const Header = () => {
     pathname === "/cart" && isCartEmptyPageShell ? "bg-gray200" : "bg-gray300";
   const canHoverNav = useCanHover();
   const isMobileHeader = useMobileHeaderLayout();
+  const { status: authStatus } = useAuth();
   const isCheckoutSuccessScreen =
     isMobileHeader &&
     (isCheckoutSuccessRoute(pathname) ||
@@ -132,6 +140,20 @@ const Header = () => {
       ? "bg-white"
       : cartCheckoutHeaderSurfaceClass;
 
+  useEffect(() => {
+    if (!isMobileHeader || authStatus !== "authenticated") return;
+
+    const warmProfileNav = () => {
+      void import("@/features/account/components/ProfileMobileNavSheet").catch(() => {});
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const idleId = window.requestIdleCallback(warmProfileNav, { timeout: 2500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(warmProfileNav, 1000);
+    return () => window.clearTimeout(timeoutId);
+  }, [authStatus, isMobileHeader]);
   const careersHeaderMode = useCareersHeaderMode(pathname);
   const isAboutTimelineHeaderSuppressed = useAboutTimelineHeaderSuppressed(pathname);
 
@@ -215,6 +237,7 @@ const Header = () => {
 
   const openProfileNav = useCallback(() => {
     dismissSearchPanel();
+    setProfileNavMounted(true);
     setProfileNavOpen(true);
   }, [dismissSearchPanel]);
 
@@ -684,12 +707,16 @@ const Header = () => {
         onSearchOpen={openSearch}
       />
 
-      <ProfileMobileNavSheet
-        open={profileNavOpen}
-        onOpenChange={setProfileNavOpen}
-        navItems={profileNavItems}
-        cartCount={displayCartCount}
-      />
+      {profileNavMounted ? (
+        <FeatureErrorBoundary featureName="ProfileMobileNavSheet">
+          <ProfileMobileNavSheet
+            open={profileNavOpen}
+            onOpenChange={setProfileNavOpen}
+            navItems={profileNavItems}
+            cartCount={displayCartCount}
+          />
+        </FeatureErrorBoundary>
+      ) : null}
 
       {appointmentPanelMounted ? (
         <FeatureErrorBoundary featureName="BookAnAppointmentPanel">

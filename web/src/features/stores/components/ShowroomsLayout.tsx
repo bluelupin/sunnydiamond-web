@@ -102,7 +102,7 @@ function ShowroomHeroStack({
               mobileSrc={location.mobileImage ?? location.desktopImage!}
               alt={location.imageAlt}
               sizes={imageSizes}
-              quality={90}
+              quality={80}
               eager
               className="object-cover object-center"
             />
@@ -234,7 +234,7 @@ function ShowroomExpandedPanel({
             alt={location.imageAlt}
             width={2500}
             height={1797}
-            quality={90}
+            quality={80}
             eager
             className="h-full w-full object-cover"
           />
@@ -378,7 +378,7 @@ function ShowroomMobileAccordionItem({
                   alt={location.imageAlt}
                   width={2500}
                   height={1797}
-                  quality={90}
+                  quality={80}
                   eager
                   className="h-full w-full object-cover"
                 />

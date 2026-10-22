@@ -111,7 +111,7 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Light.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Light.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Light.otf") format("opentype");
 }
 
 @font-face {
@@ -119,7 +119,7 @@
   font-style: italic;
   font-weight: 300;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Light Italic.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Light Italic.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Light Italic.otf") format("opentype");
 }
 
 @font-face {
@@ -127,7 +127,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans.otf") format("opentype");
 }
 
 @font-face {
@@ -135,7 +135,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Italic.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Italic.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Italic.otf") format("opentype");
 }
 
 @font-face {
@@ -143,7 +143,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Medium.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Medium.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Medium.otf") format("opentype");
 }
 
 @font-face {
@@ -151,7 +151,7 @@
   font-style: italic;
   font-weight: 500;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Medium Italic.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Medium Italic.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Medium Italic.otf") format("opentype");
 }
 
 @font-face {
@@ -167,7 +167,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Bold.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Bold.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Bold.otf") format("opentype");
 }
 
 @font-face {
@@ -175,7 +175,7 @@
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Bold Italic.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Bold Italic.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Bold Italic.otf") format("opentype");
 }
 
 @font-face {
@@ -183,7 +183,7 @@
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Heavy.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Heavy.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Heavy.otf") format("opentype");
 }
 
 @font-face {
@@ -191,7 +191,7 @@
   font-style: italic;
   font-weight: 800;
   font-display: swap;
-  src: url("/fonts/GillSans/Gill Sans Heavy Italic.otf") format("opentype");
+  src: url("/fonts/GillSans/Gill Sans Heavy Italic.woff2") format("woff2"), url("/fonts/GillSans/Gill Sans Heavy Italic.otf") format("opentype");
 }
 
 @font-face {

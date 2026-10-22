@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import BookStoreVisitPageContent from "@/features/stores/components/BookStoreVisitPageContent";
+import StoreLocatorHeroSection from "@/features/stores/components/StoreLocatorHeroSection";
 import StoreLocatorPageSkeleton from "@/features/stores/components/skeletons/StoreLocatorPageSkeleton";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { mapStoreLocatorShowroomToBookStoreVisit } from "@/features/products/utils/bookStoreVisitStores";
@@ -49,6 +50,7 @@ async function StoreLocatorPageContent() {
   return (
     <>
       {storeLocatorJsonLd ? <JsonLd data={storeLocatorJsonLd} id="store-locator-jsonld" /> : null}
+      {page.hero ? <StoreLocatorHeroSection hero={page.hero} /> : null}
       <BookStoreVisitPageContent page={page} />
     </>
   );

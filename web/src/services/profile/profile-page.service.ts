@@ -19,7 +19,7 @@ export const getProfilePage = cache(
     try {
       const raw = await apiFetch<StrapiProfilePage>(
         `${STRAPI_ENDPOINTS.profilePage}?${PROFILE_PAGE_POPULATE}`,
-        { signal },
+        { signal, next: { revalidate: 300, tags: ["profile-page"] } },
       );
       return mapProfilePage(raw);
     } catch {

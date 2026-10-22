@@ -1,7 +1,3 @@
-"use client";
-
-
-
 import Image from "next/image";
 
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
@@ -62,7 +58,7 @@ const StoreLocatorHeroSection = ({ hero }: StoreLocatorHeroSectionProps) => {
 
             fill
 
-            priority
+            fetchPriority="high"
 
             quality={PLP_HERO_IMAGE_QUALITY}
 
@@ -84,7 +80,7 @@ const StoreLocatorHeroSection = ({ hero }: StoreLocatorHeroSectionProps) => {
 
             fill
 
-            priority
+            fetchPriority="high"
 
             quality={PLP_HERO_IMAGE_QUALITY}
 
