@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import PolicyText from "./PolicyText";
+import PolicyAccordionSectionContent from "./PolicyAccordionSectionContent";
+import "@/shared/styles/editor-content.css";
 import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import Link from "next/link";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -207,22 +208,7 @@ function PolicyAccordionItem({
                 : "gap-6 text-base font-normal",
             )}
           >
-            {section.intro ? <p className="whitespace-pre-line"><PolicyText text={section.intro} /></p> : null}
-            {section.body ? <p className="whitespace-pre-line"><PolicyText text={section.body} /></p> : null}
-            {section.listItems?.length ? (
-              <ol
-                className={cn(
-                  "flex flex-col gap-2",
-                  isMobile ? "ms-[21px]" : "ms-6",
-                )}
-              >
-                {section.listItems.map((item, index) => (
-                  <li key={index} className="list-decimal">
-                    <PolicyText text={item} />
-                  </li>
-                ))}
-              </ol>
-            ) : null}
+            <PolicyAccordionSectionContent section={section} isMobile={isMobile} />
           </div>
         </div>
       </div>

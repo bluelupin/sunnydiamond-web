@@ -1,4 +1,5 @@
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { looksLikeCmsHtml, sanitizeCmsHtml } from "@/shared/utils/sanitizeCmsHtml";
 import type {
   PolicyAccordionSection,
   PolicyDocument,
@@ -84,6 +85,14 @@ function parseAnswerToSection(
   const title = cleanText(item.question);
   const answer = cleanText(item.answer);
   if (!title || !answer) return null;
+
+  if (looksLikeCmsHtml(answer)) {
+    return {
+      id: item.id != null ? `accordion-${item.id}` : `accordion-${index}`,
+      title,
+      richHtml: sanitizeCmsHtml(answer),
+    };
+  }
 
   const lines = answer.split("\n").map((line) => line.trim()).filter(Boolean);
   const numbered = lines.filter((line) => /^\d+\.\s+/.test(line));

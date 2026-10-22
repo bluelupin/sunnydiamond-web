@@ -4,6 +4,8 @@ export type PolicyAccordionSection = {
   intro?: string;
   listItems?: string[];
   body?: string;
+  /** CKEditor HTML from CMS — when set, replaces intro/body/listItems rendering. */
+  richHtml?: string;
 };
 
 export type PolicyDocument = {
