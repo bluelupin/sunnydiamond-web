@@ -45,3 +45,29 @@ export function searchTermMatchesInput(label: string, query: string): boolean {
   if (!normalizedLabel || !normalizedQuery) return false;
   return normalizedLabel.includes(normalizedQuery);
 }
+
+export type SearchQueryTextSegment = { text: string; match: boolean };
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Case-insensitive segments for typeahead — matched spans use stronger weight in UI. */
+export function splitLabelBySearchQuery(label: string, query: string): SearchQueryTextSegment[] {
+  const normalizedQuery = cleanSearchQuery(query);
+  if (!normalizedQuery) {
+    return [{ text: label, match: false }];
+  }
+
+  const pattern = new RegExp(`(${escapeRegExp(normalizedQuery)})`, "gi");
+  const parts = label.split(pattern).filter((part) => part.length > 0);
+  if (parts.length === 0) {
+    return [{ text: label, match: false }];
+  }
+
+  const normalizedQueryLower = normalizedQuery.toLowerCase();
+  return parts.map((text) => ({
+    text,
+    match: text.toLowerCase() === normalizedQueryLower,
+  }));
+}

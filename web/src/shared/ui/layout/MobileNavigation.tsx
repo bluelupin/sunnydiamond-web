@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,13 +18,16 @@ import {
   isWorldOfSunnyNavLink,
   scrollToTopBeforeClientNavigation,
 } from "@/shared/utils/navigation";
-import {
-  cleanSearchQuery,
-  MAX_SEARCH_LENGTH,
-  MIN_SEARCH_LENGTH,
-  searchResultsHref,
-} from "@/features/search/quickSearch";
+import { MAX_SEARCH_LENGTH } from "@/features/search/quickSearch";
 import { addRecentSearch } from "@/features/search/recentSearches";
+import {
+  isSearchSuggestionsExpanded,
+  SEARCH_SUGGESTIONS_LISTBOX_SELECTOR,
+  SearchSuggestionsList,
+  useSearchSuggestions,
+  type SearchSuggestionOption,
+} from "@/features/search/searchSuggestions";
+import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { WorldOfSunnyCategoryMenu } from "@/shared/ui/layout/WorldOfSunnyCategoryMenu";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
@@ -307,7 +310,34 @@ const MobileNavigation = ({
   const isSubPanelVisibleRef = useRef(false);
   const cancelEnterAnimationRef = useRef<(() => void) | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileSearchSuggestionsOpen, setIsMobileSearchSuggestionsOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchFormRef = useRef<HTMLFormElement>(null);
+  const searchSuggestionsBaseId = useId();
+  const searchSuggestionsListId = `${searchSuggestionsBaseId}-list`;
+
+  const searchSuggestions = useSearchSuggestions({
+    text: searchQuery,
+    baseId: searchSuggestionsBaseId,
+    syncRecents: isOpen,
+  });
+  const {
+    query: cleanedSearchQuery,
+    active: searchActive,
+    result: searchResult,
+    loading: searchLoading,
+    failed: searchFailed,
+    hasPrefixTypeahead,
+    showEmptyState: searchShowEmptyState,
+    showListbox: searchShowListbox,
+    groups: searchGroups,
+    activeIndex: searchActiveIndex,
+    setActiveIndex: setSearchActiveIndex,
+    activeOption: searchActiveOption,
+    resetHighlight: resetSearchHighlight,
+    refreshRecentSearches,
+    handleInputKeyDown: handleSearchInputKeyDown,
+  } = searchSuggestions;
 
   const handleClose = useCallback(() => {
     setSubPanel(null);
@@ -322,8 +352,44 @@ const MobileNavigation = ({
       setIsSubPanelVisible(false);
       isSubPanelVisibleRef.current = false;
       setSearchQuery("");
+      setIsMobileSearchSuggestionsOpen(false);
+      resetSearchHighlight();
     }
-  }, [isOpen]);
+  }, [isOpen, resetSearchHighlight]);
+
+  useEffect(() => {
+    if (!isOpen || !isVisible || !isMobileSearchSuggestionsOpen) {
+      return;
+    }
+
+    const dismissSuggestions = () => {
+      setIsMobileSearchSuggestionsOpen(false);
+      resetSearchHighlight();
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+      if (searchFormRef.current?.contains(target)) {
+        return;
+      }
+      if (target instanceof Element && target.closest(SEARCH_SUGGESTIONS_LISTBOX_SELECTOR)) {
+        return;
+      }
+      dismissSuggestions();
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      document.addEventListener("pointerdown", onPointerDown);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [isMobileSearchSuggestionsOpen, isOpen, isVisible, resetSearchHighlight]);
 
   useLayoutEffect(() => {
     if (closeTimerRef.current) {
@@ -432,22 +498,67 @@ const MobileNavigation = ({
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery("");
+    setIsMobileSearchSuggestionsOpen(false);
+    resetSearchHighlight();
     searchInputRef.current?.focus();
+  }, [resetSearchHighlight]);
+
+  const handleSearchQueryChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    if (value.trim()) {
+      setIsMobileSearchSuggestionsOpen(true);
+    } else {
+      setIsMobileSearchSuggestionsOpen(false);
+      resetSearchHighlight();
+    }
+  }, [resetSearchHighlight]);
+
+  const handleSearchInputFocus = useCallback(() => {
+    setIsMobileSearchSuggestionsOpen(true);
   }, []);
+
+  const mobileSearchSuggestionsExpanded =
+    isMobileSearchSuggestionsOpen &&
+    isSearchSuggestionsExpanded({
+      active: searchActive,
+      loading: searchLoading,
+      failed: searchFailed,
+      result: searchResult,
+      hasPrefixTypeahead,
+      showEmptyState: searchShowEmptyState,
+      showListbox: searchShowListbox,
+    });
+
+  const navigateToSearchSuggestion = useCallback(
+    (option: SearchSuggestionOption) => {
+      if (option.recent) {
+        addRecentSearch(option.recent);
+        refreshRecentSearches();
+      }
+      trackEvent("select_item", {
+        item_list_name: `search_${option.group}`,
+        search_term: cleanedSearchQuery,
+        href: option.href,
+      });
+      handleClose();
+      scrollToTopBeforeClientNavigation();
+      router.push(option.href);
+    },
+    [cleanedSearchQuery, handleClose, refreshRecentSearches, router],
+  );
+
+  const submitSearchHighlightedOption = useCallback(() => {
+    if (searchActiveOption) {
+      navigateToSearchSuggestion(searchActiveOption);
+    }
+  }, [navigateToSearchSuggestion, searchActiveOption]);
 
   const handleSearchSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const query = cleanSearchQuery(searchQuery);
-      if (query.length < MIN_SEARCH_LENGTH) {
-        return;
-      }
-      addRecentSearch(query);
-      handleClose();
-      scrollToTopBeforeClientNavigation();
-      router.push(searchResultsHref(query));
+      submitSearchHighlightedOption();
     },
-    [handleClose, router, searchQuery],
+    [submitSearchHighlightedOption],
   );
 
   if (!isRendered) return null;
@@ -538,6 +649,7 @@ const MobileNavigation = ({
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4">
           <form
+            ref={searchFormRef}
             role="search"
             className="mt-2 flex h-[46px] w-full items-center gap-2 border border-aboutInactive bg-aboutInactive p-3"
             onSubmit={handleSearchSubmit}
@@ -548,16 +660,23 @@ const MobileNavigation = ({
             </svg>
             <input
               ref={searchInputRef}
-              type="text"
+              type="search"
               enterKeyHint="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => handleSearchQueryChange(event.target.value)}
+              onFocus={handleSearchInputFocus}
+              onKeyDown={(event) => handleSearchInputKeyDown(event, submitSearchHighlightedOption)}
               placeholder="What Are You Looking For?"
+              role="combobox"
               aria-label="Search"
+              aria-expanded={mobileSearchSuggestionsExpanded}
+              aria-controls={searchSuggestionsListId}
+              aria-autocomplete="list"
+              aria-activedescendant={searchActiveOption?.id}
               autoComplete="off"
               maxLength={MAX_SEARCH_LENGTH}
               className={cn(
-                "min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:font-light placeholder:leading-110 placeholder:text-gray600",
+                "min-w-0 flex-1 appearance-none border-0 bg-transparent font-gill font-light leading-110 text-darkblack outline-none placeholder:font-gill placeholder:font-light placeholder:leading-110 placeholder:text-gray600 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden",
                 iosInputZoomGuardTextClassName,
               )}
             />
@@ -572,6 +691,27 @@ const MobileNavigation = ({
               </button>
             ) : null}
           </form>
+
+          {isOpen && isVisible && isMobileSearchSuggestionsOpen ? (
+            <SearchSuggestionsList
+              listId={searchSuggestionsListId}
+              baseId={searchSuggestionsBaseId}
+              active={searchActive}
+              loading={searchLoading}
+              failed={searchFailed}
+              result={searchResult}
+              hasPrefixTypeahead={hasPrefixTypeahead}
+              showEmptyState={searchShowEmptyState}
+              showListbox={searchShowListbox}
+              groups={searchGroups}
+              activeIndex={searchActiveIndex}
+              setActiveIndex={setSearchActiveIndex}
+              onSelect={navigateToSearchSuggestion}
+              presentation="overlay"
+              anchorRef={searchFormRef}
+              overlayAnchorActive={isVisible && isMobileSearchSuggestionsOpen}
+            />
+          ) : null}
 
           <nav aria-label="Main navigation" className="mt-6 flex w-full flex-col gap-4">
             {navLinks.map((link, index) => {
