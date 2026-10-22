@@ -239,6 +239,11 @@ type SortDrawerProps = {
   onSelect: (value: string) => void;
 };
 
+const SORT_DRAWER_OVERLAY_CLASS = "z-[80] bg-[#1E1E1EBF] backdrop-blur-[3px]";
+
+const SORT_DRAWER_SHELL_CLASS =
+  "z-[80] flex min-h-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-white p-0 shadow-2xl";
+
 const SortDrawer = ({ options, open, sortValue, onClose, onSelect }: SortDrawerProps) => {
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -249,55 +254,56 @@ const SortDrawer = ({ options, open, sortValue, onClose, onSelect }: SortDrawerP
   return (
     <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
       <DrawerContent
-        overlayClassName="z-[80] bg-[#1E1E1E]/25 backdrop-blur-[9px]"
-        className="z-[80] mt-12 max-h-[calc(100dvh-3rem)] w-full overflow-hidden rounded-none border-0 bg-transparent p-0 shadow-none [&>div:first-child]:hidden md:hidden"
+        overlayClassName={SORT_DRAWER_OVERLAY_CLASS}
+        className={cn(
+          SORT_DRAWER_SHELL_CLASS,
+          "mt-12 max-h-[calc(100dvh-3rem)] w-full [&>div:first-child]:hidden md:hidden",
+        )}
       >
         <DrawerTitle className="sr-only">Sort products</DrawerTitle>
-        <div className="shrink-0 animate-in slide-in-from-bottom duration-300 pb-[env(safe-area-inset-bottom,0px)]">
-          <div className="bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-neutral300/50 px-6 py-6">
-              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Sort By</h2>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close sort panel"
-                className="inline-flex size-8 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={32}
-                  height={32}
-                  aria-hidden
-                />
-              </button>
-            </div>
-            <ul className="m-0 flex list-none flex-col p-0">
-              {options.map((option) => {
-                const selected = sortValue === option.value;
-                return (
-                  <li key={option.value} className="border-b border-neutral300/40 last:border-b-0">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onSelect(option.value);
-                        onClose();
-                      }}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-6 py-5 text-left font-gill text-base leading-110 text-darkblack",
-                        selected ? "bg-gold300 font-normal" : "font-light",
-                      )}
-                    >
-                      <span className="inline-flex size-5 shrink-0 items-center justify-center" aria-hidden>
-                        {selected ? <Check size={20} strokeWidth={1.5} /> : null}
-                      </span>
-                      <span>{option.label}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+        <div className="flex min-h-0 flex-col pb-[env(safe-area-inset-bottom,0px)]">
+          <div className="flex items-center justify-between border-b border-neutral300/50 px-6 py-6">
+            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Sort By</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close sort panel"
+              className="inline-flex size-8 shrink-0 items-center justify-center"
+            >
+              <Image
+                src="/icons/menu-close.svg"
+                alt=""
+                width={32}
+                height={32}
+                aria-hidden
+              />
+            </button>
           </div>
+          <ul className="m-0 flex list-none flex-col p-0">
+            {options.map((option) => {
+              const selected = sortValue === option.value;
+              return (
+                <li key={option.value} className="border-b border-neutral300/40 last:border-b-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelect(option.value);
+                      onClose();
+                    }}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-6 py-5 text-left font-gill text-base leading-110 text-darkblack",
+                      selected ? "bg-gold300 font-normal" : "font-light",
+                    )}
+                  >
+                    <span className="inline-flex size-5 shrink-0 items-center justify-center" aria-hidden>
+                      {selected ? <Check size={20} strokeWidth={1.5} /> : null}
+                    </span>
+                    <span>{option.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </DrawerContent>
     </Drawer>
