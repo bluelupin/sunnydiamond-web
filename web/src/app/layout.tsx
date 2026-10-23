@@ -9,6 +9,8 @@ import { UI_PLATFORM_BOOTSTRAP_SCRIPT } from "@/shared/constants/uiPlatformBoots
 import PwaServiceWorkerRegistration from "@/shared/pwa/PwaServiceWorkerRegistration";
 import { PWA_DISPLAY_BOOTSTRAP_SCRIPT } from "@/shared/pwa/pwaDisplayBootstrap";
 import PwaStandaloneUiSetup from "@/shared/pwa/PwaStandaloneUiSetup";
+import PwaLaunchSplashStatic from "@/shared/pwa/PwaLaunchSplashStatic";
+import { PWA_LAUNCH_SPLASH_CRITICAL_CSS } from "@/shared/pwa/pwaLaunchSplashCritical";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -114,12 +116,19 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: PWA_DISPLAY_BOOTSTRAP_SCRIPT }}
         />
+        <style
+          id="pwa-launch-splash-critical"
+          dangerouslySetInnerHTML={{ __html: PWA_LAUNCH_SPLASH_CRITICAL_CSS }}
+        />
       </head>
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
+        <PwaLaunchSplashStatic />
         <GoogleAnalytics />
         <PwaStandaloneUiSetup />
         <PwaServiceWorkerRegistration />
-        <ServerAppShell>{children}</ServerAppShell>
+        <div className="pwa-app-shell-gate">
+          <ServerAppShell>{children}</ServerAppShell>
+        </div>
       </body>
     </html>
   );

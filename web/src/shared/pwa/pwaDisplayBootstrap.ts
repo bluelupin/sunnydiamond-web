@@ -1,4 +1,8 @@
 import { isPwaStandaloneDisplayMode } from "./pwaInstallPrompt";
+import {
+  PWA_LAUNCH_HTML_ATTR,
+  PWA_LAUNCH_PENDING_VALUE,
+} from "./pwaLaunchSplashCritical";
 
 /** Set on `<html>` before hydration when the app runs as an installed PWA. */
 export const PWA_DISPLAY_HTML_ATTR = "data-pwa-display";
@@ -14,6 +18,7 @@ export function applyPwaStandaloneDocumentClass(): boolean {
 
   const { documentElement, body } = document;
   documentElement.setAttribute(PWA_DISPLAY_HTML_ATTR, PWA_DISPLAY_STANDALONE_VALUE);
+  documentElement.setAttribute(PWA_LAUNCH_HTML_ATTR, PWA_LAUNCH_PENDING_VALUE);
   documentElement.classList.add(PWA_ROOT_SCROLLBAR_HIDDEN_CLASS);
   body?.classList.add(PWA_ROOT_SCROLLBAR_HIDDEN_CLASS);
   return true;
@@ -28,6 +33,8 @@ export const PWA_DISPLAY_BOOTSTRAP_SCRIPT = `
   try {
     var attr = "${PWA_DISPLAY_HTML_ATTR}";
     var value = "${PWA_DISPLAY_STANDALONE_VALUE}";
+    var launchAttr = "${PWA_LAUNCH_HTML_ATTR}";
+    var launchPending = "${PWA_LAUNCH_PENDING_VALUE}";
     var rootClass = "${PWA_ROOT_SCROLLBAR_HIDDEN_CLASS}";
     var nav = window.navigator;
     var iosStandalone = nav.standalone === true;
@@ -41,6 +48,7 @@ export const PWA_DISPLAY_BOOTSTRAP_SCRIPT = `
     function apply() {
       var root = document.documentElement;
       root.setAttribute(attr, value);
+      root.setAttribute(launchAttr, launchPending);
       root.classList.add(rootClass);
       if (document.body) {
         document.body.classList.add(rootClass);

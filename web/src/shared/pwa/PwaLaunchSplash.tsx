@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import GlobalRouteLoader from "@/shared/ui/layout/GlobalRouteLoader";
+import { GlobalRouteLoaderFrame } from "@/shared/ui/layout/GlobalRouteLoader";
 import { usePageLoading } from "@/shared/context/PageLoadingContext";
 import { isPwaStandaloneDisplayMode } from "./pwaInstallPrompt";
 import { PWA_LAUNCH_SPLASH_MAX_MS, PWA_LAUNCH_SPLASH_MIN_MS } from "./pwaLaunchSplash";
+import { completePwaLaunchSplash } from "./pwaLaunchSplashCritical";
 
 type SplashPhase = "idle" | "visible" | "hidden";
 
+const STATIC_SPLASH_ID = "pwa-launch-splash-static";
+
 /**
- * Installed PWA cold start only — reuses {@link GlobalRouteLoader} until the app shell is ready.
+ * Installed PWA cold start — continues {@link PwaLaunchSplashStatic} after hydration.
  * Regular browser / responsive web never enters the visible phase.
  */
 export default function PwaLaunchSplash() {
@@ -21,10 +24,12 @@ export default function PwaLaunchSplash() {
   useLayoutEffect(() => {
     if (!isPwaStandaloneDisplayMode()) {
       setPhase("hidden");
+      completePwaLaunchSplash();
       return;
     }
     mountAtRef.current = Date.now();
     setPhase("visible");
+    document.getElementById(STATIC_SPLASH_ID)?.remove();
   }, []);
 
   useEffect(() => {
@@ -40,6 +45,7 @@ export default function PwaLaunchSplash() {
         return;
       }
       dismissedRef.current = true;
+      completePwaLaunchSplash();
       setPhase("hidden");
     };
 
@@ -92,11 +98,11 @@ export default function PwaLaunchSplash() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] touch-none bg-background"
+      className="fixed inset-0 z-[2147483647] touch-none bg-white"
       role="presentation"
       aria-hidden={false}
     >
-      <GlobalRouteLoader />
+      <GlobalRouteLoaderFrame fixed={false} className="relative h-full w-full bg-white" />
     </div>
   );
 }
