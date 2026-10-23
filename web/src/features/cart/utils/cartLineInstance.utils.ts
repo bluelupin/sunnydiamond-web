@@ -206,11 +206,13 @@ export function assignCartLineInstance(
   options: CartLineOptions,
   productCustomOptions?: ProductCustomOptions,
 ): CartLineOptions {
-  if (options.lineInstance?.trim()) {
-    return options;
+  if (!supportsCartLineInstance(productCustomOptions)) {
+    // Magento may be mid-deployment or this product page may still be cached.
+    // Keep add-to-bag available until the Cart Line Key option reaches the catalog.
+    return { ...options, lineInstance: undefined };
   }
 
-  if (!supportsCartLineInstance(productCustomOptions)) {
+  if (options.lineInstance?.trim()) {
     return options;
   }
 

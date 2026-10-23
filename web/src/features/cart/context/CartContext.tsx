@@ -588,6 +588,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
 
       const lineUid = resolveAddedLineUid(previousItems, nextState, sku, options);
+      const addedLine = nextState.items.find((item) => item.id === lineUid);
+      const previousLineIds = new Set(previousItems.map((item) => item.id));
+      if (options.lineInstance && (!addedLine || previousLineIds.has(addedLine.id) || addedLine.quantity !== 1)) {
+        const mergedLine = nextState.items.find((item) => {
+          const before = previousItems.find((previous) => previous.id === item.id);
+          return before?.product.id === sku && item.quantity > before.quantity;
+        });
+        if (mergedLine) {
+          const before = previousItems.find((item) => item.id === mergedLine.id)!;
+          try {
+            const restored = await updateGuestCartItemQuantity(
+              cartId,
+              mergedLine.id,
+              before.quantity,
+              lineMetadataRef.current,
+            );
+            applyCartState(restored);
+          } catch {
+            // A later cart refresh will reveal the server state if rollback fails.
+            applyCartState(nextState);
+          }
+        } else {
+          const unexpectedNewLine = nextState.items.find(
+            (item) => item.product.id === sku && !previousLineIds.has(item.id),
+          );
+          if (unexpectedNewLine) {
+            try {
+              const restored = await removeGuestCartItem(
+                cartId,
+                unexpectedNewLine.id,
+                lineMetadataRef.current,
+              );
+              applyCartState(restored);
+            } catch {
+              applyCartState(nextState);
+            }
+          } else {
+            applyCartState(nextState);
+          }
+        }
+        throw new Error("Magento did not create a separate bag item. Please try again after refreshing.");
+      }
       if (lineUid) {
         const nextMetadata = upsertLineMetadata(
           lineMetadataRef.current,
@@ -696,15 +738,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const preservedLineInstance =
         lineMetadataRef.current[lineItemId]?.options.lineInstance?.trim() ||
         cartState?.items.find((item) => item.id === lineItemId)?.options.lineInstance?.trim();
+      const preparedOptions = assignCartLineInstance(
+        {
+          ...payload.options,
+          ...(preservedLineInstance ? { lineInstance: preservedLineInstance } : {}),
+        },
+        payload.productCustomOptions ?? payload.product.customOptions,
+      );
 
       await removeItem(lineItemId, { showToast: false });
 
       return addItem({
         ...payload,
-        options: {
-          ...payload.options,
-          ...(preservedLineInstance ? { lineInstance: preservedLineInstance } : {}),
-        },
+        options: preparedOptions,
       });
     },
     [addItem, cartState?.items, removeItem],
