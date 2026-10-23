@@ -78,6 +78,7 @@ export function ProfileOrderDetailView({
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReasonDialogOpen, setCancelReasonDialogOpen] = useState(false);
   const [cancelSuccessDialogOpen, setCancelSuccessDialogOpen] = useState(false);
+  const [cancellationRequestStatus, setCancellationRequestStatus] = useState<TrackedOrder["sunnyCancellationRequestStatus"]>(null);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
   const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
@@ -155,6 +156,7 @@ export function ProfileOrderDetailView({
       });
 
       setCancelReasonDialogOpen(false);
+      setCancellationRequestStatus(freshOrder?.sunnyCancellationRequestStatus ?? null);
       setCancelSuccessDialogOpen(true);
 
       if (freshOrder) {
@@ -634,6 +636,7 @@ export function ProfileOrderDetailView({
         open={cancelSuccessDialogOpen}
         onOpenChange={setCancelSuccessDialogOpen}
         orderNumber={order.number}
+        requestStatus={cancellationRequestStatus}
       />
 
       <ProfileOrderReturnDialog

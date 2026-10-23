@@ -1,6 +1,6 @@
-import CraftingRarityCategoryGrid from "@/features/cms/components/home/CraftingRarityCategoryGrid";
+import LazyCraftingRarityCategoryGrid from "@/features/cms/components/home/LazyCraftingRarityCategoryGrid";
 import CraftingRarityCopyBlock from "@/features/cms/components/home/CraftingRarityCopyBlock";
-import Reveal from "@/shared/Animation/Reveal";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ResolvedCraftingRarityContent } from "@/lib/homepage/resolveHomepageAboveFold";
@@ -45,8 +45,7 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
       {showBrillianceBlock ? (
         <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
           {hasCmsCutout ? (
-            <Reveal
-              direction="up"
+            <ScrollReveal
               className="pointer-events-none absolute right-[-29px] sm:top-[-83px] top-[-100px] z-0 lg:right-[2%] lg:top-[-204px] lg:w-[600px] lg:h-[850px] md:w-[550px] md:h-[560px] sm:w-[550px] sm:h-[560px] w-full h-[435px]"
             >
               <div className="relative h-full w-full rotate-[-13.91deg]">
@@ -62,7 +61,7 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
                   className="object-contain"
                 />
               </div>
-            </Reveal>
+            </ScrollReveal>
           ) : null}
           {hasCopy ? (
             <CraftingRarityCopyBlock
@@ -74,7 +73,7 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
           ) : null}
         </div>
       ) : null}
-      {hasCategories ? <CraftingRarityCategoryGrid categories={categories} /> : null}
+      {hasCategories ? <LazyCraftingRarityCategoryGrid categories={categories} /> : null}
     </section>
   );
 };

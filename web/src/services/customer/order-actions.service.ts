@@ -27,6 +27,7 @@ type SunnyCancelOrderResponse = {
   sunnyCancelOrder?: {
     order?: MagentoCustomerOrderDetail | null;
     refund?: MagentoSunnyRefundStatus | null;
+    request_status?: "PENDING" | "PROCESSING" | "COMPLETED" | "NEEDS_REVIEW" | null;
   } | null;
 };
 
@@ -95,6 +96,7 @@ export async function cancelCustomerOrder(
         input: {
           order_uid: payload.orderId,
           reason: payload.reason,
+          async: true,
           ...(payload.comment ? { comment: payload.comment } : {}),
         },
       },
@@ -105,7 +107,9 @@ export async function cancelCustomerOrder(
   }
 
   return {
-    order: await mapOrderActionOrder(data.sunnyCancelOrder?.order),
+    order: await mapOrderActionOrder(data.sunnyCancelOrder?.order).then((order) => order
+      ? { ...order, sunnyCancellationRequestStatus: data.sunnyCancelOrder?.request_status ?? null }
+      : null),
     refund: mapSunnyRefundStatus(data.sunnyCancelOrder?.refund),
     returnDetails: null,
   };

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { LazyInView } from "@/shared/ui/LazyInView";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
@@ -203,8 +202,7 @@ const CraftingRarityCategoryGrid = ({
   }
 
   return (
-    <LazyInView fallback={<CategoryGridSkeleton />}>
-      <section className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8">
+    <section className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8">
         {visibleCategories.map((category) => (
           <Reveal
             direction="up"
@@ -214,8 +212,7 @@ const CraftingRarityCategoryGrid = ({
             <CraftingRarityCategoryCard category={category} />
           </Reveal>
         ))}
-      </section>
-    </LazyInView>
+    </section>
   );
 };
 

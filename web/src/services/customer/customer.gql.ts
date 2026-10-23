@@ -167,6 +167,7 @@ const SUNNY_REFUND_STATUS_FIELDS = `
 const SUNNY_ORDER_STATUS_FIELDS = ORDER_FLOW_FIELDS_ENABLED
   ? `
   sunny_status
+  sunny_cancellation_request_status
   sunny_actions {
     can_track
     can_cancel
@@ -495,6 +496,7 @@ export const MAGENTO_GUEST_ORDER_QUERY = `
 export const SUNNY_CANCEL_ORDER_MUTATION = `
   mutation SunnyCancelOrder($input: SunnyCancelOrderInput!) {
     sunnyCancelOrder(input: $input) {
+      request_status
       order {
         ${ORDER_DETAIL_FIELDS}
       }
