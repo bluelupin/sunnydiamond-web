@@ -19,6 +19,7 @@ import GiftingGiftCardFlowRoot from '@/features/gift-card/components/GiftingGift
 import { UiPlatformProvider } from '@/shared/context/UiPlatformContext';
 import type { UiPlatform } from '@/shared/utils/detectUiPlatform';
 import DeferredGlobalOverlays from './DeferredGlobalOverlays';
+import PwaLaunchSplash from '@/shared/pwa/PwaLaunchSplash';
 
 export default function AppProvider({
   children,
@@ -42,6 +43,7 @@ export default function AppProvider({
                   <FeatureErrorBoundary featureName="GiftingGiftCardFlowRoot">
                     <GiftingGiftCardFlowRoot>
                       <PageLoadingProvider>
+                        <PwaLaunchSplash />
                         {children}
                       </PageLoadingProvider>
                     </GiftingGiftCardFlowRoot>

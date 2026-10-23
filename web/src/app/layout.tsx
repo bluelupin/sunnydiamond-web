@@ -8,6 +8,7 @@ import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
 import { UI_PLATFORM_BOOTSTRAP_SCRIPT } from "@/shared/constants/uiPlatformBootstrapScript";
 import PwaServiceWorkerRegistration from "@/shared/pwa/PwaServiceWorkerRegistration";
 import { PWA_DISPLAY_BOOTSTRAP_SCRIPT } from "@/shared/pwa/pwaDisplayBootstrap";
+import PwaStandaloneUiSetup from "@/shared/pwa/PwaStandaloneUiSetup";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -116,6 +117,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
         <GoogleAnalytics />
+        <PwaStandaloneUiSetup />
         <PwaServiceWorkerRegistration />
         <ServerAppShell>{children}</ServerAppShell>
       </body>
