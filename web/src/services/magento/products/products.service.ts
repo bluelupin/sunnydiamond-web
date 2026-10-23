@@ -557,7 +557,8 @@ function applySearchListingSort(
   search: string,
   sortValue: string,
 ): JewelleryListingProduct[] {
-  if (!search.trim() || sortValue === "featured") {
+  // Plain search keeps Magento relevance until the shopper picks an explicit sort.
+  if (search.trim() && sortValue === "featured") {
     return products;
   }
 
@@ -624,6 +625,98 @@ function resolveListingTotalCount(
   return Math.max(products.length, apiTotalCount);
 }
 
+function usesClientJewelleryListingSort(sortValue: string): boolean {
+  return sortValue === "price-asc" || sortValue === "price-desc" || sortValue === "name-asc";
+}
+
+function maxListingDisplayPrice(products: readonly JewelleryListingProduct[]): number {
+  if (products.length === 0) {
+    return 0;
+  }
+
+  return Math.max(...products.map((product) => Number(product.price) || 0));
+}
+
+function minListingDisplayPrice(products: readonly JewelleryListingProduct[]): number {
+  if (products.length === 0) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return Math.min(...products.map((product) => Number(product.price) || Number.POSITIVE_INFINITY));
+}
+
+function clientSortedInitialPageNeedsNextMagentoPage(
+  visible: readonly JewelleryListingProduct[],
+  nextPageProducts: readonly JewelleryListingProduct[],
+  sortValue: string,
+  mergedMagentoPage: number,
+): boolean {
+  if (nextPageProducts.length === 0 || visible.length === 0) {
+    return false;
+  }
+
+  if (sortValue === "price-asc") {
+    return minListingDisplayPrice(nextPageProducts) < maxListingDisplayPrice(visible);
+  }
+
+  if (sortValue === "price-desc") {
+    return maxListingDisplayPrice(nextPageProducts) > minListingDisplayPrice(visible);
+  }
+
+  // Name sort — one extra Magento page is enough to stabilise the first grid row.
+  return mergedMagentoPage < 2;
+}
+
+async function buildClientSortedInitialListing(
+  firstPage: JewelleryListingProductsData,
+  params: Omit<GetMagentoJewelleryProductsParams, "page"> & { pageSize?: number },
+  pageSize: number,
+  sortValue: string,
+): Promise<{
+  products: JewelleryListingProduct[];
+  pendingProducts: JewelleryListingProduct[];
+  currentPage: number;
+}> {
+  let merged = [...firstPage.products];
+  let magentoPage = 1;
+
+  while (magentoPage < firstPage.totalPages) {
+    const sorted = sortJewelleryListingProducts(merged, sortValue);
+    const visible = sorted.slice(0, pageSize);
+    const nextPageNumber = magentoPage + 1;
+
+    const nextPage = await getMagentoJewelleryProducts({
+      ...params,
+      page: nextPageNumber,
+      pageSize,
+      includeFacets: false,
+      facets: firstPage.facets,
+    });
+
+    if (
+      !clientSortedInitialPageNeedsNextMagentoPage(
+        visible,
+        nextPage.products,
+        sortValue,
+        magentoPage,
+      )
+    ) {
+      break;
+    }
+
+    merged = [...merged, ...nextPage.products];
+    magentoPage = nextPageNumber;
+  }
+
+  const sorted = sortJewelleryListingProducts(merged, sortValue);
+
+  return {
+    products: sorted.slice(0, pageSize),
+    pendingProducts: sorted.slice(pageSize),
+    currentPage: magentoPage,
+  };
+}
+
 /** Fetches the first PLP page ({@link PAGE_SIZE} products) with facets. */
 export async function getMagentoJewelleryInitialListing(
   params: Omit<GetMagentoJewelleryProductsParams, "page"> & {
@@ -631,7 +724,7 @@ export async function getMagentoJewelleryInitialListing(
   },
 ): Promise<MagentoJewelleryInitialListingResult> {
   const pageSize = params.pageSize ?? PAGE_SIZE;
-  const filters = params.filters ?? createEmptyFilterState();
+  const sortValue = params.sortValue ?? "featured";
 
   const firstPage = await getMagentoJewelleryProducts({
     ...params,
@@ -640,17 +733,34 @@ export async function getMagentoJewelleryInitialListing(
     includeFacets: params.includeFacets !== false,
   });
 
+  if (!usesClientJewelleryListingSort(sortValue)) {
+    return {
+      listing: {
+        products: firstPage.products,
+        totalCount: firstPage.totalCount,
+        totalPages: firstPage.totalPages,
+        pageSize: firstPage.pageSize,
+        currentPage: 1,
+        facets: firstPage.facets,
+        pendingProducts: [],
+      },
+      pendingProducts: [],
+    };
+  }
+
+  const expanded = await buildClientSortedInitialListing(firstPage, params, pageSize, sortValue);
+
   return {
     listing: {
-      products: firstPage.products,
+      products: expanded.products,
+      pendingProducts: expanded.pendingProducts,
       totalCount: firstPage.totalCount,
       totalPages: firstPage.totalPages,
       pageSize: firstPage.pageSize,
-      currentPage: 1,
+      currentPage: expanded.currentPage,
       facets: firstPage.facets,
-      pendingProducts: [],
     },
-    pendingProducts: [],
+    pendingProducts: expanded.pendingProducts,
   };
 }
 

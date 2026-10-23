@@ -174,7 +174,7 @@ export function mapJewellerySortToMagento(
   }
 }
 
-/** Aligns grid order with PLP cards when catalog search sort is loose or ignored server-side. */
+/** Aligns grid order with card display price when Magento catalog sort is loose or page boundaries disagree. */
 export function sortJewelleryListingProducts(
   products: JewelleryListingProduct[],
   sortValue: string,
@@ -187,10 +187,18 @@ export function sortJewelleryListingProducts(
 
   switch (sortValue) {
     case "price-asc":
-      sorted.sort((left, right) => left.price - right.price || left.name.localeCompare(right.name));
+      sorted.sort(
+        (left, right) =>
+          (Number(left.price) || 0) - (Number(right.price) || 0) ||
+          left.name.localeCompare(right.name),
+      );
       break;
     case "price-desc":
-      sorted.sort((left, right) => right.price - left.price || left.name.localeCompare(right.name));
+      sorted.sort(
+        (left, right) =>
+          (Number(right.price) || 0) - (Number(left.price) || 0) ||
+          left.name.localeCompare(right.name),
+      );
       break;
     case "name-asc":
       sorted.sort((left, right) => left.name.localeCompare(right.name));

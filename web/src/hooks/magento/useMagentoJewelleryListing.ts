@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   PAGE_SIZE,
   createEmptyFilterState,
@@ -16,6 +16,7 @@ import {
   getMagentoJewelleryProducts,
   seedMagentoJewelleryListingCache,
 } from "@/services/magento/products/products.service";
+import { sortJewelleryListingProducts } from "@/services/magento/products/products.mapper";
 import {
   markJewelleryPlpProductsFetchStart,
   reportJewelleryPlpProductsReady,
@@ -550,7 +551,8 @@ export function useMagentoJewelleryListing({
 
         if (batch.length > 0) {
           setProducts((current) => {
-            const next = appendUniqueProducts(current, batch);
+            const merged = appendUniqueProducts(current, batch);
+            const next = sortJewelleryListingProducts(merged, sortValue);
             if (getExactJewelleryPriceFilter(filtersRef.current, facetsRef.current) != null) {
               setTotalCount(next.length + pendingProductsRef.current.length);
             }
@@ -588,8 +590,13 @@ export function useMagentoJewelleryListing({
   );
   const isSearching = listingQueryKey !== resolvedListingQueryKey;
 
+  const displayProducts = useMemo(
+    () => sortJewelleryListingProducts(products, sortValue),
+    [products, sortValue],
+  );
+
   return {
-    products,
+    products: displayProducts,
     totalCount,
     facets,
     isLoading,
