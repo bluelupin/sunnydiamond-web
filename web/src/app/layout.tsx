@@ -7,6 +7,7 @@ import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
 import { UI_PLATFORM_BOOTSTRAP_SCRIPT } from "@/shared/constants/uiPlatformBootstrapScript";
 import PwaServiceWorkerRegistration from "@/shared/pwa/PwaServiceWorkerRegistration";
+import { PWA_DISPLAY_BOOTSTRAP_SCRIPT } from "@/shared/pwa/pwaDisplayBootstrap";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -106,6 +107,11 @@ export default function RootLayout({
           id="ui-platform-bootstrap"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: UI_PLATFORM_BOOTSTRAP_SCRIPT }}
+        />
+        <Script
+          id="pwa-display-bootstrap"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: PWA_DISPLAY_BOOTSTRAP_SCRIPT }}
         />
       </head>
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>

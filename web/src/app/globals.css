@@ -1027,3 +1027,36 @@
     transition: none;
   }
 }
+
+/**
+ * Installed PWA only: hide the root vertical scrollbar (native-app feel).
+ * In-browser responsive/desktop views keep default scrollbar styling.
+ * Nested scroll regions (drawers, filters) keep their own scrollbar utilities.
+ */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html,
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+html[data-pwa-display="standalone"],
+html[data-pwa-display="standalone"] body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html[data-pwa-display="standalone"]::-webkit-scrollbar,
+html[data-pwa-display="standalone"] body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
