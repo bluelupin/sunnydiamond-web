@@ -12,7 +12,6 @@ import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { categoryIconSrc } from "@/features/jewellery-product/data/categoryIcons";
 import {
-  createEmptyFilterState,
   getJewelleryPriceSliderStep,
   normalizeJewelleryPriceRange,
   parseJewelleryPriceInput,
@@ -27,7 +26,6 @@ import type {
 } from "@/types/magento/jewelleryListing";
 import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import { getMagentoProductAttributeOptions } from "@/services/magento/products/productAttributeOptions.service";
-import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
 import { resolveDiscoverJourneyDiamondShapeIcon } from "../data/diamondShapeIcons";
 import {
@@ -41,13 +39,19 @@ import {
 } from "../data/discoverJourney";
 import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
 import {
-  clearDiscoverJourneyListingFacetCache,
   discoverJourneyHasMatchingProducts,
+  getDiscoverJourneyListingFacets,
   isDiscoverJourneyAbortError,
+  peekDiscoverJourneyListingFacets,
   prefetchDiscoverJourneyCategoryFacets,
   primeDiscoverJourneyListingFacetCache,
 } from "../utils/discoverJourneyAvailability";
 import { buildEducationJourneyHref } from "../utils/educationJourneyRoutes";
+import {
+  EducationDiscoverJourneyStep1PriceSkeleton,
+  EducationDiscoverJourneyStep2CategorySkeleton,
+  EducationDiscoverJourneyStep3ShapeSkeleton,
+} from "./skeletons/EducationDiscoverJourneyStepSkeletons";
 import EducationDiscoverJourneyStepper from "./EducationDiscoverJourneyStepper";
 
 type EducationDiscoverJourneyPanelProps = {
@@ -58,8 +62,6 @@ type EducationDiscoverJourneyPanelProps = {
 
 type JourneyStep = 1 | 2 | 3;
 
-const FALLBACK_MAX_PRICE = 300_000;
-
 /** Digits and grouping commas only — matches jewellery price fields elsewhere. */
 function sanitizeDiscoverJourneyPriceInput(value: string): string {
   return value.replace(/[^\d,]/g, "");
@@ -68,12 +70,43 @@ function sanitizeDiscoverJourneyPriceInput(value: string): string {
 const rangeThumbClassName =
   "pointer-events-none col-start-1 row-start-1 z-20 h-[12px] w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[12px] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-darkblack [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[12px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-darkblack";
 
-function createFallbackFacets(): JewelleryFilterFacets {
-  return {
-    ...EMPTY_JEWELLERY_FILTER_FACETS,
-    minPrice: 0,
-    maxPrice: FALLBACK_MAX_PRICE,
-  };
+function createEmptyDiscoverJourneyPriceFacets(): JewelleryFilterFacets {
+  return { ...EMPTY_JEWELLERY_FILTER_FACETS };
+}
+
+function isValidDiscoverJourneyPriceFacets(facets: JewelleryFilterFacets): boolean {
+  return facets.maxPrice > facets.minPrice;
+}
+
+type DiscoverJourneyPriceRangeSetters = {
+  setFacets: (facets: JewelleryFilterFacets) => void;
+  setMinPrice: (value: number) => void;
+  setMaxPrice: (value: number) => void;
+  setMinInputValue: (value: string) => void;
+  setMaxInputValue: (value: string) => void;
+  setPriceFacetsLoadState: (state: "idle" | "loading" | "ready" | "error") => void;
+};
+
+function resetDiscoverJourneyPriceRangeState(setters: DiscoverJourneyPriceRangeSetters): void {
+  const empty = createEmptyDiscoverJourneyPriceFacets();
+  setters.setFacets(empty);
+  setters.setMinPrice(empty.minPrice);
+  setters.setMaxPrice(empty.maxPrice);
+  setters.setMinInputValue(formatJewelleryPrice(empty.minPrice));
+  setters.setMaxInputValue(formatJewelleryPrice(empty.maxPrice));
+}
+
+function applyDiscoverJourneyPriceRangeFromFacets(
+  nextFacets: JewelleryFilterFacets,
+  setters: DiscoverJourneyPriceRangeSetters,
+): void {
+  setters.setFacets(nextFacets);
+  primeDiscoverJourneyListingFacetCache(null, nextFacets);
+  setters.setMinPrice(nextFacets.minPrice);
+  setters.setMaxPrice(nextFacets.maxPrice);
+  setters.setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
+  setters.setMaxInputValue(formatJewelleryPrice(nextFacets.maxPrice));
+  setters.setPriceFacetsLoadState("ready");
 }
 
 /** Lets React commit loading UI before a sync PLP cache hit resolves the proceed check. */
@@ -116,17 +149,20 @@ const EducationDiscoverJourneyPanel = ({
   steps,
 }: EducationDiscoverJourneyPanelProps) => {
   const router = useRouter();
-  const { data: navData } = useMagentoJewelleryNav();
+  const { data: navData, isLoading: isJewelleryNavLoading } = useMagentoJewelleryNav();
   const { showMobileShell } = useResponsiveOverlayShell(open, EDUCATION_JOURNEY_MOBILE_QUERY);
 
   const journeySteps = useMemo(() => resolveDiscoverJourneySteps(steps), [steps]);
 
   const [step, setStep] = useState<JourneyStep>(1);
-  const [facets, setFacets] = useState<JewelleryFilterFacets>(createFallbackFacets);
+  const [facets, setFacets] = useState<JewelleryFilterFacets>(createEmptyDiscoverJourneyPriceFacets);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(FALLBACK_MAX_PRICE);
+  const [maxPrice, setMaxPrice] = useState(0);
   const [minInputValue, setMinInputValue] = useState("0");
-  const [maxInputValue, setMaxInputValue] = useState(formatJewelleryPrice(FALLBACK_MAX_PRICE));
+  const [maxInputValue, setMaxInputValue] = useState("0");
+  const [priceFacetsLoadState, setPriceFacetsLoadState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
   const [minInputFocused, setMinInputFocused] = useState(false);
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [categorySlug, setCategorySlug] = useState<JewelleryCategorySlug>("all");
@@ -157,6 +193,9 @@ const EducationDiscoverJourneyPanel = ({
     [navData?.categories],
   );
 
+  const showStep2CategorySkeleton =
+    isJewelleryNavLoading && (navData?.categories?.length ?? 0) === 0;
+
   const selectedCategory: JewelleryCategory | undefined = useMemo(
     () => categories.find((category) => category.slug === categorySlug) ?? categories[0],
     [categories, categorySlug],
@@ -175,8 +214,16 @@ const EducationDiscoverJourneyPanel = ({
   const priceSliderStep = getJewelleryPriceSliderStep(facets);
 
   useEffect(() => {
+    const priceRangeSetters: DiscoverJourneyPriceRangeSetters = {
+      setFacets,
+      setMinPrice,
+      setMaxPrice,
+      setMinInputValue,
+      setMaxInputValue,
+      setPriceFacetsLoadState,
+    };
+
     if (!open) {
-      clearDiscoverJourneyListingFacetCache();
       setStep(1);
       setCategorySlug("all");
       setDiamondShapeValue("");
@@ -193,43 +240,49 @@ const EducationDiscoverJourneyPanel = ({
       setCategoryListingFacets(null);
       setMinInputFocused(false);
       setMaxInputFocused(false);
+      resetDiscoverJourneyPriceRangeState(priceRangeSetters);
+      setPriceFacetsLoadState("idle");
       return;
     }
 
     let cancelled = false;
+    const priceAbort = new AbortController();
     const shapesAbort = new AbortController();
+
+    const cachedPriceFacets = peekDiscoverJourneyListingFacets(null);
+    if (cachedPriceFacets && isValidDiscoverJourneyPriceFacets(cachedPriceFacets)) {
+      applyDiscoverJourneyPriceRangeFromFacets(cachedPriceFacets, priceRangeSetters);
+    } else {
+      setPriceFacetsLoadState("loading");
+      resetDiscoverJourneyPriceRangeState(priceRangeSetters);
+    }
 
     setDiamondShapesLoadState("loading");
     setDiamondShapeOptions([]);
 
     void (async () => {
       try {
-        const data = await getMagentoJewelleryProducts({
-          page: 1,
-          pageSize: 1,
-          filters: createEmptyFilterState(),
-          includeFacets: true,
-        });
+        const nextFacets = await getDiscoverJourneyListingFacets(null, priceAbort.signal);
 
         if (cancelled) return;
 
-        const nextFacets =
-          data.facets.maxPrice > data.facets.minPrice ? data.facets : createFallbackFacets();
+        if (!isValidDiscoverJourneyPriceFacets(nextFacets)) {
+          if (!peekDiscoverJourneyListingFacets(null)) {
+            resetDiscoverJourneyPriceRangeState(priceRangeSetters);
+            setPriceFacetsLoadState("error");
+          }
+          return;
+        }
 
-        setFacets(nextFacets);
-        primeDiscoverJourneyListingFacetCache(null, nextFacets);
-        setMinPrice(nextFacets.minPrice);
-        setMaxPrice(nextFacets.maxPrice);
-        setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
-        setMaxInputValue(formatJewelleryPrice(nextFacets.maxPrice));
-      } catch {
-        if (cancelled) return;
-        const fallback = createFallbackFacets();
-        setFacets(fallback);
-        setMinPrice(fallback.minPrice);
-        setMaxPrice(fallback.maxPrice);
-        setMinInputValue(formatJewelleryPrice(fallback.minPrice));
-        setMaxInputValue(formatJewelleryPrice(fallback.maxPrice));
+        applyDiscoverJourneyPriceRangeFromFacets(nextFacets, priceRangeSetters);
+      } catch (error) {
+        if (cancelled || isDiscoverJourneyAbortError(error)) {
+          return;
+        }
+        if (!peekDiscoverJourneyListingFacets(null)) {
+          resetDiscoverJourneyPriceRangeState(priceRangeSetters);
+          setPriceFacetsLoadState("error");
+        }
       }
     })();
 
@@ -256,6 +309,7 @@ const EducationDiscoverJourneyPanel = ({
 
     return () => {
       cancelled = true;
+      priceAbort.abort();
       shapesAbort.abort();
     };
   }, [open]);
@@ -663,7 +717,15 @@ const EducationDiscoverJourneyPanel = ({
             DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
           )}
         >
-          {step === 1 && hasPriceRange ? (
+          {step === 1 && priceFacetsLoadState === "loading" ? (
+            <EducationDiscoverJourneyStep1PriceSkeleton />
+          ) : null}
+          {step === 1 && priceFacetsLoadState === "error" ? (
+            <p className="font-gill text-base font-light leading-110 text-neutral500">
+              Price range is unavailable right now. Please try again later.
+            </p>
+          ) : null}
+          {step === 1 && priceFacetsLoadState === "ready" && hasPriceRange ? (
             <section className="flex flex-col gap-6">
               <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
                 <div
@@ -788,7 +850,10 @@ const EducationDiscoverJourneyPanel = ({
             </section>
           ) : null}
 
-          {step === 2 ? (
+          {step === 2 && showStep2CategorySkeleton ? (
+            <EducationDiscoverJourneyStep2CategorySkeleton />
+          ) : null}
+          {step === 2 && !showStep2CategorySkeleton ? (
             <section className="flex flex-col gap-4">
               <div className="grid grid-cols-4 gap-x-3 gap-y-6">
                 {(categories.length > 0
@@ -833,9 +898,7 @@ const EducationDiscoverJourneyPanel = ({
           {step === 3 ? (
             <section className="flex flex-col gap-4">
               {diamondShapesLoadState === "loading" ? (
-                <p className="font-gill text-base font-light leading-110 text-neutral500">
-                  Loading diamond shapes…
-                </p>
+                <EducationDiscoverJourneyStep3ShapeSkeleton />
               ) : null}
               {diamondShapesLoadState === "error" ? (
                 <p className="font-gill text-base font-light leading-110 text-neutral500">
@@ -920,7 +983,7 @@ const EducationDiscoverJourneyPanel = ({
             onClick={handlePrimaryAction}
             disabled={
               isVerifyingAvailability ||
-              (step === 1 && !hasPriceRange) ||
+              (step === 1 && (priceFacetsLoadState !== "ready" || !hasPriceRange)) ||
               (step === 2 &&
                 (isCheckingStep2Category || step2CategoryHasProducts !== true)) ||
               (step === 3 &&

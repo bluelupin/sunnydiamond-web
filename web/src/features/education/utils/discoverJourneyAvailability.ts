@@ -116,6 +116,11 @@ export async function getDiscoverJourneyListingFacets(
   return fetchPromise;
 }
 
+/** Warms global catalogue price bounds for discover journey step 1. */
+export function prefetchDiscoverJourneyGlobalPriceFacets(signal?: AbortSignal): void {
+  prefetchDiscoverJourneyCategoryFacets([null], signal);
+}
+
 /** Warms facet cache for step-2 category tiles (deduped in-flight per scope). */
 export function prefetchDiscoverJourneyCategoryFacets(
   categoryUrlKeys: readonly (string | null)[],

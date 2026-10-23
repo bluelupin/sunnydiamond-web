@@ -1,4 +1,3 @@
-/** Figma 4903:61397 — Discover journey step 3 diamond shape. */
 interface props {
   className?: string;
 }
