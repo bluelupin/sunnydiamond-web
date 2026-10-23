@@ -53,7 +53,7 @@ export function resolveDiamondShapeFacetOption(
       );
     }) ?? null;
 
-  return matchIn(diamondShapes);
+  return matchIn(diamondShapes) ?? matchIn(DIAMOND_SHAPE_OPTIONS);
 }
 
 export function buildJewelleryDiamondShapeHref(
