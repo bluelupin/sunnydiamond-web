@@ -5,7 +5,7 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { detectUiPlatform, type UiPlatform } from "@/shared/utils/detectUiPlatform";
@@ -18,26 +18,26 @@ export type UiPlatformContextValue = {
 
 const UiPlatformContext = createContext<UiPlatformContextValue | null>(null);
 
-function readPlatformFromDocument(fallback: UiPlatform): UiPlatform {
-  if (typeof document === "undefined") {
-    return fallback;
+function readPlatform(): UiPlatform {
+  const value = document.documentElement.getAttribute("data-ui-platform");
+  if (value === "windows" || value === "apple" || value === "other") {
+    return value;
   }
+  return detectUiPlatform(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
+}
 
-  const fromDom = document.documentElement.getAttribute("data-ui-platform");
-  if (fromDom === "windows" || fromDom === "apple" || fromDom === "other") {
-    return fromDom;
-  }
-
-  return detectUiPlatform(
-    navigator.userAgent,
-    navigator.platform,
-    navigator.maxTouchPoints,
-  );
+function subscribeToPlatform(onChange: () => void): () => void {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-ui-platform"],
+  });
+  return () => observer.disconnect();
 }
 
 type UiPlatformProviderProps = {
   children: ReactNode;
-  /** Server-detected platform so SSR markup matches the first client render. */
+  /** Static server fallback so SSR markup matches the first client render. */
   initialPlatform?: UiPlatform;
 };
 
@@ -45,8 +45,10 @@ export function UiPlatformProvider({
   children,
   initialPlatform = "other",
 }: UiPlatformProviderProps) {
-  const [platform, setPlatform] = useState<UiPlatform>(() =>
-    readPlatformFromDocument(initialPlatform),
+  const platform = useSyncExternalStore(
+    subscribeToPlatform,
+    readPlatform,
+    () => initialPlatform,
   );
 
   useLayoutEffect(() => {
@@ -57,7 +59,6 @@ export function UiPlatformProvider({
     );
 
     document.documentElement.setAttribute("data-ui-platform", detected);
-    setPlatform(detected);
   }, []);
 
   const value = useMemo<UiPlatformContextValue>(

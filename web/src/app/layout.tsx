@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
 import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
@@ -7,7 +6,6 @@ import GoogleAnalytics from "@/infrastructure/analytics/GoogleAnalytics";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
 import { UI_PLATFORM_BOOTSTRAP_SCRIPT } from "@/shared/constants/uiPlatformBootstrapScript";
-import { detectUiPlatform } from "@/shared/utils/detectUiPlatform";
 import PwaServiceWorkerRegistration from "@/shared/pwa/PwaServiceWorkerRegistration";
 
 export const viewport: Viewport = {
@@ -91,19 +89,16 @@ export const metadata: Metadata = {
     : {}),
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const userAgent = (await headers()).get("user-agent") ?? "";
-  const uiPlatform = detectUiPlatform(userAgent);
-
   return (
     <html
       lang="en"
       className="antialiased"
-      data-ui-platform={uiPlatform}
+      data-ui-platform="other"
       suppressHydrationWarning
     >
       <head>

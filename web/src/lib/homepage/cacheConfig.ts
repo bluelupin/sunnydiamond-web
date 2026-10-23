@@ -6,4 +6,4 @@
  */
 
 /** Strapi homepage CMS ISR — `app/(home)/page.tsx` revalidate. */
-export const HOMEPAGE_CMS_REVALIDATE_SECONDS = 300;
+export const HOMEPAGE_CMS_REVALIDATE_SECONDS = 60;

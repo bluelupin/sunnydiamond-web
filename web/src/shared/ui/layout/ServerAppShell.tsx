@@ -1,6 +1,4 @@
-import { headers } from "next/headers";
 import AppProvider from "@/shared/lib/providers/AppProvider";
-import { detectUiPlatform } from "@/shared/utils/detectUiPlatform";
 import HomepageCmsSeeder from "@/shared/lib/providers/HomepageCmsSeeder";
 import MagentoNavSeeder from "@/shared/lib/providers/MagentoNavSeeder";
 import { ProfilePageCmsProvider } from "@/shared/lib/providers/ProfilePageCmsProvider";
@@ -31,11 +29,8 @@ export default async function ServerAppShell({
   const profilePage =
     profilePageResult.status === "fulfilled" ? profilePageResult.value : null;
 
-  const userAgent = (await headers()).get("user-agent") ?? "";
-  const initialUiPlatform = detectUiPlatform(userAgent);
-
   return (
-    <AppProvider authFeatures={authFeatures} initialUiPlatform={initialUiPlatform}>
+    <AppProvider authFeatures={authFeatures}>
       <HomepageCmsSeeder shell={shell} />
       <MagentoNavSeeder jewelleryNav={jewelleryNav} />
       <ProfilePageCmsProvider page={profilePage}>{children}</ProfilePageCmsProvider>

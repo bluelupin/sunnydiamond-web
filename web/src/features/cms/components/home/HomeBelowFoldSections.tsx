@@ -8,7 +8,7 @@ import type {
 } from "@/services/bespoke/contact-bespoke-page.types";
 import { FeatureErrorBoundary } from "@/shared/ui/FeatureErrorBoundary";
 import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
-import { FeaturedCarouselSkeleton } from "@/features/cms/components/home/FeaturedProductsSection";
+import FeaturedCarouselSkeleton from "@/features/cms/components/home/FeaturedCarouselSkeleton";
 import { lazyImportWithRetry } from "@/shared/utils/lazyImportWithRetry";
 
 const DiamondSourcingSection = lazyImportWithRetry(

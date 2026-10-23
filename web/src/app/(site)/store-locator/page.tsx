@@ -10,7 +10,7 @@ import { mapStoreLocatorShowroomToBookStoreVisit } from "@/features/products/uti
 import { buildStoreLocatorJsonLd } from "@/shared/lib/seo/storeLocatorSeo";
 import { getStoreLocatorPage } from "@/services/store-locator/store-locator-page.service";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {

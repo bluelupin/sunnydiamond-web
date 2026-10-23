@@ -73,7 +73,7 @@ export async function fetchStoreLocatorShowroomsFromCollection(
 ): Promise<NormalizedStoreLocatorShowroom[]> {
   const payload = await apiFetch<unknown>(
     `${STRAPI_ENDPOINTS.showrooms}?${SHOWROOMS_COLLECTION_QUERY}`,
-    { signal },
+    { signal, next: { revalidate: 60, tags: ["store-locator-showrooms"] } },
   );
 
   return mapStoreLocatorShowroomsFromCollection(payload);

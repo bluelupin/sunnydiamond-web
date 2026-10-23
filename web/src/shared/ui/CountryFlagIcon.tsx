@@ -1,7 +1,6 @@
 "use client";
 
 import { hasFlag } from "country-flag-icons";
-import * as FlagStrings from "country-flag-icons/string/3x2";
 import { cn } from "@/shared/utils/cn";
 
 function InternationalFlagPlaceholder({ className }: { className?: string }) {
@@ -35,20 +34,25 @@ export function CountryFlagIcon({ iso, className }: CountryFlagIconProps) {
     return <InternationalFlagPlaceholder className={className} />;
   }
 
-  const svg = (FlagStrings as Record<string, string>)[normalized];
-  if (!svg) {
-    return <InternationalFlagPlaceholder className={className} />;
-  }
-
   return (
     <span
       className={cn(
-        "inline-flex size-6 shrink-0 overflow-hidden [&>svg]:block [&>svg]:h-full [&>svg]:w-full",
+        "inline-flex size-6 shrink-0 overflow-hidden",
         className,
       )}
       aria-hidden
-      // SVG strings from country-flag-icons are trusted package assets.
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    >
+      {/* Static SVGs do not need the Next image optimizer. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/flags/3x2/${normalized}.svg`}
+        alt=""
+        width={24}
+        height={24}
+        loading="lazy"
+        decoding="async"
+        className="block h-full w-full object-contain"
+      />
+    </span>
   );
 }

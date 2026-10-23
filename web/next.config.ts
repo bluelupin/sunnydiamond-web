@@ -1,4 +1,5 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 
 const JEWELLERY_CATEGORY_DESTINATIONS = [
@@ -12,6 +13,8 @@ const JEWELLERY_CATEGORY_DESTINATIONS = [
 ] as const;
 
 const nextConfig: NextConfig = {
+  // Bound the CDN stale window for pages revalidated every 60 seconds.
+  expireTime: 3600,
   // Ensure async CMS metadata (title, description, OG tags) is rendered in <head>
   // instead of streamed into <body> for browser view-source and SEO tooling.
   htmlLimitedBots: /.*/,
@@ -137,7 +140,13 @@ const nextConfig: NextConfig = {
 
 // org/project/auth token come from SENTRY_ORG, SENTRY_PROJECT and SENTRY_AUTH_TOKEN
 // env vars. Without SENTRY_AUTH_TOKEN the plugin skips source map upload.
-export default withSentryConfig(nextConfig, {
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+  analyzerMode: "json",
+  openAnalyzer: false,
+});
+
+export default withBundleAnalyzer(withSentryConfig(nextConfig, {
   silent: true,
   telemetry: false,
-});
+}));

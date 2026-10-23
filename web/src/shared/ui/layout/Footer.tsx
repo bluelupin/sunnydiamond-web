@@ -10,7 +10,7 @@ import { isBookAppointmentLink, resolveShellFooterLinkGroups } from "@/shared/li
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { FooterTrustBadgeSection } from "@/features/cms/components/common/TrustBadges";
-import Reveal from "@/shared/Animation/Reveal";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { cn } from "@/shared/utils/cn";
 import { isCheckoutRoute } from "@/shared/utils/navigation";
@@ -162,7 +162,7 @@ const Footer = ({ className }: { className?: string }) => {
       />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:pt-104 lg:pb-104 md:pt-16 md:pb-16 pt-8 pb-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
-          <Reveal direction="up" className="shrink-0">
+          <ScrollReveal className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">
               <Image
                 src="/logo-desktop.svg"
@@ -174,7 +174,7 @@ const Footer = ({ className }: { className?: string }) => {
                 className="h-auto w-[200px] xl:w-[336px]"
               />
             </Link>
-          </Reveal>
+          </ScrollReveal>
           {hasFooterNavigation &&
             <nav
               aria-label="Footer navigation"
@@ -185,9 +185,9 @@ const Footer = ({ className }: { className?: string }) => {
                   key={column.id}
                   className="flex w-full flex-col gap-6"
                 >
-                  <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
+                  <ScrollReveal as="p" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                     {column.title.toUpperCase()}
-                  </Reveal>
+                  </ScrollReveal>
                   <ul className="flex flex-col gap-3">
                     {column.links.map((link) => {
                       const openInSidePanel =
@@ -196,7 +196,7 @@ const Footer = ({ className }: { className?: string }) => {
                         "font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta";
 
                       return (
-                        <Reveal as="li" direction="up" key={link.id} className="leading-[0px]">
+                        <ScrollReveal as="li" key={link.id} className="leading-[0px]">
                           {openInSidePanel ? (
                             <button
                               type="button"
@@ -210,7 +210,7 @@ const Footer = ({ className }: { className?: string }) => {
                               {link.label}
                             </Link>
                           )}
-                        </Reveal>
+                        </ScrollReveal>
                       );
                     })}
                   </ul>

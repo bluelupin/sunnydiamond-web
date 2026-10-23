@@ -7,6 +7,7 @@ import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingPr
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import Reveal from "@/shared/Animation/Reveal";
 import FeaturedProductsCenterModeSlider from "@/features/cms/components/home/FeaturedProductsCenterModeSlider";
+import FeaturedCarouselSkeleton from "./FeaturedCarouselSkeleton";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
 /** Recommended transparent product PNG/WebP for CMS uploads. */
@@ -61,14 +62,6 @@ function FeaturedProductsHeader({
 }
 
 export { FeaturedProductsHeader };
-
-const FeaturedCarouselSkeleton = () => (
-  <div className="relative h-[275px] w-full sm:h-[303px] md:h-[411px]">
-    <div className="absolute left-1/2 top-0 h-[155px] w-[200px] -translate-x-1/2 animate-pulse rounded bg-gray200 sm:h-[170px] sm:w-[260px] md:h-[259px] md:w-[600px]" aria-hidden />
-  </div>
-);
-
-export { FeaturedCarouselSkeleton };
 
 const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();

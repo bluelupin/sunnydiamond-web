@@ -29,6 +29,7 @@ export const getStoreLocatorPage = cache(
       const [raw, collectionShowrooms] = await Promise.all([
         apiFetch<StrapiStoreLocatorPage>(endpoint, {
           signal: options?.signal,
+          next: { revalidate: 60, tags: ["store-locator-page"] },
         }),
         fetchStoreLocatorShowroomsFromCollection(options?.signal).catch(() => []),
       ]);

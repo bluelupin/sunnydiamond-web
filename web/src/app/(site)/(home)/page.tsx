@@ -17,7 +17,7 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { getContactBespokePage } from "@/services/bespoke/contact-bespoke-page.service";
 
 /** Matches HOMEPAGE_CMS_REVALIDATE_SECONDS — segment config must be a literal. */
-export const revalidate = 300;
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {

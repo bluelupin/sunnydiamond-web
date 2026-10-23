@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getStoreLocatorPage } from "@/services/store-locator/store-locator-page.service";
 
-/** Same refresh as the store-locator page (ISR 300 s). */
-const SHOWROOMS_REVALIDATE_SECONDS = 300;
+/** Same refresh as the store-locator page (ISR 60 s). */
+const SHOWROOMS_REVALIDATE_SECONDS = 60;
 
 /**
  * GET /api/store-locator/showrooms — active showrooms (with coordinates) + nearest-store radius

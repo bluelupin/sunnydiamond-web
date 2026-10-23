@@ -23,7 +23,7 @@ export const getProductLandingPage = cache(
     try {
       const raw = await apiFetch<StrapiProductLandingPage>(
         `${STRAPI_ENDPOINTS.productLandingPage}?${PRODUCT_LANDING_POPULATE}`,
-        { signal },
+        { signal, next: { revalidate: 60, tags: ["product-landing-page"] } },
       );
       return mapProductLandingPage(raw);
     } catch {

@@ -28,7 +28,8 @@
     "test:gift-card": "node scripts/run-gift-card-test-cases.mjs",
     "test:gift-card-orders": "node --experimental-strip-types --no-warnings scripts/check-gift-card-order-display.mjs",
     "test:search": "node scripts/run-search-test-cases.mjs",
-    "test:intl-otp": "node --experimental-strip-types --no-warnings scripts/check-intl-otp.mjs"
+    "test:intl-otp": "node --experimental-strip-types --no-warnings scripts/check-intl-otp.mjs",
+    "copy:phone-flags": "node scripts/copy-phone-country-flags.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -62,6 +63,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

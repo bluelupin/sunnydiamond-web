@@ -2,10 +2,8 @@
 
 import { useMemo } from "react";
 import FeaturedProductsCenterModeSlider from "@/features/cms/components/home/FeaturedProductsCenterModeSlider";
-import {
-  FeaturedCarouselSkeleton,
-  FeaturedProductsHeader,
-} from "@/features/cms/components/home/FeaturedProductsSection";
+import { FeaturedProductsHeader } from "@/features/cms/components/home/FeaturedProductsSection";
+import FeaturedCarouselSkeleton from "@/features/cms/components/home/FeaturedCarouselSkeleton";
 import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 import type { NormalizedGiftingPerfectGift } from "@/services/gifting/gifting-page.types";

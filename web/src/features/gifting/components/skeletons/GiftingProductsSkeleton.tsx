@@ -1,4 +1,4 @@
-import { FeaturedCarouselSkeleton } from "@/features/cms/components/home/FeaturedProductsSection";
+import FeaturedCarouselSkeleton from "@/features/cms/components/home/FeaturedCarouselSkeleton";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 const GiftingProductsSkeleton = () => (
