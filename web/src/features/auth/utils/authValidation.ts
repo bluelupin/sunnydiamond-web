@@ -1,5 +1,7 @@
 import {
   type FieldValidation,
+  isCombinedPhoneOrEmailAsEmail,
+  shouldShowPhoneOrEmailCountryCode,
   validatePhone,
   validateRequiredEmail,
   validateRequiredName,
@@ -25,9 +27,15 @@ export const normalizeLoginPhoneDigits = (value: string, countryCode: string): s
 };
 
 // @ always selects email. Standalone symbols must not select mobile or be stripped.
-export const isEmailIdentifier = (value: string): boolean => {
-  const trimmed = value.trim();
-  return /[@\p{L}._]/u.test(trimmed) || (trimmed.length > 0 && !/\d/.test(trimmed));
+export const isEmailIdentifier = isCombinedPhoneOrEmailAsEmail;
+
+/** Country prefix on sign-in: hidden when empty, email-only mode, or email-like input. */
+export const shouldShowLoginCountryCode = (
+  value: string,
+  options?: LoginIdentifierOptions,
+): boolean => {
+  if (options?.emailOnly) return false;
+  return shouldShowPhoneOrEmailCountryCode(value);
 };
 
 /** Cap mobile entry without blocking an @ or letters that switch the field to email. */

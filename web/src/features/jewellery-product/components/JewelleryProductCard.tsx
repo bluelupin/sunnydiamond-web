@@ -73,8 +73,9 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
   >
     <Link
       href={href}
+      title={title}
       className={cn(
-        "max-w-full truncate font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm desktop:whitespace-nowrap",
+        "line-clamp-2 w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
         productNameDisplayClassName,
       )}
     >

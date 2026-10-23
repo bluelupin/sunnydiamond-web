@@ -1,4 +1,6 @@
-import type { JewelleryCategorySlug } from "../types";
+import type { JewelleryCategorySlug, JewelleryFilterState } from "../types";
+import { resolveDiamondShapeFacetOption } from "./diamondShapeListing";
+import { resolveFancyColourFacetOption } from "./fancyColourListing";
 
 export const JEWELLERY_PATH = "/jewellery";
 export const JEWELLERY_SEARCH_PATH = "/search";
@@ -138,6 +140,28 @@ export function preserveJewelleryListingSearchParams(
   }
 
   return preserved;
+}
+
+/** Applies preserved PLP query params onto filter state (replaceState-safe). */
+export function applyPreservedJewelleryListingSearchToFilterState(
+  base: JewelleryFilterState,
+  source?: URLSearchParams | string | null,
+): JewelleryFilterState {
+  const preserved = preserveJewelleryListingSearchParams(source);
+  const next = { ...base };
+  const diamondShapeFromUrl = preserved.get("diamondShape")?.trim();
+  const fancyColourFromUrl = preserved.get("fancyColour")?.trim();
+
+  if (diamondShapeFromUrl) {
+    next.diamondShape =
+      resolveDiamondShapeFacetOption(diamondShapeFromUrl, [])?.value ?? diamondShapeFromUrl;
+  }
+  if (fancyColourFromUrl) {
+    next.fancyColour =
+      resolveFancyColourFacetOption(fancyColourFromUrl, [])?.value ?? fancyColourFromUrl;
+  }
+
+  return next;
 }
 
 export const JEWELLERY_CATEGORY_QUERY_PARAM = "category";

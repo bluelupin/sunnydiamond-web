@@ -461,6 +461,22 @@ export const validatePhoneOrEmail = (
 /** True when the contact field is being used as an email address (not a phone). */
 export const isCheckoutEmailContact = (value: string): boolean => /[a-zA-Z@]/.test(value);
 
+/**
+ * Combined phone-or-email inputs: treat as email when @, letters, `.`, or non-digit-only.
+ * Shared by sign-in, checkout contact, and country-prefix visibility.
+ */
+export const isCombinedPhoneOrEmailAsEmail = (value: string): boolean => {
+  const trimmed = value.trim();
+  return /[@\p{L}._]/u.test(trimmed) || (trimmed.length > 0 && !/\d/.test(trimmed));
+};
+
+/** Dial prefix for combined phone-or-email fields — hidden when empty or email-like. */
+export const shouldShowPhoneOrEmailCountryCode = (value: string): boolean => {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  return !isCombinedPhoneOrEmailAsEmail(trimmed);
+};
+
 export const validateOptionalPhone = (value: string, countryCode = "+91"): FieldValidation => {
   if (!value.trim()) {
     return { valid: true };
