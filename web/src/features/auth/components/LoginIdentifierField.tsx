@@ -5,7 +5,12 @@ import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { cn } from "@/shared/utils/cn";
-import { isEmailIdentifier, limitLoginIdentifier, validateLoginIdentifier } from "../utils/authValidation";
+import {
+  isEmailIdentifier,
+  limitLoginIdentifier,
+  shouldShowLoginCountryCode,
+  validateLoginIdentifier,
+} from "../utils/authValidation";
 
 type LoginIdentifierFieldProps = {
   identifier: string;
@@ -48,7 +53,7 @@ const LoginIdentifierField = ({
       ? validation.error : undefined
   );
   const isEmailMode = emailOnly || isEmailIdentifier(identifier);
-  const showCountryCode = !emailOnly && !isEmailMode;
+  const showCountryCode = shouldShowLoginCountryCode(identifier, { emailOnly });
 
   return (
     <div className="flex flex-col gap-2">
@@ -81,7 +86,7 @@ const LoginIdentifierField = ({
           value={identifier}
           onChange={(event) => onIdentifierChange(limitLoginIdentifier(event.target.value, countryCode, emailOnly))}
           placeholder={
-            emailOnly ? "Enter Your Email Address." : "Enter Your Phone Number Or Email Address."
+            emailOnly ? "Enter Your Email Address." : "Enter your phone number or email address."
           }
           autoComplete={isEmailMode ? "username" : "tel-national"}
           required

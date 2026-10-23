@@ -17,6 +17,8 @@ import {
   formatRequiredFieldLabel,
   invalidFieldClassName,
   invalidFieldContainerClassName,
+  isCombinedPhoneOrEmailAsEmail,
+  shouldShowPhoneOrEmailCountryCode,
 } from "@/shared/utils/formValidation";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
@@ -281,7 +283,9 @@ export const CheckoutPhoneField = ({
 }: CheckoutPhoneFieldProps) => {
   const isPhoneOrEmailMode = mode === "phoneOrEmail";
   const isEmailInput =
-    mode === "email" || (isPhoneOrEmailMode && /[a-zA-Z@]/.test(value));
+    mode === "email" || (isPhoneOrEmailMode && isCombinedPhoneOrEmailAsEmail(value));
+  const showCountryCode =
+    mode === "phone" || (isPhoneOrEmailMode && shouldShowPhoneOrEmailCountryCode(value));
   const shouldShowVerify = showVerify;
   const inputType = isEmailInput ? "email" : isPhoneOrEmailMode ? "text" : "tel";
   const inputMode = isEmailInput ? "email" : isPhoneOrEmailMode ? "text" : "numeric";
@@ -302,7 +306,7 @@ export const CheckoutPhoneField = ({
         )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          {!isEmailInput ? (
+          {showCountryCode ? (
             <PhoneCountryCodeSelect
               id={`${id}-country-code`}
               value={countryCode}
