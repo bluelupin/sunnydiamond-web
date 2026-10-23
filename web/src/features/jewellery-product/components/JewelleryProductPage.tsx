@@ -34,6 +34,8 @@ import {
   JEWELLERY_PATH,
   JEWELLERY_SEARCH_PATH,
   parseJewelleryCategorySlug,
+  applyPreservedJewelleryListingSearchToFilterState,
+  buildJewelleryListingHref,
   preserveJewelleryListingSearchParams,
   readJewelleryListingUrlParams,
   replaceJewelleryListingUrl,
@@ -304,13 +306,23 @@ const JewelleryProductPage = ({
       facetsSyncedRef.current = true;
 
       if (nextUrlKey === null) {
-        setFilters({
-          ...createEmptyFilterState(),
-          ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
-          ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
-        });
+        setFilters(
+          applyPreservedJewelleryListingSearchToFilterState(
+            {
+              ...createEmptyFilterState(),
+              ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+              ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
+            },
+            preserved,
+          ),
+        );
       } else {
-        setFilters((current) => createClearedDrawerFilterState(current));
+        setFilters((current) =>
+          applyPreservedJewelleryListingSearchToFilterState(
+            createClearedDrawerFilterState(current),
+            preserved,
+          ),
+        );
       }
     };
 
@@ -334,29 +346,44 @@ const JewelleryProductPage = ({
   const navigateToCategory = useCallback(
     (urlKey?: string | null) => {
       const nextUrlKey = urlKey?.trim() || null;
-      setSelectedCategoryUrlKey(nextUrlKey);
-
       const preservedSearchParams = preserveJewelleryListingSearchParams(
-        searchParams?.toString() ?? window.location.search,
+        readJewelleryListingUrlParams(searchParams?.toString()),
       );
       const collectionFromUrl = preservedSearchParams.get("collection")?.trim() ?? "";
       const occasionFromUrl = preservedSearchParams.get("occasion")?.trim() ?? "";
 
+      setSelectedCategoryUrlKey(nextUrlKey);
+
       if (nextUrlKey === null) {
-        setFilters({
-          ...createEmptyFilterState(),
-          ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
-          ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
-        });
+        setFilters(
+          applyPreservedJewelleryListingSearchToFilterState(
+            {
+              ...createEmptyFilterState(),
+              ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+              ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
+            },
+            preservedSearchParams,
+          ),
+        );
       } else {
-        setFilters((current) => createClearedDrawerFilterState(current));
+        setFilters((current) =>
+          applyPreservedJewelleryListingSearchToFilterState(
+            createClearedDrawerFilterState(current),
+            preservedSearchParams,
+          ),
+        );
       }
 
       lastFacetsSyncedCategoryRef.current = nextUrlKey;
       facetsSyncedRef.current = true;
-      replaceJewelleryListingUrl(nextUrlKey, preservedSearchParams);
+
+      const href = buildJewelleryListingHref({
+        categoryUrlKey: nextUrlKey,
+        searchParams: preservedSearchParams,
+      });
+      router.replace(href, { scroll: false });
     },
-    [searchParams],
+    [router, searchParams],
   );
 
   useEffect(() => {
@@ -541,6 +568,12 @@ const JewelleryProductPage = ({
       }
       if (diamondShapeOption) {
         nextDraft.diamondShape = diamondShapeOption.value;
+      } else if (liveDiamondShapeSlug?.trim()) {
+        const resolvedShape = resolveDiamondShapeFacetOption(liveDiamondShapeSlug.trim(), []);
+        nextDraft.diamondShape = resolvedShape?.value ?? liveDiamondShapeSlug.trim();
+      } else if (preserve?.diamondShape.trim()) {
+        const resolvedShape = resolveDiamondShapeFacetOption(preserve.diamondShape, []);
+        nextDraft.diamondShape = resolvedShape?.value ?? preserve.diamondShape.trim();
       }
       if (fancyColourOption) {
         nextDraft.fancyColour = fancyColourOption.value;
