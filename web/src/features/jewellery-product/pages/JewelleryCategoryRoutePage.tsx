@@ -20,7 +20,7 @@ import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRo
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
-type JewelleryCategoryRoutePageProps = {
+export type JewelleryCategoryRoutePageProps = {
   params: Promise<{ categoryUrl: string }>;
   searchParams: Promise<{
     occasion?: string;

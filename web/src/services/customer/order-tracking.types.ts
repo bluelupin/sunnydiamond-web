@@ -98,6 +98,7 @@ export type TrackedOrderDelivery = {
  */
 export type TrackedOrderSunnyFields = {
   sunnyStatus: SunnyOrderStatus | null;
+  sunnyCancellationRequestStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "NEEDS_REVIEW" | null;
   sunnyActions: TrackedOrderActions | null;
   sunnyTracking: TrackedOrderTracking | null;
   sunnyRefund: TrackedOrderRefundStatus | null;

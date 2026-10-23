@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import Reveal from "@/shared/Animation/Reveal";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 
 type CraftingRarityCopyBlockProps = {
   subtitleLines: string[];
@@ -19,8 +17,7 @@ export default function CraftingRarityCopyBlock({
 }: CraftingRarityCopyBlockProps) {
   return (
     <PageContainer className="relative z-10 px-4 md:px-8 lg:px-10 2xl:px-[60px]">
-      <Reveal
-        direction="up"
+      <ScrollReveal
         className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start lg:justify-center justify-end lg:gap-10 md:gap-8 gap-6"
       >
         <h2 className="lg:text-5xl sm:text-4xl text-32 font-larken font-light leading-110 text-darkblack">
@@ -40,7 +37,7 @@ export default function CraftingRarityCopyBlock({
             {secondaryCtaLabel}
           </Link>
         ) : null}
-      </Reveal>
+      </ScrollReveal>
     </PageContainer>
   );
 }

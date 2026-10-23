@@ -20,6 +20,7 @@ type ProfileOrderCancelSuccessDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderNumber: string;
+  requestStatus?: "PENDING" | "PROCESSING" | "COMPLETED" | "NEEDS_REVIEW" | null;
 };
 
 type ProfileOrderCancelSuccessDialogBodyProps = {
@@ -91,13 +92,22 @@ export function ProfileOrderCancelSuccessDialog({
   open,
   onOpenChange,
   orderNumber,
+  requestStatus,
 }: ProfileOrderCancelSuccessDialogProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const content = profileTabsContent.orders;
   const dialog = content.cancelSuccessDialog;
-  const titleCopy = pickResponsiveDialogCopy(dialog, "title", isMobile);
-  const description = pickResponsiveDialogCopy(dialog, "description", isMobile);
+  const waitingForRefund = requestStatus === "PENDING" || requestStatus === "PROCESSING";
+  const needsReview = requestStatus === "NEEDS_REVIEW";
+  const titleCopy = needsReview ? "Cancellation needs review"
+    : waitingForRefund ? "Cancellation request received"
+    : pickResponsiveDialogCopy(dialog, "title", isMobile);
+  const description = needsReview
+    ? "We could not confirm the refund yet. Our team will review your request. Please do not submit another cancellation."
+    : waitingForRefund
+      ? "We have received your request. Cancellation and refund will be confirmed after processing."
+      : pickResponsiveDialogCopy(dialog, "description", isMobile);
 
   const handleClose = () => onOpenChange(false);
 
@@ -118,7 +128,7 @@ export function ProfileOrderCancelSuccessDialog({
     content,
     orderNumber,
     description,
-    descriptionDesktopLines: dialog.descriptionDesktopLines,
+    descriptionDesktopLines: waitingForRefund || needsReview ? undefined : dialog.descriptionDesktopLines,
     onCopyOrderId: () => void handleCopyOrderId(),
   };
 

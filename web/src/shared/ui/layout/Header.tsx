@@ -26,7 +26,6 @@ import {
 } from "@/shared/utils/navigation";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
-import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -65,6 +64,10 @@ const WorldOfSunnyMegaMenu = dynamic(
 );
 
 const SearchOverlay = dynamic(() => import("@/features/search/SearchOverlay"), { ssr: false, loading: () => null });
+const MobileNavigation = dynamic(() => import("@/shared/ui/layout/MobileNavigation"), {
+  ssr: false,
+  loading: () => null,
+});
 const ProfileMobileNavSheet = dynamic(
   () => import("@/features/account/components/ProfileMobileNavSheet").then((mod) => ({
     default: mod.ProfileMobileNavSheet,
@@ -89,11 +92,16 @@ const preloadSearchOverlay = () => {
   void import("@/features/search/SearchOverlay");
 };
 
+const preloadMobileNavigation = () => {
+  void import("@/shared/ui/layout/MobileNavigation");
+};
+
 const iconButtonClass =
   "inline-flex size-6 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuMounted, setMobileMenuMounted] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchMounted, setSearchMounted] = useState(false);
   const searchMountedRef = useRef(false);
@@ -474,8 +482,10 @@ const Header = () => {
                 className={cn(iconButtonClass, textClass, hoverClass)}
                 onClick={() => {
                   dismissSearchPanel();
+                  setMobileMenuMounted(true);
                   setMobileMenuOpen(true);
                 }}
+                onPointerDown={preloadMobileNavigation}
                 aria-label="Open menu"
                 aria-expanded={mobileMenuOpen}
               >
@@ -697,15 +707,17 @@ const Header = () => {
         />
       ) : null}
 
-      <MobileNavigation
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        navLinks={primaryLinks}
-        appointmentLink={appointmentLink}
-        cartCount={displayCartCount}
-        onProfileOpen={isMobileHeader ? openProfileNav : undefined}
-        onSearchOpen={openSearch}
-      />
+      {mobileMenuMounted ? (
+        <MobileNavigation
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          navLinks={primaryLinks}
+          appointmentLink={appointmentLink}
+          cartCount={displayCartCount}
+          onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+          onSearchOpen={openSearch}
+        />
+      ) : null}
 
       {profileNavMounted ? (
         <FeatureErrorBoundary featureName="ProfileMobileNavSheet">

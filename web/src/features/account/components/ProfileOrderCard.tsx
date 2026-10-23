@@ -533,6 +533,7 @@ export function ProfileOrderCard({
         open={cancelSuccessDialogOpen}
         onOpenChange={(open) => handleSuccessDialogChange(setCancelSuccessDialogOpen, open)}
         orderNumber={order.number}
+        requestStatus={changedOrder?.sunnyCancellationRequestStatus}
       />
 
       <ProfileOrderReturnDialog

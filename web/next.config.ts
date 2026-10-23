@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
       },
     ],
      qualities: [70, 75, 80, 85, 90],
-     formats: ["image/avif", "image/webp"],
+     formats: ["image/webp"],
      minimumCacheTTL: 2678400, // 31 days — media URLs are content-hashed, safe to cache long
   },
   async redirects() {

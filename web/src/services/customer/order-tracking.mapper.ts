@@ -90,6 +90,7 @@ export type MagentoSunnyOrderFields = {
     }> | null;
   } | null;
   sunny_refund?: MagentoSunnyRefundStatus | null;
+  sunny_cancellation_request_status?: "PENDING" | "PROCESSING" | "COMPLETED" | "NEEDS_REVIEW" | null;
   sunny_delivery?: {
     estimated_delivery_at?: string | null;
     delivered_at?: string | null;
@@ -614,6 +615,7 @@ export function mapSunnyOrderFields(order: MagentoSunnyOrderFields): TrackedOrde
       : null,
     sunnyTracking: mapSunnyTracking(order.sunny_tracking),
     sunnyRefund: mapSunnyRefundStatus(order.sunny_refund),
+    sunnyCancellationRequestStatus: order.sunny_cancellation_request_status ?? null,
     sunnyDelivery: delivery
       ? {
           estimatedDeliveryAt: delivery.estimated_delivery_at ?? null,
