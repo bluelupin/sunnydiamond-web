@@ -61,6 +61,11 @@ type JourneyStep = 1 | 2 | 3;
 
 const FALLBACK_MAX_PRICE = 300_000;
 
+/** Digits and grouping commas only — matches jewellery price fields elsewhere. */
+function sanitizeDiscoverJourneyPriceInput(value: string): string {
+  return value.replace(/[^\d,]/g, "");
+}
+
 const rangeThumbClassName =
   "pointer-events-none col-start-1 row-start-1 z-20 h-[12px] w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[12px] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-darkblack [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[12px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-darkblack";
 
@@ -70,6 +75,33 @@ function createFallbackFacets(): JewelleryFilterFacets {
     minPrice: 0,
     maxPrice: FALLBACK_MAX_PRICE,
   };
+}
+
+/** Lets React commit loading UI before a sync PLP cache hit resolves the proceed check. */
+function waitForDiscoverJourneyProceedPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
+/**
+ * Default catalogue range reuses the PLP listing cache and can finish in one frame;
+ * custom ranges usually miss cache and feel slower. Keep Checking… visible long enough
+ * to read on every Step 1 proceed without delaying slow network responses.
+ */
+const DISCOVER_JOURNEY_STEP1_CHECKING_MIN_MS = 400;
+
+async function waitForDiscoverJourneyMinimumCheckingDuration(startedAtMs: number): Promise<void> {
+  const remaining = DISCOVER_JOURNEY_STEP1_CHECKING_MIN_MS - (Date.now() - startedAtMs);
+  if (remaining <= 0) {
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, remaining);
+  });
 }
 
 const EDUCATION_JOURNEY_MOBILE_QUERY = "(max-width: 767px)";
@@ -115,6 +147,8 @@ const EducationDiscoverJourneyPanel = ({
     useState<JewelleryFilterFacets | null>(null);
   const step2CategoryVerifyRequestRef = useRef(0);
   const step3ShapeVerifyRequestRef = useRef(0);
+  const step1ProceedInFlightRef = useRef(false);
+  const step1ProceedRequestRef = useRef(0);
 
   const categories = useMemo(
     () => (navData?.categories ? mapMagentoCategoriesToPlpNav(navData.categories) : []),
@@ -155,6 +189,8 @@ const EducationDiscoverJourneyPanel = ({
       setDiscoverJourneyDiamondShapeOptions([]);
       setShowAvailabilityError(false);
       setIsVerifyingAvailability(false);
+      step1ProceedInFlightRef.current = false;
+      step1ProceedRequestRef.current += 1;
       setIsCheckingStep2Category(false);
       setStep2CategoryHasProducts(null);
       setIsCheckingStep3Shape(false);
@@ -454,6 +490,9 @@ const EducationDiscoverJourneyPanel = ({
 
     if (step === 2) {
       step2CategoryVerifyRequestRef.current += 1;
+      step1ProceedRequestRef.current += 1;
+      step1ProceedInFlightRef.current = false;
+      setIsVerifyingAvailability(false);
     }
 
     if (step === 3) {
@@ -466,21 +505,42 @@ const EducationDiscoverJourneyPanel = ({
 
   const handlePrimaryAction = () => {
     if (step === 1) {
-      if (isVerifyingAvailability || !hasPriceRange) {
+      if (step1ProceedInFlightRef.current || isVerifyingAvailability || !hasPriceRange) {
         return;
       }
 
+      const proceedRequestId = step1ProceedRequestRef.current + 1;
+      step1ProceedRequestRef.current = proceedRequestId;
+      step1ProceedInFlightRef.current = true;
       setIsVerifyingAvailability(true);
       setShowAvailabilityError(false);
 
       void (async () => {
+        const checkingStartedAt = Date.now();
+
         try {
+          await waitForDiscoverJourneyProceedPaint();
+
+          if (proceedRequestId !== step1ProceedRequestRef.current) {
+            return;
+          }
+
           const range = commitPriceRangeForProceed();
           const { hasProducts } = await discoverJourneyHasMatchingProducts({
             categoryUrlKey: null,
             range,
             listingFacets: facets,
           });
+
+          if (proceedRequestId !== step1ProceedRequestRef.current) {
+            return;
+          }
+
+          await waitForDiscoverJourneyMinimumCheckingDuration(checkingStartedAt);
+
+          if (proceedRequestId !== step1ProceedRequestRef.current) {
+            return;
+          }
 
           if (!hasProducts) {
             setShowAvailabilityError(true);
@@ -493,8 +553,22 @@ const EducationDiscoverJourneyPanel = ({
           );
           setStep(2);
         } catch {
+          if (proceedRequestId !== step1ProceedRequestRef.current) {
+            return;
+          }
+
+          await waitForDiscoverJourneyMinimumCheckingDuration(checkingStartedAt);
+
+          if (proceedRequestId !== step1ProceedRequestRef.current) {
+            return;
+          }
+
           setShowAvailabilityError(true);
         } finally {
+          if (proceedRequestId !== step1ProceedRequestRef.current) {
+            return;
+          }
+          step1ProceedInFlightRef.current = false;
           setIsVerifyingAvailability(false);
         }
       })();
@@ -635,7 +709,7 @@ const EducationDiscoverJourneyPanel = ({
                       }}
                       onBlur={commitMinAmountInput}
                       onChange={(event) => {
-                        const nextValue = event.target.value;
+                        const nextValue = sanitizeDiscoverJourneyPriceInput(event.target.value);
                         setMinInputValue(nextValue);
 
                         const trimmed = nextValue.replace(/,/g, "").trim();
@@ -676,7 +750,7 @@ const EducationDiscoverJourneyPanel = ({
                       }}
                       onBlur={commitMaxAmountInput}
                       onChange={(event) => {
-                        const nextValue = event.target.value;
+                        const nextValue = sanitizeDiscoverJourneyPriceInput(event.target.value);
                         setMaxInputValue(nextValue);
 
                         const trimmed = nextValue.replace(/,/g, "").trim();
