@@ -28,10 +28,12 @@ function mapAttributeOptions(
   attributeCode: string,
 ): JewelleryFilterFacetOption[] {
   const items = response.customAttributeMetadata?.items ?? [];
-  const attributeItem =
-    items.find((item) => item.attribute_code === attributeCode) ?? items[0];
+  const attributeItem = items.find((item) => item.attribute_code === attributeCode);
+  if (!attributeItem) {
+    return [];
+  }
 
-  return (attributeItem?.attribute_options ?? [])
+  return (attributeItem.attribute_options ?? [])
     .map((option) => ({
       label: option.label?.trim() ?? "",
       value: option.value?.trim() ?? "",
@@ -42,6 +44,7 @@ function mapAttributeOptions(
 async function fetchMagentoProductAttributeOptions(
   attributeCode: string,
   signal?: AbortSignal,
+  fresh = false,
 ): Promise<JewelleryFilterFacetOption[]> {
   const data = await magentoGraphqlFetch<MagentoProductAttributeOptionsResponse>({
     query: MAGENTO_PRODUCT_ATTRIBUTE_OPTIONS_QUERY,
@@ -49,23 +52,32 @@ async function fetchMagentoProductAttributeOptions(
       attributes: [{ attribute_code: attributeCode, entity_type: "catalog_product" }],
     },
     signal,
-    cache: "force-cache",
+    cache: fresh ? "no-store" : "force-cache",
   });
 
   return mapAttributeOptions(data, attributeCode);
 }
 
+export type GetMagentoProductAttributeOptionsParams = {
+  signal?: AbortSignal;
+  /** Bypass in-memory and HTTP cache (e.g. discover journey step 3). */
+  fresh?: boolean;
+};
+
 /** Live Magento select/dropdown options for a product attribute (e.g. `sd_occasions`). */
 export async function getMagentoProductAttributeOptions(
   attributeCode: string,
-  signal?: AbortSignal,
+  params?: GetMagentoProductAttributeOptionsParams,
 ): Promise<JewelleryFilterFacetOption[]> {
   const code = attributeCode.trim();
   if (!code) {
     return [];
   }
 
-  if (typeof window !== "undefined") {
+  const signal = params?.signal;
+  const fresh = params?.fresh ?? false;
+
+  if (typeof window !== "undefined" && !fresh) {
     const cached = attributeOptionsCache.get(code);
     if (
       cached?.value &&
@@ -78,9 +90,9 @@ export async function getMagentoProductAttributeOptions(
     }
   }
 
-  const fetchPromise = fetchMagentoProductAttributeOptions(code, signal);
+  const fetchPromise = fetchMagentoProductAttributeOptions(code, signal, fresh);
 
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && !fresh) {
     const existing = attributeOptionsCache.get(code);
     attributeOptionsCache.set(code, {
       value: existing?.value,
@@ -91,7 +103,7 @@ export async function getMagentoProductAttributeOptions(
 
   try {
     const options = await fetchPromise;
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !fresh) {
       attributeOptionsCache.set(code, {
         value: options,
         promise: undefined,
@@ -100,7 +112,7 @@ export async function getMagentoProductAttributeOptions(
     }
     return options;
   } catch (error) {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !fresh) {
       const existing = attributeOptionsCache.get(code);
       attributeOptionsCache.set(code, {
         value: existing?.value,

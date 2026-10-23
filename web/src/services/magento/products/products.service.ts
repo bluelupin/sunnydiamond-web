@@ -229,7 +229,7 @@ async function enrichFacetsWithOccasionAttributeOptions(
   }
 
   try {
-    const magentoOccasions = await getMagentoProductAttributeOptions("sd_occasions", signal);
+    const magentoOccasions = await getMagentoProductAttributeOptions("sd_occasions", { signal });
     return {
       ...facets,
       occasions: mergeFacetOptions(facets.occasions, magentoOccasions),
@@ -257,7 +257,7 @@ async function enrichFacetsWithCollectionAttributeOptions(
   try {
     const magentoCollections = await getMagentoProductAttributeOptions(
       MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE,
-      signal,
+      { signal },
     );
     return {
       ...facets,
@@ -279,7 +279,7 @@ async function enrichFacetsWithGemstoneAttributeOptions(
   }
 
   try {
-    const magentoGemstones = await getMagentoProductAttributeOptions("sd_gemstone_type", signal);
+    const magentoGemstones = await getMagentoProductAttributeOptions("sd_gemstone_type", { signal });
     return {
       ...facets,
       gemstoneTypes: mergeGemstoneTypeFacetOptions(facets.gemstoneTypes, magentoGemstones),
@@ -305,7 +305,7 @@ async function enrichFacetsWithDiamondShapeAttributeOptions(
   }
 
   try {
-    const magentoShapes = await getMagentoProductAttributeOptions("sd_diamond_shape", signal);
+    const magentoShapes = await getMagentoProductAttributeOptions("sd_diamond_shape", { signal });
     return {
       ...facets,
       diamondShapes: mergeFacetOptions(facets.diamondShapes, magentoShapes),
@@ -471,7 +471,7 @@ async function fetchMagentoJewelleryProducts({
   });
 
   const fetchMetalColorCatalogOptions = () =>
-    getMagentoProductAttributeOptions("sd_metal_color", signal).catch(() => []);
+    getMagentoProductAttributeOptions("sd_metal_color", { signal }).catch(() => []);
 
   const [data, facetScopeData, metalColorCatalogOptions] = await Promise.all([
     measureJewelleryPlpGraphql("products", fetchProducts, {

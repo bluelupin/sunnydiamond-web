@@ -14,21 +14,8 @@ import RoundShapeIcon from "@/assets/Icons/DiscoverJourney/RoundShapeIcon";
 import SquareShapeIcon from "@/assets/Icons/DiscoverJourney/SquareShapeIcon";
 import { slugifyDiamondShapeLabel } from "@/features/jewellery-product/utils/diamondShapeListing";
 
-/** Figma 4903:61397 — Magento `sd_diamond_shape` option value → icon (Discover journey step 3). */
-export const diamondShapeIconSrc: Record<string, ComponentType<{ className?: string }>> = {
-  "64": RoundShapeIcon,
-  "65": OvalShapeIcon,
-  "66": CushionShapeIcon,
-  "67": PearShapeIcon,
-  "68": EmeraldShapeIcon,
-  "69": HeartShapeIcon,
-};
-
-/** Label slug fallback for Magento facet options (including shapes beyond the six core ids). */
-export const diamondShapeIconByLabelSlug: Record<
-  string,
-  ComponentType<{ className?: string }>
-> = {
+/** Static icons keyed by Magento shape label slug (Discover journey step 3). */
+const diamondShapeIconByLabelSlug: Record<string, ComponentType<{ className?: string }>> = {
   round: RoundShapeIcon,
   oval: OvalShapeIcon,
   cushion: CushionShapeIcon,
@@ -49,11 +36,6 @@ export function resolveDiscoverJourneyDiamondShapeIcon(option: {
   value: string;
   label: string;
 }): ComponentType<{ className?: string }> | null {
-  const byValue = diamondShapeIconSrc[option.value.trim()];
-  if (byValue) {
-    return byValue;
-  }
-
   const labelSlug = slugifyDiamondShapeLabel(option.label);
   if (!labelSlug) {
     return null;

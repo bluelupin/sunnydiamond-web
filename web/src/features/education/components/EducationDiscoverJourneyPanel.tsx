@@ -19,16 +19,14 @@ import {
 } from "@/features/jewellery-product/data/filters";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { mapMagentoCategoriesToPlpNav } from "@/features/jewellery-product/utils/plpCategoryNav";
-import {
-  DIAMOND_SHAPE_OPTIONS,
-  slugifyDiamondShapeLabel,
-} from "@/features/jewellery-product/utils/diamondShapeListing";
+import { slugifyDiamondShapeLabel } from "@/features/jewellery-product/utils/diamondShapeListing";
 import type { JewelleryCategory, JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import type {
   JewelleryFilterFacetOption,
   JewelleryFilterFacets,
 } from "@/types/magento/jewelleryListing";
 import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
+import { getMagentoProductAttributeOptions } from "@/services/magento/products/productAttributeOptions.service";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
 import { resolveDiscoverJourneyDiamondShapeIcon } from "../data/diamondShapeIcons";
@@ -37,7 +35,8 @@ import {
   DISCOVER_JOURNEY_NO_PRODUCTS_IN_RANGE_MESSAGE,
   DISCOVER_JOURNEY_NO_PRODUCTS_IN_SHAPE_CATEGORY_AND_RANGE_MESSAGE,
   DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
-  resolveDiscoverJourneyDiamondShapeOptions,
+  MAGENTO_DIAMOND_SHAPE_ATTRIBUTE_CODE,
+  normalizeDiscoverJourneyDiamondShapeOptions,
   resolveDiscoverJourneySteps,
 } from "../data/discoverJourney";
 import type { NormalizedEducationDiscoverStep } from "@/services/education/learn-about-diamonds-page.types";
@@ -132,9 +131,12 @@ const EducationDiscoverJourneyPanel = ({
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [categorySlug, setCategorySlug] = useState<JewelleryCategorySlug>("all");
   const [diamondShapeValue, setDiamondShapeValue] = useState("");
-  const [discoverJourneyDiamondShapeOptions, setDiscoverJourneyDiamondShapeOptions] = useState<
+  const [diamondShapeOptions, setDiamondShapeOptions] = useState<
     readonly JewelleryFilterFacetOption[]
   >([]);
+  const [diamondShapesLoadState, setDiamondShapesLoadState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
   const [showAvailabilityError, setShowAvailabilityError] = useState(false);
   const [isVerifyingAvailability, setIsVerifyingAvailability] = useState(false);
   const [isCheckingStep2Category, setIsCheckingStep2Category] = useState(false);
@@ -160,14 +162,6 @@ const EducationDiscoverJourneyPanel = ({
     [categories, categorySlug],
   );
 
-  const diamondShapeOptions = useMemo(
-    () =>
-      discoverJourneyDiamondShapeOptions.length > 0
-        ? discoverJourneyDiamondShapeOptions
-        : DIAMOND_SHAPE_OPTIONS,
-    [discoverJourneyDiamondShapeOptions],
-  );
-
   const selectedShape = useMemo(
     () =>
       diamondShapeOptions.find((option) => option.value === diamondShapeValue) ?? null,
@@ -186,7 +180,8 @@ const EducationDiscoverJourneyPanel = ({
       setStep(1);
       setCategorySlug("all");
       setDiamondShapeValue("");
-      setDiscoverJourneyDiamondShapeOptions([]);
+      setDiamondShapeOptions([]);
+      setDiamondShapesLoadState("idle");
       setShowAvailabilityError(false);
       setIsVerifyingAvailability(false);
       step1ProceedInFlightRef.current = false;
@@ -202,6 +197,10 @@ const EducationDiscoverJourneyPanel = ({
     }
 
     let cancelled = false;
+    const shapesAbort = new AbortController();
+
+    setDiamondShapesLoadState("loading");
+    setDiamondShapeOptions([]);
 
     void (async () => {
       try {
@@ -223,9 +222,6 @@ const EducationDiscoverJourneyPanel = ({
         setMaxPrice(nextFacets.maxPrice);
         setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
         setMaxInputValue(formatJewelleryPrice(nextFacets.maxPrice));
-        setDiscoverJourneyDiamondShapeOptions(
-          resolveDiscoverJourneyDiamondShapeOptions(data.facets.diamondShapes),
-        );
       } catch {
         if (cancelled) return;
         const fallback = createFallbackFacets();
@@ -234,12 +230,33 @@ const EducationDiscoverJourneyPanel = ({
         setMaxPrice(fallback.maxPrice);
         setMinInputValue(formatJewelleryPrice(fallback.minPrice));
         setMaxInputValue(formatJewelleryPrice(fallback.maxPrice));
-        setDiscoverJourneyDiamondShapeOptions(resolveDiscoverJourneyDiamondShapeOptions([]));
+      }
+    })();
+
+    void (async () => {
+      try {
+        const magentoShapes = await getMagentoProductAttributeOptions(
+          MAGENTO_DIAMOND_SHAPE_ATTRIBUTE_CODE,
+          { signal: shapesAbort.signal, fresh: true },
+        );
+
+        if (cancelled) return;
+
+        const options = normalizeDiscoverJourneyDiamondShapeOptions(magentoShapes);
+        setDiamondShapeOptions(options);
+        setDiamondShapesLoadState(options.length > 0 ? "ready" : "error");
+      } catch (error) {
+        if (cancelled || isDiscoverJourneyAbortError(error)) {
+          return;
+        }
+        setDiamondShapeOptions([]);
+        setDiamondShapesLoadState("error");
       }
     })();
 
     return () => {
       cancelled = true;
+      shapesAbort.abort();
     };
   }, [open]);
 
@@ -342,7 +359,7 @@ const EducationDiscoverJourneyPanel = ({
       return slugifyDiamondShapeLabel(option.label);
     }
 
-    return slugifyDiamondShapeLabel(trimmed);
+    return "";
   };
 
   const availabilityErrorMessage =
@@ -815,42 +832,54 @@ const EducationDiscoverJourneyPanel = ({
 
           {step === 3 ? (
             <section className="flex flex-col gap-4">
-              <div className="grid grid-cols-4 gap-x-3 gap-y-6">
-                {diamondShapeOptions.map((option) => {
-                  const isSelected = option.value === diamondShapeValue;
-                  const Icon = resolveDiscoverJourneyDiamondShapeIcon(option);
+              {diamondShapesLoadState === "loading" ? (
+                <p className="font-gill text-base font-light leading-110 text-neutral500">
+                  Loading diamond shapes…
+                </p>
+              ) : null}
+              {diamondShapesLoadState === "error" ? (
+                <p className="font-gill text-base font-light leading-110 text-neutral500">
+                  Diamond shapes are unavailable right now. Please try again later.
+                </p>
+              ) : null}
+              {diamondShapesLoadState === "ready" ? (
+                <div className="grid grid-cols-4 gap-x-3 gap-y-6">
+                  {diamondShapeOptions.map((option) => {
+                    const isSelected = option.value === diamondShapeValue;
+                    const Icon = resolveDiscoverJourneyDiamondShapeIcon(option);
 
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setDiamondShapeValue(option.value)}
-                      aria-pressed={isSelected}
-                      className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-                    >
-                      {Icon ? (
-                        <Icon
-                          className={cn(
-                            "size-6",
-                            isSelected ? "text-darkblack" : "text-gray600",
-                          )}
-                          aria-hidden
-                        />
-                      ) : null}
-                      <span
-                        className={cn(
-                          "font-gill text-base leading-110",
-                          isSelected
-                            ? "font-semibold text-darkblack"
-                            : "font-normal text-gray600",
-                        )}
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setDiamondShapeValue(option.value)}
+                        aria-pressed={isSelected}
+                        className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
                       >
-                        {option.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                        {Icon ? (
+                          <Icon
+                            className={cn(
+                              "size-6",
+                              isSelected ? "text-darkblack" : "text-gray600",
+                            )}
+                            aria-hidden
+                          />
+                        ) : null}
+                        <span
+                          className={cn(
+                            "font-gill text-base leading-110",
+                            isSelected
+                              ? "font-semibold text-darkblack"
+                              : "font-normal text-gray600",
+                          )}
+                        >
+                          {option.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
             </section>
           ) : null}
         </div>
@@ -895,7 +924,8 @@ const EducationDiscoverJourneyPanel = ({
               (step === 2 &&
                 (isCheckingStep2Category || step2CategoryHasProducts !== true)) ||
               (step === 3 &&
-                (isCheckingStep3Shape ||
+                (diamondShapesLoadState !== "ready" ||
+                  isCheckingStep3Shape ||
                   step3ShapeHasProducts !== true ||
                   !diamondShapeValue.trim()))
             }

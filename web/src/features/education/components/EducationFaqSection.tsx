@@ -15,26 +15,23 @@ const faqIconTransitionClassName = accordionCollapseIconClassName;
 
 const FaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
-    <span className="absolute inset-1/4">
-      <svg viewBox="0 0 12 12" fill="none" className="size-full" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M5.5 6.5H0V5.5H5.5V0H6.5V5.5H12V6.5H6.5V12H5.5V6.5Z"
-          fill="#0A0A0A"
-        />
-      </svg>
-    </span>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 12.25H20.5" strokeLinecap="round" strokeLinejoin="round" stroke="#0A0A0A" />
+      <path d="M12.25 4V20.5" strokeLinecap="round" strokeLinejoin="round" stroke="#0A0A0A" />
+    </svg>
   </span>
 );
 
 const FaqMinusIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    className="size-6 shrink-0"
-    aria-hidden
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M17 12H5V11H17V12Z" fill="#0A0A0A" />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="size-6 shrink-0">
+    <g clip-path="url(#clip0_4903_59714)">
+      <path d="M17 12H5V11H17V12Z" fill="#0A0A0A" />
+    </g>
+    <defs>
+      <clipPath id="clip0_4903_59714">
+        <rect width="24" height="24" fill="white" />
+      </clipPath>
+    </defs>
   </svg>
 );
 

@@ -37,7 +37,9 @@ const GiftCardFlowController = () => {
     void (async () => {
       setIsOccasionsLoading(true);
       try {
-        const options = await getMagentoProductAttributeOptions("sd_occasions", controller.signal);
+        const options = await getMagentoProductAttributeOptions("sd_occasions", {
+          signal: controller.signal,
+        });
         if (!cancelled) {
           setOccasionOptions(mapMagentoOccasionsToGiftCardOptions(options));
         }
