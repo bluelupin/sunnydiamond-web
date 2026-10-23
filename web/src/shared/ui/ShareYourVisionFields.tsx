@@ -59,6 +59,8 @@ type ShareYourVisionFieldsProps = {
     notePlaceholder?: string;
     noteLabelClassName?: string;
     noteTextareaClassName?: string;
+    phoneLocked?: boolean;
+    emailLocked?: boolean;
 };
 
 const SHARE_VISION_FIELD_PLACEHOLDER = "Enter";
@@ -99,8 +101,12 @@ const ShareYourVisionFields = ({
     notePlaceholder = SHARE_VISION_FIELD_PLACEHOLDER,
     noteLabelClassName,
     noteTextareaClassName = "font-gill text-base leading-110",
+    phoneLocked = false,
+    emailLocked = false,
 }: ShareYourVisionFieldsProps) => {
     const minDate = getMinSelectableDate();
+    const isPhoneLocked = phoneLocked;
+    const isEmailLocked = emailLocked;
 
     return (
         <>
@@ -147,6 +153,7 @@ const ShareYourVisionFields = ({
                             markTouched("phone");
                         }}
                         onBlur={() => markTouched("phone")}
+                        disabled={isPhoneLocked}
                     />
                     <input
                         id={`${idPrefix}-phone`}
@@ -157,9 +164,14 @@ const ShareYourVisionFields = ({
                         onBlur={() => markTouched("phone")}
                         placeholder={SHARE_VISION_FIELD_PLACEHOLDER}
                         autoComplete="tel-national"
+                        readOnly={isPhoneLocked}
+                        aria-readonly={isPhoneLocked || undefined}
                         aria-invalid={showError("phone") || undefined}
                         aria-describedby={showError("phone") ? `${idPrefix}-phone-error` : undefined}
-                        className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none"
+                        className={cn(
+                            "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none",
+                            isPhoneLocked && "cursor-not-allowed opacity-70",
+                        )}
                     />
                 </div>
                 <FormFieldError id={`${idPrefix}-phone-error`} message={showError("phone") ? errors.phone : undefined} />
@@ -177,9 +189,15 @@ const ShareYourVisionFields = ({
                     onBlur={() => markTouched("email")}
                     placeholder={SHARE_VISION_FIELD_PLACEHOLDER}
                     autoComplete="email"
+                    readOnly={isEmailLocked}
+                    aria-readonly={isEmailLocked || undefined}
                     aria-invalid={showError("email") || undefined}
                     aria-describedby={showError("email") ? `${idPrefix}-email-error` : undefined}
-                    className={cn(fieldClassName, showError("email") && invalidFieldClassName)}
+                    className={cn(
+                        fieldClassName,
+                        isEmailLocked && "cursor-not-allowed opacity-70",
+                        showError("email") && invalidFieldClassName,
+                    )}
                 />
                 <FormFieldError id={`${idPrefix}-email-error`} message={showError("email") ? errors.email : undefined} />
             </div>

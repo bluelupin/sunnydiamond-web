@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import {
+  getAppointmentContactLocks,
+  resolveCustomerContactLockKind,
+} from "@/features/auth/utils/authLoginIdentifier";
+import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import ShareYourVisionFields from "@/shared/ui/ShareYourVisionFields";
@@ -34,6 +40,11 @@ type BespokeShareVisionPanelProps = {
 };
 
 const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPanelProps) => {
+  const { status, customer } = useAuth();
+  const { contact: profileContact } = useCustomerProfileContact(
+    open && status === "authenticated",
+  );
+  const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
@@ -50,6 +61,40 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     wishlistMovedToastDurationMs,
   );
   const referenceImageInputRef = useRef<HTMLInputElement>(null);
+
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    resolveCustomerContactLockKind(customer?.signupMethod),
+  );
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    if (!profileContact || hasAppliedProfilePrefill) {
+      return;
+    }
+
+    const profileName = profileContact.fullName?.trim();
+    const profileEmail = profileContact.email?.trim();
+    const profilePhone = profileContact.phone?.trim();
+    const profileCountryCode = profileContact.countryCode?.trim();
+
+    if (profileName && !name.trim()) {
+      setName(profileName);
+    }
+    if (profileEmail && !email.trim()) {
+      setEmail(profileEmail);
+    }
+    if (profilePhone && !phone.trim()) {
+      setPhone(profilePhone);
+    }
+    if (profileCountryCode) {
+      setCountryCode(profileCountryCode);
+    }
+
+    setHasAppliedProfilePrefill(true);
+  }, [open, profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date: "", note }),
@@ -105,6 +150,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setIsSubmitting(false);
     setApiFieldErrors({});
     setReferenceImageError(null);
+    setHasAppliedProfilePrefill(false);
     resetValidation();
   };
 
@@ -201,7 +247,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                 <div className="h-px w-full bg-neutral300" aria-hidden />
               </div>
 
-              <div className="flex flex-col gap-4 pb-72 test">
+              <div className="flex flex-col gap-4 pb-72">
                 <ShareYourVisionFields
                   idPrefix="bespoke-share-vision"
                   name={name}
@@ -210,19 +256,30 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                   email={email}
                   date=""
                   note={note}
+                  phoneLocked={phoneLocked}
+                  emailLocked={emailLocked}
                   onNameChange={(value) => {
                     clearApiFieldError("name");
                     setName(value);
                   }}
                   onCountryCodeChange={(value) => {
+                    if (phoneLocked) {
+                      return;
+                    }
                     clearApiFieldError("phone");
                     setCountryCode(value);
                   }}
                   onPhoneChange={(value) => {
+                    if (phoneLocked) {
+                      return;
+                    }
                     clearApiFieldError("phone");
                     setPhone(value);
                   }}
                   onEmailChange={(value) => {
+                    if (emailLocked) {
+                      return;
+                    }
                     clearApiFieldError("email");
                     setEmail(value);
                   }}

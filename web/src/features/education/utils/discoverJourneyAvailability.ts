@@ -1,8 +1,5 @@
 import { buildGiftFinderListingFiltersFromUrl } from "@/features/gifting/utils/giftFinderRoutes";
-import {
-  createEmptyFilterState,
-  isDefaultPriceRange,
-} from "@/features/jewellery-product/data/filters";
+import { createEmptyFilterState } from "@/features/jewellery-product/data/filters";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
@@ -189,15 +186,6 @@ export async function discoverJourneyHasMatchingProducts({
   }
 
   const filters = buildDiscoverJourneyListingFilters(range, diamondShapeSlug, scopedFacets);
-
-  // Step 1 only: full-catalog price range cannot be empty if the slider bounds loaded.
-  if (
-    categoryUrlKey == null &&
-    !diamondShapeSlug.trim() &&
-    isDefaultPriceRange(filters, scopedFacets)
-  ) {
-    return { hasProducts: true, listingFacets: scopedFacets };
-  }
 
   const data = await getMagentoJewelleryProducts({
     categoryUrlKey,
