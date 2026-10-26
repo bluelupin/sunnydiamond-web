@@ -11,6 +11,7 @@ import {
   isMagentoBestSeller,
   isMagentoPlaceholderImage,
   normalizeGemstoneTypeLabel,
+  normalizeMagentoCatalogProductImageUrl,
   resolveMagentoModelWearImageUrl,
 } from "./magentoAttribute.utils";
 import { mapMagentoProductDetailToProduct } from "./productDetail.mapper";
@@ -56,15 +57,22 @@ export function resolveMagentoProductImages(
 } {
   const urls = getActiveGalleryUrls(mediaGallery);
 
+  const normalize = (url: string | null | undefined): string => {
+    const trimmed = url?.trim() ?? "";
+    if (!trimmed || isMagentoPlaceholderImage(trimmed)) {
+      return "";
+    }
+    return normalizeMagentoCatalogProductImageUrl(trimmed);
+  };
+
   const primaryImage =
-    pickImageByRole(urls, ["f", "sd"]) ??
-    urls[0] ??
-    (!isMagentoPlaceholderImage(fallbackImageUrl) ? fallbackImageUrl?.trim() ?? "" : "");
+    normalize(pickImageByRole(urls, ["f", "sd"])) ||
+    normalize(urls[0]) ||
+    normalize(fallbackImageUrl);
 
   const lifestyleImage =
-    resolveMagentoModelWearImageUrl(modelWearImage, mediaGallery, fallbackImageUrl) ||
-    pickImageByRole(urls, ["l", "t"]) ||
-    "";
+    normalize(resolveMagentoModelWearImageUrl(modelWearImage, mediaGallery, fallbackImageUrl)) ||
+    normalize(pickImageByRole(urls, ["l", "t"]));
 
   return { primaryImage, lifestyleImage };
 }

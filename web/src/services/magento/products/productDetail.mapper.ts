@@ -10,6 +10,7 @@ import { getMagentoGraphqlUrl } from "@/services/magento/config";
 import {
   getMagentoCustomAttributeValue,
   isMagentoPlaceholderImage,
+  normalizeMagentoCatalogProductImageUrl,
   resolveMagentoProductVideoUrl,
 } from "./magentoAttribute.utils";
 import { resolveMagentoProductImages } from "./products.mapper";
@@ -122,7 +123,8 @@ function buildGalleryImages(
   const urls = (product.media_gallery ?? [])
     .filter((item) => item?.url && !item.disabled && !isMagentoPlaceholderImage(item.url))
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-    .map((item) => item.url!.trim());
+    .map((item) => normalizeMagentoCatalogProductImageUrl(item.url!.trim()))
+    .filter(Boolean);
 
   const unique = Array.from(
     new Set(
