@@ -157,7 +157,7 @@ const PanelMedia = ({
                   <EducationPanelCrossfadeImage
                     src={cutDualImages[0]}
                     alt={slider.options[activeIndex]?.dualImageAlts?.[0] ?? ""}
-                    className="object-cover"
+                    className="object-contain"
                     sizes="200px"
                   />
                 </div>
