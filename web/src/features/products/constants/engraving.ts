@@ -3,6 +3,7 @@ import type { ProductCustomOptions } from "@/features/products/types/productCust
 import type { Product } from "@/features/products/data/products";
 import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
+import { resolveEngravingFontCssFamily } from "@/features/products/constants/engravingFontAssets";
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
@@ -295,11 +296,16 @@ export function resolveEngravingPreviewTypography(font: string): {
 } {
   const trimmed = font.trim();
   const fallbackFamily = "Gill Sans, sans-serif";
+  const engravingAssetFamily = trimmed ? resolveEngravingFontCssFamily(trimmed) : null;
 
   return {
     className: resolveEngravingPreviewFontClass(trimmed),
     style: {
-      fontFamily: trimmed ? `${trimmed}, sans-serif` : fallbackFamily,
+      fontFamily: engravingAssetFamily
+        ? `"${engravingAssetFamily}", sans-serif`
+        : trimmed
+          ? `${trimmed}, sans-serif`
+          : fallbackFamily,
     },
   };
 }

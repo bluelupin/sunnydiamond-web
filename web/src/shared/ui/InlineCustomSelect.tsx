@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { cn } from "@/shared/utils/cn";
@@ -64,6 +64,8 @@ type InlineCustomSelectProps = {
   listPlacement?: "portaled" | "inline";
   /** When true, the placeholder row clears the value (filter dropdowns). */
   allowClearSelection?: boolean;
+  /** Optional per-option inline styles (e.g. engraving font preview in the list). */
+  getOptionStyle?: (option: string) => CSSProperties | undefined;
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
@@ -98,6 +100,7 @@ const InlineCustomSelect = ({
   placeholderClassName,
   disabled = false,
   listPlacement = "portaled",
+  getOptionStyle,
   allowClearSelection = false,
 }: InlineCustomSelectProps) => {
   const isInlineList = listPlacement === "inline";
@@ -245,6 +248,8 @@ const InlineCustomSelect = ({
     value && !isOptionUnavailable(value) ? options.find((option) => option === value) : undefined;
   const triggerLabel = selectedOption ?? placeholder;
   const showPlaceholder = !selectedOption;
+  const selectedOptionStyle =
+    selectedOption && getOptionStyle ? getOptionStyle(selectedOption) : undefined;
 
   const closeListAfterSelection = () => {
     setIsOpen(false);
@@ -369,7 +374,9 @@ const InlineCustomSelect = ({
                 aria-disabled="true"
                 className={optionRowClassName}
               >
-                <span className="text-base text-darkblack">{option}</span>
+                <span className="text-base text-darkblack" style={getOptionStyle?.(option)}>
+                  {option}
+                </span>
                 <span className="shrink-0 pl-4 font-gill text-sm font-normal leading-110 text-neutral500">
                   Out of Stock
                 </span>
@@ -394,7 +401,7 @@ const InlineCustomSelect = ({
               }}
               className={optionRowClassName}
             >
-              <span>{option}</span>
+              <span style={getOptionStyle?.(option)}>{option}</span>
             </button>
           );
         })}
@@ -444,7 +451,9 @@ const InlineCustomSelect = ({
             : "font-normal text-darkblack",
         )}
       >
-        <span id={valueId}>{triggerLabel}</span>
+        <span id={valueId} style={selectedOptionStyle}>
+          {triggerLabel}
+        </span>
         <SelectChevron open={isOpen} />
       </button>
       {listbox
