@@ -66,6 +66,10 @@ import {
 import { INDIAN_STATES_AND_UTS } from "@/shared/constants/indianStatesAndUts";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
+import {
+  buildProfileTryAtHomeAddressUi,
+  type ProfileTryAtHomeAddressUi,
+} from "../utils/profileDisplayMappers";
 
 const panelContent = profileTabsContent.appointments.reschedulePanel;
 
@@ -163,11 +167,18 @@ function RescheduleStoreVisitCard({
   );
 }
 
+export type ProfileAppointmentRescheduleResult = {
+  appointmentIds: string[];
+  tryAtHomeAddress?: ProfileTryAtHomeAddressUi;
+};
+
 type ProfileAppointmentReschedulePanelProps = {
   open: boolean;
   appointment: ProfileAppointmentUi | null;
   onClose: () => void;
-  onRescheduled: () => void;
+  onRescheduled: (result: ProfileAppointmentRescheduleResult) => void;
+  /** Keeps the listing card address aligned with the address step while the panel is open. */
+  onAddressDraftChange?: (draft: ProfileTryAtHomeAddressUi | null) => void;
 };
 
 export function ProfileAppointmentReschedulePanel({
@@ -175,6 +186,7 @@ export function ProfileAppointmentReschedulePanel({
   appointment,
   onClose,
   onRescheduled,
+  onAddressDraftChange,
 }: ProfileAppointmentReschedulePanelProps) {
   const { customer } = useAuth();
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
@@ -388,6 +400,40 @@ export function ProfileAppointmentReschedulePanel({
   }, [appointment, open, resetValidation]);
 
   useEffect(() => {
+    if (!open || !appointment || !isTryAtHome || step !== "address") {
+      onAddressDraftChange?.(null);
+      return;
+    }
+
+    onAddressDraftChange?.(
+      buildProfileTryAtHomeAddressUi({
+        customerName: name,
+        customerPhone: `${countryCode} ${phone}`.trim(),
+        addressLine1,
+        addressLine2: addressLine2.trim() || undefined,
+        city,
+        state: (selectedAddressState || addressState).trim() || undefined,
+        pincode,
+      }),
+    );
+  }, [
+    addressLine1,
+    addressLine2,
+    addressState,
+    city,
+    countryCode,
+    isTryAtHome,
+    name,
+    onAddressDraftChange,
+    open,
+    appointment,
+    phone,
+    pincode,
+    selectedAddressState,
+    step,
+  ]);
+
+  useEffect(() => {
     if (!open || !appointment) {
       setCmsForm(null);
       return;
@@ -435,6 +481,17 @@ export function ProfileAppointmentReschedulePanel({
         const formTag = appointment.formTag || DEFAULT_FORM_TAGS[appointment.type];
         const stateForSubmit = (selectedAddressState || addressState).trim();
 
+        const submittedAddress =
+          isTryAtHome && (isAddressStep || isAddressChanged)
+            ? {
+                addressLine1: addressLine1.trim(),
+                pincode: pincode.trim(),
+                city: city.trim(),
+                ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
+                ...(stateForSubmit ? { state: stateForSubmit } : {}),
+              }
+            : undefined;
+
         for (const appointmentId of appointmentIds) {
           await rescheduleCustomerAppointment(appointmentId, {
             formTag,
@@ -444,20 +501,23 @@ export function ProfileAppointmentReschedulePanel({
             ...(customerPhone ? { customerPhone } : {}),
             ...(customerEmail ? { customerEmail } : {}),
             ...(requestDetails ? { requestDetails } : {}),
-            ...(isAddressChanged
-              ? {
-                address: {
-                  addressLine1: addressLine1.trim(),
-                  pincode: pincode.trim(),
-                  city: city.trim(),
-                  ...(addressLine2.trim() ? { addressLine2: addressLine2.trim() } : {}),
-                  ...(stateForSubmit ? { state: stateForSubmit } : {}),
-                },
-              }
-              : {}),
+            ...(submittedAddress ? { address: submittedAddress } : {}),
           });
         }
-        onRescheduled();
+
+        const tryAtHomeAddress = submittedAddress
+          ? buildProfileTryAtHomeAddressUi({
+              customerName,
+              customerPhone,
+              addressLine1: submittedAddress.addressLine1,
+              addressLine2: submittedAddress.addressLine2,
+              city: submittedAddress.city,
+              state: submittedAddress.state,
+              pincode: submittedAddress.pincode,
+            })
+          : undefined;
+
+        onRescheduled({ appointmentIds, ...(tryAtHomeAddress ? { tryAtHomeAddress } : {}) });
         onClose();
       } catch (error) {
         setFormError(

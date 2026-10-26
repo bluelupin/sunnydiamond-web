@@ -160,7 +160,7 @@ function buildMagentoDirectCatalogUrl(
 }
 
 /** Magento cache URLs for shared model-wear assets can 403 — use the direct catalog path. */
-function stripMagentoImageCacheSegment(url: string): string {
+export function normalizeMagentoCatalogProductImageUrl(url: string): string {
   const marker = "/media/catalog/product/cache/";
   const markerIndex = url.indexOf(marker);
   if (markerIndex === -1) {
@@ -189,7 +189,7 @@ export function resolveMagentoModelWearImageUrl(
   }
 
   if (/^https?:\/\//i.test(raw)) {
-    return stripMagentoImageCacheSegment(raw);
+    return normalizeMagentoCatalogProductImageUrl(raw);
   }
 
   const directUrl = buildMagentoDirectCatalogUrl(raw, referenceImageUrl);
@@ -203,7 +203,7 @@ export function resolveMagentoModelWearImageUrl(
     (url) => url.includes(raw) || url.endsWith(raw) || url.split("/").pop() === filename,
   );
 
-  return galleryMatch ? stripMagentoImageCacheSegment(galleryMatch) : "";
+  return galleryMatch ? normalizeMagentoCatalogProductImageUrl(galleryMatch) : "";
 }
 
 const VIDEO_FILE_PATTERN = /\.(mp4|webm|mov)(\?|$)/i;
@@ -228,7 +228,7 @@ function resolveMagentoVideoFromGallery(
     );
   });
 
-  return match ? stripMagentoImageCacheSegment(match) : "";
+  return match ? normalizeMagentoCatalogProductImageUrl(match) : "";
 }
 
 /** Resolves Magento `product_video_url` (absolute URL, catalog path, or gallery reference). */
@@ -244,7 +244,7 @@ export function resolveMagentoProductVideoUrl(
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
-    return stripMagentoImageCacheSegment(trimmed);
+    return normalizeMagentoCatalogProductImageUrl(trimmed);
   }
 
   const fromCatalog = buildMagentoDirectCatalogUrl(trimmed, referenceImageUrl);

@@ -50,14 +50,62 @@ function buildIconSvg(canvasSize, logoFraction, fill) {
   );
 }
 
+/** Browser tab favicons — transparent canvas (no white plate). */
+function buildFaviconSvg(canvasSize, logoFraction, fill) {
+  const logoPx = Math.round(canvasSize * logoFraction);
+  const scale = logoPx / LOGO_VIEW;
+  const offset = (canvasSize - logoPx) / 2;
+  const paths = logoPathsCache.replaceAll("#0A0A0A", fill).replaceAll("#0a0a0a", fill);
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasSize}" height="${canvasSize}" viewBox="0 0 ${canvasSize} ${canvasSize}">
+  <g transform="translate(${offset} ${offset}) scale(${scale})">${paths}</g>
+</svg>`,
+  );
+}
+
 async function writePng(canvasSize, logoFraction, fill, outPath, outputSize) {
   const svg = buildIconSvg(canvasSize, logoFraction, fill);
   await sharp(svg).resize(outputSize, outputSize).png().toFile(outPath);
   console.log(`Wrote ${path.relative(webRoot, outPath)}`);
 }
 
+const faviconsOnly = process.argv.includes("--favicons-only");
+
 await fs.access(markPath);
 await getLogoPaths();
+
+async function writeFavicons() {
+  await writePngFromSvg(
+    buildFaviconSvg(512, ANY_LOGO_FRACTION, ICON_BLACK),
+    path.join(publicDir, "favicon-32x32.png"),
+    32,
+  );
+  await writePngFromSvg(
+    buildFaviconSvg(512, ANY_LOGO_FRACTION, ICON_BLACK),
+    path.join(publicDir, "favicon-16x16.png"),
+    16,
+  );
+
+  const faviconIco = await import("to-ico");
+  const favSvg = buildFaviconSvg(512, ANY_LOGO_FRACTION, ICON_BLACK);
+  const fav16 = await sharp(favSvg).resize(16, 16).png().toBuffer();
+  const fav32 = await sharp(favSvg).resize(32, 32).png().toBuffer();
+  await fs.writeFile(
+    path.join(publicDir, "favicon.ico"),
+    await faviconIco.default([fav16, fav32]),
+  );
+  console.log("Wrote public/favicon.ico");
+}
+
+async function writePngFromSvg(svg, outPath, outputSize) {
+  await sharp(svg).resize(outputSize, outputSize).png().toFile(outPath);
+  console.log(`Wrote ${path.relative(webRoot, outPath)}`);
+}
+
+if (faviconsOnly) {
+  await writeFavicons();
+  process.exit(0);
+}
 
 await writePng(
   MASTER_SIZE,
@@ -84,15 +132,4 @@ await writePng(
   192,
 );
 await writePng(512, ANY_LOGO_FRACTION, ICON_BLACK, path.join(publicDir, "apple-touch-icon.png"), 180);
-await writePng(512, ANY_LOGO_FRACTION, ICON_BLACK, path.join(publicDir, "favicon-32x32.png"), 32);
-await writePng(512, ANY_LOGO_FRACTION, ICON_BLACK, path.join(publicDir, "favicon-16x16.png"), 16);
-
-const faviconIco = await import("to-ico");
-const favSvg = buildIconSvg(512, ANY_LOGO_FRACTION, ICON_BLACK);
-const fav16 = await sharp(favSvg).resize(16, 16).png().toBuffer();
-const fav32 = await sharp(favSvg).resize(32, 32).png().toBuffer();
-await fs.writeFile(
-  path.join(publicDir, "favicon.ico"),
-  await faviconIco.default([fav16, fav32]),
-);
-console.log("Wrote public/favicon.ico");
+await writeFavicons();

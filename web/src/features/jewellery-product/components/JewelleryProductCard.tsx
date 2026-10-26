@@ -8,6 +8,7 @@ import {
   useState,
   type TransitionEvent,
 } from "react";
+import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
@@ -37,6 +38,9 @@ const plpLifestyleFadeClassName =
 
 const plpLifestyleChromeFadeClassName =
   "motion-safe:transition-[opacity,color] motion-safe:duration-[350ms] motion-safe:ease-in-out";
+
+const plpCardImageShellClassName =
+  "mx-auto size-[110px] w-full max-w-[110px] shrink-0 overflow-hidden md:aspect-square md:h-auto md:max-w-[303px] md:w-full desktop:size-[303px]";
 
 export interface JewelleryProductCardProps {
   title: string;
@@ -99,7 +103,7 @@ const ProductImage = ({
   priority?: boolean;
   imageClassName?: string;
 }) => (
-  <div className="mx-auto size-[110px] w-full max-w-[110px] shrink-0 overflow-hidden md:aspect-square md:h-auto md:max-w-[303px] md:w-full desktop:size-[303px]">
+  <div className={plpCardImageShellClassName}>
     <OptimizedImage
       src={src}
       alt={alt}
@@ -128,9 +132,29 @@ const JewelleryProductCard = ({
   onToggleWishlist,
   priorityImage = false,
 }: JewelleryProductCardProps) => {
+  const [inputMode, setInputMode] = useState<"hover" | "touch" | null>(null);
   const [loadHoverImage, setLoadHoverImage] = useState(false);
   const [hoverImageReady, setHoverImageReady] = useState(false);
   const lifestyleImage = hoverImage ?? modalImage;
+  const touchImageSwapEnabled = inputMode === "touch" && Boolean(lifestyleImage);
+  const hoverInteractionEnabled = inputMode === "hover";
+
+  const cardImageSwipe = useCardImageSwipe({
+    slideCount: lifestyleImage ? 2 : 1,
+    enabled: touchImageSwapEnabled,
+  });
+  const productLinkRef = useRef<HTMLAnchorElement>(null);
+
+  useLayoutEffect(() => {
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const syncInputMode = () => {
+      setInputMode(media.matches ? "hover" : "touch");
+    };
+
+    syncInputMode();
+    media.addEventListener("change", syncInputMode);
+    return () => media.removeEventListener("change", syncInputMode);
+  }, []);
 
   const prefetchHoverImage = useCallback(() => {
     if (lifestyleImage) {
@@ -141,8 +165,12 @@ const JewelleryProductCard = ({
   const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
   const displayedWishlisted = optimisticWishlisted ?? isWishlisted;
   const hoverImageLoaded = Boolean(lifestyleImage) && hoverImageReady;
-  const isHoveringLifestyle = isHoverActive && Boolean(lifestyleImage);
-  const shouldRevealLifestyle = isHoveringLifestyle && hoverImageLoaded;
+  const isHoveringLifestyle =
+    hoverInteractionEnabled && isHoverActive && Boolean(lifestyleImage);
+  const isTouchShowingLifestyle =
+    touchImageSwapEnabled && cardImageSwipe.activeSlide === 1 && Boolean(lifestyleImage);
+  const wantsLifestyleReveal = isHoveringLifestyle || isTouchShowingLifestyle;
+  const shouldRevealLifestyle = wantsLifestyleReveal && hoverImageLoaded;
   const [lifestyleLayerMounted, setLifestyleLayerMounted] = useState(false);
   const [lifestyleLayerOpaque, setLifestyleLayerOpaque] = useState(false);
   const shouldRevealLifestyleRef = useRef(shouldRevealLifestyle);
@@ -201,6 +229,41 @@ const JewelleryProductCard = ({
     };
   }, [hoverImageReady, lifestyleImage, loadHoverImage]);
 
+  useEffect(() => {
+    if (touchImageSwapEnabled && cardImageSwipe.activeSlide === 1) {
+      prefetchHoverImage();
+    }
+  }, [cardImageSwipe.activeSlide, prefetchHoverImage, touchImageSwapEnabled]);
+
+  const handleTouchImagePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      prefetchHoverImage();
+      cardImageSwipe.onPointerDown(event);
+    },
+    [cardImageSwipe, prefetchHoverImage],
+  );
+
+  const handleTouchImagePointerUp = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      cardImageSwipe.onPointerUp(event);
+      if (
+        touchImageSwapEnabled &&
+        !cardImageSwipe.pointerSessionCancelledRef.current &&
+        !cardImageSwipe.lastGestureWasSwipeRef.current
+      ) {
+        productLinkRef.current?.click();
+      }
+    },
+    [cardImageSwipe, touchImageSwapEnabled],
+  );
+
+  const handleTouchImagePointerCancel = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      cardImageSwipe.onPointerCancel(event);
+    },
+    [cardImageSwipe],
+  );
+
   const handlePointerEnter = useCallback(() => {
     if (!lifestyleImage) return;
     prefetchHoverImage();
@@ -217,9 +280,9 @@ const JewelleryProductCard = ({
         "group relative grid h-[227px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
         "lg:h-[496px] md:h-[450px]",
       )}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onFocus={lifestyleImage ? prefetchHoverImage : undefined}
+      onPointerEnter={hoverInteractionEnabled ? handlePointerEnter : undefined}
+      onPointerLeave={hoverInteractionEnabled ? handlePointerLeave : undefined}
+      onFocus={hoverInteractionEnabled && lifestyleImage ? prefetchHoverImage : undefined}
     >
       {lifestyleImage && (loadHoverImage || lifestyleLayerMounted) ? (
         <div
@@ -257,6 +320,27 @@ const JewelleryProductCard = ({
         />
       </div>
 
+      {touchImageSwapEnabled ? (
+        <div
+          className={cn(
+            "col-start-1 row-start-1 z-[35] flex w-full flex-col items-center px-4 pt-6 md:px-6 md:pt-10",
+          )}
+        >
+          <div
+            className={cn(
+              plpCardImageShellClassName,
+              "touch-pan-y select-none",
+              cardImageSwipe.isDragging ? "cursor-grabbing" : "cursor-grab",
+            )}
+            onPointerDown={handleTouchImagePointerDown}
+            onPointerMove={cardImageSwipe.onPointerMove}
+            onPointerUp={handleTouchImagePointerUp}
+            onPointerCancel={handleTouchImagePointerCancel}
+            aria-hidden
+          />
+        </div>
+      ) : null}
+
       <div
         className={cn(
           "pointer-events-none col-start-1 row-start-1 z-[70] flex size-full flex-col items-center justify-end md:z-20",
@@ -291,9 +375,11 @@ const JewelleryProductCard = ({
       </div>
 
       <Link
+        ref={productLinkRef}
         href={href}
         className="col-start-1 row-start-1 z-30 size-full"
         aria-label={`View ${title}`}
+        onClick={touchImageSwapEnabled ? cardImageSwipe.handleLinkClick : undefined}
       />
 
       <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-2 pt-2 md:z-50 md:px-6 md:pt-6">
@@ -307,7 +393,11 @@ const JewelleryProductCard = ({
             setOptimisticWishlisted(!displayedWishlisted);
             onToggleWishlist?.();
           }}
-          className="pointer-events-auto relative flex size-6 items-center justify-center md:size-8"
+          className={cn(
+            "pointer-events-auto relative flex shrink-0 items-center justify-center touch-manipulation",
+            /* 24px icon + 10px padding => 44px touch target; negative margin keeps visual placement */
+            "box-content h-6 w-6 p-2.5 -m-2.5 md:box-border md:m-0 md:size-8 md:p-0",
+          )}
         >
           <svg
             width="32"
@@ -315,6 +405,7 @@ const JewelleryProductCard = ({
             viewBox="0 0 32 32"
             fill={displayedWishlisted ? "currentColor" : "none"}
             xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
             className={cn(
               "h-6 w-6 md:h-8 md:w-8",
               displayedWishlisted
