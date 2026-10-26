@@ -329,7 +329,7 @@ const JewelleryProductCard = ({
           <div
             className={cn(
               plpCardImageShellClassName,
-              "touch-none select-none",
+              "touch-pan-y select-none",
               cardImageSwipe.isDragging ? "cursor-grabbing" : "cursor-grab",
             )}
             onPointerDown={handleTouchImagePointerDown}
