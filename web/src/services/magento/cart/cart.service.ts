@@ -88,6 +88,7 @@ import {
   resolveMagentoPaymentCode,
 } from "./checkoutPayment.mapper";
 import { MagentoGraphqlError } from "../magento.errors";
+import { isGuestCartUnavailableError } from "./guestCartAvailability";
 import { MAGENTO_CUSTOMER_CART_QUERY } from "@/services/customer/customer.gql";
 import { DEFAULT_CART_SHIPPING_ESTIMATE_ADDRESS } from "./cartShippingEstimate";
 
@@ -234,6 +235,34 @@ function fetchCartForSession(
     : fetchGuestCart(cartId, lineMetadata, signal);
 }
 
+export { isGuestCartUnavailableError } from "./guestCartAvailability";
+
+/**
+ * Page-load guest cart: refresh when id is valid; on stale id, clear and open a fresh quote.
+ * Returns null when no stored guest cart id (caller keeps empty bag — no createGuestCart).
+ */
+export async function refreshStoredGuestCartOnInit(
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState | null> {
+  const cartId = getGuestCartId();
+  if (!cartId) {
+    return null;
+  }
+
+  try {
+    return await fetchGuestCart(cartId, lineMetadata, signal);
+  } catch (error) {
+    if (!isGuestCartUnavailableError(error) || signal?.aborted) {
+      throw error;
+    }
+
+    clearGuestCartId();
+    const newCartId = await createGuestCart(signal);
+    return fetchGuestCart(newCartId, lineMetadata, signal);
+  }
+}
+
 export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
   const existingCartId = getGuestCartId();
   if (existingCartId) {
@@ -249,12 +278,7 @@ export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
     } catch (error) {
       // Only discard a cart Magento confirms is missing, inactive or inaccessible.
       // A network failure or cancellation must not replace the shopper's cart.
-      const unavailable = error instanceof MagentoGraphqlError && (
-        /could not find a cart|cart.*(?:isn't|is not|not) active|current user cannot perform|customerCart/i.test(error.message)
-        || /\(403\)$/.test(error.message)
-        || error.errors.some((entry) => entry.extensions?.category === "graphql-authorization")
-      );
-      if (!unavailable || signal?.aborted) {
+      if (!isGuestCartUnavailableError(error) || signal?.aborted) {
         throw error;
       }
       clearGuestCartId();
