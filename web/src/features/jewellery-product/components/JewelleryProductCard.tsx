@@ -143,6 +143,7 @@ const JewelleryProductCard = ({
     slideCount: lifestyleImage ? 2 : 1,
     enabled: touchImageSwapEnabled,
   });
+  const productLinkRef = useRef<HTMLAnchorElement>(null);
 
   useLayoutEffect(() => {
     const media = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -242,6 +243,27 @@ const JewelleryProductCard = ({
     [cardImageSwipe, prefetchHoverImage],
   );
 
+  const handleTouchImagePointerUp = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      cardImageSwipe.onPointerUp(event);
+      if (
+        touchImageSwapEnabled &&
+        !cardImageSwipe.pointerSessionCancelledRef.current &&
+        !cardImageSwipe.lastGestureWasSwipeRef.current
+      ) {
+        productLinkRef.current?.click();
+      }
+    },
+    [cardImageSwipe, touchImageSwapEnabled],
+  );
+
+  const handleTouchImagePointerCancel = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      cardImageSwipe.onPointerCancel(event);
+    },
+    [cardImageSwipe],
+  );
+
   const handlePointerEnter = useCallback(() => {
     if (!lifestyleImage) return;
     prefetchHoverImage();
@@ -312,11 +334,9 @@ const JewelleryProductCard = ({
             )}
             onPointerDown={handleTouchImagePointerDown}
             onPointerMove={cardImageSwipe.onPointerMove}
-            onPointerUp={cardImageSwipe.onPointerUp}
-            onPointerCancel={cardImageSwipe.onPointerCancel}
-            aria-label={`${title} images. Swipe or tap to view on model.`}
-            role="button"
-            tabIndex={-1}
+            onPointerUp={handleTouchImagePointerUp}
+            onPointerCancel={handleTouchImagePointerCancel}
+            aria-hidden
           />
         </div>
       ) : null}
@@ -355,6 +375,7 @@ const JewelleryProductCard = ({
       </div>
 
       <Link
+        ref={productLinkRef}
         href={href}
         className="col-start-1 row-start-1 z-30 size-full"
         aria-label={`View ${title}`}
@@ -372,7 +393,11 @@ const JewelleryProductCard = ({
             setOptimisticWishlisted(!displayedWishlisted);
             onToggleWishlist?.();
           }}
-          className="pointer-events-auto relative flex size-6 items-center justify-center md:size-8"
+          className={cn(
+            "pointer-events-auto relative flex shrink-0 items-center justify-center touch-manipulation",
+            /* 24px icon + 10px padding => 44px touch target; negative margin keeps visual placement */
+            "box-content h-6 w-6 p-2.5 -m-2.5 md:box-border md:m-0 md:size-8 md:p-0",
+          )}
         >
           <svg
             width="32"
@@ -380,6 +405,7 @@ const JewelleryProductCard = ({
             viewBox="0 0 32 32"
             fill={displayedWishlisted ? "currentColor" : "none"}
             xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
             className={cn(
               "h-6 w-6 md:h-8 md:w-8",
               displayedWishlisted

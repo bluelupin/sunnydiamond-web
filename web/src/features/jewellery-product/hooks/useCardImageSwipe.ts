@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState } from "react";
 
 const SWIPE_THRESHOLD_PX = 40;
-const TAP_MAX_MOVEMENT_PX = 10;
 
 type UseCardImageSwipeOptions = {
   slideCount: number;
@@ -23,6 +22,8 @@ export function useCardImageSwipe({ slideCount, enabled = true }: UseCardImageSw
     deltaY: 0,
     pointerId: 0,
   });
+  const lastGestureWasSwipeRef = useRef(false);
+  const pointerSessionCancelledRef = useRef(false);
 
   const maxSlide = Math.max(0, slideCount - 1);
 
@@ -36,6 +37,7 @@ export function useCardImageSwipe({ slideCount, enabled = true }: UseCardImageSw
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLElement>) => {
       if (!enabled || slideCount < 2) return;
+      pointerSessionCancelledRef.current = false;
       dragState.current = {
         active: true,
         startX: event.clientX,
@@ -60,6 +62,7 @@ export function useCardImageSwipe({ slideCount, enabled = true }: UseCardImageSw
 
       // Vertical scroll should not trigger image swipe or hide product copy.
       if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 8) {
+        pointerSessionCancelledRef.current = true;
         dragState.current.active = false;
         setIsDragging(false);
         setDragOffset(0);
@@ -92,24 +95,16 @@ export function useCardImageSwipe({ slideCount, enabled = true }: UseCardImageSw
       setIsDragging(false);
       setDragOffset(0);
 
-      const deltaY = dragState.current.deltaY;
+      lastGestureWasSwipeRef.current = false;
 
       if (Math.abs(deltaX) >= SWIPE_THRESHOLD_PX) {
+        lastGestureWasSwipeRef.current = true;
         setSuppressClick(true);
         if (deltaX <= -SWIPE_THRESHOLD_PX) goToSlide(activeSlide + 1);
         else if (deltaX >= SWIPE_THRESHOLD_PX) goToSlide(activeSlide - 1);
-        return;
-      }
-
-      if (
-        Math.abs(deltaX) < TAP_MAX_MOVEMENT_PX &&
-        Math.abs(deltaY) < TAP_MAX_MOVEMENT_PX
-      ) {
-        setSuppressClick(true);
-        goToSlide(activeSlide >= maxSlide ? 0 : activeSlide + 1);
       }
     },
-    [activeSlide, goToSlide, maxSlide],
+    [activeSlide, goToSlide],
   );
 
   const handleLinkClick = useCallback(
@@ -132,5 +127,7 @@ export function useCardImageSwipe({ slideCount, enabled = true }: UseCardImageSw
     onPointerCancel: endDrag,
     handleLinkClick,
     goToSlide,
+    lastGestureWasSwipeRef,
+    pointerSessionCancelledRef,
   };
 }
