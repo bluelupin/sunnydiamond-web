@@ -130,8 +130,6 @@ const LoginModalContent = ({
 
         {!noSignInMethod && otpBlockedForCountry ? (
           <div role="status" className="flex items-center justify-between gap-1">
-            {/* Adapted from the Authentication & Registration Flow document's wording,
-                now that SMS codes reach some countries (CR-B3). */}
             <div role="alert" className="flex items-center gap-2 text-[#F91616]">
               <svg width="24" height="24" viewBox="0 0 19.125 19.125" fill="none" xmlns="http://www.w3.org/2000/svg" className="size-4 shrink-0" aria-hidden="true">
                 <path d="M8.8125 8.8125C9.01141 8.8125 9.20218 8.89152 9.34283 9.03217C9.48348 9.17282 9.5625 9.36359 9.5625 9.5625V13.3125C9.5625 13.5114 9.64152 13.7022 9.78217 13.8428C9.92282 13.9835 10.1136 14.0625 10.3125 14.0625" stroke="currentColor" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round">
@@ -143,13 +141,6 @@ const LoginModalContent = ({
               </svg>
               <p className="min-w-0 font-gill text-sm font-light leading-none text-[#F91616]">SMS codes aren&apos;t available for this country yet.</p>
             </div>
-            {/* <button
-              type="button"
-              onClick={onUseEmailInstead}
-              className="self-start font-gill text-sm font-normal leading-110 text-darkblack underline-offset-2 hover:underline"
-            >
-              Use email instead
-            </button> */}
           </div>
         ) : null}
 

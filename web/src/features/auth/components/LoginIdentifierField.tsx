@@ -95,8 +95,9 @@ const LoginIdentifierField = ({
           className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
         />
       </div>
-
-      <FormFieldError id="login-identifier-error" message={fieldError} />
+      <div className="relative">
+        <FormFieldError id="login-identifier-error" message={fieldError} className="absolute left-0" />
+      </div>
     </div>
   );
 };
