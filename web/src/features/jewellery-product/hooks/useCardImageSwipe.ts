@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 const SWIPE_THRESHOLD_PX = 40;
+const TAP_MAX_MOVEMENT_PX = 10;
 
 type UseCardImageSwipeOptions = {
   slideCount: number;
@@ -91,13 +92,24 @@ export function useCardImageSwipe({ slideCount, enabled = true }: UseCardImageSw
       setIsDragging(false);
       setDragOffset(0);
 
+      const deltaY = dragState.current.deltaY;
+
       if (Math.abs(deltaX) >= SWIPE_THRESHOLD_PX) {
         setSuppressClick(true);
         if (deltaX <= -SWIPE_THRESHOLD_PX) goToSlide(activeSlide + 1);
         else if (deltaX >= SWIPE_THRESHOLD_PX) goToSlide(activeSlide - 1);
+        return;
+      }
+
+      if (
+        Math.abs(deltaX) < TAP_MAX_MOVEMENT_PX &&
+        Math.abs(deltaY) < TAP_MAX_MOVEMENT_PX
+      ) {
+        setSuppressClick(true);
+        goToSlide(activeSlide >= maxSlide ? 0 : activeSlide + 1);
       }
     },
-    [activeSlide, goToSlide],
+    [activeSlide, goToSlide, maxSlide],
   );
 
   const handleLinkClick = useCallback(
