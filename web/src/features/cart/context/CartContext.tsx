@@ -27,6 +27,7 @@ import {
   fetchCustomerCart,
   fetchGuestCart,
   migrateLegacyLinesToGuestCart,
+  refreshStoredGuestCartOnInit,
   removeCartGiftCard,
   removeGuestCartItem,
   setCartGiftOptions,
@@ -514,7 +515,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           writeStoredCartLines([]);
         }
 
-        await refreshCart(cartId);
+        const nextState = await refreshStoredGuestCartOnInit(metadata);
+        if (nextState) {
+          applyCartState(nextState);
+        }
       } catch (error) {
         console.error("Failed to initialize cart:", error);
         shippingEstimateRequestRef.current += 1;
