@@ -102,6 +102,11 @@ assert.ok(physical.timeline?.length, "physical card keeps the stepper");
 // A cancelled digital card keeps the normal cancelled layout (refund steps, Contact Us), without a delivery date.
 const cancelled = mapCustomerOrderToProfileUi(order("sd-gift-card-digital", "canceled", "CANCELLED"));
 assert.equal(cancelled.category, "cancelled");
+assert.deepEqual(
+  [cancelled.showTrack, cancelled.showCancel, cancelled.showReturn],
+  [false, false, false],
+  "cancelled order: no Track/Cancel/Return even when sunny_actions allow them",
+);
 assert.equal(cancelled.showContactUs, true, "cancelled digital card: Contact Us");
 assert.equal(cancelled.deliveryBy, undefined, "cancelled digital card: no delivery date");
 const { isActiveDigitalGiftCardOrder, isDigitalGiftCardContactUsOnlyOrder } = await import(
@@ -115,4 +120,24 @@ const jewellery = mapCustomerOrderToProfileUi(order("SD-RING-001"));
 assert.equal(jewellery.items[0].subtitle, undefined, "jewellery has no card label");
 assert.equal(jewellery.showReturn, true);
 
-console.log("gift card order display: 6/6 passed");
+const paymentFailedCancelled = mapCustomerOrderToProfileUi({
+  ...order("SD-RING-001", "Pending Payment", "IN_PROGRESS"),
+  sunnyRefund: {
+    type: "CANCELLATION",
+    steps: [],
+    refundAmount: 0,
+    currency: "INR",
+    refundMode: "",
+    estimatedCompletionDate: null,
+    estimatedWindowLabel: "5-7 business days",
+  },
+});
+assert.equal(paymentFailedCancelled.category, "cancelled", "failed payment auto-cancel: Cancelled tab");
+assert.deepEqual(
+  [paymentFailedCancelled.showTrack, paymentFailedCancelled.showCancel],
+  [false, false],
+  "failed payment auto-cancel: Contact Us layout, not in-progress CTAs",
+);
+assert.equal(paymentFailedCancelled.showContactUs, true);
+
+console.log("gift card order display: 8/8 passed");

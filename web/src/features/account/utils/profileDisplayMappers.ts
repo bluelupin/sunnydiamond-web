@@ -115,29 +115,35 @@ function categorizeOrderStatusFromLabel(status: string): OrderFilterKey {
 export function categorizeOrder(
   sunnyStatus: SunnyOrderStatus | null,
   statusLabel: string,
+  sunnyRefund?: TrackedOrderRefundStatus | null,
 ): { category: OrderFilterKey; subState?: ProfileOrderSubState } {
   const fromLabel = categorizeOrderStatusFromLabel(statusLabel);
 
+  let resolved: { category: OrderFilterKey; subState?: ProfileOrderSubState };
+
   // Magento "Canceled" must win over a stale sunny_status (e.g. still IN_PROGRESS).
   if (fromLabel === "cancelled") {
-    if (sunnyStatus === "CANCELLATION_IN_PROGRESS") {
-      return { category: "cancelled", subState: "cancellation_in_progress" };
-    }
+    resolved =
+      sunnyStatus === "CANCELLATION_IN_PROGRESS"
+        ? { category: "cancelled", subState: "cancellation_in_progress" }
+        : { category: "cancelled" };
+  } else if (fromLabel === "returned") {
+    resolved =
+      sunnyStatus === "RETURN_IN_PROGRESS"
+        ? { category: "returned", subState: "return_in_progress" }
+        : { category: "returned" };
+  } else if (sunnyStatus) {
+    resolved = CATEGORY_BY_SUNNY_STATUS[sunnyStatus];
+  } else {
+    resolved = { category: fromLabel };
+  }
+
+  // Failed gateway payment can auto-cancel while status/sunny_status still look in-progress.
+  if (resolved.category === "in_progress" && sunnyRefund?.type === "CANCELLATION") {
     return { category: "cancelled" };
   }
 
-  if (fromLabel === "returned") {
-    if (sunnyStatus === "RETURN_IN_PROGRESS") {
-      return { category: "returned", subState: "return_in_progress" };
-    }
-    return { category: "returned" };
-  }
-
-  if (sunnyStatus) {
-    return CATEGORY_BY_SUNNY_STATUS[sunnyStatus];
-  }
-
-  return { category: fromLabel };
+  return resolved;
 }
 
 /** "Delivery by" is a real delivery date or nothing at all — never the order date. */
@@ -524,7 +530,11 @@ export function mapCustomerOrderToProfileUi(
   order: CustomerOrder,
   imageBySku?: Record<string, string>,
 ): ProfileOrderUi {
-  const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
+  const { category, subState } = categorizeOrder(
+    order.sunnyStatus,
+    order.status,
+    order.sunnyRefund,
+  );
   const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapOrderItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
@@ -536,9 +546,12 @@ export function mapCustomerOrderToProfileUi(
         ? undefined
         : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
-  const showCancel = actions
-    ? actions.canCancel
-    : category === "in_progress" && canCancelInProgressOrderFromStatus(order.status);
+  const showCancel =
+    category === "cancelled"
+      ? false
+      : actions
+        ? actions.canCancel
+        : category === "in_progress" && canCancelInProgressOrderFromStatus(order.status);
   const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
   const deliveryTimeline =
     trackingTimeline.length > 0
@@ -557,13 +570,21 @@ export function mapCustomerOrderToProfileUi(
     items,
     grandTotal: order.grandTotal,
     currency: order.currency,
-    showTrack: actions ? actions.canTrack : category === "in_progress",
+    showTrack:
+      category === "cancelled"
+        ? false
+        : actions
+          ? actions.canTrack
+          : category === "in_progress",
     showCancel,
-    showReturn: isGiftCardProfileOrder({ items })
-      ? false
-      : actions
-        ? actions.canReturn
-        : category === "delivered",
+    showReturn:
+      category === "cancelled"
+        ? false
+        : isGiftCardProfileOrder({ items })
+          ? false
+          : actions
+            ? actions.canReturn
+            : category === "delivered",
     showDownloadInvoice: true,
     ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
     showCancelNote: category === "in_progress" && showCancel,
@@ -581,6 +602,8 @@ export function mapCustomerOrderToProfileUi(
       ...base,
       showDownloadInvoice: false,
       showContactUs: true,
+      showCancelNote: false,
+      footnote: undefined,
     };
   }
 
@@ -594,6 +617,9 @@ export function mapCustomerOrderToProfileUi(
       ...base,
       // Figma: a returned order card offers Contact Us, not Track.
       ...(category === "returned" ? { showTrack: false } : {}),
+      ...(category === "cancelled"
+        ? { showCancelNote: false, footnote: undefined }
+        : {}),
       showDownloadInvoice: false,
       showContactUs: true,
       estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,
