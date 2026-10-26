@@ -683,6 +683,177 @@ export function mapCustomerOrderToProfileUi(
   return base;
 }
 
+export type ProfileTryAtHomeAddressUi = NonNullable<ProfileAppointmentUi["appointmentAddress"]>;
+
+/** Address saved on try-at-home reschedule — matches the reschedule panel / card layout. */
+export function buildProfileTryAtHomeAddressUi(input: {
+  customerName: string;
+  customerPhone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+}): ProfileTryAtHomeAddressUi {
+  return {
+    name: input.customerName.trim(),
+    addressLine1: input.addressLine1.trim(),
+    ...(input.addressLine2?.trim() ? { addressLine2: input.addressLine2.trim() } : {}),
+    ...(input.city?.trim() ? { city: input.city.trim() } : {}),
+    ...(input.state?.trim() ? { state: input.state.trim() } : {}),
+    ...(input.pincode?.trim() ? { pincode: input.pincode.trim() } : {}),
+    phone: formatAppointmentPhoneDisplay(input.customerPhone),
+  };
+}
+
+function collectProfileAppointmentIds(appointment: ProfileAppointmentUi): string[] {
+  return [appointment.id, ...(appointment.clubbedAppointmentIds ?? [])];
+}
+
+function profileAppointmentsShareScope(
+  left: ProfileAppointmentUi,
+  right: ProfileAppointmentUi,
+): boolean {
+  const leftIds = new Set(collectProfileAppointmentIds(left));
+  return collectProfileAppointmentIds(right).some((id) => leftIds.has(id));
+}
+
+function resolveTryAtHomeAddressPatch(
+  appointment: ProfileAppointmentUi,
+  addressByAppointmentId: ReadonlyMap<string, ProfileTryAtHomeAddressUi>,
+): ProfileTryAtHomeAddressUi | undefined {
+  return collectProfileAppointmentIds(appointment)
+    .map((id) => addressByAppointmentId.get(id))
+    .find(Boolean);
+}
+
+function normalizeTryAtHomeAddressField(value?: string | null): string {
+  return (value ?? "").trim().toLowerCase();
+}
+
+/** True when CMS list data already matches a post-reschedule address patch (GET is source of truth). */
+export function profileTryAtHomeAddressMatchesCustomerAppointment(
+  patch: ProfileTryAtHomeAddressUi,
+  appointment: CustomerAppointment,
+): boolean {
+  return (
+    normalizeTryAtHomeAddressField(patch.addressLine1) ===
+      normalizeTryAtHomeAddressField(appointment.addressLine1) &&
+    normalizeTryAtHomeAddressField(patch.addressLine2) ===
+      normalizeTryAtHomeAddressField(appointment.addressLine2) &&
+    normalizeTryAtHomeAddressField(patch.city) ===
+      normalizeTryAtHomeAddressField(appointment.city) &&
+    normalizeTryAtHomeAddressField(patch.state) ===
+      normalizeTryAtHomeAddressField(appointment.state) &&
+    normalizeTryAtHomeAddressField(patch.pincode) ===
+      normalizeTryAtHomeAddressField(appointment.pincode)
+  );
+}
+
+function profileTryAtHomeAddressUiMatches(
+  left: ProfileTryAtHomeAddressUi,
+  right: ProfileTryAtHomeAddressUi,
+): boolean {
+  return (
+    normalizeTryAtHomeAddressField(left.addressLine1) ===
+      normalizeTryAtHomeAddressField(right.addressLine1) &&
+    normalizeTryAtHomeAddressField(left.addressLine2) ===
+      normalizeTryAtHomeAddressField(right.addressLine2) &&
+    normalizeTryAtHomeAddressField(left.city) === normalizeTryAtHomeAddressField(right.city) &&
+    normalizeTryAtHomeAddressField(left.state) === normalizeTryAtHomeAddressField(right.state) &&
+    normalizeTryAtHomeAddressField(left.pincode) ===
+      normalizeTryAtHomeAddressField(right.pincode)
+  );
+}
+
+/** Drop patches once GET /appointments returns the same address (card follows API). */
+export function pruneStaleTryAtHomeAddressPatches(
+  appointments: readonly CustomerAppointment[],
+  patches: ReadonlyMap<string, ProfileTryAtHomeAddressUi>,
+): Map<string, ProfileTryAtHomeAddressUi> {
+  if (patches.size === 0) {
+    return new Map();
+  }
+
+  const appointmentById = new Map(
+    appointments.map((appointment) => [appointment.documentId, appointment]),
+  );
+  const next = new Map(patches);
+
+  for (const [id, patch] of patches) {
+    const appointment = appointmentById.get(id);
+    if (appointment && profileTryAtHomeAddressMatchesCustomerAppointment(patch, appointment)) {
+      next.delete(id);
+    }
+  }
+
+  return next;
+}
+
+/** Apply a saved try-at-home address onto the raw CMS appointment before UI mapping. */
+export function mergeRescheduledTryAtHomeAddressIntoCustomerAppointment(
+  appointment: CustomerAppointment,
+  addressByAppointmentId: ReadonlyMap<string, ProfileTryAtHomeAddressUi>,
+): CustomerAppointment {
+  const patch = addressByAppointmentId.get(appointment.documentId);
+  if (!patch) {
+    return appointment;
+  }
+
+  if (profileTryAtHomeAddressMatchesCustomerAppointment(patch, appointment)) {
+    return appointment;
+  }
+
+  return {
+    ...appointment,
+    addressLine1: patch.addressLine1,
+    addressLine2: patch.addressLine2 ?? null,
+    city: patch.city ?? null,
+    state: patch.state ?? null,
+    pincode: patch.pincode ?? null,
+  };
+}
+
+/** While the reschedule address step is open, mirror its fields on the listing card. */
+export function applyReschedulePanelAddressDraft(
+  appointment: ProfileAppointmentUi,
+  rescheduleTarget: ProfileAppointmentUi | null,
+  draft: ProfileTryAtHomeAddressUi | null,
+): ProfileAppointmentUi {
+  if (
+    appointment.type !== "try_at_home" ||
+    !draft ||
+    !rescheduleTarget ||
+    !profileAppointmentsShareScope(appointment, rescheduleTarget)
+  ) {
+    return appointment;
+  }
+
+  return { ...appointment, appointmentAddress: draft };
+}
+
+/** After a successful try-at-home reschedule with an address edit, keep the card in sync with the panel. */
+export function applyRescheduledTryAtHomeAddress(
+  appointment: ProfileAppointmentUi,
+  addressByAppointmentId: ReadonlyMap<string, ProfileTryAtHomeAddressUi>,
+): ProfileAppointmentUi {
+  if (appointment.type !== "try_at_home") {
+    return appointment;
+  }
+
+  const patch = resolveTryAtHomeAddressPatch(appointment, addressByAppointmentId);
+  if (!patch) {
+    return appointment;
+  }
+
+  const existing = appointment.appointmentAddress;
+  if (existing && profileTryAtHomeAddressUiMatches(existing, patch)) {
+    return appointment;
+  }
+
+  return { ...appointment, appointmentAddress: patch };
+}
+
 export function mapCustomerAppointmentToProfileUi(
   appointment: CustomerAppointment,
   productImageBySku?: Record<string, string>,
