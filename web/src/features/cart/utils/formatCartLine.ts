@@ -189,9 +189,9 @@ export const formatCartLineMeta = (item: CartLineItem) => {
   return parts;
 };
 
-/** Product amount for cart line UI — aligns with PDP Price Breakup Total when available. */
+/** Magento quote line is authoritative after add-to-cart and on every refresh. */
 export const getCartLineDisplayPrice = (item: CartLineItem): number =>
-  item.displayPrice ?? item.product.price;
+  item.product.price;
 
 export const getCartLineDisplayTotal = (item: CartLineItem): number =>
   getCartLineDisplayPrice(item) * item.quantity;

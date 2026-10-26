@@ -24,7 +24,6 @@ import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   hasCatalogEngravingText,
 } from "@/features/products/constants/engraving";
-import { reconcileCartTaxesForDisplay } from "@/features/cart/utils/reconcileCartTotals";
 import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 export function applyCartLineDisplayImage(
@@ -289,14 +288,7 @@ export function mapMagentoCartTotals(cart: MagentoCart): MappedMagentoCart | nul
   const grandTotal = cart.prices?.grand_total?.value ?? subtotal + rawTaxes + shipping;
   const { offerDiscount, giftCardDiscount, appliedGiftCardCode, giftCardProblem } =
     mapCartDiscounts(cart);
-  const taxes = reconcileCartTaxesForDisplay({
-    subtotal,
-    taxes: rawTaxes,
-    shipping,
-    offerDiscount,
-    giftCardDiscount,
-    grandTotal,
-  });
+  const taxes = rawTaxes;
 
   return {
     cartId,
@@ -438,9 +430,6 @@ export function mapMagentoCartItems(
       quantity,
       options: mergedOptions,
       gifting: mergeLineGifting(serverGifting, metadata.gifting),
-      ...(metadata.displayPrice != null && Number.isFinite(metadata.displayPrice)
-        ? { displayPrice: metadata.displayPrice }
-        : {}),
     });
   }
 

@@ -6,6 +6,7 @@ export type ProductPriceBreakupComponents = {
   diamondPrice: number;
   gemstonePrice: number;
   makingCharge: number;
+  baseMakingCharge: number;
   gstRate: number;
 };
 
@@ -55,12 +56,16 @@ export function resolveMagentoProductPriceBreakup(
   const gemstonePrice = parseOptionalMagentoDecimalAttribute(
     getMagentoCustomAttributeValue(items, "sd_gemstone_price"),
   );
+  const baseMakingCharge = parseOptionalMagentoDecimalAttribute(
+    getMagentoCustomAttributeValue(items, "sd_base_making_charge"),
+  );
 
   return {
     metalPrice,
     diamondPrice,
     gemstonePrice,
     makingCharge,
+    baseMakingCharge,
     gstRate,
   };
 }

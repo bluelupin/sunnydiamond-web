@@ -32,8 +32,6 @@ export type CartLineItem = {
   quantity: number;
   options: CartLineOptions;
   gifting?: CartGiftingOptions;
-  /** Catalog final price for UI — matches PDP Price Breakup Total when set. */
-  displayPrice?: number;
 };
 
 export type AddToBagPayload = {

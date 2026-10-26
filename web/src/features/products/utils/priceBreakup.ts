@@ -10,39 +10,12 @@ export type PriceBreakup = {
   gstRate: number;
   discount: number;
   total: number;
+  isReconciled: boolean;
 };
 
 /** Whole rupees — matches `formatJewelleryPrice` display. */
 function roundRupee(amount: number): number {
   return Math.round(amount);
-}
-
-/**
- * Reconcile rounded lines so Metal + Stone + Making + GST − Discount === Total.
- * Adjusts GST first, then discount, without changing metal/stone/making.
- */
-function reconcileBreakupLines(input: {
-  subtotal: number;
-  gst: number;
-  discount: number;
-  total: number;
-}): { gst: number; discount: number } {
-  let { gst, discount, total, subtotal } = input;
-  let computed = subtotal + gst - discount;
-
-  if (computed === total) {
-    return { gst, discount };
-  }
-
-  const diff = computed - total;
-  gst = gst - diff;
-  computed = subtotal + gst - discount;
-
-  if (computed !== total) {
-    discount = Math.max(0, discount + (computed - total));
-  }
-
-  return { gst, discount };
 }
 
 export function buildPriceBreakup(
@@ -51,20 +24,18 @@ export function buildPriceBreakup(
 ): PriceBreakup {
   const metal = roundRupee(components.metalPrice);
   const stone = roundRupee(components.diamondPrice + components.gemstonePrice);
-  const makingCharges = roundRupee(components.makingCharge);
+  const makingCharges = roundRupee(components.makingCharge + components.baseMakingCharge);
   const subtotal = metal + stone + makingCharges;
-  let gst = roundRupee(subtotal * (components.gstRate / 100));
+  const gst = roundRupee(subtotal * (components.gstRate / 100));
 
   const originalPrice = pricing?.originalPrice;
   const catalogPrice = pricing?.price;
   const hasCatalogDiscount =
     originalPrice != null && catalogPrice != null && originalPrice > catalogPrice;
 
-  let discount = hasCatalogDiscount ? roundRupee(originalPrice - catalogPrice) : 0;
+  const discount = hasCatalogDiscount ? roundRupee(originalPrice - catalogPrice) : 0;
 
   const total = catalogPrice != null ? roundRupee(catalogPrice) : subtotal + gst - discount;
-
-  ({ gst, discount } = reconcileBreakupLines({ subtotal, gst, discount, total }));
 
   return {
     metal,
@@ -75,6 +46,7 @@ export function buildPriceBreakup(
     gstRate: components.gstRate,
     discount,
     total,
+    isReconciled: Math.abs(subtotal + gst - discount - total) <= 1,
   };
 }
 

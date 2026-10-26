@@ -76,7 +76,6 @@ import type {
   CartLineOptions,
 } from "../types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
-import { getProductDisplayPrice } from "@/features/products/data/productDetailContent";
 import {
   assertResolvableCartLineOptions,
   mapMagentoCartCustomizableOptions,
@@ -255,7 +254,6 @@ function upsertLineMetadata(
   lineUid: string,
   options: CartLineOptions,
   productCustomOptions?: ProductCustomOptions,
-  displayPrice?: number,
   displayImage?: string,
 ): StoredCartLineMetadata {
   const previous = current[lineUid] ?? { options: {} };
@@ -266,7 +264,6 @@ function upsertLineMetadata(
       ...previous,
       options: { ...previous.options, ...options },
       productCustomOptions: productCustomOptions ?? previous.productCustomOptions,
-      ...(displayPrice != null && Number.isFinite(displayPrice) ? { displayPrice } : {}),
       ...(displayImage?.trim() ? { displayImage: displayImage.trim() } : {}),
     },
   };
@@ -561,7 +558,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       throw new Error("Cannot add product without SKU to bag");
     }
 
-    const displayPrice = getProductDisplayPrice(product);
     const displayImage = getImageSrc(product.image) ?? undefined;
 
     assertResolvableCartLineOptions({
@@ -636,7 +632,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
           lineUid,
           options,
           productCustomOptions,
-          displayPrice,
           displayImage,
         );
         lineMetadataRef.current = nextMetadata;
@@ -652,7 +647,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
               ? {
                 ...item,
                 options: { ...item.options, ...options },
-                displayPrice,
                 product: applyCartLineDisplayImage(item.product, displayImage),
               }
               : item,
@@ -1046,9 +1040,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 ? {
                   ...item,
                   options: { ...lineMeta.options, ...item.options },
-                  ...(lineMeta.displayPrice != null && Number.isFinite(lineMeta.displayPrice)
-                    ? { displayPrice: lineMeta.displayPrice }
-                    : {}),
                   product: applyCartLineDisplayImage(item.product, lineMeta.displayImage),
                 }
                 : item,

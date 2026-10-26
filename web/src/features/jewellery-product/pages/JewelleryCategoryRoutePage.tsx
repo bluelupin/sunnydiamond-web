@@ -11,6 +11,7 @@ import { getProductLandingPage } from "@/services/product-landing/product-landin
 import { getMagentoJewelleryNavCategories } from "@/services/magento/categories/categories.service";
 import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
+import JewelleryHeroSection from "@/features/jewellery-product/components/JewelleryHeroSection";
 import {
   isJewelleryCategoryUrlKey,
   shouldNoIndexJewelleryCategoryQueryParam,
@@ -100,6 +101,7 @@ export async function JewelleryCategoryRoutePage({
 
   return (
     <>
+      {page.hero ? <JewelleryHeroSection {...page.hero} /> : null}
       <JsonLd
         data={buildJewelleryListingBreadcrumbJsonLd({
           categoryLabel: category?.label ?? seo.title,
@@ -120,7 +122,6 @@ export async function JewelleryCategoryRoutePage({
         <JewelleryProductPage
           initialListing={initialListing}
           prefetchedCategoryUrlKey={initialListing ? categoryUrlKey : undefined}
-          hero={page.hero}
           trustBadges={page.trustBadges}
           listingCards={page.listingCards}
         />

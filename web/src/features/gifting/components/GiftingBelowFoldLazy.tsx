@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import type {
   NormalizedGiftingGiftCard,
   NormalizedGiftingFinishingTouch,
+  NormalizedGiftingGiftFinder,
   NormalizedGiftingIntro,
   NormalizedGiftingOccasionGrid,
   NormalizedGiftingPerfectGift,
@@ -18,6 +19,7 @@ import GiftingOccasionSkeleton from "./skeletons/GiftingOccasionSkeleton";
 import GiftingProductsSkeleton from "./skeletons/GiftingProductsSkeleton";
 import GiftingPromiseSkeleton from "./skeletons/GiftingPromiseSkeleton";
 import GiftingWithLoveSkeleton from "./skeletons/GiftingWithLoveSkeleton";
+import SeoSectionFallback from "@/shared/ui/SeoSectionFallback";
 
 const GiftingWithLoveSection = dynamic(() => import("./GiftingWithLoveSection"), {
   loading: () => <GiftingWithLoveSkeleton />,
@@ -50,6 +52,7 @@ type GiftingBelowFoldLazyProps = {
   giftCard: NormalizedGiftingGiftCard | null;
   finishingTouch: NormalizedGiftingFinishingTouch | null;
   trustBadges: NormalizedGiftingTrustBadge[];
+  giftFinder: NormalizedGiftingGiftFinder | null;
   discoverSection: ReactNode;
 };
 
@@ -60,36 +63,53 @@ const GiftingBelowFoldLazy = ({
   giftCard,
   finishingTouch,
   trustBadges,
+  giftFinder,
   discoverSection,
 }: GiftingBelowFoldLazyProps) => (
   <>
     {intro ? (
-      <GiftingLazyInView fallback={<GiftingWithLoveSkeleton />}>
+      <GiftingLazyInView fallback={<SeoSectionFallback title={intro.title} description={intro.description} />}>
         <GiftingWithLoveSection intro={intro} />
       </GiftingLazyInView>
     ) : null}
     {occasionGrid ? (
-      <GiftingLazyInView fallback={<GiftingOccasionSkeleton />}>
+      <GiftingLazyInView fallback={<SeoSectionFallback
+        id="occasion-led-gifts"
+        title="Timeless Pieces for Every Occasion"
+        links={occasionGrid.cards.map((card) => ({ href: card.href, label: card.title }))}
+      />}>
         <GiftingOccasionSection cards={occasionGrid.cards} />
       </GiftingLazyInView>
     ) : null}
     {perfectGift ? (
-      <GiftingLazyInView fallback={<GiftingProductsSkeleton />}>
+      <GiftingLazyInView fallback={<SeoSectionFallback
+        id="gifting-products"
+        title={perfectGift.title}
+        description={perfectGift.description}
+        links={[{ href: "/jewellery", label: "Explore diamond jewellery" }]}
+      />}>
         <GiftingProductListSection perfectGift={perfectGift} />
       </GiftingLazyInView>
     ) : null}
     {discoverSection ? (
-      <GiftingLazyInView fallback={<GiftingDiscoverSkeleton />}>
+      <GiftingLazyInView fallback={giftFinder ? (
+        <SeoSectionFallback title={giftFinder.title} description={giftFinder.description} />
+      ) : <GiftingDiscoverSkeleton />}>
         {discoverSection}
       </GiftingLazyInView>
     ) : null}
     {giftCard ? (
-      <GiftingLazyInView fallback={<GiftingGiftCardSkeleton />}>
+      <GiftingLazyInView fallback={<SeoSectionFallback
+        id="gift-card"
+        title={giftCard.title}
+        description={giftCard.description}
+        links={[{ href: "/gift-card", label: giftCard.buttonLabel || "Explore gift cards" }]}
+      />}>
         <GiftingGiftCardSection giftCard={giftCard} />
       </GiftingLazyInView>
     ) : null}
     {finishingTouch ? (
-      <GiftingLazyInView fallback={<GiftingPromiseSkeleton />}>
+      <GiftingLazyInView fallback={<SeoSectionFallback title={finishingTouch.title} description={finishingTouch.description} />}>
         <GiftingPromiseSection finishingTouch={finishingTouch} />
       </GiftingLazyInView>
     ) : null}

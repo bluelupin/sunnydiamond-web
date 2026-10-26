@@ -7,6 +7,8 @@ const earlyErrors: unknown[] = [];
 
 function rememberError(error: unknown) {
   if (earlyErrors.length < 20) earlyErrors.push(error);
+  // Errors must not wait for the deferred monitoring startup.
+  void startSentry()?.catch(() => {});
 }
 
 function onEarlyError(event: ErrorEvent) {
@@ -45,8 +47,9 @@ if (dsn) {
   window.addEventListener("error", onEarlyError);
   window.addEventListener("unhandledrejection", onEarlyRejection);
 
-  // The homepage hero can render before monitoring code is needed.
-  if (window.location.pathname === "/") {
+  // Let the homepage and jewellery hero render before loading monitoring.
+  // Early errors and router transitions still initialize Sentry immediately.
+  if (["/", "/jewellery", "/jewellery/"].includes(window.location.pathname)) {
     const schedule = () => window.setTimeout(() => void startSentry()?.catch(() => {}), 5000);
     if (document.readyState === "complete") schedule();
     else window.addEventListener("load", schedule, { once: true });

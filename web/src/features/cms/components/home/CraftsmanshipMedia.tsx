@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useSyncExternalStore } from "react";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { useScrollSyncedVideo } from "@/shared/hooks/useScrollSyncedVideo";
+import { DESKTOP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 
 const motionQuery = "(prefers-reduced-motion: reduce)";
 
@@ -22,6 +23,22 @@ function usePrefersReducedMotion() {
 }
 
 type CraftsmanshipMediaVariant = "desktop" | "mobile";
+
+function subscribeViewport(callback: () => void) {
+  const query = window.matchMedia(DESKTOP_MEDIA_QUERY);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+
+function getViewportVariant(): CraftsmanshipMediaVariant {
+  // Match this section's existing lg:hidden / hidden lg:block wrappers.
+  return window.matchMedia(DESKTOP_MEDIA_QUERY).matches ? "desktop" : "mobile";
+}
+
+function getServerViewportVariant(): CraftsmanshipMediaVariant | null {
+  // Do not emit either video source before the browser knows its viewport.
+  return null;
+}
 
 type CraftsmanshipMediaProps = {
   src: string;
@@ -122,11 +139,16 @@ export default function CraftsmanshipMedia({
   variant,
   scrollProgress,
 }: CraftsmanshipMediaProps) {
+  const viewportVariant = useSyncExternalStore(
+    subscribeViewport,
+    getViewportVariant,
+    getServerViewportVariant,
+  );
   const url = variant === "mobile" ? mobileSrc : src;
   const label = variant === "mobile" ? mobileAlt : alt;
   const isVideoMedia = variant === "mobile" ? mobileIsVideo : isVideo;
 
-  if (!url) {
+  if (!url || (isVideoMedia && viewportVariant !== variant)) {
     return null;
   }
 

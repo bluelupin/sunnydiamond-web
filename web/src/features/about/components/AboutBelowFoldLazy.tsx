@@ -12,6 +12,7 @@ import AboutHandcraftedSkeleton from "./skeletons/AboutHandcraftedSkeleton";
 import AboutSince1997Skeleton from "./skeletons/AboutSince1997Skeleton";
 import AboutTimelineSkeleton from "./skeletons/AboutTimelineSkeleton";
 import AboutLazyInView from "./AboutLazyInView";
+import SeoSectionFallback from "@/shared/ui/SeoSectionFallback";
 
 const AboutSince1997Section = dynamic(
   () => import("./AboutSince1997Section"),
@@ -47,17 +48,17 @@ const AboutBelowFoldLazy = ({
 }: AboutBelowFoldLazyProps) => (
   <>
     {legacy ? (
-      <AboutLazyInView fallback={<AboutSince1997Skeleton />}>
+      <AboutLazyInView fallback={<SeoSectionFallback title={legacy.title} description={legacy.story} />}>
         <AboutSince1997Section {...legacy} />
       </AboutLazyInView>
     ) : null}
     {team ? (
-      <AboutLazyInView fallback={<AboutFacesSkeleton />}>
+      <AboutLazyInView fallback={<SeoSectionFallback title={team.title} description={team.description} />}>
         <AboutFacesSection {...team} />
       </AboutLazyInView>
     ) : null}
     {craft ? (
-      <AboutLazyInView fallback={<AboutHandcraftedSkeleton />}>
+      <AboutLazyInView fallback={<SeoSectionFallback title={craft.title} />}>
         <AboutHandcraftedSection
           {...craft}
           showTimelineScrollLine={Boolean(timeline)}
@@ -65,7 +66,10 @@ const AboutBelowFoldLazy = ({
       </AboutLazyInView>
     ) : null}
     {timeline ? (
-      <AboutLazyInView fallback={<AboutTimelineSkeleton />}>
+      <AboutLazyInView fallback={<SeoSectionFallback
+        title="Sunny Diamonds timeline"
+        description={timeline.milestones.map((milestone) => `${milestone.year}: ${milestone.title}`).join(" · ")}
+      />}>
         <AboutTimelineSection {...timeline} />
       </AboutLazyInView>
     ) : null}

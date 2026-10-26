@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/cn";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
-import { reconcileTaxesForPriceDetails } from "../utils/reconcileCartTotals";
+import { calculatePriceDetailsAdjustment } from "../utils/priceDetailsAdjustment";
 import { formatCartPrice, getCartShippingDisplay, resolveCartDisplayTotal } from "../utils/formatCartLine";
 import PriceDetailsBreakdown from "./PriceDetailsBreakdown";
 import {
@@ -63,7 +63,7 @@ const CartPriceDetails = ({
     giftCardDiscount,
     localOfferDiscount,
   );
-  const displayTaxes = reconcileTaxesForPriceDetails({
+  const adjustment = calculatePriceDetailsAdjustment({
     subtotal,
     taxes,
     shippingAmount: shippingDisplay.amount ?? 0,
@@ -92,7 +92,8 @@ const CartPriceDetails = ({
           subtotal={subtotal}
           offerDiscount={displayOfferDiscount}
           giftCardDiscount={giftCardDiscount}
-          taxes={displayTaxes}
+          taxes={taxes}
+          adjustment={adjustment}
           shippingLabel={shippingDisplay.label}
           total={displayTotal}
         />

@@ -16,7 +16,7 @@ import OffersAndDealsSection, {
   OffersAndDealsExpandedContent,
 } from "@/shared/ui/OffersAndDealsSection";
 import PriceDetailsBreakdown from "@/features/cart/components/PriceDetailsBreakdown";
-import { reconcileTaxesForPriceDetails } from "@/features/cart/utils/reconcileCartTotals";
+import { calculatePriceDetailsAdjustment } from "@/features/cart/utils/priceDetailsAdjustment";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
@@ -89,7 +89,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
     giftCardDiscount,
     localOfferDiscount,
   );
-  const displayTaxes = reconcileTaxesForPriceDetails({
+  const adjustment = calculatePriceDetailsAdjustment({
     subtotal,
     taxes,
     shippingAmount: shippingDisplay.amount ?? 0,
@@ -163,7 +163,8 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             subtotal={subtotal}
             offerDiscount={displayOfferDiscount}
             giftCardDiscount={giftCardDiscount}
-            taxes={displayTaxes}
+            taxes={taxes}
+            adjustment={adjustment}
             shippingLabel={shippingDisplay.label}
             total={displayTotal}
           />

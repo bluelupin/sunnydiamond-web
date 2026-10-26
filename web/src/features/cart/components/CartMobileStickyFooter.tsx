@@ -7,7 +7,7 @@ import OffersAndDealsSection, {
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import { GiftCardProblemRow } from "./PriceDetailsBreakdown";
-import { reconcileTaxesForPriceDetails } from "../utils/reconcileCartTotals";
+import { calculatePriceDetailsAdjustment } from "../utils/priceDetailsAdjustment";
 import { formatCartDiscountPrice, formatCartPrice, getCartShippingDisplay, getCartShippingLabel, resolveCartDisplayTotal } from "../utils/formatCartLine";
 import {
   CartDivider,
@@ -69,7 +69,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
     giftCardDiscount,
     localOfferDiscount,
   );
-  const displayTaxes = reconcileTaxesForPriceDetails({
+  const adjustment = calculatePriceDetailsAdjustment({
     subtotal,
     taxes,
     shippingAmount: shippingDisplay.amount ?? 0,
@@ -110,8 +110,14 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
                   />
                 ) : null}
                 <GiftCardProblemRow />
-                <CartPriceRow label="Taxes" value={formatCartPrice(displayTaxes)} />
+                <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
                 <CartPriceRow label="Shipping" value={shippingLabel} />
+                {adjustment !== 0 ? (
+                  <CartPriceRow
+                    label={Math.abs(adjustment) <= 1 ? "Rounding Adjustment" : "Other Adjustments"}
+                    value={adjustment < 0 ? formatCartDiscountPrice(-adjustment) : formatCartPrice(adjustment)}
+                  />
+                ) : null}
                 <CartDivider weight={1} />
               </div>
             </OffersAndDealsCollapsible>

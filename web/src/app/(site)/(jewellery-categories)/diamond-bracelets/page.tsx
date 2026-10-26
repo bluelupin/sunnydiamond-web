@@ -1,16 +1,16 @@
 import {
   generateJewelleryCategoryMetadata,
   JewelleryCategoryRoutePage,
-  type JewelleryCategoryRoutePageProps,
 } from "@/features/jewellery-product/pages/JewelleryCategoryRoutePage";
 
-type PageProps = Pick<JewelleryCategoryRoutePageProps, "searchParams">;
+export const revalidate = 60;
 const params = Promise.resolve({ categoryUrl: "diamond-bracelets" });
+const searchParams = Promise.resolve({});
 
-export function generateMetadata({ searchParams }: PageProps) {
+export function generateMetadata() {
   return generateJewelleryCategoryMetadata({ params, searchParams });
 }
 
-export default function Page({ searchParams }: PageProps) {
+export default function Page() {
   return JewelleryCategoryRoutePage({ params, searchParams });
 }
