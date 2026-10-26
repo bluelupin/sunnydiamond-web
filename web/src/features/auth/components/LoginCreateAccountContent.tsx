@@ -7,6 +7,10 @@ import { CartDivider, CartPrimaryButton } from "@/features/cart/components/CartF
 import FormFieldError from "@/shared/ui/FormFieldError";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { cn } from "@/shared/utils/cn";
+import {
+  authCompositeFieldErrorStateClassName,
+  authInputErrorStateClassName,
+} from "@/shared/utils/formValidation";
 import { getAuthFlowTitleClassName } from "../constants/authFlowTypography";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
@@ -49,7 +53,7 @@ const CloseIcon = () => (
 );
 
 const fieldInputClassName =
-  "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack";
+  "h-14 w-full bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600";
 
 const CREATE_ACCOUNT_DESCRIPTION =
   "Set up your account to enjoy a more personalised shopping experience.";
@@ -174,7 +178,7 @@ const LoginCreateAccountContent = ({
                 aria-describedby={fullNameError ? "create-account-full-name-error" : undefined}
                 className={cn(
                   fieldInputClassName,
-                  fullNameError && "border-[#F91616] bg-[#FEDCDC]",
+                  authInputErrorStateClassName(Boolean(fullNameError)),
                 )}
               />
               <FormFieldError id="create-account-full-name-error" message={fullNameError} />
@@ -195,7 +199,10 @@ const LoginCreateAccountContent = ({
                   required
                   aria-invalid={visibleEmailError ? true : undefined}
                   aria-describedby={visibleEmailError ? "create-account-email-error" : undefined}
-                  className={cn(fieldInputClassName, visibleEmailError && "border-[#F91616] bg-[#FEDCDC]")}
+                  className={cn(
+                    fieldInputClassName,
+                    authInputErrorStateClassName(Boolean(visibleEmailError)),
+                  )}
                 />
                 <FormFieldError id="create-account-email-error" message={visibleEmailError} />
               </div>
@@ -206,8 +213,8 @@ const LoginCreateAccountContent = ({
                 </label>
                 <div
                   className={cn(
-                    "flex h-14 w-full items-center gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
-                    visiblePhoneError && "border-[#F91616] bg-[#FEDCDC]",
+                    "flex h-14 w-full items-center gap-2 bg-aboutInactive px-3",
+                    authCompositeFieldErrorStateClassName(Boolean(visiblePhoneError)),
                   )}
                 >
                   <PhoneCountryCodeSelect
@@ -245,6 +252,10 @@ const LoginCreateAccountContent = ({
               onChange={onTermsAcceptedChange}
               aria-label="Agree to Terms and Conditions and Privacy Policy"
               className="translate-y-0 shrink-0"
+              boxClassName={cn(
+                termsError &&
+                  "rounded-sm outline outline-1 outline-offset-1 outline-[#F91616]",
+              )}
             />
             <p
               className="min-w-0 flex-1 font-gill text-sm leading-110"
