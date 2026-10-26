@@ -35,7 +35,6 @@ import {
   JEWELLERY_SEARCH_PATH,
   parseJewelleryCategorySlug,
   applyPreservedJewelleryListingSearchToFilterState,
-  buildJewelleryListingHref,
   preserveJewelleryListingSearchParams,
   readJewelleryListingUrlParams,
   replaceJewelleryListingUrl,
@@ -377,13 +376,9 @@ const JewelleryProductPage = ({
       lastFacetsSyncedCategoryRef.current = nextUrlKey;
       facetsSyncedRef.current = true;
 
-      const href = buildJewelleryListingHref({
-        categoryUrlKey: nextUrlKey,
-        searchParams: preservedSearchParams,
-      });
-      router.replace(href, { scroll: false });
+      replaceJewelleryListingUrl(nextUrlKey, preservedSearchParams);
     },
-    [router, searchParams],
+    [searchParams],
   );
 
   useEffect(() => {
