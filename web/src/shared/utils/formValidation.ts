@@ -3,6 +3,7 @@ import {
   getAppointmentBookingDateBounds,
   type AppointmentBookingWindow,
 } from "@/shared/utils/appointmentTimeSlots";
+import { cn } from "@/shared/utils/cn";
 
 export type FieldValidation = {
   valid: boolean;
@@ -32,6 +33,20 @@ export const inputAutofillResetClassName =
 
 export const inputAutofillSurfaceErrorClassName =
   `${inputAutofillResetClassName} [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#FEDCDC]`;
+
+/** Auth inputs: red border stays visible while the field is focused. */
+export function authInputErrorStateClassName(hasError: boolean) {
+  return hasError
+    ? cn(invalidFieldClassName, "focus:border-[#F91616]", inputAutofillSurfaceErrorClassName)
+    : cn("border-transparent focus:border-darkblack", inputAutofillResetClassName);
+}
+
+/** Auth composite fields (phone + country code): same as {@link authInputErrorStateClassName} for wrappers. */
+export function authCompositeFieldErrorStateClassName(hasError: boolean) {
+  return hasError
+    ? cn(invalidFieldContainerClassName, "focus-within:border-[#F91616]")
+    : "border border-transparent focus-within:border-darkblack";
+}
 
 export const validateRequiredName = (value: string): FieldValidation => {
   const trimmed = value.trim();

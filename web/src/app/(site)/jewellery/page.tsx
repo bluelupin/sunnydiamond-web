@@ -1,100 +1,16 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { constructMetadata } from "@/shared/lib/seo/metadata";
 import {
-  buildJewelleryListingJsonLd,
-  resolveJewellerySeoMetadata,
-} from "@/shared/lib/seo/jewellerySeo";
-import { buildJewelleryListingBreadcrumbJsonLd } from "@/shared/lib/seo/schema/breadcrumb";
-import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
-import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
-import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
-import {
-  hasPrimaryListingContext,
-  resolveCategoryUrlKeyFromQueryParam,
-  shouldNoIndexJewelleryCategoryQueryParam,
-} from "@/features/jewellery-product/utils/jewelleryRoutes";
-import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
-import JsonLd from "@/shared/lib/seo/JsonLd";
-import { resolveImageSrcString } from "@/shared/utils/image";
+  generateJewelleryListingMetadata,
+  JewelleryListingRoutePage,
+} from "@/features/jewellery-product/pages/JewelleryListingRoutePage";
 
-type JewelleryListingSearchParams = {
-  occasion?: string;
-  diamondShape?: string;
-  fancyColour?: string;
-  collection?: string;
-  category?: string;
-  minPrice?: string;
-  maxPrice?: string;
-  sort?: string;
-};
+export const revalidate = 60;
 
-type PageProps = {
-  searchParams: Promise<JewelleryListingSearchParams>;
-};
+const searchParams = Promise.resolve({});
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const query = await searchParams;
-  const page = await getProductLandingPage();
-  const { title, description, canonicalPath, keywords, image } =
-    resolveJewellerySeoMetadata(page);
-
-  return constructMetadata({
-    title,
-    description,
-    canonicalPath,
-    keywords,
-    ...(image ? { image } : {}),
-    noIndex:
-      hasGiftFinderSearchParams(query) || shouldNoIndexJewelleryCategoryQueryParam(query),
-  });
+export function generateMetadata() {
+  return generateJewelleryListingMetadata({ searchParams });
 }
 
-export default async function Page({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const prefetchedCategoryUrlKey = hasPrimaryListingContext(params)
-    ? resolveCategoryUrlKeyFromQueryParam(params.category)
-    : null;
-  const initialListing = await prefetchJewelleryListing(prefetchedCategoryUrlKey, {
-    collection: params.collection,
-    occasion: params.occasion,
-    diamondShape: params.diamondShape,
-    fancyColour: params.fancyColour,
-    minPrice: params.minPrice,
-    maxPrice: params.maxPrice,
-    sort: params.sort,
-  });
-  const page = await getProductLandingPage();
-  const seo = resolveJewellerySeoMetadata(page);
-
-  const jsonLdProducts =
-    initialListing?.products.map((product) => ({
-      name: product.name,
-      urlKey: product.urlKey,
-      image: resolveImageSrcString(product.primaryImage),
-    })) ?? [];
-
-  return (
-    <>
-      <JsonLd data={buildJewelleryListingBreadcrumbJsonLd()} id="jewellery-breadcrumb-jsonld" />
-      <JsonLd
-        data={buildJewelleryListingJsonLd({
-          name: seo.title,
-          description: seo.description,
-          canonicalPath: seo.canonicalPath,
-          products: jsonLdProducts,
-        })}
-        id="jewellery-listing-jsonld"
-      />
-      <Suspense fallback={null}>
-        <JewelleryProductPage
-          initialListing={initialListing}
-          prefetchedCategoryUrlKey={initialListing ? prefetchedCategoryUrlKey : undefined}
-          hero={page.hero}
-          trustBadges={page.trustBadges}
-          listingCards={page.listingCards}
-        />
-      </Suspense>
-    </>
-  );
+export default function Page() {
+  return JewelleryListingRoutePage({ searchParams });
 }

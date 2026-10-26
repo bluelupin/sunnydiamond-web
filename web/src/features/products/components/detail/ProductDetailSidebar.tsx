@@ -957,13 +957,11 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      {isVideoCallOpen ? (
-        <ScheduleVideoCallPanel
-          open
-          onClose={() => setIsVideoCallOpen(false)}
-          product={sizeDisplayProduct}
-        />
-      ) : null}
+      <ScheduleVideoCallPanel
+        open={isVideoCallOpen}
+        onClose={() => setIsVideoCallOpen(false)}
+        product={sizeDisplayProduct}
+      />
 
       {isTryAtHomeOpen ? (
         <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={sizeDisplayProduct} />

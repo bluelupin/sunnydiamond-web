@@ -14,6 +14,7 @@ type PriceDetailsBreakdownProps = {
   offerDiscount: number;
   giftCardDiscount: number;
   taxes: number;
+  adjustment?: number;
   shippingLabel: string;
   total: number;
   showTitle?: boolean;
@@ -40,6 +41,7 @@ const PriceDetailsBreakdown = ({
   offerDiscount,
   giftCardDiscount,
   taxes,
+  adjustment = 0,
   shippingLabel,
   total,
   showTitle = true,
@@ -68,6 +70,12 @@ const PriceDetailsBreakdown = ({
           ) : null}
           {giftCardDiscount > 0 ? (
             <PriceRow label="Gift Card Applied" value={formatCartDiscountPrice(giftCardDiscount)} />
+          ) : null}
+          {adjustment !== 0 ? (
+            <PriceRow
+              label={Math.abs(adjustment) <= 1 ? "Rounding Adjustment" : "Other Adjustments"}
+              value={adjustment < 0 ? formatCartDiscountPrice(-adjustment) : formatCartPrice(adjustment)}
+            />
           ) : null}
           <GiftCardProblemRow />
         </div>

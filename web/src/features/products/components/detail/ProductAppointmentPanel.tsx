@@ -340,22 +340,8 @@ const ProductAppointmentForm = ({
             isScheduleVideoCall ? config.successToast.title : "Request submitted",
           );
 
-          if (isScheduleVideoCall && onVideoCallBooked) {
-            let moreItems = 0;
-            try {
-              const page = await getCustomerAppointments(1, 50);
-              if (page?.appointments?.length) {
-                moreItems = countAdditionalVideoCallItemsForSlot(page.appointments, {
-                  date,
-                  selectedSlot,
-                  currentProductId: product.id,
-                });
-              }
-            } catch {
-              moreItems = 0;
-            }
-
-            onVideoCallBooked({ date, selectedSlot }, moreItems);
+          if (isScheduleVideoCall) {
+            handleClose();
             return;
           }
 
@@ -569,7 +555,17 @@ const ProductAppointmentPanel = ({
 
   const handleLegacySuccess = (message: string) => {
     if (variant === "schedule-video-call") {
-      showStatusToast(message);
+      showStatusToast(message, {
+        action: (
+          <AppStatusToastAction
+            onClick={() => {
+              router.push(buildProfileSectionHref("appointments"));
+            }}
+          >
+            View Here
+          </AppStatusToastAction>
+        ),
+      });
       return;
     }
 

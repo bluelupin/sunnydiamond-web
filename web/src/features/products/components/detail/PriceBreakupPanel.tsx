@@ -131,22 +131,28 @@ const PriceBreakupPanel = ({
 
             <div aria-hidden className="hidden min-h-0 flex-1 md:block" />
 
-            <div className="flex shrink-0 flex-col gap-3 pb-6">
-              <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
-              <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
-              <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
-              <PriceBreakupRow
-                label={formatPriceBreakupGstLabel(breakup.gstRate)}
-                value={formatAmount(breakup.gst)}
-              />
-              {breakup.discount > 0 ? (
+            {breakup.isReconciled ? (
+              <div className="flex shrink-0 flex-col gap-3 pb-6">
+                <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
+                <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
+                <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
                 <PriceBreakupRow
-                  label="Discount"
-                  value={formatAmount(breakup.discount)}
-                  discount
+                  label={formatPriceBreakupGstLabel(breakup.gstRate)}
+                  value={formatAmount(breakup.gst)}
                 />
-              ) : null}
-            </div>
+                {breakup.discount > 0 ? (
+                  <PriceBreakupRow
+                    label="Discount"
+                    value={formatAmount(breakup.discount)}
+                    discount
+                  />
+                ) : null}
+              </div>
+            ) : (
+              <p className="pb-6 font-gill text-base text-darkblack" role="status">
+                Detailed price breakup is unavailable because the component amounts do not match the current product price.
+              </p>
+            )}
           </div>
         </div>
 

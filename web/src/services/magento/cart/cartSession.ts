@@ -9,8 +9,6 @@ export type CartLineMetadata = {
   options: CartLineOptions;
   gifting?: CartGiftingOptions;
   productCustomOptions?: ProductCustomOptions;
-  /** Catalog final price shown on PDP / Price Breakup — persisted for cart line display. */
-  displayPrice?: number;
   /** Configured product image from PDP (e.g. selected metal variant) — persisted for cart UI. */
   displayImage?: string;
 };

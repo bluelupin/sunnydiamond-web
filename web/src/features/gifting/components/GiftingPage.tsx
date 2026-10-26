@@ -26,6 +26,7 @@ const GiftingPage = ({ page }: GiftingPageProps) => {
         giftCard={page.giftCard}
         finishingTouch={page.finishingTouch}
         trustBadges={page.trustBadges}
+        giftFinder={page.giftFinder}
         discoverSection={discoverSection}
       />
     </>

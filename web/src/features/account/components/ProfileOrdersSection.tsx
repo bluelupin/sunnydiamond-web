@@ -55,17 +55,22 @@ type ProfileOrderOverride = Pick<
 
 /** Patch applied over the list mapping so a cancelled/returned order changes tab at once. */
 function buildOrderOverride(order: TrackedOrder): ProfileOrderOverride {
-  const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
+  const { category, subState } = categorizeOrder(
+    order.sunnyStatus,
+    order.status,
+    order.sunnyRefund,
+  );
   const actions = order.sunnyActions;
+  const isCancelled = category === "cancelled";
 
   return {
     status: order.status,
     statusLabel: formatOrderStatusLabel(order.status, order.sunnyStatus),
     category,
     subState,
-    showTrack: actions ? actions.canTrack : false,
-    showCancel: actions ? actions.canCancel : false,
-    showReturn: actions ? actions.canReturn : false,
+    showTrack: isCancelled ? false : actions ? actions.canTrack : false,
+    showCancel: isCancelled ? false : actions ? actions.canCancel : false,
+    showReturn: isCancelled ? false : actions ? actions.canReturn : false,
   };
 }
 

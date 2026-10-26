@@ -12,6 +12,17 @@ const JEWELLERY_CATEGORY_DESTINATIONS = [
   "diamond-bracelets",
 ] as const;
 
+const JEWELLERY_LISTING_QUERY_KEYS = [
+  "occasion",
+  "diamondShape",
+  "fancyColour",
+  "collection",
+  "category",
+  "minPrice",
+  "maxPrice",
+  "sort",
+] as const;
+
 const nextConfig: NextConfig = {
   // Bound the CDN stale window for pages revalidated every 60 seconds.
   expireTime: 3600,
@@ -34,6 +45,23 @@ const nextConfig: NextConfig = {
      qualities: [70, 75, 80, 85, 90],
      formats: ["image/webp"],
      minimumCacheTTL: 2678400, // 31 days — media URLs are content-hashed, safe to cache long
+  },
+  async rewrites() {
+    const categorySource = `/:categoryUrl(${JEWELLERY_CATEGORY_DESTINATIONS.join("|")})`;
+    return {
+      beforeFiles: JEWELLERY_LISTING_QUERY_KEYS.flatMap((key) => [
+        {
+          source: "/jewellery",
+          has: [{ type: "query" as const, key }],
+          destination: "/listing-filtered/jewellery",
+        },
+        {
+          source: categorySource,
+          has: [{ type: "query" as const, key }],
+          destination: "/listing-filtered/category/:categoryUrl",
+        },
+      ]),
+    };
   },
   async redirects() {
     const jewelleryCategoryRedirects = [

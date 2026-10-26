@@ -12,7 +12,10 @@ import {
   craftsmanshipRadialGradientStyle,
 } from "@/features/cms/data/craftsmanshipProcessFigmaSpec";
 import { cn } from "@/shared/utils/cn";
-import { useMemo } from "react";
+import { useMinLgViewport } from "@/shared/hooks/useMinLgViewport";
+import { primeIosScrollVideo } from "@/shared/utils/iosScrollVideo";
+import { isIosWebKit } from "@/shared/utils/isIosWebKit";
+import { useEffect, useMemo, useRef } from "react";
 
 interface CraftsmanshipProcessProps {
   id?: string;
@@ -136,7 +139,7 @@ function CraftsmanshipBackground({
   }
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
       <CraftsmanshipSilkLayer variant="mobile" desktopSrc={desktopSrc} mobileSrc={mobileSrc} alt={alt} />
       <CraftsmanshipSilkLayer variant="desktop" desktopSrc={desktopSrc} mobileSrc={mobileSrc} alt={alt} />
       <CraftsmanshipRadialLayer variant="mobile" />
@@ -188,7 +191,15 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const resolvedDesktopImage = desktopImageUrl ?? mobileImageUrl;
   const resolvedMobileImage = mobileImageUrl ?? desktopImageUrl;
   const hasDesktopVideoBackground = desktopIsVideo && Boolean(resolvedDesktopImage);
-  const hasMobileVideoBackground = mobileIsVideo && Boolean(resolvedMobileImage);
+  /** Mobile layer: CMS mobile video, or desktop video when mobile asset is a poster still. */
+  const mobileBackgroundPlaysVideo = mobileIsVideo || desktopIsVideo;
+  const mobileBackgroundVideoUrl = mobileIsVideo
+    ? resolvedMobileImage
+    : desktopIsVideo
+      ? resolvedDesktopImage
+      : undefined;
+  const hasMobileVideoBackground =
+    mobileBackgroundPlaysVideo && Boolean(mobileBackgroundVideoUrl);
   const hasAnyVideoBackground = hasDesktopVideoBackground || hasMobileVideoBackground;
 
   const isSectionVisible =
@@ -207,6 +218,47 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
     shouldRenderSection,
   );
 
+  const isLgUp = useMinLgViewport();
+  const stickyPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isIosWebKit() || !hasAnyVideoBackground) {
+      return;
+    }
+
+    const panel = stickyPanelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    let raf = 0;
+    const primeBackgroundVideo = () => {
+      if (raf) {
+        return;
+      }
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        const video = panel.querySelector(
+          "video[data-craftsmanship-bg-video]",
+        ) as HTMLVideoElement | null;
+        if (!video) {
+          return;
+        }
+        primeIosScrollVideo(video);
+      });
+    };
+
+    panel.addEventListener("touchstart", primeBackgroundVideo, { passive: true });
+    panel.addEventListener("touchmove", primeBackgroundVideo, { passive: true });
+    window.addEventListener("scroll", primeBackgroundVideo, { passive: true });
+
+    return () => {
+      panel.removeEventListener("touchstart", primeBackgroundVideo);
+      panel.removeEventListener("touchmove", primeBackgroundVideo);
+      window.removeEventListener("scroll", primeBackgroundVideo);
+    };
+  }, [hasAnyVideoBackground, shouldRenderSection]);
+
   // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
   const rotateY = progress * 540;
   const rotateX = 18 - progress * 36;
@@ -224,7 +276,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       aria-label={sectionTitle}
       className="min-h-[750px] craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200"
     >
-      <div className="relative sticky top-0 h-[800px] overflow-hidden bg-gray200 lg:h-[750px] md:max-lg:portrait:h-[85vh] pt-16 pb-16 md:pt-104 md:pb-[77px]">
+      <div
+        ref={stickyPanelRef}
+        className="relative sticky top-0 h-[800px] max-lg:overflow-visible overflow-clip bg-gray200 lg:h-[750px] lg:overflow-hidden md:max-lg:portrait:h-[85vh] pt-16 pb-16 md:pt-104 md:pb-[77px]"
+      >
         {hasAnyVideoBackground ? (
           <>
             <CraftsmanshipBackground
@@ -232,8 +287,8 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
               mobileSrc={silkMobileSrc}
               alt={silkAlt}
             />
-            {hasDesktopVideoBackground ? (
-              <div className="pointer-events-none absolute inset-0 z-[1] hidden lg:block">
+            {isLgUp && hasDesktopVideoBackground ? (
+              <div className="pointer-events-none absolute inset-0 z-[1]">
                 <CraftsmanshipMedia
                   variant="desktop"
                   src={resolvedDesktopImage!}
@@ -247,16 +302,16 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                 />
               </div>
             ) : null}
-            {hasMobileVideoBackground ? (
-              <div className="pointer-events-none absolute inset-0 z-[1] lg:hidden">
+            {!isLgUp && hasMobileVideoBackground ? (
+              <div className="pointer-events-none absolute inset-0 z-[1]">
                 <CraftsmanshipMedia
                   variant="mobile"
                   src={resolvedDesktopImage!}
-                  mobileSrc={resolvedMobileImage!}
+                  mobileSrc={mobileBackgroundVideoUrl!}
                   alt={imageDesktopAlt || imageAlt}
                   mobileAlt={imageMobileAlt || imageAlt}
                   isVideo={desktopIsVideo}
-                  mobileIsVideo={mobileIsVideo}
+                  mobileIsVideo={mobileBackgroundPlaysVideo}
                   scrollProgress={progress}
                   background
                 />

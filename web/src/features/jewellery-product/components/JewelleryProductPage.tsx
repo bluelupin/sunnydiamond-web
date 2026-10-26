@@ -2,13 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import PageContainer from "@/shared/ui/layout/PageContainer";
-import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
 import JewelleryProductGrid from "./JewelleryProductGrid";
-import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryListingEmptyState from "./JewelleryListingEmptyState";
 import JewelleryListingErrorState from "./JewelleryListingErrorState";
@@ -35,7 +33,6 @@ import {
   JEWELLERY_SEARCH_PATH,
   parseJewelleryCategorySlug,
   applyPreservedJewelleryListingSearchToFilterState,
-  buildJewelleryListingHref,
   preserveJewelleryListingSearchParams,
   readJewelleryListingUrlParams,
   replaceJewelleryListingUrl,
@@ -68,16 +65,16 @@ import { resolveActiveCategorySlugFromFilters, resolveMainCategoryUrlKeyFromDraw
 import type { JewelleryCategory, JewelleryFilterState } from "../types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 import type {
-  NormalizedProductLandingHero,
   NormalizedProductLandingTrustBadge,
   NormalizedProductListingCard,
 } from "@/services/product-landing/product-landing-page.types";
 import { cn } from "@/shared/utils/cn";
 
+const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"));
+
 type JewelleryProductPageProps = {
   initialListing?: JewelleryListingProductsData;
   prefetchedCategoryUrlKey?: string | null;
-  hero?: NormalizedProductLandingHero | null;
   trustBadges?: NormalizedProductLandingTrustBadge[];
   listingCards?: readonly NormalizedProductListingCard[];
   /** /search: the shopper's query; hides the category tabs, which would drop it. */
@@ -102,7 +99,6 @@ function createClearedDrawerFilterState(
 const JewelleryProductPage = ({
   initialListing,
   prefetchedCategoryUrlKey,
-  hero,
   trustBadges = [],
   listingCards = [],
   searchQuery,
@@ -160,6 +156,7 @@ const JewelleryProductPage = ({
     return initial;
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [hasOpenedFilters, setHasOpenedFilters] = useState(false);
   const { data: navData } = useMagentoJewelleryNav();
   const navCategories = navData?.categories ?? [];
   const facetsSyncedRef = useRef(Boolean(initialListing));
@@ -377,13 +374,9 @@ const JewelleryProductPage = ({
       lastFacetsSyncedCategoryRef.current = nextUrlKey;
       facetsSyncedRef.current = true;
 
-      const href = buildJewelleryListingHref({
-        categoryUrlKey: nextUrlKey,
-        searchParams: preservedSearchParams,
-      });
-      router.replace(href, { scroll: false });
+      replaceJewelleryListingUrl(nextUrlKey, preservedSearchParams);
     },
-    [router, searchParams],
+    [searchParams],
   );
 
   useEffect(() => {
@@ -768,6 +761,7 @@ const JewelleryProductPage = ({
   );
 
   const handleOpenFilters = () => {
+    setHasOpenedFilters(true);
     setIsFilterOpen(true);
   };
 
@@ -778,7 +772,6 @@ const JewelleryProductPage = ({
   if (showSearchEmpty) {
     return (
       <div className="pb-0 md:pb-0">
-        {hero ? <JewelleryHeroSection {...hero} /> : null}
         <section className="relative isolate z-0 w-full bg-white">{noResults}</section>
       </div>
     );
@@ -786,7 +779,6 @@ const JewelleryProductPage = ({
 
   return (
     <div className="pb-0 md:pb-0">
-      {hero ? <JewelleryHeroSection {...hero} /> : null}
       {/* {searchQuery ? (
         <PageContainer className="pb-6 pt-10 lg:pb-10 lg:pt-16">
           <h2 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48">
@@ -843,14 +835,16 @@ const JewelleryProductPage = ({
         <JewelleryGuaranteesSection trustBadges={trustBadges} />
       </ScrollReveal>
 
-      <JewelleryFilterDrawer
-        open={isFilterOpen}
-        appliedFilters={filters}
-        facets={facets}
-        categoryFilterHeading={categoryFilterHeading}
-        onClose={() => setIsFilterOpen(false)}
-        onApply={handleApplyFilters}
-      />
+      {hasOpenedFilters ? (
+        <JewelleryFilterDrawer
+          open={isFilterOpen}
+          appliedFilters={filters}
+          facets={facets}
+          categoryFilterHeading={categoryFilterHeading}
+          onClose={() => setIsFilterOpen(false)}
+          onApply={handleApplyFilters}
+        />
+      ) : null}
 
       {isLoadingMore ? <span className="sr-only" aria-live="polite">Loading more products</span> : null}
     </div>

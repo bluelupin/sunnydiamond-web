@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GlobalRouteLoaderFrame } from "@/shared/ui/layout/GlobalRouteLoader";
 import { usePageLoading } from "@/shared/context/PageLoadingContext";
 import { isPwaStandaloneDisplayMode } from "./pwaInstallPrompt";
-import { PWA_LAUNCH_SPLASH_MAX_MS, PWA_LAUNCH_SPLASH_MIN_MS } from "./pwaLaunchSplash";
+import { PWA_LAUNCH_SPLASH_MAX_MS, PWA_LAUNCH_SPLASH_MIN_MS } from "./pwaLaunchSplashTiming";
 import { completePwaLaunchSplash } from "./pwaLaunchSplashCritical";
 
 type SplashPhase = "idle" | "visible" | "hidden";

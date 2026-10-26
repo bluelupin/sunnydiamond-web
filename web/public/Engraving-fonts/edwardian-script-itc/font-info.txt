@@ -1,0 +1,13 @@
+Edwardian Script Font — Font Info Card
+================================
+Family:    Edwardian Script ITC
+Category:  Edwardian Script
+Designer:  Font pack supplied by site owner — check included license
+Weights:   400
+Source:    No public source page on file — verify license terms from the original font release before commercial use.
+
+This pack includes the actual font file(s) for this family plus a
+self-contained preview.html you can open in any browser — it works
+offline since the font is embedded directly in the page.
+
+Please check the license terms above before commercial use.

@@ -2,6 +2,7 @@
 
 import { Fragment, type ReactNode } from "react";
 import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
+import EngravingFontStyles from "@/features/products/components/detail/EngravingFontStyles";
 import { resolveEngravingPreviewTypography } from "@/features/products/constants/engraving";
 import { cn } from "@/shared/utils/cn";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
@@ -71,6 +72,7 @@ export function ProfileOrderItemAttributes({
         className,
       )}
     >
+      <EngravingFontStyles />
       {segments.map((segment, index) => (
         <Fragment key={index}>
           {index > 0 ? <ProfileMetaDivider className="h-4 !w-[0.8px] !bg-neutral500" /> : null}

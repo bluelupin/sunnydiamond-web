@@ -5,6 +5,7 @@ import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { cn } from "@/shared/utils/cn";
+import { authCompositeFieldErrorStateClassName } from "@/shared/utils/formValidation";
 import {
   isEmailIdentifier,
   limitLoginIdentifier,
@@ -64,8 +65,8 @@ const LoginIdentifierField = ({
 
       <div
         className={cn(
-          "flex h-14 w-full items-center gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
-          fieldError && "border-[#F91616] bg-[#FEDCDC]",
+          "flex h-14 w-full items-center gap-2 bg-aboutInactive px-3",
+          authCompositeFieldErrorStateClassName(Boolean(fieldError)),
         )}
       >
         {showCountryCode ? (
@@ -95,8 +96,9 @@ const LoginIdentifierField = ({
           className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
         />
       </div>
-
-      <FormFieldError id="login-identifier-error" message={fieldError} />
+      <div className="relative">
+        <FormFieldError id="login-identifier-error" message={fieldError} className="absolute left-0" />
+      </div>
     </div>
   );
 };

@@ -784,7 +784,11 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
       setAdditionalItemsCount(moreItems);
       setSubmittedBooking(booking);
       setStep("success");
-      showStatusToast("Try at home request received");
+      showStatusToast("Try at home request received", {
+        action: (
+          <AppStatusToastAction onClick={handleViewBooking}>View Here</AppStatusToastAction>
+        ),
+      });
     } catch {
       showStatusToast("Could not submit request");
     } finally {

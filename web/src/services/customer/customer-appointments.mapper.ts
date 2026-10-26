@@ -330,13 +330,54 @@ function readStateFromRecord(item: Record<string, unknown>): string {
   return "";
 }
 
+const APPOINTMENT_ADDRESS_LINE1_KEYS = [
+  "addressLine1",
+  "address_line_1",
+  "addressLineOne",
+  "street",
+  "streetLine1",
+] as const;
+
+const APPOINTMENT_ADDRESS_LINE2_KEYS = ["addressLine2", "address_line_2", "streetLine2"] as const;
+
+const APPOINTMENT_PINCODE_KEYS = ["pincode", "postcode", "postalCode", "zip"] as const;
+
+function nestedAppointmentAddressRecord(
+  item: Record<string, unknown>,
+): Record<string, unknown> | null {
+  const nested = item.address;
+  if (!nested || typeof nested !== "object" || Array.isArray(nested)) {
+    return null;
+  }
+
+  return nested as Record<string, unknown>;
+}
+
+/** CMS may store try-at-home address on a nested `address` object after reschedule. */
+function pickAppointmentAddressField(
+  item: Record<string, unknown>,
+  keys: readonly string[],
+): string | null {
+  const nested = nestedAppointmentAddressRecord(item);
+  if (nested) {
+    const fromNested = pickTextField(nested, keys);
+    if (fromNested) {
+      return fromNested;
+    }
+  }
+
+  return pickTextField(item, keys);
+}
+
 function mapAppointmentAddressFields(
   item: StrapiCustomerAppointment & Record<string, unknown>,
 ): Pick<
   CustomerAppointment,
   "addressLine1" | "addressLine2" | "pincode" | "city" | "state"
 > {
-  let stateFromField = readStateFromRecord(item);
+  const nested = nestedAppointmentAddressRecord(item);
+
+  let stateFromField = (nested ? readStateFromRecord(nested) : "") || readStateFromRecord(item);
   if (!stateFromField && Array.isArray(item.products)) {
     for (const product of item.products) {
       if (!product || typeof product !== "object") {
@@ -376,16 +417,10 @@ function mapAppointmentAddressFields(
   }
 
   return {
-    addressLine1: pickTextField(item, [
-      "addressLine1",
-      "address_line_1",
-      "addressLineOne",
-      "street",
-      "streetLine1",
-    ]),
-    addressLine2: pickTextField(item, ["addressLine2", "address_line_2", "streetLine2"]),
-    pincode: pickTextField(item, ["pincode", "postcode", "postalCode", "zip"]),
-    city: pickTextField(item, ["city"]),
+    addressLine1: pickAppointmentAddressField(item, APPOINTMENT_ADDRESS_LINE1_KEYS),
+    addressLine2: pickAppointmentAddressField(item, APPOINTMENT_ADDRESS_LINE2_KEYS),
+    pincode: pickAppointmentAddressField(item, APPOINTMENT_PINCODE_KEYS),
+    city: pickAppointmentAddressField(item, ["city", "district", "town", "cityName"]),
     state: stateFromField || stateFromMessage || "",
   };
 }

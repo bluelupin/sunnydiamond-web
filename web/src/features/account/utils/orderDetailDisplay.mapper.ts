@@ -143,7 +143,11 @@ export function mapTrackedOrderToProfileDetailUi(
   order: TrackedOrder,
   imageBySku: Record<string, string> = {},
 ): ProfileOrderDetailUi {
-  const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
+  const { category, subState } = categorizeOrder(
+    order.sunnyStatus,
+    order.status,
+    order.sunnyRefund,
+  );
   const statusLabel = formatOrderStatusLabel(order.status, order.sunnyStatus);
   const items = mapDetailItems(order, imageBySku);
   // Digital gift cards have no estimated delivery date, but can show a delivered date.
@@ -154,9 +158,12 @@ export function mapTrackedOrderToProfileDetailUi(
         ? undefined
         : resolveOrderDeliveryBy(order.sunnyDelivery);
   const actions = order.sunnyActions;
-  const showCancel = actions
-    ? actions.canCancel
-    : category === "in_progress" && canCancelInProgressOrderFromStatus(order.status);
+  const showCancel =
+    category === "cancelled"
+      ? false
+      : actions
+        ? actions.canCancel
+        : category === "in_progress" && canCancelInProgressOrderFromStatus(order.status);
   const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
   const deliveryTimeline =
     trackingTimeline.length > 0
@@ -190,11 +197,14 @@ export function mapTrackedOrderToProfileDetailUi(
             }
           : undefined,
     showCancel,
-    showReturn: isGiftCardProfileOrder({ items })
-      ? false
-      : actions
-        ? actions.canReturn
-        : category === "delivered",
+    showReturn:
+      category === "cancelled"
+        ? false
+        : isGiftCardProfileOrder({ items })
+          ? false
+          : actions
+            ? actions.canReturn
+            : category === "delivered",
     showDownloadInvoice: true,
     ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
     showCancelNote: category === "in_progress" && showCancel,
@@ -212,6 +222,8 @@ export function mapTrackedOrderToProfileDetailUi(
       ...base,
       showDownloadInvoice: false,
       showContactUs: true,
+      showCancelNote: false,
+      footnote: undefined,
     };
   }
 
@@ -223,6 +235,9 @@ export function mapTrackedOrderToProfileDetailUi(
 
     return {
       ...base,
+      ...(category === "cancelled"
+        ? { showCancelNote: false, footnote: undefined }
+        : {}),
       showDownloadInvoice: false,
       showContactUs: true,
       estimatedDeliveryLabel: ordersContent.estimatedRefundLabel,

@@ -143,8 +143,8 @@ const LoginOtpContent = ({
                 className={cn(
                   "relative flex h-14 flex-1 items-center justify-center border p-3",
                   hasError
-                    ? invalidFieldContainerClassName
-                    : "border-darkblack bg-aboutInactive",
+                    ? cn(invalidFieldContainerClassName, "focus-within:border-[#F91616]")
+                    : "border-darkblack bg-aboutInactive focus-within:border-darkblack",
                 )}
               >
                 <input

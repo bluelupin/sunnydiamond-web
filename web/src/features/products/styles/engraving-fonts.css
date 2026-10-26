@@ -1,0 +1,83 @@
+/* Scoped engraving preview fonts — imported only from engraving UI entry points. */
+
+@font-face {
+  font-family: "SD Engraving Algerian";
+  src: url("/Engraving-fonts/Algerian%20Regular/Algerian%20Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Edwardian Script";
+  src: url("/Engraving-fonts/edwardian-script-itc/edwardian-script-itc-400.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Lucida Handwriting";
+  src: url("/Engraving-fonts/lucida-handwriting/LHANDW.TTF") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Lucida Handwriting Italic";
+  src: url("/Engraving-fonts/lucida-handwriting/Lucida%20Handwriting%20Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Monotype Corsiva";
+  src: url("/Engraving-fonts/Monotype%20Corsiva%20Regular/Monotype%20Corsiva%20Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Pinyon Script";
+  src: url("/Engraving-fonts/Pinyon-Script-Font/fonts/webfonts/PinyonScript-Regular.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Script MT Bold";
+  src: url("/Engraving-fonts/Script%20MT%20Bold/Script%20MT%20Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Vivaldi";
+  src: url("/Engraving-fonts/Vivaldi%20Regular/Vivaldi%20Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Pristina";
+  src: url("/Engraving-fonts/pristina/PRISTINA.TTF") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SD Engraving Vladimir Script";
+  src: url("/Engraving-fonts/vladimir-script/VLADIMIR.TTF") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

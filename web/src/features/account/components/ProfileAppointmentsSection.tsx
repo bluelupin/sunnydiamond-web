@@ -17,9 +17,19 @@ import type { AppointmentFilterKey, ProfileAppointmentUi } from "../types/profil
 import { clubProfileAppointments } from "../utils/clubCustomerAppointments";
 import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import {
+  applyReschedulePanelAddressDraft,
+  applyRescheduledTryAtHomeAddress,
   formatAppointmentCancelledOnNote,
   mapCustomerAppointmentToProfileUi,
+  mergeRescheduledTryAtHomeAddressIntoCustomerAppointment,
+  pruneStaleTryAtHomeAddressPatches,
+  type ProfileTryAtHomeAddressUi,
 } from "../utils/profileDisplayMappers";
+import {
+  loadStoredTryAtHomeAddressPatches,
+  persistTryAtHomeAddressPatches,
+  storeTryAtHomeAddressPatchForIds,
+} from "../utils/tryAtHomeAppointmentAddressPatch.storage";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
 import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
 import { ProfileAppointmentReschedulePanel } from "./ProfileAppointmentReschedulePanel";
@@ -54,6 +64,11 @@ const ProfileAppointmentsSection = () => {
   const [rescheduleAppointment, setRescheduleAppointment] = useState<ProfileAppointmentUi | null>(
     null,
   );
+  const [rescheduledTryAtHomeAddressById, setRescheduledTryAtHomeAddressById] = useState<
+    Map<string, ProfileTryAtHomeAddressUi>
+  >(() => loadStoredTryAtHomeAddressPatches());
+  const [rescheduleAddressDraft, setRescheduleAddressDraft] =
+    useState<ProfileTryAtHomeAddressUi | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelledAppointmentIds, setCancelledAppointmentIds] = useState<Set<string>>(
     () => new Set(),
@@ -92,6 +107,28 @@ const ProfileAppointmentsSection = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const appointments = data?.appointments;
+    if (!appointments?.length) {
+      return;
+    }
+
+    setRescheduledTryAtHomeAddressById((current) => {
+      if (current.size === 0) {
+        return current;
+      }
+
+      const pruned = pruneStaleTryAtHomeAddressPatches(appointments, current);
+      if (pruned.size === current.size) {
+        return current;
+      }
+
+      persistTryAtHomeAddressPatches(pruned);
+      return pruned;
+    });
+  }, [data]);
+
   const appointmentSkus = useMemo(() => {
     const skus = new Set<string>();
 
@@ -122,6 +159,12 @@ const ProfileAppointmentsSection = () => {
 
     const mapped = data.appointments
       .map((appointment) =>
+        mergeRescheduledTryAtHomeAddressIntoCustomerAppointment(
+          appointment,
+          rescheduledTryAtHomeAddressById,
+        ),
+      )
+      .map((appointment) =>
         mapCustomerAppointmentToProfileUi(appointment, productImageBySku),
       )
       .filter((appointment): appointment is NonNullable<typeof appointment> => appointment != null)
@@ -143,8 +186,25 @@ const ProfileAppointmentsSection = () => {
       });
 
     // CMS already groups try-at-home via products[]; FE clubbing covers legacy / store-visit rows.
-    return clubProfileAppointments(mapped);
-  }, [cancelledAppointmentIds, data, productImageBySku]);
+    return clubProfileAppointments(mapped)
+      .map((appointment) =>
+        applyRescheduledTryAtHomeAddress(appointment, rescheduledTryAtHomeAddressById),
+      )
+      .map((appointment) =>
+        applyReschedulePanelAddressDraft(
+          appointment,
+          rescheduleAppointment,
+          rescheduleAddressDraft,
+        ),
+      );
+  }, [
+    cancelledAppointmentIds,
+    data,
+    productImageBySku,
+    rescheduledTryAtHomeAddressById,
+    rescheduleAppointment,
+    rescheduleAddressDraft,
+  ]);
 
   const filteredAppointments = useMemo(() => {
     if (activeFilter === null) {
@@ -160,6 +220,20 @@ const ProfileAppointmentsSection = () => {
     },
     [showStatusToast],
   );
+
+  const commitTryAtHomeAddressPatch = useCallback(
+    (appointmentIds: readonly string[], address: ProfileTryAtHomeAddressUi) => {
+      setRescheduledTryAtHomeAddressById((current) =>
+        storeTryAtHomeAddressPatchForIds(current, appointmentIds, address),
+      );
+    },
+    [],
+  );
+
+  const closeReschedulePanel = useCallback(() => {
+    setRescheduleAddressDraft(null);
+    setRescheduleAppointment(null);
+  }, []);
 
   const openReschedulePanel = useCallback((appointment: ProfileAppointmentUi) => {
     setCancelDialogOpen(false);
@@ -331,10 +405,17 @@ const ProfileAppointmentsSection = () => {
         <ProfileAppointmentReschedulePanel
           open={rescheduleAppointment !== null}
           appointment={rescheduleAppointment}
-          onClose={() => setRescheduleAppointment(null)}
-          onRescheduled={() => {
+          onAddressDraftChange={setRescheduleAddressDraft}
+          onClose={closeReschedulePanel}
+          onRescheduled={(result) => {
+            const toastAppointmentId = rescheduleAppointment?.id ?? null;
+            if (result.tryAtHomeAddress) {
+              commitTryAtHomeAddressPatch(result.appointmentIds, result.tryAtHomeAddress);
+            }
+            setRescheduleAddressDraft(null);
+            setRescheduleAppointment(null);
             refresh();
-            showRescheduleSuccessToast(rescheduleAppointment?.id ?? null);
+            showRescheduleSuccessToast(toastAppointmentId);
           }}
         />
       </div>

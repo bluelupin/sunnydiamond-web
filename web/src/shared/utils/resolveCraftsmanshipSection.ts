@@ -1,7 +1,7 @@
 import type { CraftsmanshipSectionData } from "@/types/homepage/editorialBlocks";
 import type { CraftsmanshipStep } from "@/types/homepage/craftsmanshipSteps";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { extractStrapiImage, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 
 export type ResolvedCraftsmanshipSection = {
   isActive?: boolean | null;
@@ -28,6 +28,10 @@ function getCraftsmanshipMedia(section: CraftsmanshipSectionData | null | undefi
 }
 
 function isVideoMedia(media: unknown, url?: string): boolean {
+  const payload = extractStrapiImage(media) as { mime?: string } | null;
+  if (payload?.mime?.toLowerCase().startsWith("video/")) {
+    return true;
+  }
   if (media && typeof media === "object") {
     const record = media as { mime?: string; data?: unknown; attributes?: unknown };
     if (record.mime?.toLowerCase().startsWith("video/")) return true;
@@ -35,6 +39,10 @@ function isVideoMedia(media: unknown, url?: string): boolean {
     if (record.attributes) return isVideoMedia(record.attributes, url);
   }
   return /\.(?:mp4|webm|ogg|ogv|mov|m4v)(?:[?#]|$)/i.test(url ?? "");
+}
+
+function isSectionVideoMime(section: CraftsmanshipSectionData | null | undefined): boolean {
+  return Boolean(section?.mime?.toLowerCase().startsWith("video/"));
 }
 
 function resolveCraftsmanshipSteps(
@@ -58,6 +66,15 @@ export function resolveCraftsmanshipSection(
   const backgroundMedia = resolveResponsiveCmsImage(section?.backgroundImage);
 
   const sectionTitle = section?.sectionTitle?.trim() || "";
+  const desktopIsVideo =
+    isVideoMedia(desktopMedia, desktopUrl) ||
+    (Boolean(desktopUrl) && isSectionVideoMime(section));
+  const mobileIsVideoFromMedia =
+    isVideoMedia(mobileMedia, mobileUrl) ||
+    (Boolean(mobileUrl) && mobileUrl === desktopUrl && isSectionVideoMime(section));
+  const mobileIsVideo =
+    mobileIsVideoFromMedia ||
+    (desktopIsVideo && Boolean(mobileUrl) && mobileUrl === desktopUrl);
 
   return {
     isActive: section?.isActive,
@@ -66,8 +83,8 @@ export function resolveCraftsmanshipSection(
     steps: resolveCraftsmanshipSteps(section?.steps),
     desktopImageUrl: desktopUrl,
     mobileImageUrl: mobileUrl,
-    desktopIsVideo: isVideoMedia(desktopMedia, desktopUrl),
-    mobileIsVideo: isVideoMedia(mobileMedia, mobileUrl),
+    desktopIsVideo,
+    mobileIsVideo,
     imageDesktopAlt: imageMedia.desktopAlt,
     imageMobileAlt: imageMedia.mobileAlt,
     imageAlt: imageMedia.alt,
