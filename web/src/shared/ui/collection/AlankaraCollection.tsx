@@ -346,7 +346,7 @@ function ProductCarouselPanel({
     Math.max(0, total - 1),
   );
   const [activeIndex, setActiveIndex] = useState(clampedDefault);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const swipeRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, pointerId: 0 });
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -400,10 +400,10 @@ function ProductCarouselPanel({
   );
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!trackRef.current || total <= 1 || isAnimating) return;
+    if (!swipeRef.current || total <= 1 || isAnimating) return;
     if ((event.target as HTMLElement).closest("button, a")) return;
 
-    trackRef.current.setPointerCapture(event.pointerId);
+    swipeRef.current.setPointerCapture(event.pointerId);
     dragState.current = {
       active: true,
       startX: event.clientX,
@@ -427,7 +427,7 @@ function ProductCarouselPanel({
     const { deltaX } = dragState.current;
     dragState.current.active = false;
     try {
-      trackRef.current?.releasePointerCapture(event.pointerId);
+      swipeRef.current?.releasePointerCapture(event.pointerId);
     } catch {
       /* noop */
     }
@@ -445,25 +445,33 @@ function ProductCarouselPanel({
   const slideOffsetPercent = total > 0 ? (activeIndex * 100) / total : 0;
   const slideTransform = `translateX(calc(-${slideOffsetPercent}% + ${isDragging ? dragOffset : 0}px))`;
 
+  const swipeInteractionProps = {
+    role: "region" as const,
+    "aria-roledescription": "carousel",
+    "aria-label": "Collection products",
+    tabIndex: 0 as const,
+    onKeyDown: onCarouselKeyDown,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp: endDrag,
+    onPointerCancel: endDrag,
+  };
+
+  const swipeSurfaceClassName = cn(
+    total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
+    total > 1 && "touch-none select-none",
+  );
+
   return (
     <div
-      ref={trackRef}
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Collection products"
-      tabIndex={0}
-      onKeyDown={onCarouselKeyDown}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
+      {...(!isMobile ? swipeInteractionProps : {})}
+      ref={!isMobile ? swipeRef : undefined}
       className={cn(
         "relative overflow-hidden",
         isMobile
           ? "mx-4 bg-gray300 py-10"
           : "aspect-square h-auto w-full bg-white px-4 md:px-6 desktop:aspect-auto lg:h-[800px] md:h-[550px] desktop:px-6",
-        total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
-        total > 1 && "touch-none select-none",
+        !isMobile && swipeSurfaceClassName,
       )}
     >
       {!isMobile && total > 1 ? (
@@ -574,7 +582,14 @@ function ProductCarouselPanel({
 
       {isMobile ? (
         <div className="relative flex flex-col items-center justify-center gap-6">
-          <div className="relative aspect-square w-[180px] overflow-hidden">
+          <div
+            {...swipeInteractionProps}
+            ref={swipeRef}
+            className={cn(
+              "relative aspect-square w-[180px] overflow-hidden",
+              swipeSurfaceClassName,
+            )}
+          >
             <div
               className={cn(
                 "flex h-full items-center will-change-transform motion-reduce:transition-none",
