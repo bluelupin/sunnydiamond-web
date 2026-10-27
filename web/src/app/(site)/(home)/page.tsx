@@ -15,6 +15,8 @@ import {
 import { buildHomepageJsonLd, resolveHomepageSeoMetadata } from "@/shared/lib/seo/homepageSeo";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { getContactBespokePage } from "@/services/bespoke/contact-bespoke-page.service";
+import { getTrendingProductsSnapshot } from "@/lib/magento/trendingProductsCache";
+import MagentoTrendingSeeder from "@/shared/lib/providers/MagentoTrendingSeeder";
 
 /** Matches HOMEPAGE_CMS_REVALIDATE_SECONDS — segment config must be a literal. */
 export const revalidate = 60;
@@ -59,9 +61,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const [prefetched, bespokePage] = await Promise.all([
+  const [prefetched, bespokePage, trendingSnapshot] = await Promise.all([
     prefetchHomepageBundle(),
     getContactBespokePage(),
+    getTrendingProductsSnapshot(),
   ]);
   const hero = resolveHeroContent(prefetched.shell);
   const craftingRarity = resolveCraftingRarityContent(
@@ -81,12 +84,14 @@ export default async function Page() {
       shopping={prefetched.shopping}
       alankara={prefetched.alankara ?? undefined}
     >
+      <MagentoTrendingSeeder trendingProducts={trendingSnapshot.products} />
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
       <HomePageView
         hero={hero}
         craftingRarity={craftingRarity}
         pastCreations={bespokePage.pastCreations}
         featuredStories={bespokePage.featuredStories}
+        trendingProducts={trendingSnapshot.products}
       />
     </HomepageCmsProvider>
   );

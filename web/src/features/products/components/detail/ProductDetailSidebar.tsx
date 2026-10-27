@@ -23,6 +23,7 @@ import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import { getProductDetailContent, getProductDetailPricing } from "@/features/products/data/productDetailContent";
+import { hasAvailablePriceBreakup } from "@/features/products/utils/priceBreakup";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import {
@@ -525,7 +526,7 @@ const ProductDetailSidebar = ({
               </span>
             ) : null}
           </div>
-          {sizePricing.breakup ? (
+          {hasAvailablePriceBreakup(sizePricing) ? (
             <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="shrink-0 uppercase">
               View Price Breakup
             </DetailTextLink>
@@ -975,7 +976,7 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      {isPriceBreakupOpen && sizePricing.breakup ? (
+      {isPriceBreakupOpen && hasAvailablePriceBreakup(sizePricing) ? (
         <PriceBreakupPanel
           open
           onClose={() => setIsPriceBreakupOpen(false)}

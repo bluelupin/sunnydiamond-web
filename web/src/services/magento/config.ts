@@ -29,6 +29,10 @@ export const MAGENTO_CATALOG_REVALIDATE_SECONDS = Number(
   process.env.MAGENTO_CATALOG_REVALIDATE_SECONDS ?? 3600,
 );
 
+/** Shared homepage/gifting trending snapshot and its on-demand invalidation tag. */
+export const MAGENTO_TRENDING_REVALIDATE_SECONDS = 900;
+export const MAGENTO_TRENDING_CACHE_TAG = "magento-trending-products";
+
 export function getMagentoRestBaseUrl(): string {
   return getMagentoGraphqlUrl().replace(/\/graphql$/, "");
 }

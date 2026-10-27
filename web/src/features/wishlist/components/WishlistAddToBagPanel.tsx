@@ -15,6 +15,7 @@ import {
 } from "@/features/products/components/detail/shared";
 import RingSizeChartPanel from "@/features/products/components/detail/RingSizeChartPanel";
 import PriceBreakupPanel from "@/features/products/components/detail/PriceBreakupPanel";
+import { hasAvailablePriceBreakup } from "@/features/products/utils/priceBreakup";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import ProductWishlistDetailGalleryCarousel from "@/features/products/components/detail/ProductWishlistDetailGalleryCarousel";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -381,7 +382,7 @@ const WishlistAddToBagPanel = ({
                     </span>
                   ) : null}
                 </div>
-                {isDetailReady && pricing?.breakup ? (
+                {isDetailReady && hasAvailablePriceBreakup(displayPricing) ? (
                   <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
                     View Price Breakup
                   </DetailTextLink>
@@ -406,7 +407,7 @@ const WishlistAddToBagPanel = ({
         guide={sizeGuide}
       />
 
-      {detailProduct && displayPricing?.breakup ? (
+      {detailProduct && displayPricing && hasAvailablePriceBreakup(displayPricing) ? (
         <PriceBreakupPanel
           open={isPriceBreakupOpen}
           onClose={() => setIsPriceBreakupOpen(false)}

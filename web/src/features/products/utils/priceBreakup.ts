@@ -50,6 +50,10 @@ export function buildPriceBreakup(
   };
 }
 
+export function hasAvailablePriceBreakup(pricing: ProductDetailPricing | null | undefined): boolean {
+  return Boolean(pricing?.breakup && buildPriceBreakup(pricing.breakup, pricing).isReconciled);
+}
+
 export function formatPriceBreakupGstLabel(gstRate: number): string {
   const formattedRate = Number.isInteger(gstRate)
     ? String(gstRate)
