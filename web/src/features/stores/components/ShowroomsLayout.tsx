@@ -261,7 +261,10 @@ function ShowroomDesktopInlineListItem({
 }) {
   return (
     <div
-      className={cn("w-full transition-all duration-300", isSelected && "bg-gray300")}
+      className={cn(
+        "w-full transition-[background-color] duration-300 motion-reduce:transition-none",
+        isSelected && "bg-gray300",
+      )}
       style={{
         paddingLeft: horizontalPadding,
         paddingRight: horizontalPadding,
@@ -273,26 +276,16 @@ function ShowroomDesktopInlineListItem({
         aria-pressed={isSelected}
         onClick={() => onSelect(location.id)}
         className={cn(
-          "flex w-full items-center text-left transition-all duration-300",
+          "flex h-[74px] w-full items-center text-left transition-[border-color] duration-300 motion-reduce:transition-none",
           storeLocatorShowroomCityClassName,
           isSelected && "border-b border-gray50",
         )}
-        style={{
-          paddingTop: figma.collapsedRowPaddingY,
-          paddingBottom: isSelected ? 10 : figma.collapsedRowPaddingY,
-        }}
       >
         {location.name}
       </button>
 
       {isSelected ? (
-        <div
-          className="animate-in fade-in duration-300"
-          style={{
-            paddingTop: figma.expandedPanelPaddingY,
-            paddingBottom: figma.expandedPanelPaddingY,
-          }}
-        >
+        <div className="animate-in fade-in duration-300 lg:pb-6 lg:pt-4">
           <ShowroomLocationDetailsFigma
             location={location}
             getDirectionsLabel={getDirectionsLabel}
@@ -528,35 +521,43 @@ function ShowroomsDesktopLayout({
   const activeLocation =
     locations.find((location) => location.id === activeId) ?? locations[0] ?? null;
 
+  const desktopListLead = noAreaCopy ? (
+    <ShowroomNoAreaListLead copy={noAreaCopy} getDirectionsLabel={getDirectionsLabel} />
+  ) : listHeader ? (
+    <div className="w-full">{listHeader}</div>
+  ) : null;
+
   return (
     <div
-      className="mx-auto hidden w-full max-w-1920 lg:grid lg:grid-cols-[minmax(0,593px)_minmax(0,1fr)] lg:items-stretch"
+      className="mx-auto hidden w-full max-w-1920 lg:block"
       style={{
-        gap: figma.columnGap,
         paddingTop: figma.sectionPaddingTop,
         paddingBottom: figma.sectionPaddingBottom,
       }}
     >
-      <div className="flex w-full min-w-0 flex-col" style={{ maxWidth: figma.listMaxWidth }}>
-        {noAreaCopy ? (
-          <ShowroomNoAreaListLead copy={noAreaCopy} getDirectionsLabel={getDirectionsLabel} />
-        ) : listHeader ? (
-          <div
-            className="w-full"
-            style={{
-              paddingLeft: figma.listHorizontalPadding,
-              paddingRight: figma.listHorizontalPadding,
-              marginBottom: figma.listTitleToListGap,
-            }}
-          >
-            {listHeader}
-          </div>
-        ) : null}
-
+      {desktopListLead ? (
         <div
-          aria-label="Showroom locations"
-          className="flex w-full flex-col border-r border-neutral300"
+          className="w-full"
+          style={{
+            maxWidth: figma.listMaxWidth,
+            paddingLeft: figma.listHorizontalPadding,
+            paddingRight: figma.listHorizontalPadding,
+            marginBottom: noAreaCopy ? undefined : figma.listTitleToListGap,
+          }}
         >
+          {desktopListLead}
+        </div>
+      ) : null}
+
+      <div
+        className="lg:grid lg:grid-cols-[minmax(0,593px)_minmax(0,1fr)] lg:items-start"
+        style={{ gap: figma.columnGap }}
+      >
+        <div className="flex w-full min-w-0 flex-col" style={{ maxWidth: figma.listMaxWidth }}>
+          <div
+            aria-label="Showroom locations"
+            className="flex w-full flex-col border-r border-neutral300"
+          >
           {locations.length === 0 ? (
             emptyMessage ? (
               <p
@@ -601,30 +602,31 @@ function ShowroomsDesktopLayout({
               );
             })
           )}
-        </div>
-      </div>
-
-      <div
-        className="relative h-full min-w-0 overflow-hidden"
-        style={{ minHeight: figma.heroMinHeight }}
-      >
-        {activeLocation?.desktopImage ? (
-          <div className="absolute inset-0 bg-gray100">
-            <ResponsiveImage
-              key={activeLocation.id}
-              fill
-              desktopSrc={activeLocation.desktopImage}
-              mobileSrc={activeLocation.mobileImage ?? activeLocation.desktopImage}
-              alt={activeLocation.imageAlt}
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              quality={80}
-              eager
-              className="object-cover object-center animate-in fade-in zoom-in-105 duration-700 ease-out"
-            />
           </div>
-        ) : (
-          <ShowroomHeroStack locations={locations} activeId={activeId} className="absolute inset-0" />
-        )}
+        </div>
+
+        <div
+          className="relative min-w-0 overflow-hidden"
+          style={{ minHeight: figma.heroMinHeight }}
+        >
+          {activeLocation?.desktopImage ? (
+            <div className="absolute inset-0 bg-gray100">
+              <ResponsiveImage
+                key={activeLocation.id}
+                fill
+                desktopSrc={activeLocation.desktopImage}
+                mobileSrc={activeLocation.mobileImage ?? activeLocation.desktopImage}
+                alt={activeLocation.imageAlt}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                quality={80}
+                eager
+                className="object-cover object-center animate-in fade-in zoom-in-105 duration-700 ease-out"
+              />
+            </div>
+          ) : (
+            <ShowroomHeroStack locations={locations} activeId={activeId} className="absolute inset-0" />
+          )}
+        </div>
       </div>
     </div>
   );

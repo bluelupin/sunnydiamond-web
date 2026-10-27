@@ -147,7 +147,7 @@ const PanelMedia = ({
               <div className="flex items-center gap-4 lg:gap-6">
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <EducationPanelCrossfadeImage
-                    src={cutDualImages[1]}
+                    src={cutDualImages[0]}
                     alt={slider.options[activeIndex]?.dualImageAlts?.[1] ?? ""}
                     className="object-contain"
                     sizes="200px"
@@ -155,7 +155,7 @@ const PanelMedia = ({
                 </div>
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <EducationPanelCrossfadeImage
-                    src={cutDualImages[0]}
+                    src={cutDualImages[1]}
                     alt={slider.options[activeIndex]?.dualImageAlts?.[0] ?? ""}
                     className="object-contain"
                     sizes="200px"

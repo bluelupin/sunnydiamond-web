@@ -1,6 +1,9 @@
+"use client";
+
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { useBespokeShareVision } from "@/features/bespoke/context/BespokeShareVisionContext";
 import { bespokePageFigmaSpec } from "@/features/bespoke/data/content";
 import {
   BESPOKE_SECTION_BACKGROUND_SIZES,
@@ -13,7 +16,11 @@ type BespokeInterestedSectionProps = {
 };
 
 const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps) => {
+  const { openShareVision, canOpenShareVision } = useBespokeShareVision();
   const hasImage = Boolean(interested.image?.desktopUrl || interested.image?.mobileUrl);
+  const ctaLabel = interested.ctaLabel?.trim();
+  const showJourneyCta = Boolean(ctaLabel && canOpenShareVision);
+  const showLinkCta = Boolean(ctaLabel && interested.ctaHref && !showJourneyCta);
 
   return (
     <section
@@ -58,9 +65,13 @@ const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps)
               </p>
             ) : null}
           </div>
-          {interested.ctaLabel && interested.ctaHref ? (
+          {showJourneyCta ? (
+            <DetailTextLink onClick={openShareVision} light className="uppercase">
+              {ctaLabel}
+            </DetailTextLink>
+          ) : showLinkCta ? (
             <DetailTextLink href={interested.ctaHref} light className="uppercase">
-              {interested.ctaLabel}
+              {ctaLabel}
             </DetailTextLink>
           ) : null}
         </Reveal>

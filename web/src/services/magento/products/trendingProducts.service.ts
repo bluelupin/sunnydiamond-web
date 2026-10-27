@@ -8,6 +8,10 @@ import {
   mapMagentoProductsToJewelleryListing,
 } from "./products.mapper";
 import { MAGENTO_TRENDING_PRODUCTS_SCAN_QUERY } from "./trendingProducts.query";
+import {
+  MAGENTO_TRENDING_CACHE_TAG,
+  MAGENTO_TRENDING_REVALIDATE_SECONDS,
+} from "../config";
 
 const TRENDING_SCAN_PAGE_SIZE = 50;
 const MAX_TRENDING_PRODUCTS = 24;
@@ -31,6 +35,8 @@ async function fetchTrendingCatalogPage(
       sort: { position: "ASC" },
     },
     signal,
+    revalidateSeconds: MAGENTO_TRENDING_REVALIDATE_SECONDS,
+    tags: [MAGENTO_TRENDING_CACHE_TAG],
   });
 }
 

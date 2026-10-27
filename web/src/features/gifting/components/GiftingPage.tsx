@@ -4,12 +4,15 @@ import GiftingBelowFoldLazy from "./GiftingBelowFoldLazy";
 import GiftingDiscoverOptionsLoader from "./GiftingDiscoverOptionsLoader";
 import GiftingDiscoverSection from "./GiftingDiscoverSection";
 import GiftingHeroSection from "./GiftingHeroSection";
+import MagentoTrendingSeeder from "@/shared/lib/providers/MagentoTrendingSeeder";
+import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 
 type GiftingPageProps = {
   page: NormalizedGiftingPage;
+  trendingProducts?: JewelleryListingProduct[];
 };
 
-const GiftingPage = ({ page }: GiftingPageProps) => {
+const GiftingPage = ({ page, trendingProducts }: GiftingPageProps) => {
   const discoverSection = page.giftFinder ? (
     <Suspense fallback={<GiftingDiscoverSection giftFinder={page.giftFinder} />}>
       <GiftingDiscoverOptionsLoader giftFinder={page.giftFinder} />
@@ -18,6 +21,7 @@ const GiftingPage = ({ page }: GiftingPageProps) => {
 
   return (
     <>
+      {trendingProducts ? <MagentoTrendingSeeder trendingProducts={trendingProducts} /> : null}
       {page.hero && <GiftingHeroSection hero={page.hero} />}
       <GiftingBelowFoldLazy
         intro={page.intro}
@@ -27,6 +31,7 @@ const GiftingPage = ({ page }: GiftingPageProps) => {
         finishingTouch={page.finishingTouch}
         trustBadges={page.trustBadges}
         giftFinder={page.giftFinder}
+        trendingProducts={trendingProducts ?? []}
         discoverSection={discoverSection}
       />
     </>

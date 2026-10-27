@@ -12,7 +12,10 @@ import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
-import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
+import {
+  productNameDisplayClassName,
+  splitPlpProductTitle,
+} from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 import {
   PLP_CARD_IMAGE_QUALITY,
@@ -65,7 +68,14 @@ type ProductCopyProps = {
   className?: string;
 };
 
-const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
+const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => {
+  const { lead, remainder } = splitPlpProductTitle(title);
+  const titleLinkClassName = cn(
+    "w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
+    productNameDisplayClassName,
+  );
+
+  return (
   <div
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
@@ -78,19 +88,23 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
     <Link
       href={href}
       title={title}
-      className={cn(
-        "line-clamp-2 w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
-        productNameDisplayClassName,
-      )}
+      className={cn(titleLinkClassName, "md:line-clamp-2")}
     >
-      {title}
+      <span className="flex flex-col md:hidden">
+        <span className="block">{lead}</span>
+        {remainder ? (
+          <span className="line-clamp-1 block">{remainder}</span>
+        ) : null}
+      </span>
+      <span className="hidden md:block">{title}</span>
     </Link>
     <p className="w-full font-gill font-semibold lg:text-xl md:text-lg sm:text-base text-sm">
       <span aria-hidden>₹ </span>
       {formatJewelleryPrice(price)}
     </p>
   </div>
-);
+  );
+};
 
 const ProductImage = ({
   src,

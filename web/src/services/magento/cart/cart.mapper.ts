@@ -20,6 +20,7 @@ import type {
 } from "./magentoCart.types";
 import type { CartLineMetadata, StoredCartLineMetadata } from "./cartSession";
 import { mapMagentoCartCustomizableOptions } from "./cartLineCustomOptions.mapper";
+import { classifyCustomOptionLabel } from "../products/productCustomOptions.mapper";
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   hasCatalogEngravingText,
@@ -126,14 +127,22 @@ function mapMagentoConfigurableOptionsToLineOptions(
   const mapped: Partial<CartLineOptions> = {};
 
   for (const option of options ?? []) {
-    const optionLabel = option.option_label?.trim().toLowerCase() ?? "";
     const valueLabel = option.value_label?.trim();
     if (!valueLabel) {
       continue;
     }
 
-    if (optionLabel.includes("metal") || optionLabel.includes("color") || optionLabel.includes("gold")) {
-      mapped.metal = formatMetalColorLabel(valueLabel) || valueLabel;
+    switch (classifyCustomOptionLabel(option.option_label ?? "")) {
+      case "metal":
+        mapped.metal = formatMetalColorLabel(valueLabel) || valueLabel;
+        break;
+      case "ringSize":
+        if (!mapped.ringSize) {
+          mapped.ringSize = valueLabel;
+        }
+        break;
+      default:
+        break;
     }
   }
 

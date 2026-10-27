@@ -9,6 +9,7 @@ import {
   getGiftingPage,
 } from "@/services/gifting/gifting-page.service";
 import { resolveGiftingSeoMetadata } from "@/shared/lib/seo/giftingSeo";
+import { getTrendingProductsSnapshot } from "@/lib/magento/trendingProductsCache";
 
 export const revalidate = 300;
 
@@ -37,12 +38,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function GiftingPageContent() {
-  const page = await getGiftingPage();
+  const [page, trendingSnapshot] = await Promise.all([
+    getGiftingPage(),
+    getTrendingProductsSnapshot(),
+  ]);
 
   return (
     <>
       <GiftingDocumentPreload page={page} />
-      <GiftingPage page={page} />
+      <GiftingPage page={page} trendingProducts={trendingSnapshot.products} />
     </>
   );
 }

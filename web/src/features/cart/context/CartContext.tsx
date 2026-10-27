@@ -18,6 +18,7 @@ import {
   buildCartLineOrderKeys,
   preserveCartItemsOrder,
   preserveCartItemsOrderByKeys,
+  reconcileCartLineMetadataAfterUidRotation,
 } from "@/features/cart/utils/preserveCartItemsOrder";
 import {
   addProductToGuestCart,
@@ -422,8 +423,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsHydrating(true);
 
     try {
+      const previousItems = cartState?.items ?? [];
       await mergeGuestCartForAuthenticatedSession();
-      const nextState = await fetchCustomerCart(lineMetadataRef.current);
+      let metadata = lineMetadataRef.current;
+      let nextState = await fetchCustomerCart(metadata);
+
+      if (previousItems.length > 0) {
+        const rekeyed = reconcileCartLineMetadataAfterUidRotation(
+          metadata,
+          previousItems,
+          nextState.items,
+        );
+        if (rekeyed !== metadata) {
+          metadata = rekeyed;
+          lineMetadataRef.current = rekeyed;
+          writeCartLineMetadata(rekeyed);
+          setLineMetadata(rekeyed);
+          nextState = await fetchCustomerCart(rekeyed);
+        }
+      }
+
       applyCartState(nextState);
       setCartRefreshError(null);
     } catch (error) {
@@ -432,7 +451,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsHydrating(false);
     }
-  }, [applyCartState]);
+  }, [applyCartState, cartState?.items]);
 
   useEffect(() => {
     if (status === "loading") {

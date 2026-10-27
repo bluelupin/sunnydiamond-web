@@ -40,7 +40,9 @@ import { cartFlowSpec } from "../data/cartFlowSpec";
 import {
   buildGiftingFormStateFromItems,
   hasSavedGiftingNotes,
+  resolveGroupedGiftNoteFromCart,
 } from "../utils/cartGiftNotes";
+import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
 
 const GIFTING_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 const GIFTING_INTRO_MOBILE_OVERLAY_CLASS = "bg-[rgba(0,0,0,0.7)] backdrop-blur-[10px]";
@@ -308,7 +310,10 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     () => items.map((item) => item.id).sort().join("|"),
     [items],
   );
-  const initialFormState = useMemo(() => buildGiftingFormStateFromItems(items), [items]);
+  const initialFormState = useMemo(
+    () => buildGiftingFormStateFromItems(items, readCartLineMetadata()),
+    [items],
+  );
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(
     () => initialFormState.wrapMode,
   );
@@ -324,7 +329,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     const isPersonaliseOpen = isGiftingPanelOpen && giftingStep === "personalise";
 
     if (isPersonaliseOpen && !wasPersonaliseOpenRef.current) {
-      const nextFormState = buildGiftingFormStateFromItems(items);
+      const nextFormState = buildGiftingFormStateFromItems(items, readCartLineMetadata());
       openedWithSavedNotesRef.current = hasSavedGiftingNotes(items);
       setWrapMode(nextFormState.wrapMode);
       setGiftNote(nextFormState.giftNote);
@@ -370,17 +375,31 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     markGiftingOptionsExplored();
     const hadSavedNotes = openedWithSavedNotesRef.current;
 
+    const lineMetadata = readCartLineMetadata();
+    const trimmedGroupedNote = giftNote.trim();
+    const persistedGroupedNote = resolveGroupedGiftNoteFromCart(items, lineMetadata);
+    const groupedNoteForSave =
+      wrapMode === "single"
+        ? trimmedGroupedNote || (hadSavedNotes ? persistedGroupedNote || undefined : undefined)
+        : undefined;
+
     void applyGiftingSelection({
       mode: wrapMode,
-      groupedNote: wrapMode === "single" ? giftNote.trim() || undefined : undefined,
-      items: items.map((item) => ({
-        lineItemId: item.id,
-        isGift: selectedItemIds.has(item.id),
-        note:
-          wrapMode === "separate" && selectedItemIds.has(item.id)
-            ? itemNotes[item.id]?.trim() || undefined
-            : undefined,
-      })),
+      groupedNote: groupedNoteForSave,
+      items: items.map((item) => {
+        const trimmedItemNote = itemNotes[item.id]?.trim() ?? "";
+        const persistedItemNote = lineMetadata[item.id]?.gifting?.note?.trim();
+
+        return {
+          lineItemId: item.id,
+          isGift: selectedItemIds.has(item.id),
+          note:
+            wrapMode === "separate" && selectedItemIds.has(item.id)
+              ? trimmedItemNote ||
+                (hadSavedNotes ? persistedItemNote || undefined : undefined)
+              : undefined,
+        };
+      }),
     }).then(() => {
       if (hadSavedNotes) {
         markGiftingEditConsumed();

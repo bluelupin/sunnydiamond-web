@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
@@ -8,7 +8,8 @@ import { cn } from "@/shared/utils/cn";
 import { useSince1997HorizontalScroll } from "@/features/about/hooks/useSince1997HorizontalScroll";
 import { bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
 import { BESPOKE_CONTENT_IMAGE_QUALITY } from "@/features/bespoke/utils/bespokePageImage";
-import BespokeShareVisionPanel from "@/features/bespoke/components/BespokeShareVisionPanel";
+import { useBespokeShareVision } from "@/features/bespoke/context/BespokeShareVisionContext";
+import { isBespokeJourneyCtaEnabled } from "@/features/bespoke/utils/bespokeJourneyCta";
 import { DetailDarkButton } from "@/features/products/components/detail/shared";
 import type {
   NormalizedBespokeCustomDesignForm,
@@ -154,16 +155,9 @@ const resolveStoryStepVideoSrc = (
 const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const hasHorizontalGallery = story.steps.length > 1;
-  const [shareVisionOpen, setShareVisionOpen] = useState(false);
+  const { openShareVision } = useBespokeShareVision();
   const ctaLabel = story.ctaLabel?.trim() ?? "";
-
-  const handleShareVisionOpen = useCallback(() => {
-    setShareVisionOpen(true);
-  }, []);
-
-  const handleShareVisionClose = useCallback(() => {
-    setShareVisionOpen(false);
-  }, []);
+  const showJourneyCta = isBespokeJourneyCtaEnabled(ctaLabel, customDesignForm);
 
   useSince1997HorizontalScroll(sectionRef, hasHorizontalGallery, {
     firstStepImageWidth: bespokeStoryFigmaSpec.imageWidth,
@@ -256,10 +250,10 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
             </div>
             <div className="flex justify-center">
               <div className="lg:mt-10 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
-                {ctaLabel && customDesignForm ? (
+                {showJourneyCta ? (
                   <DetailDarkButton
                     type="button"
-                    onClick={handleShareVisionOpen}
+                    onClick={openShareVision}
                     className="w-full uppercase"
                   >
                     {ctaLabel}
@@ -286,10 +280,10 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
       </div>
       <Reveal direction="up" className="lg:hidden flex justify-center lg:pr-0 pr-4">
         <div className="mt-6 flex justify-center md:w-[284px] mx-auto w-full">
-          {ctaLabel && customDesignForm ? (
+          {showJourneyCta ? (
             <DetailDarkButton
               type="button"
-              onClick={handleShareVisionOpen}
+              onClick={openShareVision}
               className="w-full uppercase"
             >
               {ctaLabel}
@@ -297,13 +291,6 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
           ) : null}
         </div>
       </Reveal>
-      {customDesignForm ? (
-        <BespokeShareVisionPanel
-          open={shareVisionOpen}
-          onClose={handleShareVisionClose}
-          form={customDesignForm}
-        />
-      ) : null}
     </section>
   );
 };

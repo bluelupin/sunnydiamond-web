@@ -11,6 +11,7 @@ import type {
   NormalizedBespokeFeaturedStories,
   NormalizedBespokePastCreations,
 } from "@/services/bespoke/contact-bespoke-page.types";
+import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 
 const showApiDebug = process.env.NEXT_PUBLIC_API_DEBUG === "true";
 
@@ -22,6 +23,7 @@ type HomePageProps = {
     NormalizedBespokeFeaturedStories,
     "slides" | "defaultSlideIndex" | "modalCtaLabel"
   > | null;
+  trendingProducts: JewelleryListingProduct[];
 };
 
 const HomePage = ({
@@ -29,6 +31,7 @@ const HomePage = ({
   craftingRarity,
   pastCreations = null,
   featuredStories = null,
+  trendingProducts,
 }: HomePageProps) => {
   return (
     <>
@@ -39,6 +42,7 @@ const HomePage = ({
       <HomeBelowFoldSections
         pastCreations={pastCreations}
         featuredStories={featuredStories}
+        trendingProducts={trendingProducts}
       />
     </>
   );

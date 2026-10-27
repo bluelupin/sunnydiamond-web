@@ -20,6 +20,8 @@ import GiftingProductsSkeleton from "./skeletons/GiftingProductsSkeleton";
 import GiftingPromiseSkeleton from "./skeletons/GiftingPromiseSkeleton";
 import GiftingWithLoveSkeleton from "./skeletons/GiftingWithLoveSkeleton";
 import SeoSectionFallback from "@/shared/ui/SeoSectionFallback";
+import { getTrendingProductLinks } from "@/lib/magento/trendingProductLinks";
+import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 
 const GiftingWithLoveSection = dynamic(() => import("./GiftingWithLoveSection"), {
   loading: () => <GiftingWithLoveSkeleton />,
@@ -53,6 +55,7 @@ type GiftingBelowFoldLazyProps = {
   finishingTouch: NormalizedGiftingFinishingTouch | null;
   trustBadges: NormalizedGiftingTrustBadge[];
   giftFinder: NormalizedGiftingGiftFinder | null;
+  trendingProducts: JewelleryListingProduct[];
   discoverSection: ReactNode;
 };
 
@@ -64,6 +67,7 @@ const GiftingBelowFoldLazy = ({
   finishingTouch,
   trustBadges,
   giftFinder,
+  trendingProducts,
   discoverSection,
 }: GiftingBelowFoldLazyProps) => (
   <>
@@ -86,7 +90,10 @@ const GiftingBelowFoldLazy = ({
         id="gifting-products"
         title={perfectGift.title}
         description={perfectGift.description}
-        links={[{ href: "/jewellery", label: "Explore diamond jewellery" }]}
+        links={[
+          ...getTrendingProductLinks(trendingProducts),
+          { href: "/jewellery", label: "Explore diamond jewellery" },
+        ]}
       />}>
         <GiftingProductListSection perfectGift={perfectGift} />
       </GiftingLazyInView>
