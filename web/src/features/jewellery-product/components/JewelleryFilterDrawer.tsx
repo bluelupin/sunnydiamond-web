@@ -350,7 +350,7 @@ const FilterDrawerPanel = ({
         {categoryOptions.length > 0 ? (
           <section className="flex flex-col gap-[16px]">
             <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-              {categoryFilterHeading ?? "By Categories:"}
+              {categoryFilterHeading ?? "By Categories"}
             </h3>
             {categoryFilterHeading ? (
               <div className="flex flex-wrap gap-[7px]">
