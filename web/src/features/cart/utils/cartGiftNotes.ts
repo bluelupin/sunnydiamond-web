@@ -1,4 +1,5 @@
 import type { CartLineItem } from "../types/cart.types";
+import type { StoredCartLineMetadata } from "@/services/magento/cart/cartSession";
 
 export type GiftingFormState = {
   wrapMode: "single" | "separate";
@@ -44,17 +45,77 @@ export function getDefaultGiftingSelectedItemIds(items: readonly CartLineItem[])
   return items.filter(isCartLineMarkedGift).map((item) => item.id);
 }
 
-export function buildGiftingFormStateFromItems(items: readonly CartLineItem[]): GiftingFormState {
+function readGroupedGiftNoteFromMetadata(
+  items: readonly CartLineItem[],
+  lineMetadata: StoredCartLineMetadata,
+): string {
+  for (const item of items) {
+    const gifting = lineMetadata[item.id]?.gifting;
+    if (gifting?.wrapMode === "separate") {
+      continue;
+    }
+
+    const note = gifting?.note?.trim();
+    if (note) {
+      return note;
+    }
+  }
+
+  return "";
+}
+
+function readSeparateGiftNotesFromMetadata(
+  items: readonly CartLineItem[],
+  lineMetadata: StoredCartLineMetadata,
+): Record<string, string> {
+  const notes: Record<string, string> = {};
+
+  for (const item of items) {
+    const note = lineMetadata[item.id]?.gifting?.note?.trim();
+    if (note) {
+      notes[item.id] = note;
+    }
+  }
+
+  return notes;
+}
+
+/** Grouped (single-bag) gift note from cart lines, with localStorage metadata fallback. */
+export function resolveGroupedGiftNoteFromCart(
+  items: readonly CartLineItem[],
+  lineMetadata: StoredCartLineMetadata = {},
+): string {
+  const fromItems =
+    items.find(
+      (item) => item.gifting?.wrapMode !== "separate" && item.gifting?.note?.trim(),
+    )?.gifting?.note?.trim() ?? "";
+
+  if (fromItems) {
+    return fromItems;
+  }
+
+  return readGroupedGiftNoteFromMetadata(items, lineMetadata);
+}
+
+export function buildGiftingFormStateFromItems(
+  items: readonly CartLineItem[],
+  lineMetadata: StoredCartLineMetadata = {},
+): GiftingFormState {
+  const wrapMode = items.some((item) => item.gifting?.wrapMode === "separate")
+    ? "separate"
+    : "single";
+
+  const itemNotesFromItems = Object.fromEntries(
+    items
+      .filter((item) => item.gifting?.wrapMode === "separate" && item.gifting.note)
+      .map((item) => [item.id, item.gifting?.note ?? ""]),
+  );
+  const itemNotesFromMetadata = readSeparateGiftNotesFromMetadata(items, lineMetadata);
+
   return {
-    wrapMode: items.some((item) => item.gifting?.wrapMode === "separate") ? "separate" : "single",
-    giftNote:
-      items.find((item) => item.gifting?.wrapMode !== "separate" && item.gifting?.note)?.gifting
-        ?.note ?? "",
-    itemNotes: Object.fromEntries(
-      items
-        .filter((item) => item.gifting?.wrapMode === "separate" && item.gifting.note)
-        .map((item) => [item.id, item.gifting?.note ?? ""]),
-    ),
+    wrapMode,
+    giftNote: resolveGroupedGiftNoteFromCart(items, lineMetadata),
+    itemNotes: { ...itemNotesFromMetadata, ...itemNotesFromItems },
     selectedItemIds: getDefaultGiftingSelectedItemIds(items),
   };
 }
