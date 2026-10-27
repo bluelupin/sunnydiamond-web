@@ -1,5 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { MAGENTO_TRENDING_CACHE_TAG } from "@/services/magento/config";
+import { purgeTrendingPageCdn } from "@/lib/magento/purgeTrendingCdn";
 
 export const runtime = "nodejs";
 
@@ -50,8 +52,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
   }
 
-  const paths = uniqueStrings(payload.paths).filter((path) => path.startsWith("/"));
-  const tags = uniqueStrings(payload.tags);
+  const requestedTags = uniqueStrings(payload.tags);
+  const refreshTrending =
+    requestedTags.includes(MAGENTO_TRENDING_CACHE_TAG) ||
+    (payload.source === "magento" && payload.action === "trending-products-updated");
+  const paths = Array.from(new Set([
+    ...uniqueStrings(payload.paths).filter((path) => path.startsWith("/")),
+    ...(refreshTrending ? ["/", "/gifting", "/api/magento/trending-products"] : []),
+  ]));
+  const tags = Array.from(new Set([
+    ...requestedTags,
+    ...(refreshTrending ? [MAGENTO_TRENDING_CACHE_TAG] : []),
+  ]));
 
   if (paths.length === 0 && tags.length === 0) {
     return NextResponse.json({ error: "No paths or tags provided" }, { status: 400 });
@@ -65,13 +77,16 @@ export async function POST(request: NextRequest) {
     revalidatePath(path);
   }
 
+  const cdnPurge = refreshTrending ? await purgeTrendingPageCdn() : undefined;
+
   return NextResponse.json({
     revalidated: true,
     uid: payload.uid,
     action: payload.action,
     paths,
     tags,
+    ...(cdnPurge ? { cdnPurge } : {}),
     now: new Date().toISOString(),
-  });
+  }, { status: cdnPurge === "failed" ? 502 : 200 });
 }
 

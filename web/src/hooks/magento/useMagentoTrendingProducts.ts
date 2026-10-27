@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useCmsSection } from "@/hooks/homepage/useCmsSection";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
-import { MAGENTO_CATALOG_REVALIDATE_SECONDS } from "@/services/magento/config";
+import { MAGENTO_TRENDING_REVALIDATE_SECONDS } from "@/services/magento/config";
 import {
   markHomepageTrendingFetchStart,
   reportHomepageTrendingReady,
@@ -39,7 +39,7 @@ export function useMagentoTrendingProducts() {
   }, []);
 
   const state = useCmsSection<JewelleryListingProduct[]>(magentoQueryKeys.trendingProducts, fetcher, {
-    staleTimeMs: MAGENTO_CATALOG_REVALIDATE_SECONDS * 1000,
+    staleTimeMs: MAGENTO_TRENDING_REVALIDATE_SECONDS * 1000,
   });
 
   useEffect(() => {

@@ -15,6 +15,8 @@ import { isSectionActive } from "@/shared/utils/cmsSection";
 import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
 import { resolveAlankaraCollectionSection } from "@/shared/utils/resolveAlankaraCollectionSection";
 import SeoSectionFallback from "@/shared/ui/SeoSectionFallback";
+import { getTrendingProductLinks } from "@/lib/magento/trendingProductLinks";
+import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 
 const DiamondSourcingSection = lazyImportWithRetry(
   () => import("@/features/cms/components/home/DiamondSourcingSection"),
@@ -92,11 +94,13 @@ type HomeBelowFoldSectionsProps = {
     NormalizedBespokeFeaturedStories,
     "slides" | "defaultSlideIndex" | "modalCtaLabel"
   > | null;
+  trendingProducts: JewelleryListingProduct[];
 };
 
 export default function HomeBelowFoldSections({
   pastCreations = null,
   featuredStories = null,
+  trendingProducts,
 }: HomeBelowFoldSectionsProps) {
   const cms = useHomepageCmsPrefetched();
   const editorial = cms?.editorial;
@@ -156,10 +160,10 @@ export default function HomeBelowFoldSections({
             id="diamond-awaits"
             title={featuredProducts.sectionTitle}
             description={featuredProducts.description}
-            links={featuredProducts.cta?.url || featuredProducts.cta?.to ? [{
+            links={[...getTrendingProductLinks(trendingProducts), ...(featuredProducts.cta?.url || featuredProducts.cta?.to ? [{
               href: featuredProducts.cta.url ?? featuredProducts.cta.to ?? "",
               label: featuredProducts.cta.label?.trim() || "Explore jewellery",
-            }] : []}
+            }] : [])]}
           />
         ) : <FeaturedCarouselSkeleton />}
       >

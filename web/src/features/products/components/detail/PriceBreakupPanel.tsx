@@ -8,6 +8,7 @@ import type { ProductDetailPricing } from "@/features/products/types/productDeta
 import {
   buildPriceBreakup,
   formatPriceBreakupGstLabel,
+  hasAvailablePriceBreakup,
 } from "@/features/products/utils/priceBreakup";
 import {
   PanelFooter,
@@ -62,7 +63,7 @@ const PriceBreakupPanel = ({
   ringSize,
   pricing,
 }: PriceBreakupPanelProps) => {
-  if (!pricing.breakup) {
+  if (!pricing.breakup || !hasAvailablePriceBreakup(pricing)) {
     return null;
   }
 
@@ -131,28 +132,22 @@ const PriceBreakupPanel = ({
 
             <div aria-hidden className="hidden min-h-0 flex-1 md:block" />
 
-            {breakup.isReconciled ? (
-              <div className="flex shrink-0 flex-col gap-3 pb-6">
-                <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
-                <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
-                <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
+            <div className="flex shrink-0 flex-col gap-3 pb-6">
+              <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
+              <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
+              <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
+              <PriceBreakupRow
+                label={formatPriceBreakupGstLabel(breakup.gstRate)}
+                value={formatAmount(breakup.gst)}
+              />
+              {breakup.discount > 0 ? (
                 <PriceBreakupRow
-                  label={formatPriceBreakupGstLabel(breakup.gstRate)}
-                  value={formatAmount(breakup.gst)}
+                  label="Discount"
+                  value={formatAmount(breakup.discount)}
+                  discount
                 />
-                {breakup.discount > 0 ? (
-                  <PriceBreakupRow
-                    label="Discount"
-                    value={formatAmount(breakup.discount)}
-                    discount
-                  />
-                ) : null}
-              </div>
-            ) : (
-              <p className="pb-6 font-gill text-base text-darkblack" role="status">
-                Detailed price breakup is unavailable because the component amounts do not match the current product price.
-              </p>
-            )}
+              ) : null}
+            </div>
           </div>
         </div>
 
