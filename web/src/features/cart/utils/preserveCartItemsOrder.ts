@@ -1,4 +1,5 @@
 import type { CartLineItem } from "@/features/cart/types/cart.types";
+import type { StoredCartLineMetadata } from "@/services/magento/cart/cartSession";
 
 const LINE_INSTANCE_KEY_PREFIX = "li:";
 const LINE_UID_KEY_PREFIX = "uid:";
@@ -71,11 +72,11 @@ function removeFromList(list: CartLineItem[], item: CartLineItem): void {
  * previous line to its successor in the fresh response.
  */
 export function preserveCartItemsOrder(
-  previousItems: CartLineItem[],
-  nextItems: CartLineItem[],
+  previousItems: readonly CartLineItem[],
+  nextItems: readonly CartLineItem[],
 ): CartLineItem[] {
   if (previousItems.length === 0 || nextItems.length === 0) {
-    return nextItems;
+    return [...nextItems];
   }
 
   const nextById = new Map(nextItems.map((item) => [item.id, item]));
@@ -122,5 +123,55 @@ export function preserveCartItemsOrder(
     ordered.push(item);
   }
 
-  return ordered.length === nextItems.length ? ordered : nextItems;
+  return ordered.length === nextItems.length ? ordered : [...nextItems];
+}
+
+/**
+ * After mergeCarts (or any uid rotation), line metadata in localStorage is still
+ * keyed by the guest quote item uid — re-key it onto the merged customer line.
+ */
+export function reconcileCartLineMetadataAfterUidRotation(
+  metadata: StoredCartLineMetadata,
+  previousItems: readonly CartLineItem[],
+  nextItems: readonly CartLineItem[],
+): StoredCartLineMetadata {
+  if (previousItems.length === 0 || nextItems.length === 0) {
+    return metadata;
+  }
+
+  const orderedNext = preserveCartItemsOrder(previousItems, [...nextItems]);
+  let changed = false;
+  const next: StoredCartLineMetadata = { ...metadata };
+
+  const pairCount = Math.min(previousItems.length, orderedNext.length);
+  for (let index = 0; index < pairCount; index += 1) {
+    const previous = previousItems[index]!;
+    const current = orderedNext[index]!;
+    if (previous.id === current.id) {
+      continue;
+    }
+
+    const staleMeta = next[previous.id];
+    if (!staleMeta) {
+      continue;
+    }
+
+    const existing = next[current.id];
+    next[current.id] = {
+      options: { ...(staleMeta.options ?? {}), ...(existing?.options ?? {}) },
+      ...(staleMeta.gifting || existing?.gifting
+        ? { gifting: staleMeta.gifting ?? existing?.gifting }
+        : {}),
+      ...(staleMeta.productCustomOptions || existing?.productCustomOptions
+        ? { productCustomOptions: staleMeta.productCustomOptions ?? existing?.productCustomOptions }
+        : {}),
+      ...(staleMeta.displayImage || existing?.displayImage
+        ? { displayImage: staleMeta.displayImage ?? existing?.displayImage }
+        : {}),
+    };
+    delete next[previous.id];
+    changed = true;
+  }
+
+  return changed ? next : metadata;
 }
