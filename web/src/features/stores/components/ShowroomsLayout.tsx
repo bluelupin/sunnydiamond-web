@@ -261,14 +261,11 @@ function ShowroomDesktopInlineListItem({
 }) {
   return (
     <div
-      className={cn(
-        "w-full transition-[background-color] duration-300 motion-reduce:transition-none",
-        isSelected && "bg-gray300",
-      )}
+      className="w-full"
       style={{
         paddingLeft: horizontalPadding,
         paddingRight: horizontalPadding,
-        ...(isSelected ? { backgroundColor: figma.expandedPanelBackground } : {}),
+        backgroundColor: isSelected ? figma.expandedPanelBackground : undefined,
       }}
     >
       <button
@@ -276,16 +273,16 @@ function ShowroomDesktopInlineListItem({
         aria-pressed={isSelected}
         onClick={() => onSelect(location.id)}
         className={cn(
-          "flex h-[74px] w-full items-center text-left transition-[border-color] duration-300 motion-reduce:transition-none",
+          "flex md:h-[66px] h-[58px] w-full items-center border-b text-left",
           storeLocatorShowroomCityClassName,
-          isSelected && "border-b border-gray50",
+          isSelected ? "border-gray50" : "border-transparent",
         )}
       >
         {location.name}
       </button>
 
       {isSelected ? (
-        <div className="animate-in fade-in duration-300 lg:pb-6 lg:pt-4">
+        <div className="lg:pb-6 lg:pt-4">
           <ShowroomLocationDetailsFigma
             location={location}
             getDirectionsLabel={getDirectionsLabel}
@@ -365,15 +362,13 @@ function ShowroomMobileAccordionItem({
         aria-expanded={isSelected}
         onClick={() => onSelect(location.id)}
         className={cn(
-          "flex w-full items-center text-left",
+          "flex md:h-[66px] h-[58px] w-full items-center text-left",
           storeLocatorShowroomCityClassName,
           !isSelected && "hover:bg-[#F2F2F2]/60",
         )}
         style={{
           paddingLeft: horizontalPadding,
           paddingRight: horizontalPadding,
-          paddingTop: isSelected ? figma.expandedPanelPaddingY : figma.collapsedRowPaddingY,
-          paddingBottom: isSelected ? 12 : figma.collapsedRowPaddingY,
         }}
       >
         {location.name}

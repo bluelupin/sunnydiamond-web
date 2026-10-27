@@ -220,10 +220,10 @@ function ShowroomsDesktopLayout({
                 <div
                   key={location.id}
                   className={cn(
-                    "lg:px-10 lg:w-full w-fit border-b-[3px] lg:border-b-0 transition-all duration-300",
+                    "lg:px-10 lg:w-full w-fit border-b-[3px] lg:border-b-0",
                     isSelected
                       ? "border-black bg-gray300"
-                      : "border-transparent"
+                      : "border-transparent",
                   )}
                 >
                   <button
@@ -231,15 +231,15 @@ function ShowroomsDesktopLayout({
                     aria-pressed={isSelected}
                     onClick={() => onSelect(location.id ?? null)}
                     className={cn(
-                      "font-light w-full lg:h-[74px] h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
-                      isSelected && "border-b border-gray50"
+                      "font-light w-full lg:h-[74px] h-50 lg:px-0 px-6 flex items-center border-b lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack",
+                      isSelected ? "border-gray50" : "border-transparent",
                     )}
                   >
                     {location.name}
                   </button>
 
                   {isSelected && (
-                    <div className="lg:pt-4 lg:pb-6 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
+                    <div className="lg:pt-4 lg:pb-6 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] max-lg:animate-in max-lg:fade-in max-lg:duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
                       <div className="flex gap-3 items-start">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-0.5", "sm:size-5 w-5 h-5 shrink-0 mt-1")}>
                           <path d="M11.2541 12.7421L3.53381 10.5859C3.38249 10.5395 3.24971 10.4465 3.15449 10.3201C3.05926 10.1936 3.00646 10.0403 3.00365 9.8821C3.00084 9.72386 3.04817 9.56878 3.13885 9.43907C3.22953 9.30935 3.35892 9.21165 3.5085 9.15994L20.0085 3.03994C20.1409 2.99493 20.2832 2.9878 20.4194 3.01937C20.5556 3.05095 20.6802 3.11996 20.7793 3.21863C20.8783 3.31729 20.9478 3.44168 20.98 3.57775C21.0121 3.71382 21.0055 3.85616 20.961 3.98869L14.841 20.4887C14.7893 20.6383 14.6916 20.7677 14.5619 20.8584C14.4322 20.949 14.2771 20.9964 14.1188 20.9935C13.9606 20.9907 13.8073 20.9379 13.6809 20.8427C13.5545 20.7475 13.4614 20.6147 13.4151 20.4634L11.2541 12.7421Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
