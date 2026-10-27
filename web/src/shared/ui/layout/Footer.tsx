@@ -249,7 +249,7 @@ const Footer = ({ className }: { className?: string }) => {
                 {paymentMethodLogos.map((logo) => (
                   <div
                     key={logo.id}
-                    className="relative h-5 max-w-auto"
+                    className="relative sm:h-5 h-full sm:max-w-auto max-w-full w-full min-w-[280px]"
                   >
                     <ResponsiveImage
                       desktopSrc={logo.src}
@@ -257,7 +257,7 @@ const Footer = ({ className }: { className?: string }) => {
                       width={380}
                       height={25}
                       quality={80}
-                      className="sm:object-cover object-contain"
+                      className="sm:object-cover object-contain w-full h-full"
                     />
                   </div>
                 ))}

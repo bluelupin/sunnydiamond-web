@@ -273,7 +273,7 @@ function ShowroomDesktopInlineListItem({
         aria-pressed={isSelected}
         onClick={() => onSelect(location.id)}
         className={cn(
-          "flex md:h-[66px] h-[58px] w-full items-center border-b text-left",
+          "flex md:h-[74px] h-[58px] w-full items-center border-b text-left",
           storeLocatorShowroomCityClassName,
           isSelected ? "border-gray50" : "border-transparent",
         )}
@@ -362,7 +362,7 @@ function ShowroomMobileAccordionItem({
         aria-expanded={isSelected}
         onClick={() => onSelect(location.id)}
         className={cn(
-          "flex md:h-[66px] h-[58px] w-full items-center text-left",
+          "flex md:h-[74px] h-[58px] w-full items-center text-left",
           storeLocatorShowroomCityClassName,
           !isSelected && "hover:bg-[#F2F2F2]/60",
         )}
