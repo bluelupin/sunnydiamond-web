@@ -385,7 +385,7 @@ const FilterDrawerPanel = ({
         {metalTypeOptions.length > 0 ? (
           <section className="flex flex-col gap-[16px]">
             <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-              Metal Type:
+              Metal Type
             </h3>
             <div className="flex flex-wrap gap-[7px]">
               {metalTypeOptions.map((metalType) => (
@@ -403,7 +403,7 @@ const FilterDrawerPanel = ({
         {metalPurityOptions.length > 0 ? (
           <section className="flex flex-col gap-[16px]">
             <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-              Metal Purity:
+              Metal Purity
             </h3>
             <div className="flex flex-wrap gap-[7px]">
               {metalPurityOptions.map((purity) => (
@@ -425,7 +425,7 @@ const FilterDrawerPanel = ({
                 htmlFor="jewellery-filter-gemstone-type"
                 className="font-gill text-base leading-normal tracking-normal text-darkblack"
               >
-                Gemstone Type:
+                Gemstone Type
               </label>
               <InlineCustomSelect
                 id="jewellery-filter-gemstone-type"
