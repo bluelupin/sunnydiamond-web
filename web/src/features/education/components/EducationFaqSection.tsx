@@ -24,7 +24,7 @@ const FaqPlusIcon = () => (
 
 const FaqMinusIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="size-6 shrink-0">
-    <g clip-path="url(#clip0_4903_59714)">
+    <g clipPath="url(#clip0_4903_59714)">
       <path d="M17 12H5V11H17V12Z" fill="#0A0A0A" />
     </g>
     <defs>
