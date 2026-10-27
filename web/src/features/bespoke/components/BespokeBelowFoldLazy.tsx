@@ -9,6 +9,7 @@ import type {
   NormalizedBespokePastCreations,
   NormalizedBespokeStory,
 } from "@/services/bespoke/contact-bespoke-page.types";
+import { BespokeShareVisionProvider } from "@/features/bespoke/context/BespokeShareVisionContext";
 import BespokeLazyInView from "./BespokeLazyInView";
 import BespokeFeaturedStoriesSkeleton from "./skeletons/BespokeFeaturedStoriesSkeleton";
 import BespokeGuaranteesSkeleton from "./skeletons/BespokeGuaranteesSkeleton";
@@ -50,7 +51,7 @@ const BespokeBelowFoldLazy = ({
   guarantees,
   interested,
 }: BespokeBelowFoldLazyProps) => (
-  <>
+  <BespokeShareVisionProvider form={customDesignForm}>
     {story ? (
       <BespokeLazyInView fallback={<SeoSectionFallback
         title={story.title}
@@ -86,7 +87,7 @@ const BespokeBelowFoldLazy = ({
         <BespokeInterestedSection interested={interested} />
       </BespokeLazyInView>
     ) : null}
-  </>
+  </BespokeShareVisionProvider>
 );
 
 export default BespokeBelowFoldLazy;

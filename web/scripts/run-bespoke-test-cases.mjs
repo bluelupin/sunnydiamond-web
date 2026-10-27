@@ -85,6 +85,8 @@ function runStaticChecks() {
   const pastModal = readSrc("src/features/bespoke/components/BespokePastCreationsModal.tsx");
   const guarantees = readSrc("src/features/bespoke/components/BespokeGuaranteesSection.tsx");
   const interested = readSrc("src/features/bespoke/components/BespokeInterestedSection.tsx");
+  const belowFold = readSrc("src/features/bespoke/components/BespokeBelowFoldLazy.tsx");
+  const shareVisionContext = readSrc("src/features/bespoke/context/BespokeShareVisionContext.tsx");
   const service = readSrc("src/services/bespoke/contact-bespoke-page.service.ts");
   const submission = readSrc("src/services/bespoke/bespoke-submission.service.ts");
   const seo = readSrc("src/shared/lib/seo/bespokeSeo.ts");
@@ -128,10 +130,16 @@ function runStaticChecks() {
   assertSource("BESPOKE-018", "horizontal scroll", story, "useSince1997HorizontalScroll", "Desktop horizontal scroll");
   assertSource("BESPOKE-019", "mobile stack", story, "lg:hidden", "Mobile vertical stack");
   assertSource("BESPOKE-020", "video fallback", story, "setUseImageFallback", "Video image fallback");
-  assertSource("BESPOKE-021", "share vision CTA", story, "BespokeShareVisionPanel", "Share Vision panel wired");
+  assertSource(
+    "BESPOKE-021",
+    "share vision CTA",
+    shareVisionContext,
+    "BespokeShareVisionPanel",
+    "Share Vision panel wired via provider",
+  );
   record(
     "BESPOKE-022",
-    story.includes("ctaLabel && customDesignForm") ? "Pass" : "Fail",
+    story.includes("isBespokeJourneyCtaEnabled") ? "Pass" : "Fail",
     "CTA hidden when customDesignForm missing",
   );
 
@@ -179,10 +187,12 @@ function runStaticChecks() {
   // G. Sections
   record(
     "BESPOKE-045",
-    interested.includes("ctaHref") && !interested.includes("BespokeShareVisionPanel")
+    interested.includes("useBespokeShareVision") &&
+      interested.includes("openShareVision") &&
+      belowFold.includes("BespokeShareVisionProvider")
       ? "Pass"
       : "Fail",
-    "Get in Touch uses CMS href only (BESPOKE-ISSUE-004)",
+    "Get in Touch journey CTA opens Share Vision (same as story)",
   );
   assertSource("BESPOKE-046", "guarantees", bespokePage, "BespokeGuaranteesSection", "Guarantees section");
   assertSource("BESPOKE-047", "guarantees responsive", guarantees, "md:flex-row", "Guarantees responsive layout");
