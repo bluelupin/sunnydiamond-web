@@ -210,7 +210,7 @@ export default function CookieConsentBanner() {
           </div>
         ) : null}
 
-        <div className="mt-4 flex flex-col gap-2 sm:mt-2">
+        <div className="mt-4 flex flex-col gap-2 sm:mt-4">
           {!expanded ? (
             <CartTextLink onClick={() => setExpanded(true)} className="w-fit mb-3">
               {COOKIE_CONSENT_COPY.managePreferences}
