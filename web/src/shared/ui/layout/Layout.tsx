@@ -11,6 +11,7 @@ import { clearTransientErrorAutoRetry } from "@/shared/hooks/useTransientErrorAu
 import { useIsCartEmptyPageShell } from "@/features/cart/hooks/useIsCartEmptyPageShell";
 import { isAuthRoute, isCartOrCheckoutRoute, shouldHideFooter, shouldHideFooterOnMobile, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
 import PwaInstallBanner from "@/shared/pwa/PwaInstallBanner";
+import CookieConsentBanner from "@/shared/cookies/CookieConsentBanner";
 import {
   NotFoundPageShellProvider,
   useNotFoundPageShell,
@@ -69,6 +70,7 @@ const LayoutInner = ({ children }: { children: ReactNode }) => {
         {children}
       </main>
       {hideFooter ? null : <Footer className={hideFooterOnMobile ? "max-md:hidden" : undefined} />}
+      <CookieConsentBanner />
       {/* <PwaInstallBanner /> */}
     </div>
   );
