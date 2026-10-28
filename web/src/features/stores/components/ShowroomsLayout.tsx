@@ -313,17 +313,15 @@ function ShowroomNoAreaListLead({
 
   return (
     <div
-      className="flex w-full flex-col"
-      style={{ gap: storeLocatorNoAreaFigmaSpec.titleToSubtitleGap }}
-    >
-      <p className={storeLocatorNoAreaTitleClassName} style={pad}>
+      className="flex w-full flex-col md:gap-8 gap-6">
+      <p className="font-gill text-base font-normal leading-110 text-darkblack lg:px-0 px-4">
         {copy.title}
       </p>
       <div
         className="flex w-full flex-col"
         style={{ gap: storeLocatorNoAreaFigmaSpec.subtitleToFeaturedGap }}
       >
-        <p className={storeLocatorNoAreaSubtitleClassName} style={pad}>
+        <p className="font-gill text-base font-normal leading-110 text-neutral500 md:mb-3 mb-2 lg:px-0 px-4">
           {copy.subtitle}
         </p>
         {featuredLocation ? (
@@ -553,50 +551,50 @@ function ShowroomsDesktopLayout({
             aria-label="Showroom locations"
             className="flex w-full flex-col border-r border-neutral300"
           >
-          {locations.length === 0 ? (
-            emptyMessage ? (
-              <p
-                className="py-8 font-gill text-base font-light leading-110 text-neutral500"
-                style={{
-                  paddingLeft: figma.listHorizontalPadding,
-                  paddingRight: figma.listHorizontalPadding,
-                }}
-              >
-                {emptyMessage}
-              </p>
-            ) : null
-          ) : (
-            locations.map((location, index) => {
-              const isSelected = location.id === activeId;
-              const insertNearbyLabel = index === exploreNearbyInsertIndex;
+            {locations.length === 0 ? (
+              emptyMessage ? (
+                <p
+                  className="py-8 font-gill text-base font-light leading-110 text-neutral500"
+                  style={{
+                    paddingLeft: figma.listHorizontalPadding,
+                    paddingRight: figma.listHorizontalPadding,
+                  }}
+                >
+                  {emptyMessage}
+                </p>
+              ) : null
+            ) : (
+              locations.map((location, index) => {
+                const isSelected = location.id === activeId;
+                const insertNearbyLabel = index === exploreNearbyInsertIndex;
 
-              return (
-                <div key={location.id} className="w-full">
-                  {insertNearbyLabel ? (
-                    <div
-                      className="flex w-full items-center"
-                      style={{
-                        marginTop: storeLocatorExploreNearbyStoresLabelMarginTop,
-                        paddingLeft: figma.listHorizontalPadding,
-                        paddingRight: figma.listHorizontalPadding,
-                      }}
-                    >
-                      <p className={storeLocatorExploreNearbyStoresLabelClassName}>
-                        {nearbyStoresLabel}
-                      </p>
-                    </div>
-                  ) : null}
+                return (
+                  <div key={location.id} className="w-full">
+                    {insertNearbyLabel ? (
+                      <div
+                        className="flex w-full items-center"
+                        style={{
+                          marginTop: storeLocatorExploreNearbyStoresLabelMarginTop,
+                          paddingLeft: figma.listHorizontalPadding,
+                          paddingRight: figma.listHorizontalPadding,
+                        }}
+                      >
+                        <p className={storeLocatorExploreNearbyStoresLabelClassName}>
+                          {nearbyStoresLabel}
+                        </p>
+                      </div>
+                    ) : null}
 
-                  <ShowroomDesktopInlineListItem
-                    location={location}
-                    isSelected={isSelected}
-                    onSelect={onSelect}
-                    getDirectionsLabel={getDirectionsLabel}
-                  />
-                </div>
-              );
-            })
-          )}
+                    <ShowroomDesktopInlineListItem
+                      location={location}
+                      isSelected={isSelected}
+                      onSelect={onSelect}
+                      getDirectionsLabel={getDirectionsLabel}
+                    />
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
