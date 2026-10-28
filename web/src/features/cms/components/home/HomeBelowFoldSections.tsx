@@ -158,6 +158,7 @@ export default function HomeBelowFoldSections({
         fallback={featuredProducts && featuredProducts.showField !== false && isSectionActive(featuredProducts.isActive) ? (
           <SeoSectionFallback
             id="diamond-awaits"
+            appearance="product-carousel"
             title={featuredProducts.sectionTitle}
             description={featuredProducts.description}
             links={[...getTrendingProductLinks(trendingProducts), ...(featuredProducts.cta?.url || featuredProducts.cta?.to ? [{

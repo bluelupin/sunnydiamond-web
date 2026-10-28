@@ -88,6 +88,7 @@ const GiftingBelowFoldLazy = ({
     {perfectGift ? (
       <GiftingLazyInView fallback={<SeoSectionFallback
         id="gifting-products"
+        appearance="product-carousel"
         title={perfectGift.title}
         description={perfectGift.description}
         links={[

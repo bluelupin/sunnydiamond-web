@@ -23,7 +23,6 @@ import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import { getProductDetailContent, getProductDetailPricing } from "@/features/products/data/productDetailContent";
-import { hasAvailablePriceBreakup } from "@/features/products/utils/priceBreakup";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import {
@@ -526,7 +525,7 @@ const ProductDetailSidebar = ({
               </span>
             ) : null}
           </div>
-          {hasAvailablePriceBreakup(sizePricing) ? (
+          {sizePricing.breakup ? (
             <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="shrink-0 uppercase">
               View Price Breakup
             </DetailTextLink>
@@ -933,7 +932,7 @@ const ProductDetailSidebar = ({
 
   const panels = (
     <>
-      {engravingEnabled && engravingConfig ? (
+      {isEngravingOpen && engravingEnabled && engravingConfig ? (
         <MetalEngravingPanel
           open={isEngravingOpen}
           onClose={() => setIsEngravingOpen(false)}
@@ -958,11 +957,13 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      <ScheduleVideoCallPanel
-        open={isVideoCallOpen}
-        onClose={() => setIsVideoCallOpen(false)}
-        product={sizeDisplayProduct}
-      />
+      {isVideoCallOpen ? (
+        <ScheduleVideoCallPanel
+          open
+          onClose={() => setIsVideoCallOpen(false)}
+          product={sizeDisplayProduct}
+        />
+      ) : null}
 
       {isTryAtHomeOpen ? (
         <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={sizeDisplayProduct} />
@@ -976,7 +977,7 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      {isPriceBreakupOpen && hasAvailablePriceBreakup(sizePricing) ? (
+      {isPriceBreakupOpen && sizePricing.breakup ? (
         <PriceBreakupPanel
           open
           onClose={() => setIsPriceBreakupOpen(false)}
