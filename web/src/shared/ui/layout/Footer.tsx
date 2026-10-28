@@ -6,6 +6,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
+import {
+  buildFooterPlpToastHref,
+  isFooterPlpToastLink,
+  resolvePlpFooterToastIntent,
+  stashPlpFooterToastIntent,
+} from "@/shared/lib/footerPlpToast";
 import { isBookAppointmentLink, resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import PageContainer from "@/shared/ui/layout/PageContainer";
@@ -192,6 +198,7 @@ const Footer = ({ className }: { className?: string }) => {
                     {column.links.map((link) => {
                       const openInSidePanel =
                         !isMobileHeader && isBookAppointmentLink(link);
+                      const plpToastLink = isFooterPlpToastLink(link);
                       const linkClassName =
                         "font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta";
 
@@ -205,6 +212,19 @@ const Footer = ({ className }: { className?: string }) => {
                             >
                               {link.label}
                             </button>
+                          ) : plpToastLink ? (
+                            <Link
+                              href={buildFooterPlpToastHref(link)}
+                              className={linkClassName}
+                              onClick={() => {
+                                const intent = resolvePlpFooterToastIntent(link);
+                                if (intent) {
+                                  stashPlpFooterToastIntent(intent);
+                                }
+                              }}
+                            >
+                              {link.label}
+                            </Link>
                           ) : (
                             <Link href={link.url} className={linkClassName}>
                               {link.label}

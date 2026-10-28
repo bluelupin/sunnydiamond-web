@@ -36,6 +36,7 @@ export type FooterLink = {
   id: string | number;
   label: string;
   url: string;
+  targetType?: string | null;
   isActive?: boolean | null;
   sortOrder?: number | null;
 };
@@ -157,6 +158,7 @@ export function resolveShellFooterLinkGroups(
           id: link.id,
           label: link.label.trim(),
           url: resolveFooterLinkHref(link.url.trim()),
+          targetType: link.targetType ?? null,
         })),
     }))
     .filter((group) => group.links.length > 0);

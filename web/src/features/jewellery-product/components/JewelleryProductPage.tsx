@@ -69,7 +69,6 @@ import type {
   NormalizedProductListingCard,
 } from "@/services/product-landing/product-landing-page.types";
 import { cn } from "@/shared/utils/cn";
-
 const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"));
 
 type JewelleryProductPageProps = {
@@ -186,7 +185,6 @@ const JewelleryProductPage = ({
   const [listingResetNonce, setListingResetNonce] = useState(0);
   const pageSize = useJewelleryPlpPageSize();
   const { isWishlisted, toggleWishlist } = useWishlist();
-
   const initialListingParams =
     initialListing && prefetchedCategoryUrlKey !== undefined
       ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, {

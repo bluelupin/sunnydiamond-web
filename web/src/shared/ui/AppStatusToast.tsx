@@ -99,7 +99,7 @@ const AppStatusToast = ({ open, message, action, onDismiss, hideIcon = false }: 
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-16 z-[80] flex justify-center px-4 md:top-104">
+    <div className="pointer-events-none fixed inset-x-0 top-16 z-[100] flex justify-center px-4 md:top-104">
       <div
         role="status"
         aria-live="polite"
@@ -115,15 +115,22 @@ const AppStatusToast = ({ open, message, action, onDismiss, hideIcon = false }: 
       >
         <div
           className={cn(
-            "flex w-full items-center gap-3 bg-darkblack px-4 py-3",
-            displayContent.action || onDismiss ? "justify-between" : "justify-center",
+            "flex w-full items-center bg-darkblack px-4 py-3",
+            displayContent.action || onDismiss ? "justify-between gap-8" : "justify-center gap-3",
           )}
         >
-          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             {hideIcon ? null : (
               <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
             )}
-            <p className="min-w-0 text-center font-gill text-sm font-light leading-110 text-white">
+            <p
+              className={cn(
+                "min-w-0 font-gill text-sm font-normal leading-110 text-white",
+                hideIcon && onDismiss && !displayContent.action
+                  ? "text-left"
+                  : "text-center",
+              )}
+            >
               {displayContent.message}
             </p>
           </div>
@@ -137,7 +144,7 @@ const AppStatusToast = ({ open, message, action, onDismiss, hideIcon = false }: 
                   className="inline-flex shrink-0 text-white"
                   aria-label="Close notification"
                 >
-                  <X size={18} strokeWidth={1.25} aria-hidden />
+                  <X size={24} strokeWidth={1.25} aria-hidden />
                 </button>
               ) : null}
             </div>

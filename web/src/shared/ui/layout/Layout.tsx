@@ -1,8 +1,9 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, Suspense, useEffect } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import PlpFooterToastHost from "@/features/jewellery-product/components/PlpFooterToastHost";
 import BrowserBackScrollRestore from "@/shared/lib/providers/BrowserBackScrollRestore";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
@@ -45,6 +46,9 @@ const LayoutInner = ({ children }: { children: ReactNode }) => {
       )}
     >
       <BrowserBackScrollRestore />
+      <Suspense fallback={null}>
+        <PlpFooterToastHost />
+      </Suspense>
       <Header />
       <main
         className={
