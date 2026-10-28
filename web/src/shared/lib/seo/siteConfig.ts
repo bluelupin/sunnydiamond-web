@@ -49,4 +49,7 @@ export const getAbsoluteUrl = (path = "/") => {
   }
 };
 
+/** SD monogram (180×180, above Google's 112 px minimum) for Organization `logo` markup. */
+export const BRAND_LOGO_URL = getAbsoluteUrl("/apple-touch-icon.png");
+
 export default siteEnv;

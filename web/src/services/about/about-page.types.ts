@@ -19,7 +19,6 @@ export type StrapiAboutSeo = {
   metaDescription?: string | null;
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
-  structuredData?: unknown;
 };
 
 export type StrapiAboutHeroVideoBlock = {

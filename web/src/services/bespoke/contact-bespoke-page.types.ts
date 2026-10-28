@@ -20,7 +20,6 @@ export type StrapiBespokeSeo = {
   metaDescription?: string | null;
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
-  structuredData?: unknown;
   showField?: boolean | null;
   ogImage?: StrapiImagePayload | null;
 };

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import { siteConfig } from "@/shared/lib/siteConfig";
+import JsonLd from "@/shared/lib/seo/JsonLd";
+import { buildJobPostingJsonLd } from "@/shared/lib/seo/schema/jobPosting";
 import CareersJobSlugPage from "@/features/careers/components/CareersJobSlugPage";
 import { getCareerJobPath } from "@/features/careers/constants/careersRoutes";
 import {
@@ -51,5 +53,15 @@ export default async function CareerJobPage({ params }: PageProps) {
 
   const cms = cmsResult.status === "fulfilled" ? cmsResult.value : EMPTY_CAREERS_PAGE_DATA;
 
-  return <CareersJobSlugPage cms={cms} job={job.value} />;
+  // The service only returns active openings; a posting without a description fails Google's checks.
+  const jobPosting = buildJobPostingJsonLd(job.value);
+
+  return (
+    <>
+      {jobPosting.description ? (
+        <JsonLd data={jobPosting} id={`job-jsonld-${job.value.id}`} />
+      ) : null}
+      <CareersJobSlugPage cms={cms} job={job.value} />
+    </>
+  );
 }
