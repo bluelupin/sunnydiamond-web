@@ -1,6 +1,8 @@
 "use client";
 
-import GiftingPanelCheckboxIcon from "@/assets/Icons/GiftingPanelCheckboxIcon";
+import GiftingPanelCheckboxIcon, {
+  type GiftingPanelCheckboxCheckedFill,
+} from "@/assets/Icons/GiftingPanelCheckboxIcon";
 import { cn } from "@/shared/utils/cn";
 import { useUiPlatform } from "../hooks/use-ui-platform";
 
@@ -34,6 +36,8 @@ type GiftingPanelCheckboxProps = {
   boxClassName?: string;
   /** Classes for the checkbox SVG (e.g. `size-4`). */
   iconClassName?: string;
+  /** Checked state fill color — default `gold` preserves existing panels. */
+  checkedFill?: GiftingPanelCheckboxCheckedFill;
   disabled?: boolean;
   "aria-label"?: string;
 };
@@ -47,6 +51,7 @@ const GiftingPanelCheckbox = ({
   className,
   boxClassName,
   iconClassName,
+  checkedFill,
   disabled = false,
   "aria-label": ariaLabel,
 }: GiftingPanelCheckboxProps) => {
@@ -77,6 +82,7 @@ const GiftingPanelCheckbox = ({
       >
         <GiftingPanelCheckboxIcon
           checked={checked}
+          checkedFill={checkedFill}
           className={cn(dimensions.icon, iconClassName)}
         />
       </span>

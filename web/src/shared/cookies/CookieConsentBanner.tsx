@@ -7,11 +7,14 @@ import {
   CartPrimaryButton,
   CartTextLink,
 } from "@/features/cart/components/CartFlowUi";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { cn } from "@/shared/utils/cn";
 import { isAuthRoute } from "@/shared/utils/navigation";
 import { COOKIE_CONSENT_COPY } from "./cookieConsentCopy";
 import {
-  markCookieConsentBannerDismissed,
+  persistCookieConsentChoice,
+  readCookieConsentPreferences,
+  type CookieConsentPreferences,
   wasCookieConsentBannerDismissed,
 } from "./cookieConsentStorage";
 
@@ -24,6 +27,9 @@ export default function CookieConsentBanner() {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<BannerPhase>("hidden");
+  const [expanded, setExpanded] = useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [marketingEnabled, setMarketingEnabled] = useState(true);
 
   const suppressOnRoute = isAuthRoute(pathname);
 
@@ -41,6 +47,10 @@ export default function CookieConsentBanner() {
       return;
     }
 
+    const stored = readCookieConsentPreferences();
+    setAnalyticsEnabled(stored.analytics);
+    setMarketingEnabled(stored.marketing);
+    setExpanded(false);
     setOpen(true);
   }, [mounted, suppressOnRoute]);
 
@@ -93,14 +103,26 @@ export default function CookieConsentBanner() {
     });
   };
 
-  const dismissBanner = useCallback(() => {
-    markCookieConsentBannerDismissed();
+  const closeBanner = useCallback((preferences: CookieConsentPreferences) => {
+    persistCookieConsentChoice(preferences);
     setOpen(false);
   }, []);
 
   const handleAcceptAll = useCallback(() => {
-    dismissBanner();
-  }, [dismissBanner]);
+    closeBanner({ analytics: true, marketing: true });
+  }, [closeBanner]);
+
+  const handleRejectNonEssential = useCallback(() => {
+    closeBanner({ analytics: false, marketing: false });
+  }, [closeBanner]);
+
+  const handleSavePreferences = useCallback(() => {
+    closeBanner({ analytics: analyticsEnabled, marketing: marketingEnabled });
+  }, [analyticsEnabled, marketingEnabled, closeBanner]);
+
+  const handleClose = useCallback(() => {
+    handleRejectNonEssential();
+  }, [handleRejectNonEssential]);
 
   if (!mounted || phase === "hidden") {
     return null;
@@ -124,14 +146,14 @@ export default function CookieConsentBanner() {
           "md:max-w-[500px] md:p-6",
           "motion-reduce:animate-none",
           phase === "enter" &&
-            "animate-in fade-in duration-300 ease-out max-md:slide-in-from-bottom-full md:slide-in-from-bottom-4",
+          "animate-in fade-in duration-300 ease-out max-md:slide-in-from-bottom-full md:slide-in-from-bottom-4",
           phase === "exit" &&
-            "animate-out fade-out duration-300 ease-in max-md:slide-out-to-bottom-full md:slide-out-to-bottom-4",
+          "animate-out fade-out duration-300 ease-in max-md:slide-out-to-bottom-full md:slide-out-to-bottom-4",
         )}
       >
         <button
           type="button"
-          onClick={dismissBanner}
+          onClick={handleClose}
           className="absolute right-4 top-4 inline-flex size-8 items-center justify-center md:right-5 md:top-5"
           aria-label="Close cookie banner"
         >
@@ -164,22 +186,94 @@ export default function CookieConsentBanner() {
           .
         </p>
 
-        <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:items-stretch sm:gap-3">
-          <CartOutlineButton
-            type="button"
-            className="w-full sm:w-[34%] sm:min-w-0 sm:shrink-0"
-            onClick={dismissBanner}
-          >
-            {COOKIE_CONSENT_COPY.decline}
-          </CartOutlineButton>
-          <CartPrimaryButton
-            type="button"
-            className="w-full sm:min-w-0 sm:flex-1"
-            onClick={handleAcceptAll}
-          >
-            {COOKIE_CONSENT_COPY.acceptAll}
-          </CartPrimaryButton>
+        {expanded ? (
+          <div className="mt-4 flex flex-col gap-3 border-t border-neutral300 pt-4">
+            <PreferenceRow
+              title={COOKIE_CONSENT_COPY.necessaryTitle}
+              description={COOKIE_CONSENT_COPY.necessaryDescription}
+              checked
+              disabled
+              onChange={() => undefined}
+            />
+            <PreferenceRow
+              title={COOKIE_CONSENT_COPY.analyticsTitle}
+              description={COOKIE_CONSENT_COPY.analyticsDescription}
+              checked={analyticsEnabled}
+              onChange={setAnalyticsEnabled}
+            />
+            <PreferenceRow
+              title={COOKIE_CONSENT_COPY.marketingTitle}
+              description={COOKIE_CONSENT_COPY.marketingDescription}
+              checked={marketingEnabled}
+              onChange={setMarketingEnabled}
+            />
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-col gap-2 sm:mt-2">
+          {!expanded ? (
+            <CartTextLink onClick={() => setExpanded(true)} className="w-fit mb-3">
+              {COOKIE_CONSENT_COPY.managePreferences}
+            </CartTextLink>
+          ) : null}
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
+            {expanded ? (
+              <CartOutlineButton
+                type="button"
+                className="w-full sm:min-w-0 sm:flex-1"
+                onClick={handleSavePreferences}
+              >
+                {COOKIE_CONSENT_COPY.savePreferences}
+              </CartOutlineButton>
+            ) : (
+              <CartOutlineButton
+                type="button"
+                className="w-full sm:min-w-0 sm:flex-1"
+                onClick={handleRejectNonEssential}
+              >
+                {COOKIE_CONSENT_COPY.rejectNonEssential}
+              </CartOutlineButton>
+            )}
+            <CartPrimaryButton
+              type="button"
+              className="w-full sm:min-w-0 sm:flex-1"
+              onClick={handleAcceptAll}
+            >
+              {COOKIE_CONSENT_COPY.acceptAll}
+            </CartPrimaryButton>
+          </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PreferenceRow({
+  title,
+  description,
+  checked,
+  disabled = false,
+  onChange,
+}: {
+  title: string;
+  description: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <GiftingPanelCheckbox
+        checked={checked}
+        checkedFill="black"
+        disabled={disabled}
+        onChange={onChange}
+        className="mt-0.5 shrink-0"
+      />
+      <div className="min-w-0">
+        <p className="font-gill text-sm font-normal leading-110 text-darkblack">{title}</p>
+        <p className="mt-0.5 font-gill text-sm font-light leading-110 text-neutral500">{description}</p>
       </div>
     </div>
   );
