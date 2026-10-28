@@ -965,9 +965,11 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      {isTryAtHomeOpen ? (
-        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={sizeDisplayProduct} />
-      ) : null}
+      <TryAtHomePanel
+        open={isTryAtHomeOpen}
+        onClose={() => setIsTryAtHomeOpen(false)}
+        product={sizeDisplayProduct}
+      />
 
       {isPersonaliseOpen ? (
         <PersonaliseProductPanel

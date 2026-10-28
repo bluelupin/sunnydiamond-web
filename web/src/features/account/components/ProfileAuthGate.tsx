@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { getLoginHref } from "@/features/auth/utils/authNavigation";
 
@@ -13,12 +13,17 @@ const ProfileAuthGate = ({ children }: ProfileAuthGateProps) => {
   const { status } = useAuth();
   const router = useRouter();
   const pathname = usePathname() ?? "/profile";
+  const searchParams = useSearchParams();
+  const returnPath = useMemo(() => {
+    const query = searchParams?.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (status === "guest") {
-      router.replace(getLoginHref(pathname));
+      router.replace(getLoginHref(returnPath));
     }
-  }, [pathname, router, status]);
+  }, [returnPath, router, status]);
 
   if (status === "loading") {
     return (

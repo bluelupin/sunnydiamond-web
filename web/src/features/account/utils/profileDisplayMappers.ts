@@ -750,6 +750,35 @@ export function profileTryAtHomeAddressMatchesCustomerAppointment(
   );
 }
 
+/**
+ * When line/pincode/state already match GET but city differs, trust CMS city and drop the
+ * session patch (avoids stale patch city after API catches up).
+ */
+export function tryAtHomeAddressPatchSupersededByApiCity(
+  patch: ProfileTryAtHomeAddressUi,
+  appointment: CustomerAppointment,
+): boolean {
+  const apiCity = normalizeTryAtHomeAddressField(appointment.city);
+  if (!apiCity) {
+    return false;
+  }
+
+  const coreMatches =
+    normalizeTryAtHomeAddressField(patch.addressLine1) ===
+      normalizeTryAtHomeAddressField(appointment.addressLine1) &&
+    normalizeTryAtHomeAddressField(patch.addressLine2) ===
+      normalizeTryAtHomeAddressField(appointment.addressLine2) &&
+    normalizeTryAtHomeAddressField(patch.state) ===
+      normalizeTryAtHomeAddressField(appointment.state) &&
+    normalizeTryAtHomeAddressField(patch.pincode) ===
+      normalizeTryAtHomeAddressField(appointment.pincode);
+
+  return (
+    coreMatches &&
+    normalizeTryAtHomeAddressField(patch.city) !== apiCity
+  );
+}
+
 function profileTryAtHomeAddressUiMatches(
   left: ProfileTryAtHomeAddressUi,
   right: ProfileTryAtHomeAddressUi,
@@ -782,7 +811,13 @@ export function pruneStaleTryAtHomeAddressPatches(
 
   for (const [id, patch] of patches) {
     const appointment = appointmentById.get(id);
-    if (appointment && profileTryAtHomeAddressMatchesCustomerAppointment(patch, appointment)) {
+    if (!appointment) {
+      continue;
+    }
+    if (
+      profileTryAtHomeAddressMatchesCustomerAppointment(patch, appointment) ||
+      tryAtHomeAddressPatchSupersededByApiCity(patch, appointment)
+    ) {
       next.delete(id);
     }
   }
@@ -800,7 +835,10 @@ export function mergeRescheduledTryAtHomeAddressIntoCustomerAppointment(
     return appointment;
   }
 
-  if (profileTryAtHomeAddressMatchesCustomerAppointment(patch, appointment)) {
+  if (
+    profileTryAtHomeAddressMatchesCustomerAppointment(patch, appointment) ||
+    tryAtHomeAddressPatchSupersededByApiCity(patch, appointment)
+  ) {
     return appointment;
   }
 

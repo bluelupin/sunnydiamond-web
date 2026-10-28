@@ -117,6 +117,16 @@ function extractStateFromMessageText(value: string): string {
   return "";
 }
 
+function extractCityFromMessageText(value: string): string {
+  for (const line of value.split(/\r?\n/)) {
+    const match = line.match(/^\s*City\s*:\s*(.+)\s*$/i);
+    if (match?.[1]?.trim()) {
+      return match[1].trim();
+    }
+  }
+  return "";
+}
+
 function coerceMessageValue(value: unknown): string {
   if (typeof value === "string") {
     return value.trim();
@@ -342,6 +352,15 @@ const APPOINTMENT_ADDRESS_LINE2_KEYS = ["addressLine2", "address_line_2", "stree
 
 const APPOINTMENT_PINCODE_KEYS = ["pincode", "postcode", "postalCode", "zip"] as const;
 
+const APPOINTMENT_CITY_KEYS = [
+  "city",
+  "district",
+  "town",
+  "cityName",
+  "locality",
+  "city_name",
+] as const;
+
 function nestedAppointmentAddressRecord(
   item: Record<string, unknown>,
 ): Record<string, unknown> | null {
@@ -351,6 +370,20 @@ function nestedAppointmentAddressRecord(
   }
 
   return nested as Record<string, unknown>;
+}
+
+/** Nested `address` is the live try-at-home payload after reschedule; root fields can lag (especially city). */
+function nestedAddressIsAuthoritative(
+  item: Record<string, unknown>,
+  nested: Record<string, unknown>,
+): boolean {
+  const nestedLine1 = pickTextField(nested, APPOINTMENT_ADDRESS_LINE1_KEYS);
+  if (!nestedLine1) {
+    return false;
+  }
+
+  const rootLine1 = pickTextField(item, APPOINTMENT_ADDRESS_LINE1_KEYS);
+  return !rootLine1 || nestedLine1 !== rootLine1;
 }
 
 /** CMS may store try-at-home address on a nested `address` object after reschedule. */
@@ -363,6 +396,10 @@ function pickAppointmentAddressField(
     const fromNested = pickTextField(nested, keys);
     if (fromNested) {
       return fromNested;
+    }
+
+    if (nestedAddressIsAuthoritative(item, nested)) {
+      return null;
     }
   }
 
@@ -416,11 +453,50 @@ function mapAppointmentAddressFields(
     }
   }
 
+  let city = pickAppointmentAddressField(item, APPOINTMENT_CITY_KEYS);
+  if (!city && Array.isArray(item.products)) {
+    for (const product of item.products) {
+      if (!product || typeof product !== "object") {
+        continue;
+      }
+      city =
+        pickAppointmentAddressField(product as Record<string, unknown>, APPOINTMENT_CITY_KEYS) ??
+        "";
+      if (city) {
+        break;
+      }
+    }
+  }
+
+  let cityFromMessage = extractCityFromMessageText(
+    coerceMessageValue(item.requestDetails) ||
+      coerceMessageValue(item.notes) ||
+      coerceMessageValue(item.customerMessage) ||
+      "",
+  );
+  if (!cityFromMessage && Array.isArray(item.products)) {
+    for (const product of item.products) {
+      if (!product || typeof product !== "object") {
+        continue;
+      }
+      const productRecord = product as Record<string, unknown>;
+      cityFromMessage = extractCityFromMessageText(
+        coerceMessageValue(productRecord.requestDetails) ||
+          coerceMessageValue(productRecord.notes) ||
+          coerceMessageValue(productRecord.customerMessage) ||
+          "",
+      );
+      if (cityFromMessage) {
+        break;
+      }
+    }
+  }
+
   return {
     addressLine1: pickAppointmentAddressField(item, APPOINTMENT_ADDRESS_LINE1_KEYS),
     addressLine2: pickAppointmentAddressField(item, APPOINTMENT_ADDRESS_LINE2_KEYS),
     pincode: pickAppointmentAddressField(item, APPOINTMENT_PINCODE_KEYS),
-    city: pickAppointmentAddressField(item, ["city", "district", "town", "cityName"]),
+    city: city || cityFromMessage || "",
     state: stateFromField || stateFromMessage || "",
   };
 }

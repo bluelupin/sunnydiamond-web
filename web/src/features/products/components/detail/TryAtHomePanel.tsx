@@ -659,6 +659,10 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
     wishlistMovedToastDurationMs,
   );
   const productImage = product.image || product.images[0];
+  const profileAppointmentsHref = useMemo(
+    () => buildProfileSectionHref("appointments"),
+    [],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -693,6 +697,23 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
     onClose();
   };
 
+  const navigateToAppointments = useCallback(() => {
+    router.push(profileAppointmentsHref);
+    handleClose();
+  }, [handleClose, profileAppointmentsHref, router]);
+
+  const profileAppointmentsToastAction = (
+    <AppStatusToastAction href={profileAppointmentsHref} onClick={handleClose}>
+      View Here
+    </AppStatusToastAction>
+  );
+
+  const duplicateAppointmentToastAction = (
+    <AppStatusToastAction href={profileAppointmentsHref} onClick={handleClose}>
+      {DUPLICATE_APPOINTMENT_VIEW_LABEL}
+    </AppStatusToastAction>
+  );
+
   const handleAddressSubmit = async (address: {
     addressLine1: string;
     addressLine2: string;
@@ -726,11 +747,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         }))
       ) {
         showStatusToast(DUPLICATE_APPOINTMENT_TOAST, {
-          action: (
-            <AppStatusToastAction onClick={handleViewBooking}>
-              {DUPLICATE_APPOINTMENT_VIEW_LABEL}
-            </AppStatusToastAction>
-          ),
+          action: duplicateAppointmentToastAction,
         });
         return;
       }
@@ -785,20 +802,13 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
       setSubmittedBooking(booking);
       setStep("success");
       showStatusToast("Try at home request received", {
-        action: (
-          <AppStatusToastAction onClick={handleViewBooking}>View Here</AppStatusToastAction>
-        ),
+        action: profileAppointmentsToastAction,
       });
     } catch {
       showStatusToast("Could not submit request");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleViewBooking = () => {
-    handleClose();
-    router.push(buildProfileSectionHref("appointments"));
   };
 
   const handleContinueShopping = () => {
@@ -852,7 +862,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             minNoticeMinutes={TRY_AT_HOME_BOOKING_WINDOW.minNoticeMinutes}
             additionalItemsCount={additionalItemsCount}
             onClose={handleClose}
-            onViewBooking={handleViewBooking}
+            onViewBooking={navigateToAppointments}
             onContinueShopping={handleContinueShopping}
           />
         ) : null}
