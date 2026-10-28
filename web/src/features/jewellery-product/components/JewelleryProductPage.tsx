@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
 import JewelleryProductGrid from "./JewelleryProductGrid";
+import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryListingEmptyState from "./JewelleryListingEmptyState";
 import JewelleryListingErrorState from "./JewelleryListingErrorState";
@@ -69,7 +69,6 @@ import type {
   NormalizedProductListingCard,
 } from "@/services/product-landing/product-landing-page.types";
 import { cn } from "@/shared/utils/cn";
-const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"));
 
 type JewelleryProductPageProps = {
   initialListing?: JewelleryListingProductsData;
@@ -155,7 +154,6 @@ const JewelleryProductPage = ({
     return initial;
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [hasOpenedFilters, setHasOpenedFilters] = useState(false);
   const { data: navData } = useMagentoJewelleryNav();
   const navCategories = navData?.categories ?? [];
   const facetsSyncedRef = useRef(Boolean(initialListing));
@@ -759,7 +757,6 @@ const JewelleryProductPage = ({
   );
 
   const handleOpenFilters = () => {
-    setHasOpenedFilters(true);
     setIsFilterOpen(true);
   };
 
@@ -833,16 +830,14 @@ const JewelleryProductPage = ({
         <JewelleryGuaranteesSection trustBadges={trustBadges} />
       </ScrollReveal>
 
-      {hasOpenedFilters ? (
-        <JewelleryFilterDrawer
-          open={isFilterOpen}
-          appliedFilters={filters}
-          facets={facets}
-          categoryFilterHeading={categoryFilterHeading}
-          onClose={() => setIsFilterOpen(false)}
-          onApply={handleApplyFilters}
-        />
-      ) : null}
+      <JewelleryFilterDrawer
+        open={isFilterOpen}
+        appliedFilters={filters}
+        facets={facets}
+        categoryFilterHeading={categoryFilterHeading}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={handleApplyFilters}
+      />
 
       {isLoadingMore ? <span className="sr-only" aria-live="polite">Loading more products</span> : null}
     </div>

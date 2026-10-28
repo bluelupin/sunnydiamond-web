@@ -4,10 +4,10 @@ import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import FormFieldError from "@/shared/ui/FormFieldError";
-import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/shared/ui/sheet";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
-import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/shared/ui/drawer";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import {
   chunkFilterOptions,
@@ -770,6 +770,7 @@ const JewelleryFilterDrawer = ({
           )}
         >
           <DrawerTitle className="sr-only">Filters</DrawerTitle>
+          <DrawerDescription className="sr-only">Refine jewellery by price, category, and other options.</DrawerDescription>
           <FilterDrawerPanel {...panelProps} />
         </DrawerContent>
       </Drawer>
@@ -790,6 +791,7 @@ const JewelleryFilterDrawer = ({
         )}
       >
         <SheetTitle className="sr-only">Filters</SheetTitle>
+        <SheetDescription className="sr-only">Refine jewellery by price, category, and other options.</SheetDescription>
         <FilterDrawerPanel {...panelProps} />
       </SheetContent>
     </Sheet>
