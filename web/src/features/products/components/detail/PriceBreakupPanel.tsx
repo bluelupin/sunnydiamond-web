@@ -8,7 +8,6 @@ import type { ProductDetailPricing } from "@/features/products/types/productDeta
 import {
   buildPriceBreakup,
   formatPriceBreakupGstLabel,
-  hasAvailablePriceBreakup,
 } from "@/features/products/utils/priceBreakup";
 import {
   PanelFooter,
@@ -63,7 +62,7 @@ const PriceBreakupPanel = ({
   ringSize,
   pricing,
 }: PriceBreakupPanelProps) => {
-  if (!pricing.breakup || !hasAvailablePriceBreakup(pricing)) {
+  if (!pricing.breakup) {
     return null;
   }
 

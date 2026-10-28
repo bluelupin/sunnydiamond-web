@@ -19,6 +19,7 @@ interface ResponsiveImageProps {
   eager?: boolean;
   sizes?: string;
   quality?: number;
+  onImageLoad?: (image: HTMLImageElement, variant: "mobile" | "desktop" | "shared") => void;
 }
 
 const ResponsiveImage = ({
@@ -35,6 +36,7 @@ const ResponsiveImage = ({
   priority = false,
   eager = false,
   quality,
+  onImageLoad,
   sizes = "100vw",
 }: ResponsiveImageProps) => {
   const desktopImage = getImageSrc(desktopSrc) ?? (mobileSrc ? getImageSrc(mobileSrc) : null);
@@ -68,12 +70,14 @@ const ResponsiveImage = ({
       <>
         <Image
           {...commonProps}
+          onLoad={onImageLoad ? (event) => onImageLoad(event.currentTarget, "mobile") : undefined}
           alt={mobileAlt ?? alt}
           src={mobileImage}
           className={cn(imageClassName, "md:hidden")}
         />
         <Image
           {...commonProps}
+          onLoad={onImageLoad ? (event) => onImageLoad(event.currentTarget, "desktop") : undefined}
           alt={desktopAlt ?? alt}
           src={hasDistinctRetina ? retinaImage! : desktopImage}
           className={cn(imageClassName, "hidden md:block")}
@@ -87,12 +91,14 @@ const ResponsiveImage = ({
       <>
         <Image
           {...commonProps}
+          onLoad={onImageLoad ? (event) => onImageLoad(event.currentTarget, "mobile") : undefined}
           alt={alt}
           src={desktopImage}
           className={cn(imageClassName, "md:hidden")}
         />
         <Image
           {...commonProps}
+          onLoad={onImageLoad ? (event) => onImageLoad(event.currentTarget, "desktop") : undefined}
           alt={alt}
           src={retinaImage}
           className={cn(imageClassName, "hidden md:block")}
@@ -101,7 +107,7 @@ const ResponsiveImage = ({
     );
   }
 
-  return <Image {...commonProps} alt={alt} src={desktopImage} className={imageClassName} />;
+  return <Image {...commonProps} onLoad={onImageLoad ? (event) => onImageLoad(event.currentTarget, "shared") : undefined} alt={alt} src={desktopImage} className={imageClassName} />;
 };
 
 export default ResponsiveImage;

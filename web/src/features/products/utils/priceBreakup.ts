@@ -22,11 +22,13 @@ export function buildPriceBreakup(
   components: ProductPriceBreakupComponents,
   pricing?: Pick<ProductDetailPricing, "originalPrice" | "price">,
 ): PriceBreakup {
-  const metal = roundRupee(components.metalPrice);
-  const stone = roundRupee(components.diamondPrice + components.gemstonePrice);
-  const makingCharges = roundRupee(components.makingCharge + components.baseMakingCharge);
-  const subtotal = metal + stone + makingCharges;
-  const gst = roundRupee(subtotal * (components.gstRate / 100));
+  const preciseStone = components.diamondPrice + components.gemstonePrice;
+  const preciseMakingCharges = components.makingCharge + components.baseMakingCharge;
+  let metal = roundRupee(components.metalPrice);
+  let stone = roundRupee(components.diamondPrice) + roundRupee(components.gemstonePrice);
+  let makingCharges = roundRupee(components.makingCharge) + roundRupee(components.baseMakingCharge);
+  const subtotalBeforeTax = metal + stone + makingCharges;
+  const gst = roundRupee(subtotalBeforeTax * (components.gstRate / 100));
 
   const originalPrice = pricing?.originalPrice;
   const catalogPrice = pricing?.price;
@@ -35,7 +37,31 @@ export function buildPriceBreakup(
 
   const discount = hasCatalogDiscount ? roundRupee(originalPrice - catalogPrice) : 0;
 
-  const total = catalogPrice != null ? roundRupee(catalogPrice) : subtotal + gst - discount;
+  const total = catalogPrice != null
+    ? roundRupee(catalogPrice)
+    : roundRupee(subtotalBeforeTax + subtotalBeforeTax * (components.gstRate / 100) - discount);
+  const difference = total - (metal + stone + makingCharges + gst - discount);
+
+  // Balance a one-rupee display difference against the component whose rounded
+  // value moves closest to its precise Magento value. Never change the GST row.
+  if (Math.abs(difference) === 1) {
+    const lines = [
+      { precise: components.metalPrice, shown: metal },
+      { precise: preciseStone, shown: stone },
+      { precise: preciseMakingCharges, shown: makingCharges },
+    ];
+    const bestIndex = lines.reduce((best, line, index) => {
+      if (line.shown + difference < 0) return best;
+      const cost = Math.abs(line.shown + difference - line.precise) - Math.abs(line.shown - line.precise);
+      const bestLine = lines[best];
+      const bestCost = Math.abs(bestLine.shown + difference - bestLine.precise) - Math.abs(bestLine.shown - bestLine.precise);
+      return cost < bestCost ? index : best;
+    }, 0);
+    if (bestIndex === 0) metal += difference;
+    if (bestIndex === 1) stone += difference;
+    if (bestIndex === 2) makingCharges += difference;
+  }
+  const subtotal = metal + stone + makingCharges;
 
   return {
     metal,
@@ -46,12 +72,8 @@ export function buildPriceBreakup(
     gstRate: components.gstRate,
     discount,
     total,
-    isReconciled: Math.abs(subtotal + gst - discount - total) <= 1,
+    isReconciled: subtotal + gst - discount === total,
   };
-}
-
-export function hasAvailablePriceBreakup(pricing: ProductDetailPricing | null | undefined): boolean {
-  return Boolean(pricing?.breakup && buildPriceBreakup(pricing.breakup, pricing).isReconciled);
 }
 
 export function formatPriceBreakupGstLabel(gstRate: number): string {
