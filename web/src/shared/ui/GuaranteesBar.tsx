@@ -75,7 +75,7 @@ const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizont
 
 const GuaranteeItem = (item: GuaranteeBarItem) => (
   <li
-    className="list-none flex w-[200px] shrink-0 flex-col items-center justify-center text-center desktop:w-[260px]"
+    className="list-none flex lg:w-[260px] md:w-[235px] w-full shrink-0 flex-col items-center justify-center text-center"
     style={{
       height: `${guaranteeBarSpec.itemHeight}px`,
       gap: `${guaranteeBarSpec.itemGap}px`,
@@ -123,6 +123,7 @@ const GuaranteesBar = ({
         className={cn(
           "m-0 hidden list-none items-stretch justify-evenly p-0 md:flex",
           "px-10 py-16",
+          // "m-0 list-none flex items-center justify-center 2xl:gap-[75px] xl:gap-16 lg:gap-12 md:gap-1 gap-6 p-0 flex md:flex-row flex-col md:py-16 py-10 px-4",
           "desktop:justify-between desktop:px-[180px] desktop:py-16",
         )}
       >

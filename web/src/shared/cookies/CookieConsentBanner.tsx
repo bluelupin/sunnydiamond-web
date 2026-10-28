@@ -120,7 +120,7 @@ export default function CookieConsentBanner() {
       <div
         onAnimationEnd={handleAnimationEnd}
         className={cn(
-          "pointer-events-auto relative w-full max-w-[420px] border border-neutral300 bg-white p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
+          "pointer-events-auto relative w-full max-w-[420px] bg-white p-5 shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
           "md:max-w-[500px] md:p-6",
           "motion-reduce:animate-none",
           phase === "enter" &&
@@ -132,7 +132,7 @@ export default function CookieConsentBanner() {
         <button
           type="button"
           onClick={dismissBanner}
-          className="absolute right-4 top-4 inline-flex size-8 items-center justify-center bg-gray200 text-neutral500 transition-colors hover:text-darkblack md:right-5 md:top-5"
+          className="absolute right-4 top-4 inline-flex size-8 items-center justify-center md:right-5 md:top-5"
           aria-label="Close cookie banner"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
