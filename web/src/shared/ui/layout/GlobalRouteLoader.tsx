@@ -11,7 +11,7 @@ export function GlobalRouteLoaderContent() {
       </div>
 
       <div className="flex flex-col items-center space-y-1">
-        <span className="font-heading text-xl font-semibold uppercase italic tracking-[0.2em] text-foreground md:text-2xl">
+        <span className="font-Larken text-xl font-larken uppercase italic tracking-[0.2em] text-foreground md:text-2xl">
           Sunny Diamonds
         </span>
         <span className="font-gill text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
