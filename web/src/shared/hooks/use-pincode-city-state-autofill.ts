@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { validateIndianPincode } from "@/shared/utils/formValidation";
 import { fetchPincodeCityState, PIN_LOOKUP_DEBOUNCE_MS } from "@/shared/utils/pincodeGeo.client";
 
@@ -23,31 +23,38 @@ export function usePincodeCityStateAutofill({
   pincode,
   enabled = true,
   onApply,
-}: UsePincodeCityStateAutofillOptions): void {
+}: UsePincodeCityStateAutofillOptions): { isLookingUp: boolean } {
   const requestRef = useRef(0);
   const onApplyRef = useRef(onApply);
+  const [isLookingUp, setIsLookingUp] = useState(false);
   onApplyRef.current = onApply;
 
   useEffect(() => {
     if (!enabled) {
+      setIsLookingUp(false);
       return;
     }
 
     const pin = pincode.trim();
     if (!validateIndianPincode(pin).valid) {
+      setIsLookingUp(false);
       return;
     }
 
     const requestId = ++requestRef.current;
     let cancelled = false;
+    setIsLookingUp(true);
     const timer = window.setTimeout(() => {
       void (async () => {
         const address = await fetchPincodeCityState(pin);
-        if (cancelled || requestId !== requestRef.current || !address) {
+        if (cancelled || requestId !== requestRef.current) {
           return;
         }
 
-        onApplyRef.current(address, pin);
+        if (address) {
+          onApplyRef.current(address, pin);
+        }
+        setIsLookingUp(false);
       })();
     }, PIN_LOOKUP_DEBOUNCE_MS);
 
@@ -56,4 +63,6 @@ export function usePincodeCityStateAutofill({
       window.clearTimeout(timer);
     };
   }, [enabled, pincode]);
+
+  return { isLookingUp };
 }

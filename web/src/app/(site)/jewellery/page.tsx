@@ -1,16 +1,19 @@
 import {
   generateJewelleryListingMetadata,
   JewelleryListingRoutePage,
+  type JewelleryListingSearchParams,
 } from "@/features/jewellery-product/pages/JewelleryListingRoutePage";
 
 export const revalidate = 60;
 
-const searchParams = Promise.resolve({});
+type PageProps = {
+  searchParams: Promise<JewelleryListingSearchParams>;
+};
 
-export function generateMetadata() {
+export function generateMetadata({ searchParams }: PageProps) {
   return generateJewelleryListingMetadata({ searchParams });
 }
 
-export default function Page() {
+export default function Page({ searchParams }: PageProps) {
   return JewelleryListingRoutePage({ searchParams });
 }

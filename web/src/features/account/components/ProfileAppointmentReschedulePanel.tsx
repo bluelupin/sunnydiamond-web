@@ -286,7 +286,7 @@ export function ProfileAppointmentReschedulePanel({
     }
   }, []);
 
-  usePincodeCityStateAutofill({
+  const { isLookingUp: isPincodeLookupPending } = usePincodeCityStateAutofill({
     pincode,
     enabled: isAddressStep,
     onApply: applyPincodeLookup,
@@ -346,7 +346,8 @@ export function ProfileAppointmentReschedulePanel({
     );
   }, [appointment, countryCode, date, email, isAddressChanged, name, note, phone, selectedSlot]);
 
-  const canSave = canProceedToAddress && !hasAddressErrors && hasChanges;
+  const canSave =
+    canProceedToAddress && !hasAddressErrors && hasChanges && !isPincodeLookupPending;
 
   const handleUseCurrentLocation = async () => {
     const detected = await detectAddress();
