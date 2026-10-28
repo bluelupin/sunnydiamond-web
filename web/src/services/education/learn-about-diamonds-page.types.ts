@@ -202,7 +202,6 @@ export type StrapiEducationSeo = {
   isActive?: boolean | null;
   showField?: boolean | null;
   ogImage?: StrapiEducationMediaFile | null;
-  structuredData?: unknown;
 };
 
 export type StrapiLearnAboutDiamondsPageEntity = {

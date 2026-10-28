@@ -1,5 +1,6 @@
 import type { NormalizedHomepageHero } from "@/services/homepage/homepage.mapper";
 import { siteConfig } from "@/shared/lib/siteConfig";
+import { BRAND_LOGO_URL } from "@/shared/lib/seo/siteConfig";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type { HomepageSeo } from "@/types/homepage/seo";
 
@@ -102,7 +103,6 @@ export function buildHomepageJsonLd(data: {
   title: string;
   description: string;
   url: string;
-  image?: string;
 }) {
   const sameAs = [siteConfig.social.instagram, siteConfig.social.facebook, siteConfig.social.pinterest].filter(Boolean);
 
@@ -120,12 +120,10 @@ export function buildHomepageJsonLd(data: {
         name: siteConfig.brand.name,
         url: data.url,
         description: data.description,
-        logo: data.image
-          ? {
-              "@type": "ImageObject",
-              url: data.image,
-            }
-          : undefined,
+        logo: {
+          "@type": "ImageObject",
+          url: BRAND_LOGO_URL,
+        },
         sameAs: sameAs.length > 0 ? sameAs : undefined,
       },
     ],

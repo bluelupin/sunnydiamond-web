@@ -73,7 +73,7 @@ export default async function Page() {
     prefetched.shopping,
   );
 
-  const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(
+  const { title, description, canonicalUrl } = resolveHomepageSeoMetadata(
     prefetched.shell ?? {},
   );
 
@@ -85,7 +85,7 @@ export default async function Page() {
       alankara={prefetched.alankara ?? undefined}
     >
       <MagentoTrendingSeeder trendingProducts={trendingSnapshot.products} />
-      <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
+      <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl })} />
       <HomePageView
         hero={hero}
         craftingRarity={craftingRarity}

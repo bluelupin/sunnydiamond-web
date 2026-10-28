@@ -84,6 +84,9 @@ export default async function ProductPage({ params }: PageProps) {
           name: product.name,
           description: product.shortDescription || product.description,
           image: product.image,
+          images: product.images,
+          // The mapper falls back to a bare "Gold" when Magento has no metal data; never publish that guess.
+          material: product.metal && product.metal !== "Gold" ? product.metal : undefined,
           price: product.price,
           inStock: product.inStock,
           rating: product.rating,
