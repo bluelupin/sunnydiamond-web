@@ -397,7 +397,10 @@ const TryAtHomeAddressStep = ({
     [cmsStateOptions, form?.stateRelationOptions],
   );
 
-  usePincodeCityStateAutofill({ pincode, onApply: applyPincodeLookup });
+  const { isLookingUp: isPincodeLookupPending } = usePincodeCityStateAutofill({
+    pincode,
+    onApply: applyPincodeLookup,
+  });
 
   const errors = useMemo(
     () => ({
@@ -447,7 +450,7 @@ const TryAtHomeAddressStep = ({
       city: true,
       state: true,
     });
-    if (!isValid) {
+    if (!isValid || isPincodeLookupPending) {
       return;
     }
     const stateForSubmit = pickTryAtHomeStateForCmsApi(
@@ -635,7 +638,7 @@ const TryAtHomeAddressStep = ({
         </p>
         <DetailDarkButton
           onClick={handleSubmit}
-          disabled={isSubmitting || !isValid}
+          disabled={isSubmitting || !isValid || isPincodeLookupPending}
           className="disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "SUBMITTING..." : submitLabel}
