@@ -20,8 +20,7 @@ import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import { mapMagentoProductCustomOptions } from "./productCustomOptions.mapper";
 import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
-import fallBackImage from "@/assets/fallBackImage.png";
-import { getImageSrc } from "@/shared/utils/image";
+import { PRODUCT_IMAGE_PLACEHOLDER_SRC } from "@/features/products/utils/productImagePlaceholder";
 
 function stripHtml(html?: string | null): string {
   if (!html) {
@@ -404,18 +403,12 @@ export function mapMagentoProductDetailToProduct(
     images = defaultVariant.images;
   }
 
-  const fallbackImageSrc = getImageSrc(fallBackImage) || "";
   const primaryImage =
     pickFirstRealImage([
       images[0],
       defaultVariant?.image,
       product.image?.url,
-      fallbackImageSrc,
-    ]) ?? fallbackImageSrc;
-
-  if (!primaryImage) {
-    return null;
-  }
+    ]) ?? PRODUCT_IMAGE_PLACEHOLDER_SRC;
 
   if (images.length === 0) {
     images = [primaryImage];

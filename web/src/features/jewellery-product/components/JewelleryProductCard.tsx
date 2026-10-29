@@ -22,6 +22,10 @@ import {
   PLP_CARD_IMAGE_WIDTH,
 } from "../utils/jewelleryPlpImage";
 import type { StaticImageData } from "next/image";
+import {
+  isValidProductCatalogImage,
+  resolveProductCatalogImageSrc,
+} from "@/features/products/utils/productImagePlaceholder";
 
 function getImageSrc(src: string | StaticImageData): string {
   return typeof src === "string" ? src : src.src;
@@ -149,7 +153,11 @@ const JewelleryProductCard = ({
   const [inputMode, setInputMode] = useState<"hover" | "touch" | null>(null);
   const [loadHoverImage, setLoadHoverImage] = useState(false);
   const [hoverImageReady, setHoverImageReady] = useState(false);
-  const lifestyleImage = hoverImage ?? modalImage;
+  const resolvedPrimaryImage = resolveProductCatalogImageSrc(primaryImage);
+  const lifestyleCandidate = hoverImage ?? modalImage;
+  const lifestyleImage = isValidProductCatalogImage(lifestyleCandidate)
+    ? lifestyleCandidate
+    : undefined;
   const touchImageSwapEnabled = inputMode === "touch" && Boolean(lifestyleImage);
   const hoverInteractionEnabled = inputMode === "hover";
 
@@ -327,7 +335,7 @@ const JewelleryProductCard = ({
         )}
       >
         <ProductImage
-          src={primaryImage}
+          src={resolvedPrimaryImage}
           alt={title}
           priority={priorityImage}
           imageClassName={cn(hidePrimaryProductShot && "opacity-0")}

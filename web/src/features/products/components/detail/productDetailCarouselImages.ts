@@ -1,4 +1,8 @@
 import type { Product } from "@/features/products/data/products";
+import {
+  isValidProductCatalogImage,
+  resolveProductCatalogImageSrc,
+} from "@/features/products/utils/productImagePlaceholder";
 
 export const PRODUCT_DETAIL_GALLERY_SLIDE_COUNT = 5;
 
@@ -9,27 +13,37 @@ export type ProductDetailGallerySlots = {
   lifestyleImage: Product["image"];
 };
 
+const resolveGalleryImage = (src: Product["image"] | undefined): Product["image"] =>
+  resolveProductCatalogImageSrc(src);
+
 export const getProductDetailGallerySlots = (product: Product): ProductDetailGallerySlots => {
-  const primary = product.image;
-  const [first, second, third, fourth] = product.images;
+  const primary = resolveGalleryImage(product.image);
+  const [first, second, third, fourth] = product.images.map((image) => resolveGalleryImage(image));
+
+  const lifestyleCandidate =
+    product.lifestyleImage ?? fourth ?? second ?? product.image;
+  const lifestyleImage = isValidProductCatalogImage(lifestyleCandidate)
+    ? resolveGalleryImage(lifestyleCandidate)
+    : primary;
 
   return {
     heroImage: first ?? primary,
     thumbOne: second ?? primary,
     thumbTwo: third ?? primary,
-    lifestyleImage: product.lifestyleImage ?? fourth ?? second ?? primary,
+    lifestyleImage,
   };
 };
 
 export const getProductDetailCarouselImages = (product: Product) => {
   const { heroImage, thumbOne, thumbTwo, lifestyleImage } = getProductDetailGallerySlots(product);
+  const resolvedProductImage = resolveGalleryImage(product.image);
 
   return [
     heroImage,
     thumbOne,
     thumbTwo,
     lifestyleImage,
-    product.image,
+    resolvedProductImage,
   ].slice(0, PRODUCT_DETAIL_GALLERY_SLIDE_COUNT);
 };
 
@@ -40,7 +54,9 @@ const lifestyleGalleryFrameClass =
 export function getProductDetailLifestyleImages(product: Product): Product["image"][] {
   const { heroImage, thumbOne, thumbTwo, lifestyleImage } = getProductDetailGallerySlots(product);
   const heroKeys = new Set([String(heroImage), String(thumbOne), String(thumbTwo)]);
-  const lifestyleStack = product.images.filter((image) => !heroKeys.has(String(image)));
+  const lifestyleStack = product.images
+    .map((image) => resolveGalleryImage(image))
+    .filter((image) => !heroKeys.has(String(image)));
 
   if (lifestyleStack.length > 0) {
     return lifestyleStack;
