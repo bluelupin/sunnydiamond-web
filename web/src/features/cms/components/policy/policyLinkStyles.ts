@@ -2,6 +2,10 @@
 export const POLICY_TERTIARY_LINK_CLASSNAME =
   "text-tertiary-cta-underline inline-flex w-fit max-w-full shrink-0 font-gill text-[15px] font-medium uppercase leading-110 text-darkblack no-underline break-words md:text-base cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
+/** Support section phone / email — tertiary hover, Figma text-sm (no uppercase). */
+export const POLICY_SUPPORT_TERTIARY_LINK_CLASSNAME =
+  "text-tertiary-cta-underline inline-flex w-fit max-w-full break-all pb-1 font-gill text-sm font-normal leading-110 text-darkblack no-underline cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+
 /**
  * CKEditor anchors must carry `text-tertiary-cta-underline` on the element itself
  * so globals.css `::after` hover animation applies (Tailwind `[&_a]:` cannot do this).

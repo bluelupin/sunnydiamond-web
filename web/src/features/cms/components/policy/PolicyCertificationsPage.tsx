@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import PolicyAccordionSectionContent from "./PolicyAccordionSectionContent";
+import { POLICY_SUPPORT_TERTIARY_LINK_CLASSNAME } from "./policyLinkStyles";
 import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import Link from "next/link";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -332,10 +333,6 @@ function PolicySupportSection({
     return null;
   }
 
-  // Figma: one underlined clickable value per card (no icon row + second CTA).
-  const linkClassName =
-    "inline-flex w-fit max-w-full break-all border-b border-darkblack pb-1 font-gill text-sm font-normal leading-110 text-darkblack";
-
   return (
     <section
       aria-label="Customer support"
@@ -368,9 +365,10 @@ function PolicySupportSection({
             ) : null}
             {support.phoneLabel ? (
               <ContactPhoneLink
+                variant="plain"
                 href={support.phoneHref || support.contactHref || undefined}
                 label={support.phoneLabel}
-                className={linkClassName}
+                className={POLICY_SUPPORT_TERTIARY_LINK_CLASSNAME}
               />
             ) : null}
           </div>
@@ -399,7 +397,7 @@ function PolicySupportSection({
               </p>
             ) : null}
             {support.emailLabel && support.emailHref ? (
-              <Link href={support.emailHref} className={linkClassName}>
+              <Link href={support.emailHref} className={POLICY_SUPPORT_TERTIARY_LINK_CLASSNAME}>
                 {support.emailLabel}
               </Link>
             ) : null}
