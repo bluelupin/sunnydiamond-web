@@ -30,7 +30,13 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
-      - name: Verify typescript compiked
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Next.js route types
+        run: npx next typegen
+
+      - name: Verify TypeScript
         env:
           NEXT_PUBLIC_STRAPI_URL: https://sunnydiamonds-cms-dev.on-forge.com
           NEXT_PUBLIC_APP_ENV: qa
@@ -41,7 +47,7 @@ jobs:
           NEXT_PUBLIC_MAGENTO_GRAPHQL_URL: https://sunnydiamond-store-dev.on-forge.com/graphql
           NEXT_PUBLIC_MAGENTO_STORE_CODE: default
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: 1045895424883-qlhgd7r0smh8mj74fuvk5fukkihl45ui.apps.googleusercontent.com
-        run: npx tsc --noemit
+        run: npx tsc --noEmit
 
       - name: Call Forge deployment trigger
         shell: bash
