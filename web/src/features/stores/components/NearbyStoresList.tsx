@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -51,7 +52,12 @@ function CallStoreAction({ store }: { store: BookStoreVisitStore }) {
     const whatsAppHref = toWhatsAppHref(phone);
     return (
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <p className={textClassName}>{phone}</p>
+        <ContactPhoneLink
+          href={toTelHref(phone)}
+          label={phone}
+          variant="plain"
+          className={textClassName}
+        />
         {whatsAppHref ? (
           <DetailTextLink href={whatsAppHref} target="_blank" rel="noopener noreferrer">
             WhatsApp

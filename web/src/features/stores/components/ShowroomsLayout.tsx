@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, type ReactNode } from "react";
 import type { StaticImageData } from "next/image";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
@@ -147,9 +148,12 @@ function ShowroomPhoneRow({ phone }: { phone: string }) {
     >
       <StoreLocatorPhoneIcon />
       {href ? (
-        <a href={href} className={cn(textClassName, "shrink-0 no-underline")}>
-          {phone}
-        </a>
+        <ContactPhoneLink
+          href={href}
+          label={phone}
+          variant="plain"
+          className={cn(textClassName, "shrink-0 no-underline")}
+        />
       ) : (
         <p className={cn(textClassName, "shrink-0")}>{phone}</p>
       )}
