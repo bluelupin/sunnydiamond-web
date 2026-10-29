@@ -87,7 +87,7 @@ function buildDrawerDraft(
 const FILTER_DRAWER_MOBILE_QUERY = "(max-width: 767px)";
 
 const FILTER_DRAWER_OVERLAY_CLASS =
-  "z-[80] bg-[#1E1E1EBF] backdrop-blur-[3px]";
+  "z-[80] bg-[#1E1E1EBF] backdrop-blur-[3px] will-change-[opacity]";
 
 const FILTER_DRAWER_SHELL_CLASS =
   "z-[80] flex min-h-0 flex-col gap-0 overflow-hidden border-0 bg-white p-0 shadow-2xl";
@@ -786,7 +786,7 @@ const JewelleryFilterDrawer = ({
           FILTER_DRAWER_SHELL_CLASS,
           "h-dvh max-h-dvh w-full",
           RIGHT_PANEL_WIDTH_CLASS,
-          "data-[state=open]:duration-300 data-[state=closed]:duration-300",
+          "transform-gpu will-change-transform transition-none data-[state=open]:duration-300 data-[state=closed]:duration-300",
           "[&>button]:hidden",
         )}
       >
