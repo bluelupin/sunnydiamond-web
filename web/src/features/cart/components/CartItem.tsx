@@ -39,7 +39,7 @@ const MetalEngravingPanel = dynamic(
 
 interface CartItemProps {
   item: CartLineItem;
-  onRemove: (lineItemId: string) => void;
+  onRemove: (lineItemId: string) => void | Promise<void>;
   onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => Promise<void>;
 }
 
@@ -67,6 +67,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const [movedToWishlist, setMovedToWishlist] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isMovingToWishlist, setIsMovingToWishlist] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const engravingFont = options.engravingFont?.trim();
   const fontLabels =
@@ -161,6 +162,23 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
     })();
   };
 
+  const handleRemove = () => {
+    if (isNavigatingToCheckout || isRemoving || isMovingToWishlist) {
+      return;
+    }
+
+    void (async () => {
+      setIsRemoving(true);
+      try {
+        await onRemove(item.id);
+      } catch {
+        showCartStatusToast("Could not remove this item. Please try again.");
+      } finally {
+        setIsRemoving(false);
+      }
+    })();
+  };
+
   const productViewHref = getProductHref(product);
   const productEditHref = getProductEditHref(product, item.id);
   const { windows } = useUiPlatform();
@@ -239,11 +257,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
         <button
           type="button"
-          onClick={() => {
-            if (isNavigatingToCheckout) return;
-            onRemove(item.id);
-          }}
-          disabled={isNavigatingToCheckout}
+          onClick={handleRemove}
+          disabled={isNavigatingToCheckout || isRemoving || isMovingToWishlist}
+          aria-busy={isRemoving || undefined}
           aria-label={`Remove ${product.name}`}
           className="shrink-0 text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         >
