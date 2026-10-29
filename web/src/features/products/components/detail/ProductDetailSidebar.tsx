@@ -601,33 +601,42 @@ const ProductDetailSidebar = ({
           {showMetalColor ? (
             <div className="flex flex-col gap-4">
               <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-6">
-                  {content.metalColors.map((metal) =>
-                    metalColorSelectable ? (
-                      <button
-                        key={metal.id}
-                        type="button"
-                        aria-label={metal.label}
-                        aria-pressed={selectedMetal === metal.id}
-                        onClick={() => setSelectedMetal(metal.id)}
+              <div className="flex items-start gap-6">
+                {content.metalColors.map((metal) => {
+                  const isSelected = selectedMetal === metal.id;
+                  return (
+                    <div key={metal.id} className="flex w-[51px] shrink-0 flex-col items-center gap-2">
+                      {metalColorSelectable ? (
+                        <button
+                          type="button"
+                          aria-label={metal.label}
+                          aria-pressed={isSelected}
+                          onClick={() => setSelectedMetal(metal.id)}
+                          className={cn(
+                            "size-51 shrink-0",
+                            isSelected && "border-2 border-darkblack",
+                          )}
+                          style={{ backgroundColor: metal.color }}
+                        />
+                      ) : (
+                        <div
+                          aria-label={metal.label}
+                          className="size-51 shrink-0 border-2 border-darkblack"
+                          style={{ backgroundColor: metal.color }}
+                        />
+                      )}
+                      <p
                         className={cn(
-                          "size-51 shrink-0",
-                          selectedMetal === metal.id && "border-2 border-darkblack",
+                          "w-full text-left font-gill text-base leading-110 text-neutral500",
+                          !isSelected && "invisible",
                         )}
-                        style={{ backgroundColor: metal.color }}
-                      />
-                    ) : (
-                      <div
-                        key={metal.id}
-                        aria-label={metal.label}
-                        className="size-[52px] shrink-0 border-2 border-darkblack"
-                        style={{ backgroundColor: metal.color }}
-                      />
-                    ),
-                  )}
-                </div>
-                <p className="font-gill text-base leading-110 text-neutral500 max-w-[52px]">{activeMetal?.label}</p>
+                        aria-hidden={!isSelected}
+                      >
+                        {metal.label}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ) : null}
