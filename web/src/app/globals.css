@@ -720,26 +720,6 @@
     transform-origin: right center;
   }
 }
-
-.neckLaceArcContainer {
-  background-image: url("../assets/diamond-necklace-arc.svg");
-  background-position: 100% 0%;
-  background-size: 50%;
-  background-repeat: no-repeat;
-}
-
-@media screen and (max-width: 768px) {
-  .neckLaceArcContainer {
-    background-size: 70%;
-  }
-}
-
-@media screen and (max-width: 640px) {
-  .neckLaceArcContainer {
-    background-size: 107%;
-  }
-}
-
 .necklaceArcImage {
   width: 180%;
   max-width: none;
