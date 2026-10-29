@@ -806,6 +806,7 @@ const JewelleryProductPage = ({
           <JewelleryProductGrid
             products={products}
             listingCards={listingCards}
+            pageSize={pageSize}
             isWishlisted={isWishlisted}
             onToggleWishlist={handleToggleWishlist}
             metalPurityQuery={metalPurityQuery}

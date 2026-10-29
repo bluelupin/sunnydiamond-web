@@ -12,6 +12,8 @@ import type { NormalizedProductListingCard } from "@/services/product-landing/pr
 interface JewelleryProductGridProps {
   products: JewelleryListingProduct[];
   listingCards?: readonly NormalizedProductListingCard[];
+  /** Magento load-more page size — listing cards repeat per chunk. */
+  pageSize: number;
   isWishlisted: (productId: string) => boolean;
   onToggleWishlist?: (productId: string) => void;
   metalPurityQuery?: string;
@@ -21,6 +23,7 @@ interface JewelleryProductGridProps {
 const JewelleryProductGrid = ({
   products,
   listingCards = [],
+  pageSize,
   isWishlisted,
   onToggleWishlist,
   metalPurityQuery,
@@ -30,8 +33,8 @@ const JewelleryProductGrid = ({
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
 
   const gridItems = useMemo(
-    () => buildJewelleryPlpGridItems(products, listingCards, viewport),
-    [listingCards, products, viewport],
+    () => buildJewelleryPlpGridItems(products, listingCards, viewport, pageSize),
+    [listingCards, pageSize, products, viewport],
   );
 
   const handleHoverStart = useCallback((productId: string) => {
@@ -61,7 +64,12 @@ const JewelleryProductGrid = ({
     >
       {gridItems.map((item) => {
         if (item.kind === "listing-card") {
-          return <JewelleryListingPromoCard key={`listing-card-${item.card.id}`} card={item.card} />;
+          return (
+            <JewelleryListingPromoCard
+              key={`listing-card-${item.card.id}-seg-${item.segmentIndex}`}
+              card={item.card}
+            />
+          );
         }
 
         const { product, productIndex } = item;
