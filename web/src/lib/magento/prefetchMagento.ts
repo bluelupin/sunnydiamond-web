@@ -12,7 +12,7 @@ import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/j
 import { getMagentoJewelleryNavCategories } from "@/services/magento/categories/categories.service";
 import { getMagentoJewelleryInitialListing } from "@/services/magento/products/products.service";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
-import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
+import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 
 export const getCachedMagentoJewelleryNavCategories = cache(async () =>
   getMagentoJewelleryNavCategories(),
@@ -26,13 +26,13 @@ async function resolveJewelleryListingPrefetchFilters(
   categoryUrlKey: string | null,
   sortValue: string,
   listingFilters: JewelleryListingPrefetchFilters,
-): Promise<JewelleryFilterState> {
+): Promise<{ filters: JewelleryFilterState; facets?: JewelleryFilterFacets }> {
   const minFromUrl = parseGiftFinderPriceParam(listingFilters.minPrice);
   const maxFromUrl = parseGiftFinderPriceParam(listingFilters.maxPrice);
   const needsPriceClamp = minFromUrl > 0 || maxFromUrl > 0;
 
   if (!needsPriceClamp) {
-    return buildGiftFinderListingFiltersFromUrl(listingFilters);
+    return { filters: buildGiftFinderListingFiltersFromUrl(listingFilters) };
   }
 
   const baseFilters = buildGiftFinderListingFiltersFromUrl(listingFilters);
@@ -47,7 +47,10 @@ async function resolveJewelleryListingPrefetchFilters(
     includeFacets: true,
   });
 
-  return buildGiftFinderListingFiltersFromUrl(listingFilters, listing.facets);
+  return {
+    filters: buildGiftFinderListingFiltersFromUrl(listingFilters, listing.facets),
+    facets: listing.facets,
+  };
 }
 
 export const getCachedJewelleryListing = cache(
@@ -56,14 +59,15 @@ export const getCachedJewelleryListing = cache(
     listingFilters?: JewelleryListingPrefetchFilters | null,
   ): Promise<JewelleryListingProductsData> => {
     const sortValue = parseJewelleryListingSortParam(listingFilters?.sort);
-    const filters = listingFilters
+    const resolved = listingFilters
       ? await resolveJewelleryListingPrefetchFilters(categoryUrlKey, sortValue, listingFilters)
-      : createEmptyFilterState();
+      : { filters: createEmptyFilterState() };
 
     const { listing } = await getMagentoJewelleryInitialListing({
       categoryUrlKey,
       sortValue,
-      filters,
+      filters: resolved.filters,
+      facets: resolved.facets,
       includeFacets: true,
     });
 

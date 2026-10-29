@@ -126,16 +126,23 @@ function keywordMatches(query: string, keywords: string[]): boolean {
   );
 }
 
+/** Require every query word in the product name; Magento full-text search can return partial matches. */
+function productNameMatchesQuery(name: string, query: string): boolean {
+  const words = name.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  const terms = query.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  return terms.length > 0 && terms.every((term) => words.some((word) => word.startsWith(term)));
+}
+
 async function searchProducts(query: string): Promise<QuickSearchProduct[]> {
   const data = await magentoGraphqlFetch<ProductsResponse>({
     query: PRODUCTS_QUERY,
-    variables: { search: query, pageSize: 6 },
+    variables: { search: query, pageSize: 12 },
     headers: SUGGEST_HEADERS,
     revalidateSeconds: RESULT_CACHE_SECONDS,
   });
 
   return (data.products?.items ?? []).flatMap((item) => {
-    if (!item?.url_key) return [];
+    if (!item?.url_key || !productNameMatchesQuery(item.name, query)) return [];
     const min = item.price_range?.minimum_price?.final_price?.value ?? 0;
     const max = item.price_range?.maximum_price?.final_price?.value ?? min;
     return [{
@@ -146,7 +153,7 @@ async function searchProducts(query: string): Promise<QuickSearchProduct[]> {
       price: min,
       fromPrice: max > min,
     }];
-  });
+  }).slice(0, 6);
 }
 
 async function searchCategories(query: string): Promise<SearchLink[]> {
