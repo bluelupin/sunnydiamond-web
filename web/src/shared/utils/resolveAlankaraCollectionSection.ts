@@ -6,7 +6,10 @@ import {
   type AlankaraCollectionProduct,
 } from "@/shared/ui/collection/alankaraCollection.types";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
-import { getImageSrc } from "@/shared/utils/image";
+import {
+  isValidProductCatalogImage,
+  resolveProductCatalogImageSrc,
+} from "@/features/products/utils/productImagePlaceholder";
 import { buildJewelleryCollectionHref } from "@/features/jewellery-product/utils/collectionListing";
 import type { FeaturedCollectionSection } from "@/types/homepage/categoryNavigation";
 
@@ -39,17 +42,14 @@ function getThumbnailCrop(index: number) {
   return THUMBNAIL_CROPS[index % THUMBNAIL_CROPS.length];
 }
 
-function resolveAlankaraMagentoProductImage(
-  product: JewelleryListingProduct,
-): string | null {
+function resolveAlankaraMagentoProductImage(product: JewelleryListingProduct): string {
   for (const candidate of [product.primaryImage, product.modalImage, product.hoverImage]) {
-    const src = candidate ? getImageSrc(candidate) : "";
-    if (src) {
-      return src;
+    if (isValidProductCatalogImage(candidate)) {
+      return resolveProductCatalogImageSrc(candidate);
     }
   }
 
-  return null;
+  return resolveProductCatalogImageSrc(null);
 }
 
 export function mapMagentoProductsToAlankaraCollectionList(
@@ -61,7 +61,6 @@ export function mapMagentoProductsToAlankaraCollectionList(
 
   for (const magento of magentoProducts) {
     const image = resolveAlankaraMagentoProductImage(magento);
-    if (!image) continue;
 
     const index = mappedProducts.length;
     const crop = getThumbnailCrop(index);

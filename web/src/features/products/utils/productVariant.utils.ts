@@ -1,4 +1,11 @@
 import type { Product, ProductConfigurableVariant } from "@/features/products/data/products";
+import {
+  isValidProductCatalogImage,
+  resolveProductCatalogImage,
+  resolveProductCatalogImagePriority,
+  resolveProductCatalogImagePriorityPreserving,
+  resolveProductCatalogImageSrc,
+} from "@/features/products/utils/productImagePlaceholder";
 
 const METAL_ATTRIBUTE_CODE = "sd_metal_color";
 const PURITY_ATTRIBUTE_CODE = "sd_metal_purity";
@@ -148,6 +155,41 @@ function overlayMetalPurityAttributes(product: Product, purity: string): Product
   return replaced ? next : [purityLabel, ...next];
 }
 
+function variantCatalogGallery(variant: ProductConfigurableVariant): string[] {
+  return variant.images
+    .filter((image) => isValidProductCatalogImage(image))
+    .map((image) => resolveProductCatalogImageSrc(image));
+}
+
+/** Variant/configuration imagery with parent product fallback (see productImagePlaceholder). */
+export function resolveVariantDisplayImages(
+  parent: Pick<Product, "image" | "images" | "lifestyleImage">,
+  variant: ProductConfigurableVariant,
+): Pick<Product, "image" | "images" | "lifestyleImage"> {
+  const variantGallery = variantCatalogGallery(variant);
+  const variantPrimaryCandidate = isValidProductCatalogImage(variant.image)
+    ? variant.image
+    : variantGallery[0];
+
+  const image = resolveProductCatalogImagePriorityPreserving(
+    variantPrimaryCandidate,
+    parent.image,
+  );
+
+  const images =
+    variantGallery.length > 0
+      ? variantGallery.map((url) => resolveProductCatalogImageSrc(url))
+      : parent.images.map((entry) => resolveProductCatalogImage(entry));
+
+  const lifestyleImage = resolveProductCatalogImagePriorityPreserving(
+    variantGallery[1] ?? variantGallery[0] ?? variantPrimaryCandidate,
+    parent.lifestyleImage,
+    parent.image,
+  );
+
+  return { image, images, lifestyleImage };
+}
+
 /** Overlay selected configurable metal variant price/images onto the parent product for PDP display. */
 export function applySelectedMetalVariant(
   product: Product,
@@ -162,8 +204,7 @@ export function applySelectedMetalVariant(
   const purity = getVariantMetalPurity(variant);
   const metalColorLabel = variant.attributes[METAL_ATTRIBUTE_CODE]?.trim();
   const metal = [purity, metalColorLabel].filter(Boolean).join(" ") || product.metal;
-  // Variants without their own imagery keep the parent's images.
-  const hasVariantImagery = Boolean(variant.image);
+  const displayImages = resolveVariantDisplayImages(product, variant);
 
   return {
     ...product,
@@ -172,11 +213,7 @@ export function applySelectedMetalVariant(
     metalPurity: purity,
     price: variant.price,
     originalPrice: variant.originalPrice,
-    image: hasVariantImagery ? variant.image : product.image,
-    images: hasVariantImagery ? variant.images : product.images,
-    lifestyleImage: hasVariantImagery
-      ? (variant.images[1] ?? variant.image)
-      : product.lifestyleImage,
+    ...displayImages,
     inStock: variant.inStock,
     metal,
     metalColorValue: normalizeMetalKey(metalId),
@@ -200,11 +237,14 @@ export function applySelectedSizeVariant(
 ): Product {
   if (!variant) return product;
 
+  const displayImages = resolveVariantDisplayImages(product, variant);
+
   return {
     ...product,
     productSku: variant.sku,
     price: variant.price,
     originalPrice: variant.originalPrice,
+    ...displayImages,
     ...(variant.priceBreakup ? { priceBreakup: variant.priceBreakup } : {}),
     ...(variant.detailAttributes ? { detailAttributes: variant.detailAttributes } : {}),
     ...(variant.detailSections

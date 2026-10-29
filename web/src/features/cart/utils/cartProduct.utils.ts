@@ -2,6 +2,7 @@ import type { Product } from "@/features/products/data/products";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import type { CartLineItem } from "../types/cart.types";
 import type { StoredCartLine } from "../types/cartPersistence.types";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 
 const CART_STORAGE_KEY = "sunny-cart-v2";
@@ -99,6 +100,7 @@ export function writeStoredCartLines(lines: StoredCartLine[]): void {
 }
 
 export function mapListingProductToCartProduct(listing: JewelleryListingProduct): Product {
+  const catalogImage = resolveProductCatalogImage(listing.primaryImage);
   return {
     id: listing.sku,
     urlKey: listing.urlKey,
@@ -107,8 +109,8 @@ export function mapListingProductToCartProduct(listing: JewelleryListingProduct)
     description: listing.name,
     shortDescription: listing.name,
     category: listing.category,
-    image: listing.primaryImage,
-    images: [listing.primaryImage],
+    image: catalogImage,
+    images: [catalogImage],
     lifestyleImage: listing.modalImage ?? listing.hoverImage,
     carat: listing.metalPurity ?? "",
     metal: listing.metalPurity ?? "",

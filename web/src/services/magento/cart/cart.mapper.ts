@@ -5,7 +5,10 @@ import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
 import { mapMagentoProductCustomOptions } from "../products/productCustomOptions.mapper";
 import { mapMagentoProductEngraving } from "../products/productEngraving.mapper";
-import fallBackImage from "@/assets/fallBackImage.png";
+import {
+  resolveProductCatalogImagePriority,
+  resolveProductCatalogImageSrc,
+} from "@/features/products/utils/productImagePlaceholder";
 import type {
   MagentoCart,
   MagentoCartConfigurableOption,
@@ -36,10 +39,12 @@ export function applyCartLineDisplayImage(
     return product;
   }
 
+  const image = resolveProductCatalogImageSrc(trimmed);
+
   return {
     ...product,
-    image: trimmed,
-    images: [trimmed],
+    image,
+    images: [image],
   };
 }
 
@@ -72,13 +77,16 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     return null;
   }
 
-  // Prefer Magento configured child (gold variant) imagery over the configurable parent.
+  // Variant/configuration image first, then configurable parent (no merged gallery).
   const variant = item.configured_variant;
-  const { primaryImage } = resolveMagentoProductImages(
-    variant?.media_gallery ?? product?.media_gallery,
-    variant?.image?.url ?? product?.image?.url,
-  );
-  const image = primaryImage || fallBackImage;
+  const parentPrimary = resolveMagentoProductImages(
+    product?.media_gallery,
+    product?.image?.url,
+  ).primaryImage;
+  const variantPrimary = variant
+    ? resolveMagentoProductImages(variant.media_gallery, variant.image?.url).primaryImage
+    : undefined;
+  const image = resolveProductCatalogImagePriority(variantPrimary, parentPrimary);
   const customOptions = mapMagentoProductCustomOptions(product?.options);
   const categorySlug = resolveCartProductCategorySlug(product?.categories);
   const engraving = mapMagentoProductEngraving(

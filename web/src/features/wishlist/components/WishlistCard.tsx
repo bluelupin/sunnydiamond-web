@@ -10,7 +10,10 @@ import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlis
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { cn } from "@/shared/utils/cn";
-import { getImageSrc } from "@/shared/utils/image";
+import {
+  isValidProductCatalogImage,
+  resolveProductCatalogImage,
+} from "@/features/products/utils/productImagePlaceholder";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistCardLayout = "default" | "profile";
@@ -30,13 +33,14 @@ const WishlistCard = ({
 }: WishlistCardProps) => {
   const href = getWishlistProductHref(product);
   const isProfileLayout = layout === "profile";
-  const hasProductImage = Boolean(getImageSrc(product.primaryImage));
+  const catalogImage = resolveProductCatalogImage(product.primaryImage);
+  const hasRealProductImage = isValidProductCatalogImage(product.primaryImage);
 
   const imageLinkClassName = cn(
     "pointer-events-auto mx-auto block shrink-0",
     isProfileLayout
       ? "aspect-[400/300] h-auto w-full max-w-[155px] sm:max-w-[240px] md:max-w-[300px] lg:max-w-[400px]"
-      : hasProductImage
+      : hasRealProductImage
         ? "h-auto w-full max-w-[155px] max-h-[155px] sm:max-w-[240px] sm:max-h-[240px] md:max-w-[300px] md:max-h-[300px] lg:max-w-[426px] lg:max-h-[426px]"
         : "aspect-square w-full max-w-[155px] sm:max-w-[240px] md:max-w-[300px] lg:max-w-[426px]",
   );
@@ -57,17 +61,13 @@ const WishlistCard = ({
         <DeleteIcon className="size-6 text-darkblack" />
       </button>
       <Link href={href} className={imageLinkClassName}>
-        {hasProductImage ? (
-          <OptimizedImage
-            src={product.primaryImage}
-            alt={product.name}
-            width={372}
-            height={287}
-            className="size-full object-cover"
-          />
-        ) : (
-          <span className="block size-full" aria-hidden />
-        )}
+        <OptimizedImage
+          src={catalogImage}
+          alt={product.name}
+          width={372}
+          height={287}
+          className="size-full object-cover"
+        />
       </Link>
       <div
         className={cn(

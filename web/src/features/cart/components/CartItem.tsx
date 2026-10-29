@@ -9,6 +9,7 @@ import {
   resolveProductEngravingConfig,
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
@@ -183,7 +184,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             )}
           >
             <OptimizedImage
-              src={product.image}
+              src={resolveProductCatalogImage(product.image)}
               alt={product.name}
               width={140}
               height={140}

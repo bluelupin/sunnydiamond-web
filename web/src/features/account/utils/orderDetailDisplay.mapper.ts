@@ -121,7 +121,7 @@ function mapDetailItems(
     return {
       id: `${order.id}-${item.productSku ?? index}`,
       name: giftCardNameForSku(item.productName, sku),
-      ...(imageUrl ? { imageSrc: imageUrl } : {}),
+      imageSrc: imageUrl,
       ...(subtitle ? { subtitle } : {}),
       size: display.size,
       metal: display.metal,
@@ -129,7 +129,7 @@ function mapDetailItems(
       engravingFont: display.engravingFont,
       isGift: item.isGift || display.isGift,
       isBespoke: display.isBespoke,
-      useIconPlaceholder: !imageUrl,
+      useIconPlaceholder: false,
       quantity: item.quantity,
       productUrlKey: item.productUrlKey,
       unitPrice: item.unitPrice,

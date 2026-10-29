@@ -14,6 +14,7 @@ import {
   normalizeMagentoCatalogProductImageUrl,
   resolveMagentoModelWearImageUrl,
 } from "./magentoAttribute.utils";
+import { resolveProductCatalogImagePriority } from "@/features/products/utils/productImagePlaceholder";
 import { mapMagentoProductDetailToProduct } from "./productDetail.mapper";
 
 function getActiveGalleryUrls(mediaGallery: MagentoMediaGalleryItem[] | null | undefined): string[] {
@@ -124,10 +125,10 @@ export function mapMagentoProductToJewelleryListing(
     product.model_wear_image,
   );
 
-  // Keep products that only have Magento's Luma placeholder so PLP count matches the grid.
-  const variantPrimaryImage =
-    typeof defaultVariantDisplay?.image === "string" ? defaultVariantDisplay.image.trim() : "";
-  const primaryImage = variantPrimaryImage || resolvedPrimaryImage;
+  const primaryImage = resolveProductCatalogImagePriority(
+    defaultVariantDisplay?.image,
+    resolvedPrimaryImage,
+  );
 
   const customAttributes = product.custom_attributesV2?.items;
   const isBestseller = isMagentoBestSeller(customAttributes);

@@ -1,8 +1,12 @@
 import type { StaticImageData } from "next/image";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
+import {
+  isValidProductCatalogImage,
+  resolveProductCatalogImageSrc,
+} from "@/features/products/utils/productImagePlaceholder";
 
 export function listingImageUrl(image: string | StaticImageData): string {
-  return typeof image === "string" ? image : image.src;
+  return resolveProductCatalogImageSrc(image);
 }
 
 export function buildMagentoProductImageBySku(
@@ -22,21 +26,20 @@ export function buildMagentoProductImageBySku(
   return images;
 }
 
-/** Order snapshot thumbnail first, then Magento catalog image by SKU (same source as PLP). */
+/** Order snapshot thumbnail first, then Magento catalog image by SKU; else product placeholder. */
 export function resolveOrderItemImageUrl(
   orderImageUrl: string | null | undefined,
   productSku: string | null | undefined,
   imageBySku?: Record<string, string>,
-): string | null {
-  const fromOrder = orderImageUrl?.trim();
-  if (fromOrder) {
-    return fromOrder;
+): string {
+  if (isValidProductCatalogImage(orderImageUrl)) {
+    return resolveProductCatalogImageSrc(orderImageUrl);
   }
 
   const sku = productSku?.trim();
-  if (!sku || !imageBySku) {
-    return null;
+  if (sku && imageBySku?.[sku] && isValidProductCatalogImage(imageBySku[sku])) {
+    return resolveProductCatalogImageSrc(imageBySku[sku]);
   }
 
-  return imageBySku[sku]?.trim() || null;
+  return resolveProductCatalogImageSrc(null);
 }

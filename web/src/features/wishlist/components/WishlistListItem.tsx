@@ -9,7 +9,7 @@ import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduc
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { cn } from "@/shared/utils/cn";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistListItemLayout = "default" | "profile";
@@ -30,7 +30,7 @@ const WishlistListItem = ({
 }: WishlistListItemProps) => {
   const href = getWishlistProductHref(product);
   const isProfileLayout = layout === "profile";
-  const hasProductImage = Boolean(getImageSrc(product.primaryImage));
+  const catalogImage = resolveProductCatalogImage(product.primaryImage);
 
   return (
     <article
@@ -44,17 +44,13 @@ const WishlistListItem = ({
         className="flex w-full items-center justify-center"
       >
         <div className="relative aspect-[94/70] w-full max-w-[153px] shrink-0">
-          {hasProductImage ? (
-            <OptimizedImage
-              src={product.primaryImage}
-              alt={product.name}
-              width={94}
-              height={70}
-              className="size-full object-contain"
-            />
-          ) : (
-            <span className="block size-full" aria-hidden />
-          )}
+          <OptimizedImage
+            src={catalogImage}
+            alt={product.name}
+            width={94}
+            height={70}
+            className="size-full object-contain"
+          />
         </div>
       </Link>
 

@@ -20,7 +20,7 @@ import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import { mapMagentoProductCustomOptions } from "./productCustomOptions.mapper";
 import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
-import { PRODUCT_IMAGE_PLACEHOLDER_SRC } from "@/features/products/utils/productImagePlaceholder";
+import { resolveProductCatalogImagePriority } from "@/features/products/utils/productImagePlaceholder";
 
 function stripHtml(html?: string | null): string {
   if (!html) {
@@ -186,12 +186,8 @@ function mapConfigurableVariant(
   }
 
   const images = buildGalleryImages(child);
-  const rawImage =
-    pickFirstRealImage([images[0], child.image?.url]) ?? images[0] ?? child.image?.url?.trim() ?? "";
-  // A variant without its own imagery is still sellable — keep it and let the
-  // PDP fall back to the parent's images instead of dropping the whole variant
-  // (which would strip the metal selector and make the product unaddable).
-  const image = !rawImage || isMagentoPlaceholderImage(rawImage) ? "" : rawImage;
+  // Empty when the child has no real imagery — PDP/cart resolve parent → placeholder.
+  const image = pickFirstRealImage([images[0], child.image?.url]) ?? "";
 
   const attributes: Record<string, string> = {};
   const optionUids: string[] = [];
@@ -403,12 +399,11 @@ export function mapMagentoProductDetailToProduct(
     images = defaultVariant.images;
   }
 
-  const primaryImage =
-    pickFirstRealImage([
-      images[0],
-      defaultVariant?.image,
-      product.image?.url,
-    ]) ?? PRODUCT_IMAGE_PLACEHOLDER_SRC;
+  const primaryImage = resolveProductCatalogImagePriority(
+    defaultVariant?.image,
+    images[0],
+    product.image?.url,
+  );
 
   if (images.length === 0) {
     images = [primaryImage];

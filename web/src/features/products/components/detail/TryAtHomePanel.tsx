@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { cn } from "@/shared/utils/cn";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
@@ -661,7 +662,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
     wishlistMovedToastDurationMs,
   );
-  const productImage = product.image || product.images[0];
+  const productImage = resolveProductCatalogImage(product.image || product.images[0]);
   const profileAppointmentsHref = useMemo(
     () => buildProfileSectionHref("appointments"),
     [],

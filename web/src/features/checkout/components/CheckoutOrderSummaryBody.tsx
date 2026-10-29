@@ -19,6 +19,7 @@ import PriceDetailsBreakdown from "@/features/cart/components/PriceDetailsBreakd
 import { calculatePriceDetailsAdjustment } from "@/features/cart/utils/priceDetailsAdjustment";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
 import { cn } from "@/shared/utils/cn";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type CheckoutOrderSummaryBodyProps = {
@@ -36,7 +37,13 @@ const CheckoutOrderSummaryItem = ({ item }: { item: CartLineItem }) => {
       ) : null}
 
       <div className="relative h-[71px] w-20 shrink-0 overflow-hidden bg-gray200">
-        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="80px" />
+        <Image
+          src={resolveProductCatalogImage(item.product.image)}
+          alt={item.product.name}
+          fill
+          className="object-cover"
+          sizes="80px"
+        />
       </div>
 
       <div className="flex w-[214px] max-w-[214px] shrink-0 flex-col gap-2">
@@ -113,7 +120,13 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
                 <CartGiftBadge className="absolute -left-px -top-px z-10" />
               ) : null}
               <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200">
-                <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="60px" />
+                <Image
+                  src={resolveProductCatalogImage(item.product.image)}
+                  alt={item.product.name}
+                  fill
+                  className="object-cover"
+                  sizes="60px"
+                />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <p

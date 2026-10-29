@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useCart } from "../context/CartContext";
@@ -84,7 +85,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
                 <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">
                   <div className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:w-[91px] lg:h-[68px]">
                     <OptimizedImage
-                      src={addedItem.product.image}
+                      src={resolveProductCatalogImage(addedItem.product.image)}
                       alt={addedItem.product.name}
                       width={91}
                       height={91}

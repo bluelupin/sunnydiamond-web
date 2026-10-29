@@ -26,6 +26,7 @@ import {
 } from "@/features/products/utils/appointmentDuplicateBooking";
 import { getProductSubmissionVariant } from "@/features/products/utils/productSubmissionVariant";
 import type { Product } from "@/features/products/data/products";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { getProductHref } from "@/features/products/utils/productRoutes";
 import {
   countAdditionalVideoCallItemsForSlot,
@@ -530,7 +531,7 @@ const ProductAppointmentPanel = ({
   const router = useRouter();
   const { toast } = useToast();
   const config = PRODUCT_APPOINTMENT_PANEL_CONFIG[variant];
-  const productImage = product.images[0] ?? product.image;
+  const productImage = resolveProductCatalogImage(product.images[0] ?? product.image);
   const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
     wishlistMovedToastDurationMs,
   );

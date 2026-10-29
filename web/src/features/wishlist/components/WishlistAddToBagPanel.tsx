@@ -22,6 +22,7 @@ import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatP
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { Product } from "@/features/products/data/products";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import {
@@ -235,7 +236,7 @@ const WishlistAddToBagPanel = ({
                   <div className="flex h-250 w-full items-center justify-center bg-gray300">
                     <div className="flex h-250 w-full max-w-full items-center justify-center overflow-hidden">
                       <OptimizedImage
-                        src={product.primaryImage}
+                        src={resolveProductCatalogImage(product.primaryImage)}
                         alt={product.name}
                         priority
                         sizes="(max-width: 768px) 100vw, 472px"

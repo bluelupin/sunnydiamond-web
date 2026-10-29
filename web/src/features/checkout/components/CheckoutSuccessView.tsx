@@ -16,6 +16,7 @@ import {
 } from "@/features/cart/utils/formatCartLine";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
+import { resolveProductCatalogImage } from "@/features/products/utils/productImagePlaceholder";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { buildProfileOrderDetailHref } from "@/features/account/utils/profileOrderNavigation";
 import { getExpectedDeliveryDate } from "../types/checkout.types";
@@ -32,7 +33,7 @@ const SuccessOrderItem = ({ item }: { item: CartLineItem }) => (
   <div className="flex min-h-[68px] items-center gap-6">
     <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200">
       <OptimizedImage
-        src={item.product.image}
+        src={resolveProductCatalogImage(item.product.image)}
         alt={item.product.name}
         width={60}
         height={53}

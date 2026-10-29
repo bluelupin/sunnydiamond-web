@@ -47,6 +47,7 @@ import {
   isGiftCardProfileOrder,
   normalizeOrderStatus,
 } from "./orderDeliveryTimeline.utils";
+import { resolveProductCatalogImageSrc } from "@/features/products/utils/productImagePlaceholder";
 import { resolveOrderItemImageUrl } from "./orderItemImage.utils";
 
 const ordersContent = profileTabsContent.orders;
@@ -511,7 +512,7 @@ function mapOrderItems(
     return {
       id: `${order.id}-${item.productSku ?? index}`,
       name: giftCardNameForSku(item.productName, item.productSku),
-      ...(imageUrl ? { imageSrc: imageUrl } : {}),
+      imageSrc: imageUrl,
       ...(subtitle ? { subtitle } : {}),
       size: display.size,
       metal: display.metal,
@@ -519,7 +520,7 @@ function mapOrderItems(
       engravingFont: display.engravingFont,
       isGift: item.isGift || display.isGift,
       isBespoke: display.isBespoke,
-      useIconPlaceholder: !imageUrl,
+      useIconPlaceholder: false,
       quantity: item.quantity,
       productUrlKey: item.productUrlKey,
     };
@@ -925,7 +926,7 @@ export function mapCustomerAppointmentToProfileUi(
               product.productId ||
               `${appointment.documentId}-${index}`,
             name: product.productName ?? appointment.productName ?? "Product",
-            ...(productImage ? { imageSrc: productImage } : {}),
+            imageSrc: resolveProductCatalogImageSrc(productImage),
           };
         })
       : (() => {
@@ -944,7 +945,7 @@ export function mapCustomerAppointmentToProfileUi(
             {
               id: appointment.documentId,
               name: appointment.productName,
-              ...(productImage ? { imageSrc: productImage } : {}),
+              imageSrc: resolveProductCatalogImageSrc(productImage),
             },
           ];
         })();

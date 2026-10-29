@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import RightArrow from "@/assets/Icons/RightArrow";
 import {
   DetailDarkButton,
@@ -16,6 +15,7 @@ import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 import { cn } from "@/shared/utils/cn";
+import { resolveProductCatalogImageSrc } from "@/features/products/utils/productImagePlaceholder";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { ProfileCard, ProfileInfoNote } from "./profileUi";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
@@ -44,19 +44,13 @@ function ProductGalleryTile({
   return (
     <div className="flex w-[176px] shrink-0 flex-col items-start gap-1.5">
       <div className="relative h-[135px] w-[176px] overflow-hidden">
-        {product.imageSrc ? (
-          <Image
-            src={product.imageSrc}
-            alt={product.name}
-            fill
-            className="object-contain"
-            sizes="176px"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center">
-            <RingsTabIcon className="size-12 text-darkblack" />
-          </div>
-        )}
+        <Image
+          src={resolveProductCatalogImageSrc(product.imageSrc)}
+          alt={product.name}
+          fill
+          className="object-contain"
+          sizes="176px"
+        />
       </div>
       <p
         className={cn(

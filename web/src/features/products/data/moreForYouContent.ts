@@ -1,6 +1,6 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { getProductHref } from "@/features/products/utils/productRoutes";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveProductCatalogImageSrc } from "@/features/products/utils/productImagePlaceholder";
 
 export const MORE_FOR_YOU_PRODUCT_LIMIT = 8;
 
@@ -21,19 +21,10 @@ export function mapJewelleryListingToMoreForYouItems(
   return products
     .filter((product) => product.sku !== normalizedExcludeSku)
     .slice(0, limit)
-    .flatMap((product) => {
-      const image = getImageSrc(product.primaryImage);
-      if (!image) {
-        return [];
-      }
-
-      return [
-        {
-          id: product.sku,
-          name: product.name,
-          href: getProductHref({ urlKey: product.urlKey, id: product.sku }),
-          image,
-        },
-      ];
-    });
+    .map((product) => ({
+      id: product.sku,
+      name: product.name,
+      href: getProductHref({ urlKey: product.urlKey, id: product.sku }),
+      image: resolveProductCatalogImageSrc(product.primaryImage),
+    }));
 }

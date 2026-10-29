@@ -58,7 +58,7 @@ import {
   findCartItemUidBySku,
   computeCartTotalQuantity,
 } from "@/services/magento/cart/cart.mapper";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveProductCatalogImagePriority } from "@/features/products/utils/productImagePlaceholder";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import {
@@ -581,7 +581,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       throw new Error("Cannot add product without SKU to bag");
     }
 
-    const displayImage = getImageSrc(product.image) ?? undefined;
+    const displayImage = resolveProductCatalogImagePriority(product.image);
 
     assertResolvableCartLineOptions({
       lineOptions: options,

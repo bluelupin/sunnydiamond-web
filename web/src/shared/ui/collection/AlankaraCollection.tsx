@@ -9,7 +9,8 @@ import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { getImageSrc, resolveImageSrc } from "@/shared/utils/image";
+import { getImageSrc } from "@/shared/utils/image";
+import { resolveProductCatalogImageSrc } from "@/features/products/utils/productImagePlaceholder";
 import {
   ALANKARA_HERO_DESKTOP_CROP,
   ALANKARA_THUMBNAIL_CROPS,
@@ -82,10 +83,7 @@ function CroppedFillImage({
   priority?: boolean;
   className?: string;
 }) {
-  const imageSrc = getImageSrc(src);
-  if (!imageSrc) {
-    return null;
-  }
+  const imageSrc = resolveProductCatalogImageSrc(src);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -115,7 +113,7 @@ function ProductSlideImage({
   variant: "desktop" | "mobile";
   priority?: boolean;
 }) {
-  const imageSrc = resolveImageSrc(product.image);
+  const imageSrc = resolveProductCatalogImageSrc(product.image);
 
   if (variant === "mobile") {
     return (
@@ -550,10 +548,9 @@ function ProductCarouselPanel({
               {/* <div aria-hidden className="h-[45px] shrink-0" /> */}
               <div className="flex w-full shrink-0 justify-between gap-1 overflow-x-auto pt-6 horizontalScroll desktop:gap-[5.6px] desktop:pt-12">
                 {products.map((product, index) => {
-                  const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image);
-                  if (!thumbSrc) {
-                    return null;
-                  }
+                  const thumbSrc = resolveProductCatalogImageSrc(
+                    product.thumbnailImage ?? product.image,
+                  );
                   const isActive = index === activeIndex;
                   return (
                     <AlankaraProductThumbnail

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
-import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
+import { resolveProductCatalogImageSrc } from "@/features/products/utils/productImagePlaceholder";
 import { BookStoreVisitStoreHero } from "@/features/products/components/detail/BookStoreVisitStoreHero";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import {
@@ -605,19 +605,13 @@ export function ProfileAppointmentReschedulePanel({
             {product && !isStoreVisit && !isAddressStep ? (
               <div className="flex flex-col items-center gap-2 pb-4">
                 <div className="relative h-[133px] w-[206px]">
-                  {product.imageSrc ? (
-                    <Image
-                      src={product.imageSrc}
-                      alt={product.name}
-                      fill
-                      className="object-contain"
-                      sizes="206px"
-                    />
-                  ) : (
-                    <div className="flex size-full items-center justify-center bg-white">
-                      <RingsTabIcon className="size-16 text-darkblack" />
-                    </div>
-                  )}
+                  <Image
+                    src={resolveProductCatalogImageSrc(product.imageSrc)}
+                    alt={product.name}
+                    fill
+                    className="object-contain"
+                    sizes="206px"
+                  />
                 </div>
                 <p
                   className={cn(
