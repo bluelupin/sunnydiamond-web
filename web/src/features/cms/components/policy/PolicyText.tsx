@@ -2,6 +2,7 @@
 
 import React from "react";
 import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
+import { POLICY_TERTIARY_LINK_CLASSNAME } from "./policyLinkStyles";
 
 /** Render safe links from plain CMS text. */
 export default function PolicyText({ text }: { text: string }) {
@@ -26,7 +27,7 @@ export default function PolicyText({ text }: { text: string }) {
     }
 
     parts.push(text.slice(offset, start));
-    const className = "break-words underline underline-offset-4 hover:text-darkblack focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+    const className = POLICY_TERTIARY_LINK_CLASSNAME;
 
     if (isEmail) {
       parts.push(<a key={start} href={`mailto:${value}`} className={className}>{value}</a>);

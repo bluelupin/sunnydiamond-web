@@ -1,10 +1,11 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import { useMemo, type MouseEvent } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import type { PolicyAccordionSection } from "@/features/cms/data/policyCertificationsContent";
 import PolicyText from "./PolicyText";
+import { enrichPolicyRichHtmlAnchors } from "./policyLinkStyles";
 
 type PolicyAccordionSectionContentProps = {
   section: PolicyAccordionSection;
@@ -16,6 +17,11 @@ export default function PolicyAccordionSectionContent({
   isMobile,
 }: PolicyAccordionSectionContentProps) {
   const { toast } = useToast();
+
+  const richHtml = useMemo(
+    () => (section.richHtml ? enrichPolicyRichHtmlAnchors(section.richHtml) : ""),
+    [section.richHtml],
+  );
 
   const handleRichHtmlPhoneClick = async (event: MouseEvent<HTMLDivElement>) => {
     if (isMobile || !(event.target instanceof Element)) {
@@ -50,13 +56,12 @@ export default function PolicyAccordionSectionContent({
           "[&_*]:text-inherit [&_*]:font-[inherit] [&_*]:leading-[inherit]",
           "[&_p]:m-0 [&_p]:whitespace-pre-line",
           isMobile ? "[&_p+p]:mt-4 [&_ul+_*]:mt-4 [&_ol+_*]:mt-4" : "[&_p+p]:mt-6 [&_ul+_*]:mt-6 [&_ol+_*]:mt-6",
-          "[&_a]:break-words [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-darkblack [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-2",
           "[&_ol]:flex [&_ol]:flex-col [&_ol]:gap-2 [&_ol]:list-decimal",
           "[&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:list-disc",
           isMobile ? "[&_ol]:ms-[21px] [&_ul]:ms-[21px]" : "[&_ol]:ms-6 [&_ul]:ms-6",
           "[&_li]:list-item",
         )}
-        dangerouslySetInnerHTML={{ __html: section.richHtml }}
+        dangerouslySetInnerHTML={{ __html: richHtml }}
       />
     );
   }
