@@ -102,9 +102,48 @@ function buildSegmentGridItems(
   return items;
 }
 
+function listingCardsInPositionOrder(
+  cardsByPosition: Map<number, NormalizedProductListingCard>,
+): NormalizedProductListingCard[] {
+  return [...cardsByPosition.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([, card]) => card);
+}
+
+function collectPlacedListingCardIds(items: readonly JewelleryPlpGridItem[]): Set<string | number> {
+  const placed = new Set<string | number>();
+
+  for (const item of items) {
+    if (item.kind === "listing-card") {
+      placed.add(item.card.id);
+    }
+  }
+
+  return placed;
+}
+
+/** Appends CMS cards that were not placed in-grid (e.g. ineligible slot on a short segment). */
+function appendUnplacedListingCardsAtEnd(
+  items: JewelleryPlpGridItem[],
+  cardsByPosition: Map<number, NormalizedProductListingCard>,
+  segmentIndex: number,
+): void {
+  const placedIds = collectPlacedListingCardIds(items);
+
+  for (const card of listingCardsInPositionOrder(cardsByPosition)) {
+    if (placedIds.has(card.id)) {
+      continue;
+    }
+
+    items.push({ kind: "listing-card", card, segmentIndex });
+    placedIds.add(card.id);
+  }
+}
+
 /**
  * Inserts CMS listing cards at 1-based grid slots per PLP pagination chunk (load-more page size).
  * Positions are relative to each chunk, not the accumulated product list.
+ * Cards that cannot be placed in-grid are appended after that segment's products.
  */
 export function buildJewelleryPlpGridItems(
   products: readonly JewelleryListingProduct[],
@@ -148,15 +187,16 @@ export function buildJewelleryPlpGridItems(
       segmentProducts.length,
     );
 
-    items.push(
-      ...buildSegmentGridItems(
-        segmentProducts,
-        globalProductOffset,
-        cardsByPosition,
-        eligiblePositions,
-        segmentIndex,
-      ),
+    const segmentItems = buildSegmentGridItems(
+      segmentProducts,
+      globalProductOffset,
+      cardsByPosition,
+      eligiblePositions,
+      segmentIndex,
     );
+
+    appendUnplacedListingCardsAtEnd(segmentItems, cardsByPosition, segmentIndex);
+    items.push(...segmentItems);
   }
 
   return items;
