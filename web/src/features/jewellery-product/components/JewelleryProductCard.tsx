@@ -76,7 +76,7 @@ type ProductCopyProps = {
 const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => {
   const { lead, remainder } = splitPlpProductTitle(title);
   const titleLinkClassName = cn(
-    "w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
+    "!leading-110 w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
     productNameDisplayClassName,
   );
 
@@ -382,11 +382,11 @@ const JewelleryProductCard = ({
         />
         <div
           className={cn(
-            "relative z-10 flex w-full flex-col items-center gap-3 px-4 md:px-6 lg:pb-[58px] md:pb-10 pb-6",
+            "relative z-10 flex w-full flex-col items-center md:gap-6 gap-[10px] px-4 md:px-6 lg:pb-[58px] md:pb-10 pb-6",
           )}
         >
           {isBestseller ? (
-            <span className="flex h-9 shrink-0 items-center justify-center bg-white px-3 font-gill text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:text-sm">
+            <span className="flex md:h-9 h-[25px] shrink-0 items-center justify-center bg-white px-3 font-gill text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:text-sm">
               BESTSELLER
             </span>
           ) : null}
