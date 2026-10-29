@@ -24,6 +24,7 @@ import {
 import type { StaticImageData } from "next/image";
 import {
   isValidProductCatalogImage,
+  PRODUCT_IMAGE_PLACEHOLDER_SRC,
   resolveProductCatalogImageSrc,
 } from "@/features/products/utils/productImagePlaceholder";
 
@@ -155,7 +156,9 @@ const JewelleryProductCard = ({
   const [hoverImageReady, setHoverImageReady] = useState(false);
   const resolvedPrimaryImage = resolveProductCatalogImageSrc(primaryImage);
   const lifestyleCandidate = hoverImage ?? modalImage;
-  const lifestyleImage = isValidProductCatalogImage(lifestyleCandidate)
+  // Keep the same placeholder visible on hover instead of revealing a different image.
+  const lifestyleImage = resolvedPrimaryImage !== PRODUCT_IMAGE_PLACEHOLDER_SRC &&
+    isValidProductCatalogImage(lifestyleCandidate)
     ? lifestyleCandidate
     : undefined;
   const touchImageSwapEnabled = inputMode === "touch" && Boolean(lifestyleImage);
