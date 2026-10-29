@@ -314,6 +314,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     () => buildGiftingFormStateFromItems(items, readCartLineMetadata()),
     [items],
   );
+  const initialPanelFormStateRef = useRef(initialFormState);
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(
     () => initialFormState.wrapMode,
   );
@@ -330,6 +331,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
     if (isPersonaliseOpen && !wasPersonaliseOpenRef.current) {
       const nextFormState = buildGiftingFormStateFromItems(items, readCartLineMetadata());
+      initialPanelFormStateRef.current = nextFormState;
       openedWithSavedNotesRef.current = hasSavedGiftingNotes(items);
       setWrapMode(nextFormState.wrapMode);
       setGiftNote(nextFormState.giftNote);
@@ -371,7 +373,32 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     });
   };
 
+  const hasUnsavedChanges = useMemo(() => {
+    const initial = initialPanelFormStateRef.current;
+    const selectedItemsChanged =
+      selectedItemIds.size !== initial.selectedItemIds.length ||
+      initial.selectedItemIds.some((itemId) => !selectedItemIds.has(itemId));
+    const noteIds = new Set([
+      ...Object.keys(initial.itemNotes),
+      ...Object.keys(itemNotes),
+    ]);
+    const itemNotesChanged = [...noteIds].some(
+      (itemId) => (itemNotes[itemId] ?? "") !== (initial.itemNotes[itemId] ?? ""),
+    );
+
+    return (
+      wrapMode !== initial.wrapMode ||
+      giftNote !== initial.giftNote ||
+      selectedItemsChanged ||
+      itemNotesChanged
+    );
+  }, [giftNote, itemNotes, selectedItemIds, wrapMode]);
+
   const applyGifting = () => {
+    if (!hasUnsavedChanges) {
+      return;
+    }
+
     markGiftingOptionsExplored();
     const hadSavedNotes = openedWithSavedNotesRef.current;
 
@@ -531,7 +558,12 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
         />
         <hr className="border-neutral300 mb-6" />
         <div className="w-full px-4">
-          <CartPrimaryButton type="button" className="w-full uppercase" onClick={applyGifting}>
+          <CartPrimaryButton
+            type="button"
+            className="w-full uppercase"
+            onClick={applyGifting}
+            disabled={!hasUnsavedChanges}
+          >
             Save
           </CartPrimaryButton>
         </div>
