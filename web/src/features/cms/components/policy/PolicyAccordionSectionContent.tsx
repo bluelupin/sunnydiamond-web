@@ -1,6 +1,8 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import { cn } from "@/shared/utils/cn";
+import { useToast } from "@/shared/hooks/use-toast";
 import type { PolicyAccordionSection } from "@/features/cms/data/policyCertificationsContent";
 import PolicyText from "./PolicyText";
 
@@ -13,9 +15,36 @@ export default function PolicyAccordionSectionContent({
   section,
   isMobile,
 }: PolicyAccordionSectionContentProps) {
+  const { toast } = useToast();
+
+  const handleRichHtmlPhoneClick = async (event: MouseEvent<HTMLDivElement>) => {
+    if (isMobile || !(event.target instanceof Element)) {
+      return;
+    }
+
+    const phoneLink = event.target.closest<HTMLAnchorElement>("a");
+    if (!phoneLink || !/^tel:/i.test(phoneLink.getAttribute("href") ?? "")) {
+      return;
+    }
+
+    event.preventDefault();
+    const phone = phoneLink.textContent?.trim() || phoneLink.href.replace(/^tel:/i, "");
+
+    try {
+      await navigator.clipboard.writeText(phone);
+      toast({ title: "Phone number copied" });
+    } catch {
+      toast({
+        title: "Unable to copy",
+        description: "Please copy the phone number manually.",
+      });
+    }
+  };
+
   if (section.richHtml) {
     return (
       <div
+        onClick={handleRichHtmlPhoneClick}
         className={cn(
           // Inherit accordion typography from parent — only structure CKEditor markup.
           "[&_*]:text-inherit [&_*]:font-[inherit] [&_*]:leading-[inherit]",

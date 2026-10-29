@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import { useToast } from "@/shared/hooks/use-toast";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 
 /** Render safe links from plain CMS text. */
 export default function PolicyText({ text }: { text: string }) {
-  const { toast } = useToast();
   const parts: React.ReactNode[] = [];
   const pattern = /https?:\/\/[^\s<>"']+|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|\+?\d[\d\s().-]{7,}\d/gi;
   let offset = 0;
@@ -33,22 +32,13 @@ export default function PolicyText({ text }: { text: string }) {
       parts.push(<a key={start} href={`mailto:${value}`} className={className}>{value}</a>);
     } else if (isPhone) {
       parts.push(
-        <button
+        <ContactPhoneLink
           key={start}
-          type="button"
+          href={`tel:${value.replace(/[^\d+]/g, "")}`}
+          label={value}
+          variant="plain"
           className={className}
-          onClick={async (event) => {
-            event.preventDefault();
-            try {
-              await navigator.clipboard.writeText(value.trim());
-              toast({ title: "Phone number copied" });
-            } catch {
-              toast({ title: "Unable to copy", description: "Please copy the phone number manually." });
-            }
-          }}
-        >
-          {value}
-        </button>,
+        />,
       );
     } else if (url) {
       const label = url.hostname === "sunnydiamonds-web-dev.on-forge.com" && url.pathname === "/" && !url.search && !url.hash

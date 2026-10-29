@@ -1,5 +1,6 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import ContactCardCtaLink from "./ContactCardCtaLink";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -10,7 +11,7 @@ type ContactPhoneLinkProps = {
   label: string;
   className?: string;
   /** Matches DetailTextLink styling used on Contact info cards; default keeps ContactCardCtaLink. */
-  variant?: "card" | "detail";
+  variant?: "card" | "detail" | "plain";
 };
 
 const getClipboardPhoneValue = (href: string | undefined, label: string): string => {
@@ -44,6 +45,27 @@ const ContactPhoneLink = ({
       });
     }
   };
+
+  const handlePlainDesktopClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (isMobile) {
+      return;
+    }
+
+    event.preventDefault();
+    void handleCopyPhoneNumber();
+  };
+
+  if (variant === "plain") {
+    if (!href) {
+      return <span className={className}>{label}</span>;
+    }
+
+    return (
+      <a href={href} onClick={handlePlainDesktopClick} className={className}>
+        {label}
+      </a>
+    );
+  }
 
   if (variant === "detail") {
     if (isMobile && href) {

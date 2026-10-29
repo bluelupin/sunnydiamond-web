@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import type { NormalizedSupportContactOption } from "@/services/support/support-page.types";
 
@@ -53,12 +54,12 @@ const SupportContactOptionsSection = ({ options }: SupportContactOptionsSectionP
             </div>
 
             {option.phone && option.phoneHref ? (
-              <a
+              <ContactPhoneLink
                 href={option.phoneHref}
+                label={option.phone}
+                variant="plain"
                 className="font-gill text-xl font-light leading-110 text-darkblack underline-offset-4 hover:underline"
-              >
-                {option.phone}
-              </a>
+              />
             ) : null}
 
             {option.email && option.emailHref ? (
