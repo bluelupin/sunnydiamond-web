@@ -52,8 +52,8 @@ function PolicyDesktopSidebar({
     >
       <div className="flex w-full flex-col gap-6">
         {navGroups.map((group, index) => (
-          <>
-            <div key={group.id} className="flex w-full flex-col items-start gap-4">
+          <div key={group.id}>
+            <div className="flex w-full flex-col items-start gap-4">
               <p className="whitespace-nowrap font-gill text-xl font-light leading-110 text-darkblack">
                 {group.label}
               </p>
@@ -82,7 +82,7 @@ function PolicyDesktopSidebar({
               </ul>
             </div>
             {index === 0 && <hr className="border-neutral300" />}
-          </>
+          </div>
         ))}
       </div>
     </nav>
@@ -104,37 +104,42 @@ function PolicyMobileNav({
 
   return (
     <nav aria-label="Policy categories" className="flex w-full flex-col gap-[29px]">
-      {navGroups.map((group) => (
-        <div key={group.id} className="flex w-full flex-col gap-6">
-          <p className="font-gill text-base font-light leading-110 text-darkblack">
-            {group.label}
-          </p>
-          <ul className="flex w-full flex-col gap-4">
-            {group.items.map((policy, index) => {
-              const isActive = policy.id === activePolicyId;
-              const label = policy.mobileNavLabel ?? policy.navLabel;
+      {navGroups.map((group, index) => (
+        <>
+          <div key={group.id} className="flex w-full flex-col gap-6">
+            <p className="font-gill text-base font-light leading-110 text-natural500">
+              {group.label}
+            </p>
+            <ul className="flex w-full flex-col gap-6">
+              {group.items.map((policy, index) => {
+                const isActive = policy.id === activePolicyId;
+                const label = policy.mobileNavLabel ?? policy.navLabel;
 
-              return (
-                <li key={policy.id} className="flex flex-col gap-4">
-                  <button
-                    type="button"
-                    onClick={() => onSelect(policy.id)}
-                    className="flex w-full items-center justify-between text-left"
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    <span className="font-gill text-sm font-normal uppercase leading-110 text-darkblack">
-                      {label}
-                    </span>
-                    <ChevronRight className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
-                  </button>
-                  {index < group.items.length - 1 ? (
-                    <div className="h-px w-full bg-neutral300" aria-hidden />
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+                return (
+                  <li key={policy.id} className="flex flex-col gap-4">
+                    <button
+                      type="button"
+                      onClick={() => onSelect(policy.id)}
+                      className="flex w-full items-center justify-between text-left"
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
+                        {label}
+                      </span>
+                      <ChevronRight className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
+                    </button>
+                    {index < group.items.length - 1 ? (
+                      <div className="h-px w-full bg-neutral300 lg:flex hidden" aria-hidden />
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          {index < group.items.length - 1 ? (
+            <div className="h-[0.5px] w-full bg-neutral300" aria-hidden />
+          ) : null}
+        </>
       ))}
     </nav>
   );
@@ -190,7 +195,7 @@ function PolicyAccordionItem({
           isMobile ? "items-start" : "min-h-6 shrink-0 items-center",
         )}
       >
-        <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack">
+        <span className="min-w-0 flex-1 font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
           {section.title}
         </span>
         <PolicyAccordionToggleIcon isOpen={isOpen} />
@@ -209,7 +214,7 @@ function PolicyAccordionItem({
               "flex flex-col pt-4 font-gill leading-110 text-neutral500",
               isMobile
                 ? "gap-4 text-sm font-light"
-                : "gap-6 text-base font-normal",
+                : "gap-6 lg:text-xl md:text-base text-sm font-light",
             )}
           >
             <PolicyAccordionSectionContent section={section} isMobile={isMobile} />
