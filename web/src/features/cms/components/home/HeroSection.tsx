@@ -34,7 +34,6 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
           priority
           quality={HOMEPAGE_HERO_IMAGE_QUALITY}
           sizes={HOMEPAGE_HERO_IMAGE_SIZES}
-          unoptimized
         />
         <HeroSectionOverlay />
         <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-10 py-6 md:px-6 px-4">
