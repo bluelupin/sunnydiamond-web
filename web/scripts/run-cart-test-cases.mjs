@@ -116,6 +116,13 @@ function runStaticChecks() {
   assertSource("CART-016", "more items note", bagDrawer, "CartMoreItemsNote", "More items note component");
   assertSource("CART-017", "update bag message", bagDrawer, "Product updated successfully", "Update bag drawer message");
   assertSource("CART-018", "add error toast", addToBagHook, "formatAddToBagErrorMessage", "Add failure toast");
+  assertSource(
+    "CART-018a",
+    "wishlist sync on add",
+    addToBagHook,
+    "removeFromWishlist",
+    "Successful add removes wishlisted SKU",
+  );
 
   // D. Line items
   assertSource("CART-019", "line image", cartItem, "OptimizedImage", "Line item image");
