@@ -19,6 +19,7 @@ interface ResponsiveImageProps {
   eager?: boolean;
   sizes?: string;
   quality?: number;
+  unoptimized?: boolean;
   onImageLoad?: (image: HTMLImageElement, variant: "mobile" | "desktop" | "shared") => void;
 }
 
@@ -36,6 +37,7 @@ const ResponsiveImage = ({
   priority = false,
   eager = false,
   quality,
+  unoptimized = false,
   onImageLoad,
   sizes = "100vw",
 }: ResponsiveImageProps) => {
@@ -57,6 +59,7 @@ const ResponsiveImage = ({
     fetchPriority: priority || eager ? ("high" as const) : undefined,
     sizes,
     quality,
+    unoptimized,
     ...(fill
       ? { fill: true as const }
       : {

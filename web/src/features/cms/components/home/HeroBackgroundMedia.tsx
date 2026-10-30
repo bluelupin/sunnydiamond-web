@@ -12,6 +12,7 @@ type HeroBackgroundMediaProps = {
   priority?: boolean;
   quality?: number;
   sizes?: string;
+  unoptimized?: boolean;
 };
 
 const HeroBackgroundMedia = ({
@@ -23,6 +24,7 @@ const HeroBackgroundMedia = ({
   priority = true,
   quality = PLP_HERO_IMAGE_QUALITY,
   sizes = "100vw",
+  unoptimized = false,
 }: HeroBackgroundMediaProps) => {
   const videoSrc = cmsVideoUrl?.trim() ?? "";
   const hasVideo = Boolean(videoSrc);
@@ -48,6 +50,7 @@ const HeroBackgroundMedia = ({
           height={1080}
           sizes={sizes}
           quality={quality}
+          unoptimized={unoptimized}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
