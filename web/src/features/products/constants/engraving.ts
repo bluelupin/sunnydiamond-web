@@ -3,7 +3,10 @@ import type { ProductCustomOptions } from "@/features/products/types/productCust
 import type { Product } from "@/features/products/data/products";
 import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
-import { resolveEngravingFontCssFamily } from "@/features/products/constants/engravingFontAssets";
+import {
+  resolveEngravingFontCssFamily,
+  resolveEngravingFontPreviewSizePx,
+} from "@/features/products/constants/engravingFontAssets";
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
@@ -30,12 +33,15 @@ export type EngravingPreviewLayout = {
   textArcPath: string;
   /** Scales resolved font size for smaller engraving surfaces (earring back, name tag). */
   fontSizeScale?: number;
+  /** Defaults to `xMidYMid slice` on the preview SVG overlay. */
+  svgPreserveAspectRatio?: string;
 };
 
 /**
- * Inner-band arc calibrated to Figma `4903:44987` ("Diya Gupta" on ring inner wall).
+ * Inner back wall on ring-engraving-preview (343×214) — symmetric quadratic arc; max bend at
+ * center (~11px below endpoints) so short and long labels read clearly curved. Wide chord.
  */
-export const RING_ENGRAVING_TEXT_ARC_PATH = "M 137 92 Q 174 84 210 92";
+export const RING_ENGRAVING_TEXT_ARC_PATH = "M 98 100 Q 171.5 60 245 100";
 
 /**
  * Text paths calibrated to category preview assets — same 343×214 viewBox as the panel image.
@@ -47,6 +53,7 @@ export const CATEGORY_ENGRAVING_PREVIEW_LAYOUTS: Partial<
   rings: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
     textArcPath: RING_ENGRAVING_TEXT_ARC_PATH,
+    svgPreserveAspectRatio: "xMidYMid meet",
   },
   pendants: {
     viewBox: ENGRAVING_PREVIEW_VIEWBOX,
@@ -139,15 +146,31 @@ export function resolveEngravingPreviewLayout(
   return DEFAULT_ENGRAVING_PREVIEW_LAYOUT;
 }
 
-export function resolveEngravingPreviewFontSize(text: string, fontSizeScale = 1): number {
+/** Scales preview size down as engraving text grows (relative to the 5-char reference). */
+function resolveEngravingPreviewLengthSizeFactor(text: string): number {
   const length = text.trim().length;
-  let base: number;
-  if (length <= 5) base = 14;
-  else if (length <= 8) base = 13.5;
-  else if (length <= 12) base = 12.5;
-  else base = 11.5;
+  let referencePx: number;
+  if (length <= 5) referencePx = 14;
+  else if (length <= 8) referencePx = 13.5;
+  else if (length <= 12) referencePx = 12.5;
+  else referencePx = 11.5;
 
-  const scaled = base * fontSizeScale;
+  return referencePx / 14;
+}
+
+export function resolveEngravingPreviewFontSize(
+  text: string,
+  fontSizeScale = 1,
+  fontLabel?: string | null,
+): number {
+  const trimmedFont = fontLabel?.trim() ?? "";
+  const fontBasePx = trimmedFont ? resolveEngravingFontPreviewSizePx(trimmedFont) : null;
+  const lengthFactor = resolveEngravingPreviewLengthSizeFactor(text);
+
+  const basePx = fontBasePx ?? 14 * lengthFactor;
+  const scaled =
+    fontBasePx != null ? fontBasePx * lengthFactor * fontSizeScale : basePx * fontSizeScale;
+
   return Math.round(scaled * 10) / 10;
 }
 

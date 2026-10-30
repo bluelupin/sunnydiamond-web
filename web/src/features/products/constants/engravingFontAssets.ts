@@ -79,3 +79,29 @@ export function resolveEngravingFontFamilyStyle(magentoLabel: string): CSSProper
 
   return { fontFamily: `"${cssFamily}", sans-serif` };
 }
+
+/**
+ * Preview / panel dropdown size per loaded @font-face family (Magento labels stay dynamic).
+ */
+export const ENGRAVING_FONT_PREVIEW_SIZE_PX_BY_CSS_FAMILY: Readonly<
+  Partial<Record<string, number>>
+> = {
+  "SD Engraving Vivaldi": 16,
+  "SD Engraving Edwardian Script": 22,
+  "SD Engraving Lucida Handwriting": 13,
+  "SD Engraving Algerian": 14,
+  "SD Engraving Monotype Corsiva": 18,
+  "SD Engraving Pinyon Script": 18,
+  "SD Engraving Pristina": 19,
+  "SD Engraving Script MT Bold": 15,
+  "SD Engraving Vladimir Script": 18,
+};
+
+export function resolveEngravingFontPreviewSizePx(magentoLabel: string): number | null {
+  const cssFamily = resolveEngravingFontCssFamily(magentoLabel);
+  if (!cssFamily) {
+    return null;
+  }
+
+  return ENGRAVING_FONT_PREVIEW_SIZE_PX_BY_CSS_FAMILY[cssFamily] ?? null;
+}

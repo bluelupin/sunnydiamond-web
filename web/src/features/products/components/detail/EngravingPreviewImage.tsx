@@ -36,6 +36,7 @@ const EngravingPreviewImage = ({
   const fontSize = resolveEngravingPreviewFontSize(
     displayText,
     layout.fontSizeScale ?? 1,
+    font,
   );
 
   if (!imageSrc) {
@@ -59,7 +60,7 @@ const EngravingPreviewImage = ({
         <svg
           className="pointer-events-none absolute inset-0 z-10 h-full w-full"
           viewBox={`0 0 ${layout.viewBox.width} ${layout.viewBox.height}`}
-          preserveAspectRatio="xMidYMid slice"
+          preserveAspectRatio={layout.svgPreserveAspectRatio ?? "xMidYMid slice"}
           aria-hidden
         >
           <defs>
