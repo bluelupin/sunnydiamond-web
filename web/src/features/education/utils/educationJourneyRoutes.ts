@@ -11,13 +11,19 @@ export function buildEducationJourneyHref({
   maxPrice,
   diamondShapeLabel,
   listingFacets,
+  priceUrlFacets,
 }: {
   categoryUrlKey: string | null;
   minPrice: number;
   maxPrice: number;
   diamondShapeLabel: string;
-  /** Category-scoped facets so price query params match PLP prefetch/clamping. */
+  /** Category/shape-scoped facets for clamping the listing filter state. */
   listingFacets?: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">;
+  /**
+   * Catalog bounds from step 1 for serializing price query params. Scoped availability
+   * facets can match the selected range exactly and would otherwise omit min/max from the URL.
+   */
+  priceUrlFacets?: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">;
 }): string {
   const baseHref = categoryUrlKey
     ? buildJewelleryCategoryHref(categoryUrlKey)
@@ -30,13 +36,17 @@ export function buildEducationJourneyHref({
     params.set("diamondShape", shapeSlug);
   }
 
-  if (listingFacets) {
-    const filters = buildDiscoverJourneyListingFilters(
+  // Encode the step-1 range only against global catalog bounds — not category/shape-scoped
+  // facets, which can cap max (e.g. 300000) below what the user selected in step 1.
+  const urlFacetBounds = priceUrlFacets ?? listingFacets;
+
+  if (urlFacetBounds) {
+    const filtersForUrl = buildDiscoverJourneyListingFilters(
       { minPrice, maxPrice },
       shapeSlug,
-      listingFacets,
+      urlFacetBounds,
     );
-    applyJewelleryPriceSearchParams(params, filters, listingFacets);
+    applyJewelleryPriceSearchParams(params, filtersForUrl, urlFacetBounds);
   } else {
     const filters = buildGiftFinderListingFiltersFromUrl({
       minPrice: minPrice > 0 ? String(minPrice) : null,
