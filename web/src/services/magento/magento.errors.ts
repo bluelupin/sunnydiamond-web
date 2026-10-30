@@ -1,5 +1,6 @@
 export type MagentoGraphqlErrorEntry = {
   message: string;
+  code?: string;
   /** Magento error category, e.g. `graphql-authorization` or a module-specific code. */
   extensions?: { category?: string };
 };

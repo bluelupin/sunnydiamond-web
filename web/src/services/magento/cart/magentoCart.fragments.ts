@@ -36,6 +36,15 @@ const cartFields = (productCustomOptions: string) => `
     items {
       uid
       quantity
+      errors {
+        code
+        message
+      }
+      sunny_stock_issue {
+        code
+        message
+        sku
+      }
       ... on SimpleCartItem {
         is_gift
         gift_message {
@@ -71,6 +80,7 @@ const cartFields = (productCustomOptions: string) => `
         }
         configured_variant {
           sku
+          sunny_availability
           image {
             url
           }
@@ -86,6 +96,7 @@ const cartFields = (productCustomOptions: string) => `
       }
       product {
         sku
+        sunny_availability
         name
         url_key
         categories {

@@ -1,5 +1,4 @@
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
-import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import {
   clearPendingCheckoutPayment,
   getPaidPendingCheckoutPayment,
@@ -169,12 +168,7 @@ export async function verifyRazorpayPayment(input: {
 }
 
 function isRazorpayPaymentAlreadyRecordedError(error: unknown): boolean {
-  const message =
-    error instanceof MagentoGraphqlError
-      ? error.message
-      : error instanceof Error
-        ? error.message
-        : "";
+  const message = error instanceof Error ? error.message : "";
 
   return /unique constraint/i.test(message);
 }

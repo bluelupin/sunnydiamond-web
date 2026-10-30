@@ -451,7 +451,8 @@ const ProductDetailSidebar = ({
     preferredPurities,
   )?.sku?.trim();
   const stockAlertSku = selectedVariantSku || product.id;
-  const showNotifyWhenAvailable = stockAlertEnabled && !sizeDisplayProduct.inStock;
+  const soldOutLimitedEdition = Boolean(product.isLimitedEdition && (showSizeSelector ? selectedSize && !selectedSize.inStock : !sizeDisplayProduct.inStock));
+  const showNotifyWhenAvailable = stockAlertEnabled && !soldOutLimitedEdition && !sizeDisplayProduct.inStock;
   const addingToBagLabel = addToBagLabel === "Update Bag" ? "Updating…" : "Adding…";
 
   const scrollToRingSizeField = useCallback(() => {
@@ -468,7 +469,7 @@ const ProductDetailSidebar = ({
   }, []);
 
   const handleAddToBagClick = async () => {
-    if (isAddingToBag) return;
+    if (isAddingToBag || soldOutLimitedEdition) return;
 
     if (showSizeSelector && !ringSize.trim()) {
       setRingSizeError(
@@ -541,9 +542,9 @@ const ProductDetailSidebar = ({
               onClick={() => {
                 void handleAddToBagClick();
               }}
-              disabled={isAddingToBag}
+              disabled={isAddingToBag || soldOutLimitedEdition}
             >
-              {isAddingToBag ? addingToBagLabel : addToBagLabel}
+              {soldOutLimitedEdition ? "Out of Stock" : isAddingToBag ? addingToBagLabel : addToBagLabel}
             </DetailDarkButton>
           )}
           <button

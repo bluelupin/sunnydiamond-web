@@ -391,10 +391,11 @@ export async function syncGuestCartLineOptions(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
   isAuthenticated = false,
+  initialState?: GuestCartState,
 ): Promise<GuestCartState> {
   let metadata = lineMetadata;
   let metadataChanged = false;
-  let state = await fetchCartForSession(cartId, metadata, isAuthenticated, signal);
+  let state = initialState ?? await fetchCartForSession(cartId, metadata, isAuthenticated, signal);
   // Lines whose sync the server refused — the server-stored value stands.
   const refused = new Set<string>();
 
@@ -879,6 +880,53 @@ export async function fetchActiveCartState(
   return fetchGuestCart(cartId, lineMetadata, signal);
 }
 
+export class UnavailableCartLineError extends Error {
+  constructor(message: string, readonly cartItemUid: string) {
+    super(message);
+    this.name = "UnavailableCartLineError";
+  }
+}
+
+/** Block payment selection when Magento reports an unavailable cart line. */
+function assertCartItemsAvailable(cart: MagentoCart): void {
+  const items = cart.itemsV2?.items ?? [];
+  if (items.length === 0) {
+    throw new Error("Your shopping bag is empty. Please add a product before checkout.");
+  }
+
+  for (const item of items) {
+    const name = item.product?.name?.trim() || item.configured_variant?.sku || item.product?.sku || "A product";
+    const issue = item.sunny_stock_issue;
+    if (issue?.code === "OUT_OF_STOCK") {
+      if (item.uid) throw new UnavailableCartLineError("An item in your bag is out of stock.", item.uid);
+      throw new Error("An item in your bag is out of stock. Please update your bag.");
+    }
+    if (issue?.code === "INSUFFICIENT_QUANTITY") {
+      throw new Error(`${name} is not available in the requested quantity. Please update your bag.`);
+    }
+    if (issue?.code === "CHECK_FAILED") {
+      throw new Error("Stock could not be checked. Please try again.");
+    }
+    const stockError = item.errors?.find((error) =>
+      /(?:stock|salable|saleable|available|quantity)/i.test(`${error.code ?? ""} ${error.message ?? ""}`),
+    );
+    if (stockError) {
+      const message = `${name} cannot be ordered in the requested quantity. Please update your bag.`;
+      if (item.uid && /(?:out of stock|not salable|not saleable|unavailable)/i.test(
+        `${stockError.code ?? ""} ${stockError.message ?? ""}`,
+      )) {
+        throw new UnavailableCartLineError("An item in your bag is out of stock.", item.uid);
+      }
+      throw new Error(message);
+    }
+    const availability = item.configured_variant?.sunny_availability ?? item.product?.sunny_availability;
+    if (availability === "UNAVAILABLE") {
+      if (item.uid) throw new UnavailableCartLineError("An item in your bag is out of stock.", item.uid);
+      throw new Error("An item in your bag is out of stock. Please update your bag.");
+    }
+  }
+}
+
 export async function prepareCheckoutForPayment(
   cartId: string,
   form: CheckoutFormData,
@@ -887,10 +935,10 @@ export async function prepareCheckoutForPayment(
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
   const addressedState = await applyCheckoutAddresses(cartId, form, lineMetadata, options, signal);
-  const syncedState = await syncGuestCartLineOptions(cartId, lineMetadata, signal, options.isAuthenticated);
-  await selectFirstAvailableGuestShippingMethod(cartId, syncedState, lineMetadata, signal);
-
-  return fetchActiveCartState(lineMetadata, signal, options.isAuthenticated);
+  const syncedState = await syncGuestCartLineOptions(cartId, lineMetadata, signal, options.isAuthenticated, addressedState);
+  const finalState = await selectFirstAvailableGuestShippingMethod(cartId, syncedState, lineMetadata, signal);
+  assertCartItemsAvailable(finalState.cart);
+  return finalState;
 }
 
 export async function prepareGuestCheckoutForPayment(
@@ -981,6 +1029,7 @@ export async function placeGuestOrder(
     const normalizedErrors = errors
       .map((error) => ({
         message: error.message?.trim() || "Magento could not place the order",
+        code: error.code?.trim() || undefined,
       }))
       .filter((error) => error.message);
 
@@ -1011,6 +1060,7 @@ export async function completeGuestCheckout(
   isAuthenticated = false,
 ): Promise<GuestCheckoutResult> {
   const cartState = await fetchCartForSession(cartId, lineMetadata, isAuthenticated, signal);
+  assertCartItemsAvailable(cartState.cart);
   const paymentCode = resolveMagentoPaymentCode(
     paymentMethod,
     cartState.totals.paymentMethods,
@@ -1042,8 +1092,26 @@ export async function completeGuestCheckout(
   // setPaymentMethodOnCart would leave a selected payment on a cart state the
   // shopper never confirmed if the sync stalls.
   await syncGuestCartLineOptions(cartId, lineMetadata, signal, isAuthenticated);
-  await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
-  const order = await placeGuestOrder(cartId, signal);
+  const paymentState = await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
+  assertCartItemsAvailable(paymentState.cart);
+  let order: PlacedGuestOrder;
+  try {
+    order = await placeGuestOrder(cartId, signal);
+  } catch (error) {
+    // Stock may change after the last cart response. Identify the affected UID
+    // from Magento before exposing the generic placeOrder error to checkout.
+    try {
+      const currentState = await fetchCartForSession(cartId, lineMetadata, isAuthenticated, signal);
+      assertCartItemsAvailable(currentState.cart);
+    } catch (stockError) {
+      if (typeof stockError === "object" && stockError !== null &&
+          "name" in stockError && stockError.name === "UnavailableCartLineError" &&
+          "cartItemUid" in stockError && typeof stockError.cartItemUid === "string") {
+        throw stockError;
+      }
+    }
+    throw error;
+  }
 
   return {
     ...order,

@@ -10,6 +10,7 @@ import { getMagentoGraphqlUrl } from "@/services/magento/config";
 import {
   getMagentoCustomAttributeValue,
   isMagentoPlaceholderImage,
+  isMagentoBooleanTruthy,
   normalizeMagentoCatalogProductImageUrl,
   resolveMagentoProductVideoUrl,
 } from "./magentoAttribute.utils";
@@ -467,6 +468,7 @@ export function mapMagentoProductDetailToProduct(
     metal,
     ...(metalColorValue ? { metalColorValue } : {}),
     inStock: product.stock_status === "IN_STOCK",
+    isLimitedEdition: isMagentoBooleanTruthy(getMagentoCustomAttributeValue(product.custom_attributesV2?.items, "sd_limited_edition")),
     featured: false,
     rating: Number.isFinite(rating) ? rating : 0,
     reviews: 0,

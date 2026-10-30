@@ -6,6 +6,7 @@ import JewelleryListingPromoCard from "./JewelleryListingPromoCard";
 import { useJewelleryPlpViewport } from "../hooks/useJewelleryPlpViewport";
 import { PLP_PRIORITY_IMAGE_COUNT } from "../utils/jewelleryPlpImage";
 import { buildJewelleryPlpGridItems } from "../utils/plpListingCards";
+import { getJewelleryListingDisplayPrice } from "../utils/plpVariantPrice";
 import type { JewelleryListingProduct } from "../types";
 import type { NormalizedProductListingCard } from "@/services/product-landing/product-landing-page.types";
 
@@ -77,12 +78,13 @@ const JewelleryProductGrid = ({
           <JewelleryProductCard
             key={product.id}
             title={product.name}
-            price={product.price}
+            price={getJewelleryListingDisplayPrice(product, metalTypeQuery, metalPurityQuery)}
             primaryImage={product.primaryImage}
             modalImage={product.modalImage}
             hoverImage={product.hoverImage}
             href={productHref(product.urlKey)}
             isBestseller={product.isBestseller}
+            isLimitedEdition={product.isLimitedEdition}
             isWishlisted={isWishlisted(product.id)}
             isHoverActive={hoveredProductId === product.id}
             onHoverStart={() => handleHoverStart(product.id)}

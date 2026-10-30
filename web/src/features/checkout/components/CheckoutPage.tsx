@@ -66,7 +66,7 @@ import {
 } from "@/services/magento/cart/cart.service";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
 import { enrichCartLinesWithGroupedGiftNote } from "@/services/magento/orders/orderLineMetadata.service";
-import { MagentoGraphqlError } from "@/services/magento/magento.errors";
+import { findUnavailableCartItem, isUnavailableCartError } from "../utils/unavailableCartItem";
 import {
   collectRazorpayPayment,
   resetRazorpayCart,
@@ -88,11 +88,26 @@ import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
 /** The form a guest filled before the create-account step reloads the page. */
 const CHECKOUT_FORM_RESUME_KEY = "sunny-checkout-form-resume";
 
+function getUnavailableCartLineUid(error: unknown): string | null {
+  if (typeof error !== "object" || error === null) return null;
+  const candidate = error as { name?: unknown; cartItemUid?: unknown };
+  return candidate.name === "UnavailableCartLineError" &&
+    typeof candidate.cartItemUid === "string" && candidate.cartItemUid.length > 0
+    ? candidate.cartItemUid
+    : null;
+}
+
+function getCheckoutErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error !== "object" || error === null || !("message" in error)) return fallback;
+  return typeof error.message === "string" && error.message.trim() ? error.message : fallback;
+}
+
 const CheckoutPage = () => {
   const {
     items,
     totalPrice,
     clearCart,
+    removeItem,
     applyMagentoCartState,
     refreshCart,
     isHydrating,
@@ -757,17 +772,27 @@ const CheckoutPage = () => {
           setStep("payment");
           window.scrollTo({ top: 0, behavior: "smooth" });
         } catch (error) {
-          const description =
-            error instanceof MagentoGraphqlError
-              ? error.message
-              : error instanceof Error
-                ? error.message
-                : "Please check your address details and try again.";
+          const description = getCheckoutErrorMessage(
+            error,
+            "Please check your address details and try again.",
+          );
 
+          const stockError = isUnavailableCartError(error) || getUnavailableCartLineUid(error) !== null;
           toast({
-            title: isAuthenticated ? "Could not continue to payment" : "Could not save delivery address",
-            description,
+            title: stockError
+              ? "Product out of stock"
+              : isAuthenticated ? "Could not continue to payment" : "Could not save delivery address",
+            description: stockError ? "Unable to place order. Not enough items for sale" : description,
           });
+          const unavailableUid = getUnavailableCartLineUid(error)
+            ?? findUnavailableCartItem(error, items)?.id;
+          if (unavailableUid) {
+            try {
+              await removeItem(unavailableUid, { showToast: false });
+            } catch {
+              toast({ title: "Could not update bag", description: "Please remove the unavailable product and try again." });
+            }
+          }
         } finally {
           checkoutLockedRef.current = false;
           setIsSavingAddresses(false);
@@ -922,14 +947,41 @@ const CheckoutPage = () => {
             guestOtp: verifiedCheckoutOtpRef.current,
           });
         } catch (error) {
-          const description =
-            error instanceof MagentoGraphqlError
-              ? error.message
-              : error instanceof Error
-                ? error.message
-                : "We could not place your order. Please try again.";
+          const description = getCheckoutErrorMessage(
+            error,
+            "We could not place your order. Please try again.",
+          );
 
-          showCheckoutStatusToast(description);
+          const stockError = isUnavailableCartError(error) || getUnavailableCartLineUid(error) !== null;
+          let unavailableUid = getUnavailableCartLineUid(error)
+            ?? findUnavailableCartItem(error, submittedItems)?.id;
+          if (stockError && !unavailableUid) {
+            try {
+              const currentCart = await fetchActiveCartState(readCartLineMetadata(), undefined, isAuthenticated);
+              const unavailableLines = (currentCart.cart.itemsV2?.items ?? []).filter((item) =>
+                item.sunny_stock_issue?.code === "OUT_OF_STOCK" ||
+                (item.configured_variant?.sunny_availability ?? item.product?.sunny_availability) === "UNAVAILABLE" ||
+                item.errors?.some((lineError) => /(?:out of stock|not salable|not saleable|unavailable)/i.test(
+                  `${lineError.code ?? ""} ${lineError.message ?? ""}`,
+                )),
+              );
+              if (unavailableLines.length === 1) {
+                unavailableUid = unavailableLines[0]?.uid ?? undefined;
+              }
+            } catch {
+              // Keep the cart intact if Magento cannot identify the affected line.
+            }
+          }
+          showCheckoutStatusToast(stockError
+            ? "Unable to place order. Not enough items for sale"
+            : description);
+          if (stockError && unavailableUid) {
+            try {
+              await removeItem(unavailableUid, { showToast: false });
+            } catch {
+              showCheckoutStatusToast("Please remove the unavailable product from your bag and try again.");
+            }
+          }
         } finally {
           checkoutLockedRef.current = false;
           paymentInFlightRef.current = false;

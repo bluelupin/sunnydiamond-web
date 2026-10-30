@@ -3,12 +3,13 @@ import {
   getDefaultMetalColorId,
   getMetalColorOptions,
 } from "@/features/products/utils/metalColorOptions.utils";
-import { applySelectedMetalVariant } from "@/features/products/utils/productVariant.utils";
+import { applySelectedMetalVariant, getConfigurableMetalOption } from "@/features/products/utils/productVariant.utils";
 import type { MagentoProductDetailItem, MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
 import {
   formatMagentoFacetLabel,
   getMagentoCustomAttributeValue,
   isMagentoBestSeller,
+  isMagentoBooleanTruthy,
   isMagentoPlaceholderImage,
   normalizeGemstoneTypeLabel,
   normalizeMagentoCatalogProductImageUrl,
@@ -86,8 +87,8 @@ function resolveProductCategory(categories: MagentoProductListItem["categories"]
   return jewelleryCategory?.name?.trim() || categories?.[0]?.name?.trim() || "";
 }
 
-/** Match PDP initial view: default metal variant price, image, and purity on PLP cards. */
-function resolveListingDisplayFromDefaultMetalVariant(product: MagentoProductListItem) {
+/** Keep PLP's default display and the compact prices needed for filtered variants. */
+function resolveListingVariantDisplay(product: MagentoProductListItem) {
   if (!product.variants?.length) {
     return null;
   }
@@ -101,8 +102,25 @@ function resolveListingDisplayFromDefaultMetalVariant(product: MagentoProductLis
     return null;
   }
 
-  const defaultMetalId = getDefaultMetalColorId(mapped, getMetalColorOptions(mapped));
-  return applySelectedMetalVariant(mapped, defaultMetalId);
+  const metalColorOptions = getMetalColorOptions(mapped);
+  const defaultMetalId = getDefaultMetalColorId(mapped, metalColorOptions);
+  const metalAttributeCode = getConfigurableMetalOption(mapped)?.attributeCode ?? "sd_metal_color";
+  const seen = new Set<string>();
+  const variantPrices = mapped.configurable.variants.flatMap((variant) => {
+    const metalColor = variant.attributes[metalAttributeCode]?.trim();
+    if (!metalColor) return [];
+    const metalPurity = variant.attributes.sd_metal_purity?.trim();
+    const key = `${metalColor.toLowerCase()}|${metalPurity?.toLowerCase() ?? ""}`;
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [{ metalColor, ...(metalPurity ? { metalPurity } : {}), price: variant.price }];
+  });
+
+  return {
+    defaultDisplay: applySelectedMetalVariant(mapped, defaultMetalId),
+    variantPrices,
+    metalColorOptions: metalColorOptions.map(({ id, label }) => ({ id, label })),
+  };
 }
 
 export function mapMagentoProductToJewelleryListing(
@@ -111,7 +129,8 @@ export function mapMagentoProductToJewelleryListing(
   const sku = product.sku?.trim();
   const name = product.name?.trim();
   const urlKey = product.url_key?.trim();
-  const defaultVariantDisplay = resolveListingDisplayFromDefaultMetalVariant(product);
+  const variantDisplay = resolveListingVariantDisplay(product);
+  const defaultVariantDisplay = variantDisplay?.defaultDisplay;
   const price =
     defaultVariantDisplay?.price ?? product.price_range?.minimum_price?.final_price?.value;
 
@@ -132,6 +151,7 @@ export function mapMagentoProductToJewelleryListing(
 
   const customAttributes = product.custom_attributesV2?.items;
   const isBestseller = isMagentoBestSeller(customAttributes);
+  const isLimitedEdition = isMagentoBooleanTruthy(getMagentoCustomAttributeValue(customAttributes, "sd_limited_edition"));
   const metalType = formatMagentoFacetLabel(
     getMagentoCustomAttributeValue(customAttributes, "sd_metal_type"),
   );
@@ -148,6 +168,8 @@ export function mapMagentoProductToJewelleryListing(
     urlKey,
     name,
     price,
+    ...(variantDisplay?.variantPrices.length ? { variantPrices: variantDisplay.variantPrices } : {}),
+    ...(variantDisplay?.metalColorOptions.length ? { metalColorOptions: variantDisplay.metalColorOptions } : {}),
     primaryImage,
     ...(lifestyleImage
       ? { modalImage: lifestyleImage, hoverImage: lifestyleImage }
@@ -157,6 +179,7 @@ export function mapMagentoProductToJewelleryListing(
     ...(metalPurity ? { metalPurity } : {}),
     ...(gemstoneType ? { gemstoneType } : {}),
     ...(isBestseller ? { isBestseller: true } : {}),
+    ...(isLimitedEdition ? { isLimitedEdition: true } : {}),
   };
 }
 

@@ -71,6 +71,7 @@ export interface Product {
   /** Magento `sd_metal_color` slug (e.g. rose-gold). */
   metalColorValue?: string;
   inStock: boolean;
+  isLimitedEdition?: boolean;
   featured: boolean;
   bestseller?: boolean;
   rating: number;

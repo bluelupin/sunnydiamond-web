@@ -58,6 +58,7 @@ export interface JewelleryProductCardProps {
   hoverImage?: string | StaticImageData;
   href: string;
   isBestseller?: boolean;
+  isLimitedEdition?: boolean;
   isWishlisted?: boolean;
   isHoverActive?: boolean;
   onHoverStart?: () => void;
@@ -144,6 +145,7 @@ const JewelleryProductCard = ({
   hoverImage,
   href,
   isBestseller = false,
+  isLimitedEdition = false,
   isWishlisted = false,
   isHoverActive = false,
   onHoverStart,
@@ -385,10 +387,14 @@ const JewelleryProductCard = ({
             "relative z-10 flex w-full flex-col items-center md:gap-6 gap-[10px] px-4 md:px-6 lg:pb-[58px] md:pb-10 pb-6",
           )}
         >
-          {isBestseller ? (
-            <span className="flex md:h-9 h-[25px] shrink-0 items-center justify-center bg-white px-3 font-gill text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:text-sm">
-              BESTSELLER
-            </span>
+          {isBestseller || isLimitedEdition ? (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {[...(isBestseller ? ["BESTSELLER"] : []), ...(isLimitedEdition ? ["LIMITED EDITION"] : [])].map((label) => (
+                <span key={label} className="flex md:h-9 h-[25px] shrink-0 items-center justify-center bg-white px-3 font-gill text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:text-sm">
+                  {label}
+                </span>
+              ))}
+            </div>
           ) : null}
           <ProductCopy
             title={title}

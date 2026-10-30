@@ -11,6 +11,7 @@ export type MagentoCartCategory = {
 
 export type MagentoCartProduct = {
   sku?: string | null;
+  sunny_availability?: "IN_STOCK" | "MADE_TO_ORDER" | "UNAVAILABLE" | null;
   name?: string | null;
   url_key?: string | null;
   categories?: MagentoCartCategory[] | null;
@@ -46,6 +47,8 @@ export type MagentoGiftMode = "GROUPED" | "SEPARATE";
 export type MagentoCartItem = {
   uid?: string | null;
   quantity?: number | null;
+  errors?: Array<{ code?: string | null; message?: string | null }> | null;
+  sunny_stock_issue?: { code: string; message: string; sku: string } | null;
   customizable_options?: MagentoCartCustomizableOption[] | null;
   configurable_options?: MagentoCartConfigurableOption[] | null;
   configured_variant?: MagentoCartProduct | null;
