@@ -4,8 +4,6 @@ import {
   resolveProductCatalogImageSrc,
 } from "@/features/products/utils/productImagePlaceholder";
 
-export const PRODUCT_DETAIL_GALLERY_SLIDE_COUNT = 5;
-
 export type ProductDetailGallerySlots = {
   heroImage: Product["image"];
   thumbOne: Product["image"];
@@ -34,17 +32,12 @@ export const getProductDetailGallerySlots = (product: Product): ProductDetailGal
   };
 };
 
-export const getProductDetailCarouselImages = (product: Product) => {
-  const { heroImage, thumbOne, thumbTwo, lifestyleImage } = getProductDetailGallerySlots(product);
-  const resolvedProductImage = resolveGalleryImage(product.image);
+/** Mobile carousel — same order as desktop: hero, two thumbs, then lifestyle stack. */
+export const getProductDetailCarouselImages = (product: Product): Product["image"][] => {
+  const { heroImage, thumbOne, thumbTwo } = getProductDetailGallerySlots(product);
+  const lifestyleImages = getProductDetailLifestyleImages(product);
 
-  return [
-    heroImage,
-    thumbOne,
-    thumbTwo,
-    lifestyleImage,
-    resolvedProductImage,
-  ].slice(0, PRODUCT_DETAIL_GALLERY_SLIDE_COUNT);
+  return [heroImage, thumbOne, thumbTwo, ...lifestyleImages];
 };
 
 const lifestyleGalleryFrameClass =
