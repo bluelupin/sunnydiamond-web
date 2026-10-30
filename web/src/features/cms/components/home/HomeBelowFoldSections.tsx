@@ -129,7 +129,8 @@ export default function HomeBelowFoldSections({
 
       <LazyHomeSection
         featureName="FeaturedCollectionSection"
-        minHeight="bg-white"
+        // Reserve the mobile hero and product panel before the lazy section mounts.
+        minHeight="min-h-[900px] bg-white md:min-h-[800px]"
         fallback={collectionData && isSectionActive(collectionData.isActive) ? (
           <SeoSectionFallback
             id="alankara"

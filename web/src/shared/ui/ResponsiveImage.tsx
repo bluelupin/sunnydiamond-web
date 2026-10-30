@@ -48,13 +48,15 @@ const ResponsiveImage = ({
   const retinaImage = retinaSrc ? getImageSrc(retinaSrc) : null;
   const hasDistinctMobile = mobileImage !== null && mobileImage !== desktopImage;
   const hasDistinctRetina = retinaImage !== null && retinaImage !== desktopImage;
+  const hasResponsivePair = hasDistinctMobile || hasDistinctRetina;
+  const shouldPreload = priority && !hasResponsivePair;
 
   const imageClassName = cn(fill ? "object-cover" : "h-full w-full object-cover", className);
   const commonProps = {
     alt,
-    priority,
-    loading: priority || eager ? ("eager" as const) : ("lazy" as const),
-    fetchPriority: priority || eager ? ("high" as const) : undefined,
+    preload: shouldPreload,
+    loading: hasResponsivePair ? ("lazy" as const) : eager && !shouldPreload ? ("eager" as const) : undefined,
+    fetchPriority: !shouldPreload && (priority || eager) ? ("high" as const) : undefined,
     sizes,
     quality,
     ...(fill
