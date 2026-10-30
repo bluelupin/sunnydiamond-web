@@ -45,6 +45,7 @@ import {
   peekDiscoverJourneyListingFacets,
   prefetchDiscoverJourneyCategoryFacets,
   primeDiscoverJourneyListingFacetCache,
+  type DiscoverJourneyPriceRange,
 } from "../utils/discoverJourneyAvailability";
 import { buildEducationJourneyHref } from "../utils/educationJourneyRoutes";
 import {
@@ -187,6 +188,9 @@ const EducationDiscoverJourneyPanel = ({
   const step3ShapeVerifyRequestRef = useRef(0);
   const step1ProceedInFlightRef = useRef(false);
   const step1ProceedRequestRef = useRef(0);
+  const committedDiscoverJourneyPriceRangeRef = useRef<DiscoverJourneyPriceRange | null>(
+    null,
+  );
 
   const categories = useMemo(
     () => (navData?.categories ? mapMagentoCategoriesToPlpNav(navData.categories) : []),
@@ -233,6 +237,7 @@ const EducationDiscoverJourneyPanel = ({
       setIsVerifyingAvailability(false);
       step1ProceedInFlightRef.current = false;
       step1ProceedRequestRef.current += 1;
+      committedDiscoverJourneyPriceRangeRef.current = null;
       setIsCheckingStep2Category(false);
       setStep2CategoryHasProducts(null);
       setIsCheckingStep3Shape(false);
@@ -597,6 +602,7 @@ const EducationDiscoverJourneyPanel = ({
           }
 
           const range = commitPriceRangeForProceed();
+          committedDiscoverJourneyPriceRangeRef.current = range;
           const { hasProducts } = await discoverJourneyHasMatchingProducts({
             categoryUrlKey: null,
             range,
@@ -662,12 +668,14 @@ const EducationDiscoverJourneyPanel = ({
     }
 
     const categoryUrlKey = selectedCategory?.urlKey ?? null;
+    const priceRange =
+      committedDiscoverJourneyPriceRangeRef.current ?? { minPrice, maxPrice };
     const href = buildEducationJourneyHref({
       categoryUrlKey,
-      minPrice,
-      maxPrice,
+      minPrice: priceRange.minPrice,
+      maxPrice: priceRange.maxPrice,
       diamondShapeLabel: selectedShape.label,
-      listingFacets: categoryListingFacets ?? facets,
+      priceUrlFacets: facets,
     });
 
     setShowAvailabilityError(false);
@@ -680,6 +688,17 @@ const EducationDiscoverJourneyPanel = ({
       onClose();
     }
   };
+
+  const isPrimaryActionChecking =
+    (step === 1 && isVerifyingAvailability) ||
+    (step === 2 && isCheckingStep2Category) ||
+    (step === 3 && isCheckingStep3Shape);
+
+  const primaryActionLabel = isPrimaryActionChecking
+    ? "Checking..."
+    : step === 3
+      ? "View Products"
+      : "Proceed";
 
   const panelBody = (
     <>
@@ -994,13 +1013,7 @@ const EducationDiscoverJourneyPanel = ({
             }
             className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <span className="relative z-10">
-              {isVerifyingAvailability && step === 1
-                ? "Checking..."
-                : step === 3
-                  ? "View Products"
-                  : "Proceed"}
-            </span>
+            <span className="relative z-10">{primaryActionLabel}</span>
           </button>
         </div>
       </PanelFooter>
