@@ -65,7 +65,7 @@ const CartBenefitsSection = ({ strip }: CartBenefitsSectionProps) => {
                   className="h-10 w-10 object-contain"
                 />
               </div>
-              <div className="md:!max-w-[120px] flex flex-col items-center gap-0 font-gill text-base font-normal leading-110 text-darkblack">
+              <div className="md:min-h-[52px] md:!max-w-[120px] flex flex-col items-center gap-0 font-gill text-base font-normal leading-110 text-darkblack">
                 {benefit.lines.map((line, lineIndex) => (
                   <span key={`${benefit.label}-${lineIndex}`} className="block">
                     {line}
