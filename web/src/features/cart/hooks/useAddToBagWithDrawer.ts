@@ -7,9 +7,12 @@ import { useCartUI } from "@/features/cart/context/CartUIContext";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import { formatAddToBagErrorMessage } from "@/features/cart/utils/formatAddToBagError";
 import { buildOptimisticAddItemResult } from "@/features/cart/utils/optimisticAddToBag";
+import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import { resolveWishlistSkuFromAddToBagPayload } from "@/features/wishlist/utils/resolveWishlistSkuFromAddToBag";
 
 export function useAddToBagWithDrawer() {
   const { addItem, replaceLineItem, showCartStatusToast, totalItems } = useCart();
+  const { isWishlisted, removeFromWishlist } = useWishlist();
   const {
     openBagDrawer,
     updateBagDrawerResult,
@@ -19,9 +22,9 @@ export function useAddToBagWithDrawer() {
   } = useCartUI();
 
   const addToBagAndOpenDrawer = useCallback(
-    async (payload: AddToBagPayload | Product) => {
+    async (payload: AddToBagPayload | Product): Promise<boolean> => {
       if (!tryBeginBagAction()) {
-        return;
+        return false;
       }
 
       openBagDrawer(buildOptimisticAddItemResult(payload, totalItems));
@@ -29,10 +32,22 @@ export function useAddToBagWithDrawer() {
       try {
         const result = await addItem(payload);
         updateBagDrawerResult(result);
+
+        const wishlistSku = resolveWishlistSkuFromAddToBagPayload(payload);
+        if (wishlistSku && isWishlisted(wishlistSku)) {
+          try {
+            await removeFromWishlist(wishlistSku, { showRemovedToast: false });
+          } catch (error) {
+            console.error("Wishlist sync after add to bag failed:", error);
+          }
+        }
+
+        return true;
       } catch (error) {
         closeBagDrawer();
         console.error("Add to bag failed:", error);
         showCartStatusToast(formatAddToBagErrorMessage(error));
+        return false;
       } finally {
         endBagAction();
       }
@@ -41,7 +56,9 @@ export function useAddToBagWithDrawer() {
       addItem,
       closeBagDrawer,
       endBagAction,
+      isWishlisted,
       openBagDrawer,
+      removeFromWishlist,
       showCartStatusToast,
       totalItems,
       tryBeginBagAction,

@@ -18,7 +18,7 @@ import { WishlistPageGridSkeleton } from "./skeletons/WishlistPageSkeleton";
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 
 const WishlistPage = () => {
-  const { wishlistedIds, isWishlistReady, toggleWishlist, removeFromWishlist } = useWishlist();
+  const { wishlistedIds, isWishlistReady, toggleWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
   const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
   const [visibleCount, setVisibleCount] = useState(WISHLIST_VISIBLE_CAP);
@@ -56,18 +56,8 @@ const WishlistPage = () => {
   };
 
   const handlePanelAddToBag = async (payload: Parameters<typeof addToBagAndOpenDrawer>[0]) => {
-    const wishlistSku = addToBagProduct?.sku?.trim() ?? null;
     setAddToBagProduct(null);
-
     await addToBagAndOpenDrawer(payload);
-
-    if (wishlistSku) {
-      try {
-        await removeFromWishlist(wishlistSku, { showRemovedToast: false });
-      } catch {
-        // Bag add succeeded; wishlist removal can be retried from the wishlist page.
-      }
-    }
   };
 
   return (
