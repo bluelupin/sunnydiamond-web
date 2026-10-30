@@ -561,14 +561,17 @@ export function SearchSuggestionsList({
     <div
       className={cn(
         SUGGESTIONS_OVERLAY_Z_CLASS,
-        "fixed flex flex-col overflow-hidden bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+        "fixed flex flex-col overflow-hidden bg-white md:shadow-[0_8px_24px_rgba(0,0,0,0.12)] left-0 w-full px-4",
         className,
       )}
       style={{
         top: resolvedOverlayLayout.top,
-        left: resolvedOverlayLayout.left,
-        width: resolvedOverlayLayout.width,
-        maxHeight: resolvedOverlayLayout.maxHeight,
+        // left: resolvedOverlayLayout.left,
+        // width: resolvedOverlayLayout.width,
+        // maxHeight: resolvedOverlayLayout.maxHeight,
+        minHeight: 'calc(100vh - 126px)',
+        height: 'calc(100vh - 126px)',
+        maxHeight: 'calc(100vh - 126px)',
       }}
       onMouseDown={(event) => event.preventDefault()}
       onClick={(event) => event.stopPropagation()}
