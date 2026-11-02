@@ -33,11 +33,7 @@ const EngravingPreviewImage = ({
       : previewImage ?? null;
   const previewImagePath = typeof previewImage === "string" ? previewImage : null;
   const layout = resolveEngravingPreviewLayout(categorySlug, previewImagePath);
-  const fontSize = resolveEngravingPreviewFontSize(
-    displayText,
-    layout.fontSizeScale ?? 1,
-    font,
-  );
+  const fontSize = resolveEngravingPreviewFontSize(font, categorySlug, previewImagePath);
 
   if (!imageSrc) {
     return null;

@@ -3,6 +3,7 @@ import type { ProductCustomOptions } from "@/features/products/types/productCust
 import type { Product } from "@/features/products/data/products";
 import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
+import { parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import {
   resolveEngravingFontCssFamily,
   resolveEngravingPreviewFontBaseSizePx,
@@ -31,7 +32,10 @@ export const RING_ENGRAVING_PREVIEW_VIEWBOX = ENGRAVING_PREVIEW_VIEWBOX;
 export type EngravingPreviewLayout = {
   viewBox: typeof ENGRAVING_PREVIEW_VIEWBOX;
   textArcPath: string;
-  /** Scales resolved font size for smaller engraving surfaces (earring back, name tag). */
+  /**
+   * @deprecated Surface sizing is baked into `ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY`.
+   * Kept for reference only — not applied when rendering SVG text.
+   */
   fontSizeScale?: number;
   /** Defaults to `xMidYMid slice` on the preview SVG overlay. */
   svgPreserveAspectRatio?: string;
@@ -105,11 +109,9 @@ export function resolveEngravingPreviewCategorySlug(
   categorySlug?: string | null,
   previewImage?: string | null,
 ): JewelleryCategorySlug | null {
-  if (categorySlug) {
-    const normalized = categorySlug.trim().toLowerCase() as JewelleryCategorySlug;
-    if (CATEGORY_ENGRAVING_PREVIEW_LAYOUTS[normalized]) {
-      return normalized;
-    }
+  const parsedSlug = categorySlug ? parseJewelleryCategorySlug(categorySlug) : null;
+  if (parsedSlug && CATEGORY_ENGRAVING_PREVIEW_LAYOUTS[parsedSlug]) {
+    return parsedSlug;
   }
 
   const preview = previewImage?.trim();
@@ -146,32 +148,24 @@ export function resolveEngravingPreviewLayout(
   return DEFAULT_ENGRAVING_PREVIEW_LAYOUT;
 }
 
-/** Scales preview size down as engraving text grows (relative to the 5-char reference). */
-function resolveEngravingPreviewLengthSizeFactor(text: string): number {
-  const length = text.trim().length;
-  let referencePx: number;
-  if (length <= 5) referencePx = 14;
-  else if (length <= 8) referencePx = 13.5;
-  else if (length <= 12) referencePx = 12.5;
-  else referencePx = 11.5;
+/** Fallback SVG `fontSize` when no Magento font is selected or the family is unmapped. */
+const ENGRAVING_PREVIEW_UNMAPPED_FONT_SIZE = 14;
 
-  return referencePx / 14;
-}
-
+/**
+ * Resolves SVG `fontSize` in preview viewBox units — exactly the configured category + font value.
+ */
 export function resolveEngravingPreviewFontSize(
-  text: string,
-  fontSizeScale = 1,
   fontLabel?: string | null,
+  categorySlug?: string | null,
+  previewImage?: string | null,
 ): number {
   const trimmedFont = fontLabel?.trim() ?? "";
-  const fontBasePx = trimmedFont ? resolveEngravingPreviewFontBaseSizePx(trimmedFont) : null;
-  const lengthFactor = resolveEngravingPreviewLengthSizeFactor(text);
+  const previewCategory = resolveEngravingPreviewCategorySlug(categorySlug, previewImage);
+  const fontBasePx = trimmedFont
+    ? resolveEngravingPreviewFontBaseSizePx(trimmedFont, previewCategory)
+    : null;
 
-  const basePx = fontBasePx ?? 14 * lengthFactor;
-  const scaled =
-    fontBasePx != null ? fontBasePx * lengthFactor * fontSizeScale : basePx * fontSizeScale;
-
-  return Math.round(scaled * 10) / 10;
+  return fontBasePx ?? ENGRAVING_PREVIEW_UNMAPPED_FONT_SIZE;
 }
 
 const CATALOG_PRODUCT_IMAGE_PATTERN = /\/catalog\/product\//i;
