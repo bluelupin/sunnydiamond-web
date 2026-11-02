@@ -1,0 +1,33 @@
+# Optional but strongly recommended for Forge + Nginx.
+# Add INSIDE your site's server { } block (adjust paths to your Forge site directory).
+#
+# When web/.maintenance exists, Nginx serves the static page for EVERY request —
+# including /_next/* — without hitting Node during npm run build / pm2 restart.
+
+# set $site_root /home/forge/sunnydiamonds-web-staging.on-forge.com/web;
+
+# location = /maintenance.html {
+#   alias $site_root/public/maintenance.html;
+#   default_type text/html;
+#   add_header Cache-Control "no-store, max-age=0";
+# }
+#
+# location / {
+#   if (-f $site_root/.maintenance) {
+#     rewrite ^ /maintenance.html break;
+#   }
+#   proxy_pass http://127.0.0.1:3000;
+#   proxy_http_version 1.1;
+#   proxy_set_header Upgrade $http_upgrade;
+#   proxy_set_header Connection 'upgrade';
+#   proxy_set_header Host $host;
+#   proxy_set_header X-Sunny-Maintenance $sunny_maintenance;
+#   proxy_cache_bypass $http_upgrade;
+# }
+
+# Alternative: pass a header when the flag file exists (works with app middleware only):
+# set $sunny_maintenance 0;
+# if (-f $site_root/.maintenance) {
+#   set $sunny_maintenance 1;
+# }
+# proxy_set_header X-Sunny-Maintenance $sunny_maintenance;

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isMaintenanceModeEnabledByEnv } from "@/shared/lib/maintenanceModeEnv";
+import {
+  isMaintenanceModeEnabledByRequestHeader,
+  shouldFailClosedOnMaintenanceStatusError,
+} from "@/shared/lib/maintenanceModeRequest";
 
 const MAINTENANCE_STATUS_PATH = "/api/maintenance/status";
 const MAINTENANCE_PAGE_PATH = "/maintenance.html";
@@ -10,7 +14,7 @@ const maintenanceStatusCache = {
   checkedAt: 0,
 };
 
-const MAINTENANCE_STATUS_CACHE_MS = 2_000;
+const MAINTENANCE_STATUS_CACHE_MS = 500;
 
 function isMaintenanceBypassPath(pathname: string): boolean {
   return (
@@ -20,6 +24,10 @@ function isMaintenanceBypassPath(pathname: string): boolean {
 }
 
 async function isMaintenanceActive(request: NextRequest): Promise<boolean> {
+  if (isMaintenanceModeEnabledByRequestHeader(request)) {
+    return true;
+  }
+
   if (isMaintenanceModeEnabledByEnv()) {
     return true;
   }
@@ -37,19 +45,22 @@ async function isMaintenanceActive(request: NextRequest): Promise<boolean> {
     });
 
     if (!response.ok) {
+      const failClosed = shouldFailClosedOnMaintenanceStatusError();
       maintenanceStatusCache.checkedAt = now;
-      maintenanceStatusCache.value = false;
-      return false;
+      maintenanceStatusCache.value = failClosed;
+      return failClosed;
     }
 
     const payload = (await response.json()) as { maintenance?: boolean };
-    maintenanceStatusCache.value = Boolean(payload.maintenance);
+    const active = Boolean(payload.maintenance);
+    maintenanceStatusCache.value = active;
     maintenanceStatusCache.checkedAt = now;
-    return maintenanceStatusCache.value;
+    return active;
   } catch {
+    const failClosed = shouldFailClosedOnMaintenanceStatusError();
     maintenanceStatusCache.checkedAt = now;
-    maintenanceStatusCache.value = false;
-    return false;
+    maintenanceStatusCache.value = failClosed;
+    return failClosed;
   }
 }
 

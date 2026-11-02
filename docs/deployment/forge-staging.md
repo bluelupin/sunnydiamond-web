@@ -14,32 +14,28 @@ The workflow reports whether Forge accepted the trigger request. Check the deplo
 
 ## Maintenance mode during deploy
 
-To avoid broken or partially updated UI while a new build is rolling out, the app can serve a standalone **`/maintenance.html`** page for all routes (including `/_next/*`).
+Broken UI during deploy (unstyled HTML, missing `/_next` CSS) happens when **maintenance was never enabled** on the server or Nginx serves static assets while Node is mid-build. Fix both:
 
-Maintenance is active when **either**:
+1. **Forge Deploy Script** — use `web/scripts/forge-deploy.sh` (or equivalent) so **`web/.maintenance` is created before `npm run build`** and removed after, with **`pm2 reload`** after each toggle.
+2. **Nginx (recommended)** — add `docs/deployment/forge-nginx-maintenance.conf.example` so when `.maintenance` exists, **all requests** (including `/_next/*`) get `maintenance.html` without hitting Node.
 
-1. **`MAINTENANCE_MODE=true`** (or `1` / `yes`) is set in the Forge site environment, or  
-2. A **`web/.maintenance`** flag file exists on the server (not committed to git).
+Maintenance is active when **any** of these apply:
 
-### Recommended Forge deploy script order
+1. **`web/.maintenance`** flag file on the server (primary; read at runtime by `/api/maintenance/status`),  
+2. **`X-Sunny-Maintenance: 1`** request header (from Nginx when the flag file exists), or  
+3. **`MAINTENANCE_MODE=true`** in the Forge environment (also read at runtime by the status API; reload PM2 after changing).
+
+### Forge deploy script (required)
+
+In Forge → your site → **Deploy Script**, use the repo script (adjust PM2 name if needed):
 
 ```bash
-cd /home/forge/your-site/web
-
-# 1. Enable maintenance before stopping or rebuilding
-node scripts/toggle-maintenance.mjs on
-# Optional: reload the Node process so in-flight requests drain cleanly
-# pm2 reload sunnydiamond-web --update-env
-
-# 2. Pull, install, build (your existing steps)
-git pull origin $FORGE_SITE_BRANCH
-npm ci
-npm run build
-
-# 3. Disable maintenance and restart
-node scripts/toggle-maintenance.mjs off
-# pm2 reload sunnydiamond-web --update-env
+bash web/scripts/forge-deploy.sh
 ```
+
+Or paste the same steps manually — **maintenance ON → pm2 reload → pull → npm ci → build → maintenance OFF → pm2 reload**.
+
+Without **`node scripts/toggle-maintenance.mjs on`** before build, users will keep seeing broken pages like unstyled layout + partial images.
 
 While maintenance is on, visitors see the static page (no React chunks). The page polls **`GET /api/maintenance/status`** every 15 seconds and returns to **`/`** when maintenance is off.
 

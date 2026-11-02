@@ -22,10 +22,12 @@ if (mode !== "on" && mode !== "off") {
 if (mode === "on") {
   await fs.writeFile(flagPath, `${new Date().toISOString()}\n`, "utf8");
   console.log(`Maintenance enabled (${FLAG} created).`);
+  console.log("Reload the Node process (e.g. pm2 reload all --update-env) so traffic switches immediately.");
 } else {
   try {
     await fs.unlink(flagPath);
-    console.log(`Maintenance disabled (${FLAG} removed).`);
+      console.log(`Maintenance disabled (${FLAG} removed).`);
+      console.log("Reload the Node process (e.g. pm2 reload all --update-env) when deploy is complete.");
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
       console.log(`Maintenance already off (${FLAG} not present).`);
