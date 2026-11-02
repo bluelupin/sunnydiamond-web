@@ -5,7 +5,7 @@ import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
 import {
   resolveEngravingFontCssFamily,
-  resolveEngravingFontPreviewSizePx,
+  resolveEngravingPreviewFontBaseSizePx,
 } from "@/features/products/constants/engravingFontAssets";
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
@@ -164,7 +164,7 @@ export function resolveEngravingPreviewFontSize(
   fontLabel?: string | null,
 ): number {
   const trimmedFont = fontLabel?.trim() ?? "";
-  const fontBasePx = trimmedFont ? resolveEngravingFontPreviewSizePx(trimmedFont) : null;
+  const fontBasePx = trimmedFont ? resolveEngravingPreviewFontBaseSizePx(trimmedFont) : null;
   const lengthFactor = resolveEngravingPreviewLengthSizeFactor(text);
 
   const basePx = fontBasePx ?? 14 * lengthFactor;

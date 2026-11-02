@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import {
   resolveEngravingFontFamilyStyle,
-  resolveEngravingFontPreviewSizePx,
+  resolveEngravingPanelFontDropdownSizePx,
 } from "@/features/products/constants/engravingFontAssets";
 
 /** Inline styles for engraving panel font select trigger and list options. */
@@ -13,7 +13,7 @@ export function resolveEngravingPanelFontOptionStyle(
     return undefined;
   }
 
-  const fontSizePx = resolveEngravingFontPreviewSizePx(magentoLabel);
+  const fontSizePx = resolveEngravingPanelFontDropdownSizePx(magentoLabel);
 
   if (fontSizePx == null) {
     return familyStyle;
