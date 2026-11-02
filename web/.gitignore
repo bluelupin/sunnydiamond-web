@@ -25,16 +25,13 @@
 *.pem
 
 # debug
-npm-debug.log*
+npm-debug.log*forge-staging.md
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-
-# runtime deploy maintenance flag (see docs/deployment/forge-staging.md)
-.maintenance
 
 # vercel
 .vercel
