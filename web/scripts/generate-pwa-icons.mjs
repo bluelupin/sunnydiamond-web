@@ -20,9 +20,10 @@ const BACKGROUND = "#FFFFFF";
 
 const LOGO_VIEW = 62;
 
-/** Logo occupies this fraction of the canvas edge (512 baseline: 320px any, 256px maskable). */
-const ANY_LOGO_FRACTION = 0.625;
-const MASKABLE_LOGO_FRACTION = 0.5;
+/** Logo occupies this fraction of the canvas edge (1024 master: ~738px any, ~594px maskable). */
+const ANY_LOGO_FRACTION = 0.72;
+/** Maskable safe zone — keep below ~0.62 so circular crops on Android/iOS do not clip the mark. */
+const MASKABLE_LOGO_FRACTION = 0.58;
 
 const MASTER_SIZE = 1024;
 
@@ -63,9 +64,12 @@ function buildFaviconSvg(canvasSize, logoFraction, fill) {
   );
 }
 
-async function writePng(canvasSize, logoFraction, fill, outPath, outputSize) {
-  const svg = buildIconSvg(canvasSize, logoFraction, fill);
-  await sharp(svg).resize(outputSize, outputSize).png().toFile(outPath);
+async function writePng(logoFraction, outPath, outputSize, fill = ICON_BLACK) {
+  const svg = buildIconSvg(MASTER_SIZE, logoFraction, fill);
+  await sharp(svg)
+    .resize(outputSize, outputSize, { kernel: sharp.kernel.lanczos3 })
+    .png()
+    .toFile(outPath);
   console.log(`Wrote ${path.relative(webRoot, outPath)}`);
 }
 
@@ -88,8 +92,14 @@ async function writeFavicons() {
 
   const faviconIco = await import("to-ico");
   const favSvg = buildFaviconSvg(512, ANY_LOGO_FRACTION, ICON_BLACK);
-  const fav16 = await sharp(favSvg).resize(16, 16).png().toBuffer();
-  const fav32 = await sharp(favSvg).resize(32, 32).png().toBuffer();
+  const fav16 = await sharp(favSvg)
+    .resize(16, 16, { kernel: sharp.kernel.lanczos3 })
+    .png()
+    .toBuffer();
+  const fav32 = await sharp(favSvg)
+    .resize(32, 32, { kernel: sharp.kernel.lanczos3 })
+    .png()
+    .toBuffer();
   await fs.writeFile(
     path.join(publicDir, "favicon.ico"),
     await faviconIco.default([fav16, fav32]),
@@ -98,7 +108,10 @@ async function writeFavicons() {
 }
 
 async function writePngFromSvg(svg, outPath, outputSize) {
-  await sharp(svg).resize(outputSize, outputSize).png().toFile(outPath);
+  await sharp(svg)
+    .resize(outputSize, outputSize, { kernel: sharp.kernel.lanczos3 })
+    .png()
+    .toFile(outPath);
   console.log(`Wrote ${path.relative(webRoot, outPath)}`);
 }
 
@@ -108,28 +121,22 @@ if (faviconsOnly) {
 }
 
 await writePng(
-  MASTER_SIZE,
   ANY_LOGO_FRACTION,
-  ICON_BLACK,
   path.join(pwaDir, "app-icon-master-1024x1024.png"),
   MASTER_SIZE,
 );
 
-await writePng(512, ANY_LOGO_FRACTION, ICON_BLACK, path.join(publicDir, "android-chrome-512x512.png"), 512);
-await writePng(512, ANY_LOGO_FRACTION, ICON_BLACK, path.join(publicDir, "android-chrome-192x192.png"), 192);
+await writePng(ANY_LOGO_FRACTION, path.join(publicDir, "android-chrome-512x512.png"), 512);
+await writePng(ANY_LOGO_FRACTION, path.join(publicDir, "android-chrome-192x192.png"), 192);
 await writePng(
-  512,
   MASKABLE_LOGO_FRACTION,
-  ICON_BLACK,
   path.join(pwaDir, "android-chrome-512x512-maskable.png"),
   512,
 );
 await writePng(
-  512,
   MASKABLE_LOGO_FRACTION,
-  ICON_BLACK,
   path.join(pwaDir, "android-chrome-192x192-maskable.png"),
   192,
 );
-await writePng(512, ANY_LOGO_FRACTION, ICON_BLACK, path.join(publicDir, "apple-touch-icon.png"), 180);
+await writePng(ANY_LOGO_FRACTION, path.join(publicDir, "apple-touch-icon.png"), 180);
 await writeFavicons();
