@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# runtime deploy maintenance flag (see docs/deployment/forge-staging.md)
+.maintenance
+
 # vercel
 .vercel
 
