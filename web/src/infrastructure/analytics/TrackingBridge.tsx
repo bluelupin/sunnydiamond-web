@@ -9,7 +9,7 @@ const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 const ga4MeasurementId = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
 const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 const clarityProjectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
-const production = process.env.NEXT_PUBLIC_APP_ENV === "production";
+const trackingEnabled = Boolean(gtmId && /^GTM-[A-Z0-9]+$/.test(gtmId));
 const campaignKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const contactValue = /[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+?\d[\s().-]*){10,}/i;
 const clarityAllowed = (path: string) => path === "/" || /^\/(jewellery|product)(\/|$)/.test(path);
@@ -48,7 +48,7 @@ export default function TrackingBridge() {
   const lastPage = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!production || !gtmId || !/^GTM-[A-Z0-9]+$/.test(gtmId)) return;
+    if (!trackingEnabled || !gtmId) return;
     let active = true;
     const sync = () => {
       const choice = readConfirmedConsent();
@@ -88,7 +88,7 @@ export default function TrackingBridge() {
   }, []);
 
   useEffect(() => {
-    if (!production || !gtmId) return;
+    if (!trackingEnabled) return;
     const onClick = (event: MouseEvent) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const target = event.target;
@@ -105,14 +105,14 @@ export default function TrackingBridge() {
   }, []);
 
   useEffect(() => {
-    if (!production || !gtmId) return;
+    if (!trackingEnabled) return;
     const clarity = (window as Window & { clarity?: (...args: unknown[]) => void }).clarity;
     if (clarityAllowed(pathname ?? "/") && readConfirmedConsent()?.preferences.analytics) clarity?.("resume");
     else clarity?.("pause");
   }, [pathname]);
 
   useEffect(() => {
-    if (!production || !gtmId || !readConfirmedConsent()) return;
+    if (!trackingEnabled || !readConfirmedConsent()) return;
     const query = searchParams?.toString();
     const path = `${pathname ?? "/"}${query ? `?${query}` : ""}`;
     if (path === lastPage.current) return;

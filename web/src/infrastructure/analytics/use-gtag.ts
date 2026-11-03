@@ -3,7 +3,7 @@ import { readConfirmedConsent } from "@/shared/cookies/cookieConsentStorage";
 declare global { interface Window { dataLayer?: Record<string, unknown>[] } }
 
 export function trackEvent(action: string, params?: Record<string, unknown>) {
-  if (typeof window === "undefined" || process.env.NEXT_PUBLIC_APP_ENV !== "production" || !process.env.NEXT_PUBLIC_GTM_ID) return;
+  if (typeof window === "undefined" || !/^GTM-[A-Z0-9]+$/.test(process.env.NEXT_PUBLIC_GTM_ID ?? "")) return;
   if (action === "search" && typeof params?.search_term === "string" &&
     /[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+?\d[\s().-]*){10,}/i.test(params.search_term)) return;
   const choice = readConfirmedConsent();
