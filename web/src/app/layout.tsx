@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import Script from "next/script";
 import "./globals.css";
 import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
-import GoogleAnalytics from "@/infrastructure/analytics/GoogleAnalytics";
+import TrackingBridge from "@/infrastructure/analytics/TrackingBridge";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
 import { UI_PLATFORM_BOOTSTRAP_SCRIPT } from "@/shared/constants/uiPlatformBootstrapScript";
@@ -123,7 +124,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
         <PwaLaunchSplashStatic />
-        <GoogleAnalytics />
+        <Suspense fallback={null}><TrackingBridge /></Suspense>
         <PwaStandaloneUiSetup />
         <PwaServiceWorkerRegistration />
         <div className="pwa-app-shell-gate">

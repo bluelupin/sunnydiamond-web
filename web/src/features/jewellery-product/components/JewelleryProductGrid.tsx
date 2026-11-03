@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { COOKIE_CONSENT_CHANGED, readConfirmedConsent } from "@/shared/cookies/cookieConsentStorage";
 import JewelleryProductCard from "./JewelleryProductCard";
 import JewelleryListingPromoCard from "./JewelleryListingPromoCard";
 import { useJewelleryPlpViewport } from "../hooks/useJewelleryPlpViewport";
@@ -32,6 +34,29 @@ const JewelleryProductGrid = ({
 }: JewelleryProductGridProps) => {
   const viewport = useJewelleryPlpViewport();
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
+  const listContext = useRef("");
+  const seenListSkus = useRef(new Set<string>());
+
+  useEffect(() => {
+    const emit = () => {
+      if (!readConfirmedConsent() || products.length === 0) return;
+      const key = `${window.location.pathname}${window.location.search}`;
+      if (key !== listContext.current) {
+        listContext.current = key;
+        seenListSkus.current.clear();
+      }
+      const newProducts = products.map((item, index) => ({ item, index }))
+        .filter(({ item }) => !seenListSkus.current.has(item.sku));
+      if (newProducts.length === 0) return;
+      for (const { item } of newProducts) seenListSkus.current.add(item.sku);
+      trackEvent("view_item_list", { item_list_id: "jewellery", items: newProducts.slice(0, 200).map(({ item, index }) => ({
+        item_id: item.sku, item_name: item.name, price: getJewelleryListingDisplayPrice(item, metalTypeQuery, metalPurityQuery), index,
+      })) });
+    };
+    emit();
+    window.addEventListener(COOKIE_CONSENT_CHANGED, emit);
+    return () => window.removeEventListener(COOKIE_CONSENT_CHANGED, emit);
+  }, [products, metalTypeQuery, metalPurityQuery]);
 
   const gridItems = useMemo(
     () => buildJewelleryPlpGridItems(products, listingCards, viewport, pageSize),
@@ -93,6 +118,10 @@ const JewelleryProductGrid = ({
             onToggleWishlist={
               onToggleWishlist ? () => onToggleWishlist(product.id) : undefined
             }
+            onSelect={() => trackEvent("select_item", { item_list_id: "jewellery", items: [{
+              item_id: product.sku, item_name: product.name,
+              price: getJewelleryListingDisplayPrice(product, metalTypeQuery, metalPurityQuery),
+            }] })}
           />
         );
       })}

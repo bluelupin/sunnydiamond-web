@@ -13,9 +13,12 @@ import {
 import { clearGuestWishlistStorage } from "@/features/wishlist/utils/guestWishlistStorage";
 import { clearAuthLoginIdentifierKind } from "@/features/auth/utils/authLoginIdentifier";
 import { sanitizeAuthCustomer } from "@/shared/utils/customerName";
+import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { COOKIE_CONSENT_CHANGED, linkConfirmedConsentToCustomer, readConfirmedConsent } from "@/shared/cookies/cookieConsentStorage";
 
 export type AuthCustomer = {
   id: number;
+  analyticsUserId?: string;
   firstname: string;
   lastname: string;
   email: string;
@@ -44,6 +47,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const SESSION_RETRY_LIMIT = 3;
 const SESSION_RETRY_DELAY_MS = 3000;
 
+function syncAnalyticsIdentity(customer: AuthCustomer | null) {
+  if (process.env.NEXT_PUBLIC_APP_ENV !== "production" || !process.env.NEXT_PUBLIC_GTM_ID) return;
+  window.dataLayer ??= [];
+  window.dataLayer.push({ user_id: readConfirmedConsent()?.preferences.analytics ? customer?.analyticsUserId ?? null : null });
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [customer, setCustomer] = useState<AuthCustomer | null>(null);
@@ -54,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshRef = useRef<() => Promise<void>>(async () => {});
 
   const applyStatus = useCallback((next: AuthStatus) => {
+    if (statusRef.current === "guest" && next === "authenticated") trackEvent("login", { method: "account" });
     statusRef.current = next;
     setStatus(next);
   }, []);
@@ -77,8 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("auth/me unavailable");
       }
       retryCountRef.current = 0;
+      syncAnalyticsIdentity(result.customer);
       setCustomer(result.customer ? sanitizeAuthCustomer(result.customer) : null);
       applyStatus(result.customer ? "authenticated" : "guest");
+      if (result.customer) void linkConfirmedConsentToCustomer(result.customer.id);
     } catch {
       // The session endpoint is unreachable — we have NO answer about the
       // session, so never resolve to "guest" on a blip: that bounced valid
@@ -109,10 +121,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshRef.current = refresh;
   }, [refresh]);
 
+  useEffect(() => {
+    if (!customer) return;
+    const link = () => { syncAnalyticsIdentity(customer); void linkConfirmedConsentToCustomer(customer.id); };
+    window.addEventListener(COOKIE_CONSENT_CHANGED, link);
+    return () => window.removeEventListener(COOKIE_CONSENT_CHANGED, link);
+  }, [customer]);
+
   const logout = useCallback(async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
+      syncAnalyticsIdentity(null);
       // Do not set guest in React here — ProfileAuthGate would router.replace to
       // /login before navigation finishes (login UI flicker). Home reload
       // rehydrates guest state from /api/auth/me.

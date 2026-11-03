@@ -695,6 +695,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             item_id: lineItem.product.id,
             item_name: lineItem.product.name,
             price: lineItem.product.price,
+            quantity: 1,
           },
         ],
       });

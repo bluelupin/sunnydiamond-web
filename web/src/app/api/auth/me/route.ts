@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHmac } from "node:crypto";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import { decodeMagentoEntityId } from "@/services/magento/decodeMagentoEntityId";
@@ -9,6 +10,7 @@ import { mapMagentoCustomerNameForClient } from "@/shared/utils/customerName";
 export type AuthMeResponse = {
   customer: {
     id: number;
+    analyticsUserId?: string;
     firstname: string;
     lastname: string;
     email: string;
@@ -111,6 +113,10 @@ export async function GET() {
     return NextResponse.json({
       customer: {
         id,
+        ...(process.env.ANALYTICS_USER_ID_SECRET
+          ? { analyticsUserId: createHmac("sha256", process.env.ANALYTICS_USER_ID_SECRET)
+            .update(`sunny-diamonds:magento-customer:${id}`).digest("hex") }
+          : {}),
         firstname,
         lastname,
         email: customer.email,

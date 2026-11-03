@@ -12,8 +12,12 @@ import { cn } from "@/shared/utils/cn";
 import { isAuthRoute } from "@/shared/utils/navigation";
 import { COOKIE_CONSENT_COPY } from "./cookieConsentCopy";
 import {
-  persistCookieConsentChoice,
+  createConsentChoice,
+  OPEN_COOKIE_SETTINGS,
+  readConfirmedConsent,
   readCookieConsentPreferences,
+  storePendingConsent,
+  submitPendingConsent,
   type CookieConsentPreferences,
   wasCookieConsentBannerDismissed,
 } from "./cookieConsentStorage";
@@ -28,8 +32,8 @@ export default function CookieConsentBanner() {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<BannerPhase>("hidden");
   const [expanded, setExpanded] = useState(false);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
-  const [marketingEnabled, setMarketingEnabled] = useState(true);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+  const [marketingEnabled, setMarketingEnabled] = useState(false);
 
   const suppressOnRoute = isAuthRoute(pathname);
 
@@ -53,6 +57,18 @@ export default function CookieConsentBanner() {
     setExpanded(false);
     setOpen(true);
   }, [mounted, suppressOnRoute]);
+
+  useEffect(() => {
+    const reopen = () => {
+      const stored = readCookieConsentPreferences();
+      setAnalyticsEnabled(stored.analytics);
+      setMarketingEnabled(stored.marketing);
+      setExpanded(true);
+      setOpen(true);
+    };
+    window.addEventListener(OPEN_COOKIE_SETTINGS, reopen);
+    return () => window.removeEventListener(OPEN_COOKIE_SETTINGS, reopen);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -104,8 +120,16 @@ export default function CookieConsentBanner() {
   };
 
   const closeBanner = useCallback((preferences: CookieConsentPreferences) => {
-    persistCookieConsentChoice(preferences);
+    const previous = readConfirmedConsent()?.preferences;
+    const choice = createConsentChoice(preferences);
+    if (!storePendingConsent(choice)) return;
     setOpen(false);
+    if ((previous?.analytics && !preferences.analytics) || (previous?.marketing && !preferences.marketing)) {
+      // Unload provider scripts after withdrawal; the pending choice blocks their reload.
+      window.location.reload();
+      return;
+    }
+    void submitPendingConsent(choice);
   }, []);
 
   const handleAcceptAll = useCallback(() => {

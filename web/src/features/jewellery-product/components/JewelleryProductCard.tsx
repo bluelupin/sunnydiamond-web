@@ -64,6 +64,7 @@ export interface JewelleryProductCardProps {
   onHoverStart?: () => void;
   onHoverEnd?: () => void;
   onToggleWishlist?: () => void;
+  onSelect?: () => void;
   priorityImage?: boolean;
 }
 
@@ -72,9 +73,10 @@ type ProductCopyProps = {
   price: number;
   href: string;
   className?: string;
+  onSelect?: () => void;
 };
 
-const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => {
+const ProductCopy = ({ title, price, href, className, onSelect }: ProductCopyProps) => {
   const { lead, remainder } = splitPlpProductTitle(title);
   const titleLinkClassName = cn(
     "!leading-110 w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
@@ -93,6 +95,7 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => {
   >
     <Link
       href={href}
+      onClick={onSelect}
       title={title}
       className={cn(titleLinkClassName, "md:line-clamp-2")}
     >
@@ -151,6 +154,7 @@ const JewelleryProductCard = ({
   onHoverStart,
   onHoverEnd,
   onToggleWishlist,
+  onSelect,
   priorityImage = false,
 }: JewelleryProductCardProps) => {
   const [inputMode, setInputMode] = useState<"hover" | "touch" | null>(null);
@@ -400,6 +404,7 @@ const JewelleryProductCard = ({
             title={title}
             price={price}
             href={href}
+            onSelect={onSelect}
             className={cn(shouldRevealLifestyle && lifestyleLayerOpaque && "text-white")}
           />
         </div>
@@ -410,7 +415,10 @@ const JewelleryProductCard = ({
         href={href}
         className="col-start-1 row-start-1 z-30 size-full"
         aria-label={`View ${title}`}
-        onClick={touchImageSwapEnabled ? cardImageSwipe.handleLinkClick : undefined}
+        onClick={(event) => {
+          if (touchImageSwapEnabled) cardImageSwipe.handleLinkClick(event);
+          if (!event.defaultPrevented) onSelect?.();
+        }}
       />
 
       <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-2 pt-2 md:z-50 md:px-6 md:pt-6">

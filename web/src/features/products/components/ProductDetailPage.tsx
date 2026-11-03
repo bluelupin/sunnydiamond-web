@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { COOKIE_CONSENT_CHANGED, readConfirmedConsent } from "@/shared/cookies/cookieConsentStorage";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { Product } from "@/features/products/data/products";
@@ -101,6 +103,22 @@ const ProductDetailPageBody = ({
     [product, selectedMetal, preferredPurities],
   );
   const pricing = getProductDetailPricing(displayProduct);
+  const lastViewKey = useRef("");
+  useEffect(() => {
+    const emit = () => {
+      if (!readConfirmedConsent()) return;
+      const key = `${displayProduct.productSku ?? displayProduct.id}:${pricing.price}`;
+      if (lastViewKey.current === key) return;
+      lastViewKey.current = key;
+      trackEvent("view_item", { currency: "INR", value: pricing.price, items: [{
+        item_id: displayProduct.productSku ?? displayProduct.id,
+        item_name: displayProduct.name, price: pricing.price,
+      }] });
+    };
+    emit();
+    window.addEventListener(COOKIE_CONSENT_CHANGED, emit);
+    return () => window.removeEventListener(COOKIE_CONSENT_CHANGED, emit);
+  }, [displayProduct, pricing.price]);
   const displayContent = useMemo(
     () => ({
       ...content,

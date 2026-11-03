@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
+import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import AppStatusToast, { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
@@ -245,6 +246,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         lastLocalMutationAtRef.current = Date.now();
         setWishlistedIds(next);
         writeGuestWishlistToStorage(next);
+        if (action === "add") trackEvent("add_to_wishlist", { items: [{ item_id: normalizedSku }] });
 
         if (action === "add") {
           if (options.showMovedToast !== false) {
@@ -311,6 +313,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         }
 
         setWishlistedIds(wishlist.skus);
+        if (action === "add") trackEvent("add_to_wishlist", { items: [{ item_id: normalizedSku }] });
       } catch (error) {
         if (toggleGeneration !== toggleGenerationRef.current) {
           throw error;

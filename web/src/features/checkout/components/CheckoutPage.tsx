@@ -106,6 +106,8 @@ const CheckoutPage = () => {
   const {
     items,
     totalPrice,
+    taxes,
+    shipping,
     clearCart,
     removeItem,
     applyMagentoCartState,
@@ -368,9 +370,14 @@ const CheckoutPage = () => {
         // Order placement already succeeded; metadata attachment is best-effort.
       }
 
-      trackEvent("purchase", {
+      const purchaseKey = `sunny.analytics.purchase.${input.orderNumber}`;
+      let purchaseSent = false;
+      try { purchaseSent = window.sessionStorage.getItem(purchaseKey) === "1"; } catch { /* unavailable */ }
+      if (!purchaseSent) trackEvent("purchase", {
         currency: "INR",
         value: input.orderTotal,
+        tax: taxes,
+        shipping,
         transaction_id: input.orderNumber,
         items: input.orderItems.map((item) => ({
           item_id: item.product.id,
@@ -379,6 +386,9 @@ const CheckoutPage = () => {
           quantity: item.quantity,
         })),
       });
+      if (!purchaseSent) {
+        try { window.sessionStorage.setItem(purchaseKey, "1"); } catch { /* unavailable */ }
+      }
 
       let accountReady = input.wasAuthenticated;
 
@@ -398,7 +408,7 @@ const CheckoutPage = () => {
         await persistGuestCheckoutAddresses(input.orderForm);
       }
     },
-    [clearCart, refreshAuth, showOrderPlacedToast],
+    [clearCart, refreshAuth, showOrderPlacedToast, taxes, shipping],
   );
 
   useEffect(() => {
@@ -522,6 +532,8 @@ const CheckoutPage = () => {
       trackEvent("begin_checkout", {
         currency: "INR",
         value: totalPrice,
+        tax: taxes,
+        shipping,
         items: items.map((item) => ({
           item_id: item.product.id,
           item_name: item.product.name,
@@ -530,7 +542,7 @@ const CheckoutPage = () => {
         })),
       });
     }
-  }, [items, totalPrice, step]);
+  }, [items, totalPrice, taxes, shipping, step]);
 
   useEffect(() => {
     if (!isHydrating) {
