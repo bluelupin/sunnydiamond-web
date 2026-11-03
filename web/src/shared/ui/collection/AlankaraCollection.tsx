@@ -96,7 +96,7 @@ function CroppedFillImage({
             sizes={sizes}
             priority={priority}
             quality={DEFAULT_IMAGE_QUALITY}
-            className={cn("object-cover", className)}
+            className={cn("object-cover object-top", className)}
           />
         </div>
       </div>
@@ -238,7 +238,7 @@ function CollectionHeroPanel({
             width={375}
             height={540}
             quality={DEFAULT_IMAGE_QUALITY}
-            className="size-full object-cover"
+            className="size-full object-cover object-top"
           />
         ) : (
           <CroppedFillImage
