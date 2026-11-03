@@ -43,7 +43,7 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
   const hasImage = ctaBanner.hasCmsBackgroundImage && Boolean(ctaBanner.imageDesktopUrl);
 
   return (
-    <section aria-labelledby="education-discover-title" className="bg-gray300">
+    <section aria-labelledby="education-discover-title" className="bg-gray300 overflow-hidden">
       <div className="isolate flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-20 xl:gap-101px] md:gap-8">
         {hasImage ? (
           <Reveal
