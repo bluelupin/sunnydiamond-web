@@ -46,15 +46,20 @@ export default function TrackingBridge() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lastPage = useRef<string | null>(null);
+  const previousConsent = useRef<{ analytics: boolean; marketing: boolean } | null>(null);
 
   useEffect(() => {
-    if (!trackingEnabled || !gtmId) return;
+    if (!trackingEnabled) return;
     let active = true;
     const sync = () => {
       const choice = readConfirmedConsent();
       const analytics = choice?.preferences.analytics === true;
       const marketing = choice?.preferences.marketing === true;
       if (!choice) lastPage.current = null;
+      if ((analytics && !previousConsent.current?.analytics) || (marketing && !previousConsent.current?.marketing)) {
+        lastPage.current = null;
+      }
+      previousConsent.current = { analytics, marketing };
       window.dataLayer ??= [];
       window.dataLayer.push({
         ga4_measurement_id: ga4MeasurementId && /^G-[A-Z0-9]+$/.test(ga4MeasurementId) ? ga4MeasurementId : undefined,
@@ -63,7 +68,7 @@ export default function TrackingBridge() {
       });
       window.dataLayer.push({ event: "consent_state", analytics_consent: analytics, marketing_consent: marketing });
       updateLoadedProviders(analytics, marketing);
-      if ((analytics || marketing) && !document.getElementById("sunny-gtm")) {
+      if (gtmId && trackingEnabled && (analytics || marketing) && !document.getElementById("sunny-gtm")) {
         const script = document.createElement("script");
         script.id = "sunny-gtm";
         script.async = true;

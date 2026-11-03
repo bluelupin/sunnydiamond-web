@@ -50,7 +50,8 @@ const SESSION_RETRY_DELAY_MS = 3000;
 function syncAnalyticsIdentity(customer: AuthCustomer | null) {
   if (!/^GTM-[A-Z0-9]+$/.test(process.env.NEXT_PUBLIC_GTM_ID ?? "")) return;
   window.dataLayer ??= [];
-  window.dataLayer.push({ user_id: readConfirmedConsent()?.preferences.analytics ? customer?.analyticsUserId ?? null : null });
+  const userId = readConfirmedConsent()?.preferences.analytics ? customer?.analyticsUserId ?? null : null;
+  window.dataLayer.push({ user_id: userId });
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
