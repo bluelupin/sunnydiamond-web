@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStrapiApiToken, getStrapiBaseUrl } from "@/api/config";
+import { getPublicSiteUrl, getStrapiApiToken, getStrapiBaseUrl } from "@/api/config";
 import { getCustomerToken } from "@/services/auth/session";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { decodeMagentoEntityId } from "@/services/magento/decodeMagentoEntityId";
@@ -7,10 +7,23 @@ import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const NOTICE_VERSION = "2026-11-02";
+const STAGING_ORIGIN = "https://sunnydiamonds-web-staging.on-forge.com";
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  if (origin) {
+    let browserOrigin: URL;
+    try { browserOrigin = new URL(origin); }
+    catch { return NextResponse.json({ error: "Invalid origin" }, { status: 403 }); }
+    // Forge can give request.url an internal origin. Host remains the browser-facing
+    // request target, so accept that host as well as the configured public origin.
+    const sameHost = browserOrigin.host === request.headers.get("host") &&
+      (browserOrigin.protocol === "https:" || browserOrigin.hostname === "localhost");
+    if (!sameHost && browserOrigin.origin !== STAGING_ORIGIN && browserOrigin.origin !== new URL(request.url).origin &&
+      browserOrigin.origin !== new URL(getPublicSiteUrl()).origin) {
+      return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+    }
+  }
   const input: unknown = await request.json().catch(() => null);
   if (!input || typeof input !== "object") return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   const choice = input as Record<string, unknown>;
