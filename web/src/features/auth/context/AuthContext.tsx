@@ -14,6 +14,7 @@ import { clearGuestWishlistStorage } from "@/features/wishlist/utils/guestWishli
 import { clearAuthLoginIdentifierKind } from "@/features/auth/utils/authLoginIdentifier";
 import { sanitizeAuthCustomer } from "@/shared/utils/customerName";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
+import { setDirectUserId } from "@/infrastructure/analytics/directProviders";
 import { COOKIE_CONSENT_CHANGED, linkConfirmedConsentToCustomer, readConfirmedConsent } from "@/shared/cookies/cookieConsentStorage";
 
 export type AuthCustomer = {
@@ -48,9 +49,11 @@ const SESSION_RETRY_LIMIT = 3;
 const SESSION_RETRY_DELAY_MS = 3000;
 
 function syncAnalyticsIdentity(customer: AuthCustomer | null) {
-  if (!/^GTM-[A-Z0-9]+$/.test(process.env.NEXT_PUBLIC_GTM_ID ?? "")) return;
+  if (!process.env.NEXT_PUBLIC_GTM_ID && !process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID) return;
   window.dataLayer ??= [];
-  window.dataLayer.push({ user_id: readConfirmedConsent()?.preferences.analytics ? customer?.analyticsUserId ?? null : null });
+  const userId = readConfirmedConsent()?.preferences.analytics ? customer?.analyticsUserId ?? null : null;
+  window.dataLayer.push({ user_id: userId });
+  setDirectUserId(userId);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
