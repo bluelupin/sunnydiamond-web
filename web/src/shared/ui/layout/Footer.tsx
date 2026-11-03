@@ -283,13 +283,6 @@ const Footer = ({ className }: { className?: string }) => {
                 ))}
               </div>
             }
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new Event("sunny:open-cookie-settings"))}
-              className="font-gill text-sm font-light text-neutral500 underline"
-            >
-              Cookie settings
-            </button>
             {hasCopyright &&
               <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
                 {footerCopyright}
