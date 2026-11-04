@@ -14,7 +14,7 @@ import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 
 const DIVIDER_SRC = "/icons/invest-review-divider.svg";
-const INFO_ICON_SRC = "/images/diamonds-for-everyone/invest-review-info.svg";
+const INFO_ICON_SRC = "/icons/invest-review-info.svg";
 
 function ReviewDivider() {
   return (

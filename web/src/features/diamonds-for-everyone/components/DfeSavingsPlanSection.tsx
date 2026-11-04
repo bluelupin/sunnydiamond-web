@@ -103,7 +103,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
                     width={634}
                     height={1304}
                     sizes="100vw"
-                    className="absolute top-[0.01%] left-[-276.26%] h-full max-w-none w-[523.2%] object-cover"
+                    className="object-cover"
                   />
                 </div>
                 <div className="absolute inset-0 bg-[rgba(244,243,238,0.8)]" />

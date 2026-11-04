@@ -173,7 +173,7 @@ function DfeInvestPageLayout({
           }
           aria-hidden
         >
-          <div className="absolute left-0 top-[-42.07%] h-[184.31%] w-full">
+          <div className="absolute left-0 bottom-[0%] h-[100%] w-full">
             <ResponsiveImage
               desktopSrc={desktopImageUrl}
               mobileSrc={mobileImageUrl}

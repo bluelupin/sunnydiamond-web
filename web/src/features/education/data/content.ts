@@ -2,11 +2,11 @@ export const learnAboutDiamondsRoute = "/learn-about-diamonds" as const;
 
 export const educationPageImages = {
   panelTexture: "/images/verticle-texture.png",
-  certifiedDivider: "/images/education/certified-divider.svg",
-  certifiedDividerMobile: "/images/education/certified-divider-mobile.svg",
-  anatomySparkle: "/images/education/scroll-arrow.svg",
-  scrollArrow: "/images/education/scroll-arrow.svg",
-  claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
+  certifiedDivider: "/icons/certified-divider.svg",
+  certifiedDividerMobile: "/icons/certified-divider-mobile.svg",
+  anatomySparkle: "/icons/scroll-arrow.svg",
+  scrollArrow: "/icons/scroll-arrow.svg",
+  claritySliderThumb: "/icons/clarity-slider-thumb.svg",
 } as const;
 
 /** Figma 692:29026 / 692:29042 / 692:29044 — C4 carat hand + diamond */

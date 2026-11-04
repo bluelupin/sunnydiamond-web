@@ -15,9 +15,9 @@ export const jewelleryListingToolbarSpec = {
 } as const;
 
 export const jewelleryListingToolbarAssets = {
-  filterIcon: "/images/jewellery/filter-icon.svg",
-  chevronDownIcon: "/images/jewellery/chevron-down-24.svg",
-  chevronDownMobileIcon: "/images/jewellery/chevron-down-20.svg",
+  filterIcon: "/icons/filter-icon.svg",
+  chevronDownIcon: "/icons/chevron-down-24.svg",
+  chevronDownMobileIcon: "/icons/chevron-down-20.svg",
 } as const;
 
 /** Figma node 1279:1015 — mobile sticky filter / sort footer bar */
