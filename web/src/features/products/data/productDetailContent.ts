@@ -62,7 +62,7 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     attributes,
     metalColors: getMetalColorOptions(product),
     accordions: buildAccordions(product),
-    heroBannerImage: "/images/products/pdp/hero-banner-poster.png",
+    heroBannerImage: "/images/pdp/hero-banner-poster.png",
     ...(product.productVideoUrl ? { heroBannerVideo: product.productVideoUrl } : {}),
   };
 }

@@ -15,12 +15,12 @@ export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 export const CATEGORY_ENGRAVING_PREVIEW_IMAGES: Partial<
   Record<JewelleryCategorySlug, string>
 > = {
-  rings: "/images/products/pdp/ring-engraving-preview.png",
-  earrings: "/images/products/pdp/Earrings-engraving-preview.png",
-  necklace: "/images/products/pdp/Necklace-engraving-preview.png",
-  pendants: "/images/products/pdp/Pendants-engraving-preview.png",
-  bracelets: "/images/products/pdp/Bracelet-engraving-preview.png",
-  bangles: "/images/products/pdp/Bangle-engraving-preview.png",
+  rings: "/images/pdp/ring-engraving-preview.png",
+  earrings: "/images/pdp/Earrings-engraving-preview.png",
+  necklace: "/images/pdp/Necklace-engraving-preview.png",
+  pendants: "/images/pdp/Pendants-engraving-preview.png",
+  bracelets: "/images/pdp/Bracelet-engraving-preview.png",
+  bangles: "/images/pdp/Bangle-engraving-preview.png",
 };
 
 /** Figma `4903:44930` — shared engraving preview coordinate space (343×214). */
