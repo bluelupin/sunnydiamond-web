@@ -84,7 +84,7 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
                 height={223}
                 quality={80}
                 sizes="240px"
-                className="absolute top-[-17.89%] left-[-42.4%] h-[134.34%] max-w-none w-[187.23%] object-cover"
+                className="object-cover"
               />
             </ScrollReveal>
           ) : null}
