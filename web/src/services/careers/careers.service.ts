@@ -23,6 +23,8 @@ const CAREER_LANDING_POPULATE_QUERY =
   "populate=*" +
   "&populate[heroSection][populate][backgroundImage][populate][desktopImage]=true" +
   "&populate[heroSection][populate][backgroundImage][populate][mobileImage]=true" +
+  "&populate[heroSection][populate][image][populate][desktopImage]=true" +
+  "&populate[heroSection][populate][image][populate][mobileImage]=true" +
   "&populate[moreThanSection][populate][featuredImage1][populate][desktopImage]=true" +
   "&populate[moreThanSection][populate][featuredImage1][populate][mobileImage]=true" +
   "&populate[moreThanSection][populate][featuredImage2][populate][desktopImage]=true" +
@@ -41,7 +43,8 @@ const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
 // This CMS type rejects combining wildcard population with nested hero media.
 const CAREER_LISTING_POPULATE_QUERY = "populate=*";
 const CAREER_LISTING_HERO_QUERY =
-  "populate[heroSection][populate][backgroundImage][populate]=*";
+  "populate[heroSection][populate][backgroundImage][populate]=*" +
+  "&populate[heroSection][populate][image][populate]=*";
 
 /** Uppercase `SEO` is omitted by `populate=*` and must be requested on its own. */
 const CAREER_SEO_QUERY = "populate[SEO][populate][ogImage]=true";

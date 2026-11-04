@@ -38,7 +38,7 @@ const HeroBackgroundMedia = ({
     <>
       {hasHeroImage ? (
         <ResponsiveImage
-          desktopSrc={desktopImageUrl || mobileImageUrl || posterSrc || ""}
+          desktopSrc={desktopImageUrl || posterSrc || ""}
           mobileSrc={mobileImageUrl}
           alt={desktopAlt}
           desktopAlt={desktopAlt}

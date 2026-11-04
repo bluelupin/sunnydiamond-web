@@ -109,15 +109,13 @@ const mapResponsiveImage = (
 ): NormalizedCareerResponsiveImage | null => {
   if (!media) return null;
 
-  const directUrl = resolveCmsMediaUrl(media);
-  const desktopUrl =
-    resolveCmsMediaUrl(media.desktopImage) ??
-    resolveCmsMediaUrl(media.mobileImage) ??
-    directUrl;
-  const mobileUrl =
-    resolveCmsMediaUrl(media.mobileImage) ??
-    resolveCmsMediaUrl(media.desktopImage) ??
-    directUrl;
+  const desktopFromField = resolveCmsMediaUrl(media.desktopImage);
+  const mobileFromField = resolveCmsMediaUrl(media.mobileImage);
+  const hasNestedFields = Boolean(media.desktopImage ?? media.mobileImage);
+  const flatUrl = hasNestedFields ? undefined : resolveCmsMediaUrl(media);
+
+  const desktopUrl = desktopFromField ?? flatUrl;
+  const mobileUrl = mobileFromField ?? flatUrl ?? desktopFromField;
 
   if (!desktopUrl && !mobileUrl) return null;
 
@@ -127,7 +125,58 @@ const mapResponsiveImage = (
   return {
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
-    alt: resolveCmsAltText(media.desktopImage) ?? "",
+    alt: resolveCmsAltText(media.desktopImage) ?? resolveCmsAltText(media.mobileImage) ?? "",
+    width: desktopFile?.width ?? mobileFile?.width ?? undefined,
+    height: desktopFile?.height ?? mobileFile?.height ?? undefined,
+  };
+};
+
+/** Merge desktop/mobile from hero.backgroundImage and hero.image (CMS may split across both). */
+const mapCareerHeroResponsiveImage = (
+  hero?: StrapiCareerHero | null,
+): NormalizedCareerResponsiveImage | null => {
+  if (!hero) return null;
+
+  const sources = [hero.backgroundImage, hero.image].filter(
+    (entry): entry is StrapiCareerResponsiveImage => Boolean(entry),
+  );
+  if (sources.length === 0) return null;
+
+  let desktopUrl: string | undefined;
+  let mobileUrl: string | undefined;
+  let desktopFile = null as ReturnType<typeof extractStrapiImage>;
+  let mobileFile = null as ReturnType<typeof extractStrapiImage>;
+
+  for (const media of sources) {
+    if (!desktopUrl) {
+      const resolved = resolveCmsMediaUrl(media.desktopImage);
+      if (resolved) {
+        desktopUrl = resolved;
+        desktopFile = extractStrapiImage(media.desktopImage);
+      }
+    }
+    if (!mobileUrl) {
+      const resolved = resolveCmsMediaUrl(media.mobileImage);
+      if (resolved) {
+        mobileUrl = resolved;
+        mobileFile = extractStrapiImage(media.mobileImage);
+      }
+    }
+  }
+
+  if (!desktopUrl && !mobileUrl) {
+    return mapResponsiveImage(sources[0]);
+  }
+
+  return {
+    desktopUrl: desktopUrl ?? mobileUrl!,
+    mobileUrl: mobileUrl ?? desktopUrl!,
+    alt:
+      resolveCmsAltText(sources[0]?.desktopImage) ??
+      resolveCmsAltText(sources[0]?.mobileImage) ??
+      resolveCmsAltText(sources[1]?.desktopImage) ??
+      resolveCmsAltText(sources[1]?.mobileImage) ??
+      "",
     width: desktopFile?.width ?? mobileFile?.width ?? undefined,
     height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };
@@ -203,8 +252,7 @@ const mapHero = (hero?: StrapiCareerHero | null): NormalizedCareerHero | null =>
   const title = cleanText(hero.title);
   const ctaLabel =
     cleanText(hero.ctaLabel) ?? cleanText(hero.CtaLable);
-  const image =
-    mapResponsiveImage(hero.backgroundImage) ?? mapResponsiveImage(hero.image);
+  const image = mapCareerHeroResponsiveImage(hero);
 
   if (!title) return null;
 
