@@ -1,7 +1,7 @@
 export const DELIVERY_STORE_MAP_IMAGES = {
-  base: "/images/products/delivery-store/map-base.png",
-  overlay1: "/images/products/delivery-store/map-overlay-1.png",
-  overlay2: "/images/products/delivery-store/map-overlay-2.png",
+  base: "/images/delivery-store/map-base.png",
+  overlay1: "/images/delivery-store/map-overlay-1.png",
+  overlay2: "/images/delivery-store/map-overlay-2.png",
 } as const;
 
 export const DELIVERY_STORE_ICONS = {

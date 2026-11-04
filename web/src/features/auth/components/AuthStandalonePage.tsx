@@ -18,10 +18,10 @@ type AuthStandalonePageProps = {
 };
 
 const LOGIN_WEB_BACKGROUND_IMAGE_URL =
-  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_web_bg_a141f6da7f.avif";
+  "https://d1gf9vo4d2b63b.cloudfront.net/cms/auth_bg_web_5cece1e521.png";
 
 const LOGIN_MOBILE_BACKGROUND_IMAGE_URL =
-  "https://d1gf9vo4d2b63b.cloudfront.net/cms/login_mobile_bg_c7195b83ef.avif";
+  "https://d1gf9vo4d2b63b.cloudfront.net/cms/auth_bg_mobile_c06f04fca9.png";
 
 const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
   const router = useRouter();
