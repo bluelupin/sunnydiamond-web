@@ -7,7 +7,15 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
-import { formatCartLineMeta, formatCartPrice, getCartLineDisplayPrice } from "../utils/formatCartLine";
+import {
+  formatCartLineMeta,
+  formatCartPrice,
+  getCartBagDrawerLineDisplayPrice,
+  getCartShippingDisplay,
+  isCartBagDrawerAmountPending,
+  resolveCartDisplayTotal,
+} from "../utils/formatCartLine";
+import CartBagDrawerAmountSkeleton from "./skeletons/CartBagDrawerAmountSkeleton";
 import {
   Drawer,
   DrawerContent,
@@ -43,7 +51,22 @@ const BAG_DRAWER_SR_TITLES = {
 const MOBILE_DRAWER_MEDIA_QUERY = "(max-width: 1023px)";
 
 const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
-  const { items, totalItems, removeItem } = useCart();
+  const {
+    items,
+    totalItems,
+    removeItem,
+    isUpdating,
+    subtotal,
+    taxes,
+    totalPrice,
+    shipping,
+    offerDiscount,
+    giftCardDiscount,
+    localOfferDiscount,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  } = useCart();
   const { lastAddedLineItemId, bagDrawerSnapshot, bagDrawerMode } = useCartUI();
   const successMessage = BAG_DRAWER_SUCCESS_MESSAGES[bagDrawerMode];
 
@@ -61,6 +84,26 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 
   const meta = addedItem ? formatCartLineMeta(addedItem) : [];
   const isGift = Boolean(addedItem?.options.isGift || addedItem?.gifting);
+
+  const shippingDisplay = getCartShippingDisplay(
+    shipping,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  );
+  const cartDisplayGrandTotal = resolveCartDisplayTotal(
+    subtotal,
+    taxes,
+    totalPrice,
+    shippingDisplay,
+    offerDiscount,
+    giftCardDiscount,
+    localOfferDiscount,
+  );
+  const isAmountPending = isCartBagDrawerAmountPending(addedItem, subtotal, isUpdating);
+  const addedItemDisplayPrice = addedItem
+    ? getCartBagDrawerLineDisplayPrice(addedItem, subtotal, cartDisplayGrandTotal)
+    : 0;
 
   const handleRemoveAddedItem = () => {
     if (!addedItem) return;
@@ -103,8 +146,18 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
                       {addedItem.product.name}
                     </p>
                     <CartMetaRow parts={meta} />
-                    <p className="font-gill text-base leading-110 text-darkblack">
-                      {formatCartPrice(getCartLineDisplayPrice(addedItem))}
+                    <p
+                      className="font-gill text-base leading-110 text-darkblack"
+                      aria-busy={isAmountPending}
+                    >
+                      {isAmountPending ? (
+                        <>
+                          <CartBagDrawerAmountSkeleton />
+                          <span className="sr-only">Loading price</span>
+                        </>
+                      ) : (
+                        formatCartPrice(addedItemDisplayPrice)
+                      )}
                     </p>
                   </div>
                 </div>

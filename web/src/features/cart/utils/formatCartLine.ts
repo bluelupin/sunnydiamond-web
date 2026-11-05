@@ -195,3 +195,33 @@ export const getCartLineDisplayPrice = (item: CartLineItem): number =>
 
 export const getCartLineDisplayTotal = (item: CartLineItem): number =>
   getCartLineDisplayPrice(item) * item.quantity;
+
+/** True while bag drawer should not show the grand-total-aligned amount yet. */
+export const isCartBagDrawerAmountPending = (
+  item: CartLineItem | null,
+  subtotalExcludingTax: number,
+  isUpdating: boolean,
+): boolean => {
+  if (!item) {
+    return false;
+  }
+  if (item.id.startsWith("optimistic-") || isUpdating) {
+    return true;
+  }
+  return subtotalExcludingTax <= 0;
+};
+
+/** Bag drawer: align line amount with Magento grand_total, not subtotal_excluding_tax. */
+export const getCartBagDrawerLineDisplayPrice = (
+  item: CartLineItem,
+  subtotalExcludingTax: number,
+  cartDisplayGrandTotal: number,
+): number => {
+  if (subtotalExcludingTax <= 0 || cartDisplayGrandTotal <= 0) {
+    return getCartLineDisplayPrice(item);
+  }
+
+  const lineExcludingTax = getCartLineDisplayTotal(item);
+  const lineShareOfGrandTotal = (lineExcludingTax / subtotalExcludingTax) * cartDisplayGrandTotal;
+  return lineShareOfGrandTotal / Math.max(item.quantity, 1);
+};
