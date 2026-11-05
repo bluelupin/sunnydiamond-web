@@ -96,6 +96,11 @@ export function isJewelleryListingPath(pathname: string): boolean {
 }
 
 /** Query params preserved when switching PLP category tabs (collection, gift-finder, etc.). */
+export const JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM = "metalColor";
+export const JEWELLERY_LISTING_PURITY_QUERY_PARAM = "purity";
+export const JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM = "gemstone";
+export const JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM = "subcategory";
+
 export const PRESERVED_JEWELLERY_LISTING_SEARCH_PARAMS = [
   "collection",
   "occasion",
@@ -104,6 +109,10 @@ export const PRESERVED_JEWELLERY_LISTING_SEARCH_PARAMS = [
   "minPrice",
   "maxPrice",
   "sort",
+  JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM,
+  JEWELLERY_LISTING_PURITY_QUERY_PARAM,
+  JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM,
+  JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM,
 ] as const;
 
 /** Prefer the live browser query string — tab changes use `replaceState`, so Next `searchParams` can be stale. */

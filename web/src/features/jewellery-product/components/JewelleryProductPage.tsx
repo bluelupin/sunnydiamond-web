@@ -15,8 +15,9 @@ import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkelet
 import {
   createDefaultFilterState,
   createEmptyFilterState,
-  applyJewelleryPriceSearchParams,
+  applyJewelleryListingFilterSearchParams,
   applyJewelleryListingSortParam,
+  mergeJewelleryDrawerFiltersFromSearchParams,
   hasActiveFilters,
   hasMagentoFilterFacets,
   isDefaultPriceRange,
@@ -133,6 +134,10 @@ const JewelleryProductPage = ({
           collection: collectionSlug,
           minPrice: searchParams?.get("minPrice"),
           maxPrice: searchParams?.get("maxPrice"),
+          metalColor: searchParams?.get("metalColor"),
+          purity: searchParams?.get("purity"),
+          gemstone: searchParams?.get("gemstone"),
+          subcategory: searchParams?.get("subcategory"),
         },
         initialListing.facets,
       );
@@ -337,10 +342,10 @@ const JewelleryProductPage = ({
   );
 
   const navigateToCategory = useCallback(
-    (urlKey?: string | null) => {
+    (urlKey?: string | null, listingSearchParams?: URLSearchParams) => {
       const nextUrlKey = urlKey?.trim() || null;
       const preservedSearchParams = preserveJewelleryListingSearchParams(
-        readJewelleryListingUrlParams(searchParams?.toString()),
+        listingSearchParams ?? readJewelleryListingUrlParams(searchParams?.toString()),
       );
       const collectionFromUrl = preservedSearchParams.get("collection")?.trim() ?? "";
       const occasionFromUrl = preservedSearchParams.get("occasion")?.trim() ?? "";
@@ -572,12 +577,16 @@ const JewelleryProductPage = ({
       } else if (liveCollectionSlug?.trim()) {
         nextDraft.collection = liveCollectionSlug.trim();
       }
-      return applyGiftFinderPriceToFilterState(
+      const withPrice = applyGiftFinderPriceToFilterState(
         nextDraft,
         facets,
         liveMinPriceFromUrl,
         liveMaxPriceFromUrl,
       );
+
+      return mergeJewelleryDrawerFiltersFromSearchParams(withPrice, liveUrlParams, facets, {
+        replaceWhenParamMissing: !preserve,
+      });
     };
 
     const facetPriceBoundsKey = `${facets.minPrice}|${facets.maxPrice}`;
@@ -633,6 +642,11 @@ const JewelleryProductPage = ({
           setFilters({ ...nextFilters, categories: [] });
           setIsFilterOpen(false);
           const params = readJewelleryListingUrlParams(searchParams?.toString());
+          applyJewelleryListingFilterSearchParams(
+            params,
+            { ...nextFilters, categories: [] },
+            facets,
+          );
           params.set("category", categoryParam);
           replaceSearchUrl(params);
           return;
@@ -647,9 +661,12 @@ const JewelleryProductPage = ({
         );
 
         if (mainCategoryUrlKey) {
-          setFilters({ ...nextFilters, categories: [] });
+          const appliedFilters = { ...nextFilters, categories: [] };
+          setFilters(appliedFilters);
           setIsFilterOpen(false);
-          navigateToCategory(mainCategoryUrlKey);
+          const params = readJewelleryListingUrlParams(searchParams?.toString());
+          applyJewelleryListingFilterSearchParams(params, appliedFilters, facets);
+          navigateToCategory(mainCategoryUrlKey, params);
           return;
         }
       }
@@ -669,7 +686,7 @@ const JewelleryProductPage = ({
 
       if (pathname) {
         const params = readJewelleryListingUrlParams(searchParams?.toString());
-        applyJewelleryPriceSearchParams(params, nextFilters, facets);
+        applyJewelleryListingFilterSearchParams(params, nextFilters, facets);
 
         if (searchQuery) {
           replaceSearchUrl(params);

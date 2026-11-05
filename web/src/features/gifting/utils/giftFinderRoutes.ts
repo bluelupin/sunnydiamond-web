@@ -1,8 +1,17 @@
-import { createEmptyFilterState } from "@/features/jewellery-product/data/filters";
+import {
+  createEmptyFilterState,
+  mergeJewelleryDrawerFiltersFromSearchParams,
+} from "@/features/jewellery-product/data/filters";
 import { buildJewelleryCategoryHref, isJewelleryCategoryUrlKey } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+
+function isDrawerFacetContext(
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice"> | JewelleryFilterFacets | undefined,
+): facets is JewelleryFilterFacets {
+  return facets != null && Array.isArray((facets as JewelleryFilterFacets).categories);
+}
 import type { JewelleryNavCategoriesData } from "@/types/magento/jewelleryNav";
 import { giftingPageContent } from "../data/content";
 
@@ -43,6 +52,10 @@ export type GiftFinderSearchParams = {
   collection?: string | null;
   minPrice?: string | null;
   maxPrice?: string | null;
+  metalColor?: string | null;
+  purity?: string | null;
+  gemstone?: string | null;
+  subcategory?: string | null;
 };
 
 export function buildGiftFinderListingFiltersFromUrl(
@@ -86,7 +99,48 @@ export function buildGiftFinderListingFiltersFromUrl(
     filters.maxPrice = maxFromUrl;
   }
 
-  return filters;
+  const metalColor = searchParams.metalColor?.trim();
+  const purity = searchParams.purity?.trim();
+  const gemstone = searchParams.gemstone?.trim();
+  const subcategory = searchParams.subcategory?.trim();
+
+  if (!metalColor && !purity && !gemstone && !subcategory) {
+    return filters;
+  }
+
+  const urlParams = new URLSearchParams();
+  if (metalColor) {
+    urlParams.set("metalColor", metalColor);
+  }
+  if (purity) {
+    urlParams.set("purity", purity);
+  }
+  if (gemstone) {
+    urlParams.set("gemstone", gemstone);
+  }
+  if (subcategory) {
+    urlParams.set("subcategory", subcategory);
+  }
+
+  if (!isDrawerFacetContext(facets)) {
+    if (metalColor) {
+      filters.metalTypes = metalColor.split(",").map((value) => value.trim()).filter(Boolean);
+    }
+    if (purity) {
+      filters.metalPurities = purity.split(",").map((value) => value.trim()).filter(Boolean);
+    }
+    if (gemstone) {
+      filters.gemstoneType = gemstone;
+    }
+    if (subcategory) {
+      filters.categories = subcategory.split(",").map((value) => value.trim()).filter(Boolean);
+    }
+    return filters;
+  }
+
+  return mergeJewelleryDrawerFiltersFromSearchParams(filters, urlParams, facets, {
+    replaceWhenParamMissing: true,
+  });
 }
 
 export function hasGiftFinderSearchParams(searchParams: GiftFinderSearchParams): boolean {

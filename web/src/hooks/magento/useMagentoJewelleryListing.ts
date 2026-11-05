@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   PAGE_SIZE,
   createEmptyFilterState,
@@ -22,7 +22,10 @@ import {
   reportJewelleryPlpProductsReady,
 } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
-import { applyPreservedJewelleryListingSearchToFilterState } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import {
+  applyPreservedJewelleryListingSearchToFilterState,
+  readJewelleryListingUrlParams,
+} from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
 import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
@@ -94,6 +97,18 @@ function buildListingQueryKey(
   facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
 ): string {
   return `${buildListingScopeKey(categoryUrlKey, search, sortValue, pageSize)}|${getJewelleryListingFiltersKey(filters, facets)}`;
+}
+
+/** Matches the filter payload used for Magento listing requests (replaceState-safe URL params). */
+function resolveListingFiltersForQuery(filters: JewelleryFilterState): JewelleryFilterState {
+  if (typeof window === "undefined") {
+    return applyPreservedJewelleryListingSearchToFilterState(filters);
+  }
+
+  return applyPreservedJewelleryListingSearchToFilterState(
+    filters,
+    readJewelleryListingUrlParams(),
+  );
 }
 
 function seedInitialListingPageCaches(
@@ -300,7 +315,7 @@ export function useMagentoJewelleryListing({
       return;
     }
 
-    const listingFilters = applyPreservedJewelleryListingSearchToFilterState(
+    const listingFilters = resolveListingFiltersForQuery(
       initialListingParams.filters ?? createEmptyFilterState(),
     );
 
@@ -343,9 +358,7 @@ export function useMagentoJewelleryListing({
     markJewelleryPlpProductsFetchStart();
 
     const fetchStartedAt = performance.now();
-    const listingFilters = applyPreservedJewelleryListingSearchToFilterState(
-      filtersOverride ?? filtersRef.current,
-    );
+    const listingFilters = resolveListingFiltersForQuery(filtersOverride ?? filtersRef.current);
     filtersRef.current = listingFilters;
 
     try {
@@ -480,12 +493,13 @@ export function useMagentoJewelleryListing({
     listingResetNonce,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (listingResetNonce !== lastListingResetNonceRef.current) {
       return;
     }
 
-    const nextKey = getJewelleryListingFiltersKey(filters, facetsRef.current);
+    const queryFilters = resolveListingFiltersForQuery(filters);
+    const nextKey = getJewelleryListingFiltersKey(queryFilters, facetsRef.current);
     if (nextKey === appliedFiltersKeyRef.current) {
       return;
     }
@@ -495,7 +509,8 @@ export function useMagentoJewelleryListing({
     setCurrentPage(1);
     pendingProductsRef.current = [];
     setPendingCount(0);
-    void fetchInitialListing();
+    setIsLoading(true);
+    void fetchInitialListing(queryFilters);
   }, [filters, fetchInitialListing, listingResetNonce]);
 
   useEffect(() => {
@@ -650,15 +665,20 @@ export function useMagentoJewelleryListing({
     pendingCount > 0 ||
     (totalPages > 0 ? currentPage < totalPages : products.length < totalCount);
 
-  const listingQueryKey = buildListingQueryKey(
-    categoryUrlKey,
-    search,
-    sortValue,
-    pageSize,
-    filters,
-    facets,
+  const listingQueryKey = useMemo(
+    () =>
+      buildListingQueryKey(
+        categoryUrlKey,
+        search,
+        sortValue,
+        pageSize,
+        resolveListingFiltersForQuery(filters),
+        facets,
+      ),
+    [categoryUrlKey, search, sortValue, pageSize, filters, facets],
   );
-  const isSearching = listingQueryKey !== resolvedListingQueryKey;
+  const isSearching =
+    listingQueryKey !== resolvedListingQueryKey || isLoading;
 
   const displayProducts = useMemo(
     () => sortJewelleryListingProducts(products, sortValue),

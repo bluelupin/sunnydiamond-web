@@ -28,6 +28,10 @@ export type JewelleryListingSearchParams = {
   minPrice?: string;
   maxPrice?: string;
   sort?: string;
+  metalColor?: string;
+  purity?: string;
+  gemstone?: string;
+  subcategory?: string;
 };
 
 type PageProps = {
@@ -64,6 +68,10 @@ export async function JewelleryListingRoutePage({ searchParams }: PageProps) {
     minPrice: params.minPrice,
     maxPrice: params.maxPrice,
     sort: params.sort,
+    metalColor: params.metalColor,
+    purity: params.purity,
+    gemstone: params.gemstone,
+    subcategory: params.subcategory,
   });
   const page = await getProductLandingPage();
   const seo = resolveJewellerySeoMetadata(page);

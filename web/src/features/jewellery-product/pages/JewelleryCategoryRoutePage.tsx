@@ -32,6 +32,10 @@ export type JewelleryCategoryRoutePageProps = {
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
+    metalColor?: string;
+    purity?: string;
+    gemstone?: string;
+    subcategory?: string;
   }>;
 };
 
@@ -83,6 +87,10 @@ export async function JewelleryCategoryRoutePage({
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
       sort: query.sort,
+      metalColor: query.metalColor,
+      purity: query.purity,
+      gemstone: query.gemstone,
+      subcategory: query.subcategory,
     } satisfies JewelleryListingPrefetchFilters),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),

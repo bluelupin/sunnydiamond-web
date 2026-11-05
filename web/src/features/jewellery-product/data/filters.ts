@@ -1,6 +1,23 @@
 import type { JewelleryFilterState, JewellerySortOption } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
-import { readJewelleryListingUrlParams } from "../utils/jewelleryRoutes";
+import {
+  JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM,
+  JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM,
+  JEWELLERY_LISTING_PURITY_QUERY_PARAM,
+  JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM,
+  readJewelleryListingUrlParams,
+} from "../utils/jewelleryRoutes";
+import { slugifyCollectionSlug, resolveCollectionFacetOption } from "../utils/collectionListing";
+import {
+  slugifyDiamondShapeLabel,
+  resolveDiamondShapeFacetOption,
+} from "../utils/diamondShapeListing";
+import {
+  slugifyFancyColourLabel,
+  resolveFancyColourFacetOption,
+} from "../utils/fancyColourListing";
+import { resolveGemstoneTypeFacetOption } from "../utils/gemstoneListing";
+import { slugifyOccasionTitle, resolveOccasionFacetOption } from "../utils/occasionListing";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 
 export const DESKTOP_PAGE_SIZE = 10;
@@ -508,6 +525,185 @@ export function resolveJewelleryDraftPriceRange(
     : facets.maxPrice;
 
   return normalizeJewelleryPriceRange(nextMin, nextMax, facets);
+}
+
+function slugifyJewelleryFilterLabel(label: string): string {
+  return slugifyOccasionTitle(label);
+}
+
+function splitCommaSeparatedQueryParam(value: string | null | undefined): string[] {
+  if (!value?.trim()) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function matchFacetLabelsFromCommaParam(
+  param: string | null | undefined,
+  availableLabels: string[],
+): string[] {
+  const tokens = splitCommaSeparatedQueryParam(param);
+  if (tokens.length === 0) {
+    return [];
+  }
+
+  if (availableLabels.length === 0) {
+    return tokens;
+  }
+
+  return tokens
+    .map((token) => {
+      const normalized = token.toLowerCase();
+      const slug = slugifyJewelleryFilterLabel(token);
+
+      const exact = availableLabels.find((label) => label.trim().toLowerCase() === normalized);
+      if (exact) {
+        return exact;
+      }
+
+      const bySlug = availableLabels.find(
+        (label) => slugifyJewelleryFilterLabel(label) === slug,
+      );
+      return bySlug ?? token;
+    })
+    .filter(Boolean);
+}
+
+/** Applies drawer filter query params (metal, purity, gemstone, subcategories) onto filter state. */
+export function mergeJewelleryDrawerFiltersFromSearchParams(
+  base: JewelleryFilterState,
+  params: Pick<URLSearchParams, "get">,
+  facets: JewelleryFilterFacets,
+  options?: { replaceWhenParamMissing?: boolean },
+): JewelleryFilterState {
+  const replaceWhenParamMissing = options?.replaceWhenParamMissing ?? false;
+  const next = { ...base };
+
+  const metalParam = params.get(JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM);
+  if (metalParam != null) {
+    next.metalTypes = matchFacetLabelsFromCommaParam(
+      metalParam,
+      getAvailableMetalTypeLabels(facets),
+    );
+  } else if (replaceWhenParamMissing) {
+    next.metalTypes = [];
+  }
+
+  const purityParam = params.get(JEWELLERY_LISTING_PURITY_QUERY_PARAM);
+  if (purityParam != null) {
+    next.metalPurities = matchFacetLabelsFromCommaParam(
+      purityParam,
+      getAvailableMetalPurityLabels(facets),
+    );
+  } else if (replaceWhenParamMissing) {
+    next.metalPurities = [];
+  }
+
+  const gemstoneParam = params.get(JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM);
+  if (gemstoneParam != null) {
+    const trimmed = gemstoneParam.trim();
+    const resolved = resolveGemstoneTypeFacetOption(trimmed, facets.gemstoneTypes);
+    next.gemstoneType = resolved?.label ?? trimmed;
+  } else if (replaceWhenParamMissing) {
+    next.gemstoneType = "";
+  }
+
+  const subcategoryParam = params.get(JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM);
+  if (subcategoryParam != null) {
+    next.categories = matchFacetLabelsFromCommaParam(
+      subcategoryParam,
+      getAvailableCategoryLabels(facets),
+    );
+  } else if (replaceWhenParamMissing) {
+    next.categories = [];
+  }
+
+  return next;
+}
+
+/** Writes all active PLP filter selections into listing URL search params. */
+export function applyJewelleryListingFilterSearchParams(
+  params: URLSearchParams,
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+): void {
+  applyJewelleryPriceSearchParams(params, filters, facets);
+
+  params.delete("occasion");
+  const occasionValue = filters.occasion.trim();
+  if (occasionValue) {
+    const occasionOption = resolveOccasionFacetOption(occasionValue, facets.occasions);
+    params.set(
+      "occasion",
+      slugifyOccasionTitle(occasionOption?.label ?? occasionValue),
+    );
+  }
+
+  params.delete("collection");
+  const collectionValue = filters.collection.trim();
+  if (collectionValue) {
+    const collectionOption = resolveCollectionFacetOption(collectionValue, facets.collections);
+    params.set(
+      "collection",
+      slugifyCollectionSlug(collectionOption?.value ?? collectionValue),
+    );
+  }
+
+  params.delete("diamondShape");
+  const diamondShapeValue = filters.diamondShape.trim();
+  if (diamondShapeValue) {
+    const shapeOption = resolveDiamondShapeFacetOption(diamondShapeValue, facets.diamondShapes);
+    params.set(
+      "diamondShape",
+      slugifyDiamondShapeLabel(shapeOption?.label ?? diamondShapeValue),
+    );
+  }
+
+  params.delete("fancyColour");
+  const fancyColourValue = filters.fancyColour.trim();
+  if (fancyColourValue) {
+    const colourOption = resolveFancyColourFacetOption(fancyColourValue, facets.fancyColours);
+    params.set(
+      "fancyColour",
+      slugifyFancyColourLabel(colourOption?.label ?? fancyColourValue),
+    );
+  }
+
+  params.delete(JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM);
+  const metalTypeQuery = getSelectedMetalTypeQuery(filters.metalTypes, facets);
+  if (metalTypeQuery) {
+    params.set(JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM, metalTypeQuery);
+  }
+
+  params.delete(JEWELLERY_LISTING_PURITY_QUERY_PARAM);
+  const purityQuery = getSelectedMetalPurityQuery(filters.metalPurities, facets);
+  if (purityQuery) {
+    params.set(JEWELLERY_LISTING_PURITY_QUERY_PARAM, purityQuery);
+  }
+
+  params.delete(JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM);
+  const gemstoneValue = filters.gemstoneType.trim();
+  if (gemstoneValue) {
+    const gemstoneOption = resolveGemstoneTypeFacetOption(gemstoneValue, facets.gemstoneTypes);
+    params.set(
+      JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM,
+      slugifyJewelleryFilterLabel(gemstoneOption?.label ?? gemstoneValue),
+    );
+  }
+
+  params.delete(JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM);
+  if (!isAllCategoriesSelected(filters.categories, facets)) {
+    const subcategorySlugs = filters.categories
+      .map((label) => slugifyJewelleryFilterLabel(label))
+      .filter(Boolean);
+    if (subcategorySlugs.length > 0) {
+      params.set(JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM, subcategorySlugs.join(","));
+    }
+  }
 }
 
 export function applyJewelleryPriceSearchParams(
