@@ -14,21 +14,35 @@ const LIST_GAP_PX = 4;
 const VIEWPORT_PADDING_PX = 8;
 const LIST_MAX_HEIGHT_PX = 280;
 
-/** iOS/Android may emit a stray click on the element under the finger after a portaled option tap. */
-const swallowGhostClickAfterListSelection = () => {
+const GHOST_CLICK_SWALLOW_MS = 400;
+
+/** iOS/Android may emit a stray click on the trigger right after a portaled option tap. */
+const swallowGhostClickAfterListSelection = (trigger: HTMLElement | null) => {
+  if (!trigger) {
+    return;
+  }
+
+  const startedAt = performance.now();
+
+  const cleanup = () => {
+    document.removeEventListener("click", swallow, true);
+    window.clearTimeout(timeoutId);
+  };
+
   const swallow = (event: MouseEvent) => {
     const target = event.target;
-    if (
-      target instanceof Element &&
-      target.closest('button[aria-haspopup="listbox"]')
-    ) {
+    const isOnTrigger = target instanceof Node && (target === trigger || trigger.contains(target));
+
+    if (isOnTrigger && performance.now() - startedAt <= GHOST_CLICK_SWALLOW_MS) {
       event.preventDefault();
       event.stopPropagation();
     }
-    document.removeEventListener("click", swallow, true);
+
+    cleanup();
   };
 
   document.addEventListener("click", swallow, true);
+  const timeoutId = window.setTimeout(cleanup, GHOST_CLICK_SWALLOW_MS);
 };
 
 type ListPosition = {
@@ -254,7 +268,7 @@ const InlineCustomSelect = ({
   const closeListAfterSelection = () => {
     setIsOpen(false);
     onBlur?.();
-    swallowGhostClickAfterListSelection();
+    swallowGhostClickAfterListSelection(triggerRef.current);
   };
 
   const selectOption = (option: string) => {
