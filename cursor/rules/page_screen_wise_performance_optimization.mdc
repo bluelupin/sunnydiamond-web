@@ -1,0 +1,520 @@
+# Page- and Screen-Wise Performance Optimization Plan
+
+## Next.js / React Website --- Safe Optimization Without UI or Functionality Regression
+
+## 1. Objective
+
+Improve Lighthouse performance across desktop and mobile, with
+particular focus on mobile devices and throttled networks, **without
+changing existing UI layouts, visual design, business logic, content
+behavior, routes, or integrations**.
+
+### Baseline from the performance report
+
+  -----------------------------------------------------------------------
+  Metric                                Desktop        Mobile / Throttled
+                                                                  Network
+  ------------------- ------------------------- -------------------------
+  Performance score                      68/100                39--45/100
+
+  Largest Contentful                     2.05 s               5.8--12.9 s
+  Paint (LCP)                                   
+
+  SEO                                   100/100                   100/100
+
+  Accessibility                         100/100                   100/100
+
+  Cumulative Layout          Within recommended        Within recommended
+  Shift (CLS)                         benchmark                 benchmark
+
+  Approximate page              2.6 MB reported     Review under the same
+  weight                                                  test conditions
+  -----------------------------------------------------------------------
+
+Treat these values as the **baseline**, not as guaranteed outcomes.
+First reproduce the measurements under consistent conditions and record
+the exact URL, device profile, throttling, browser, and test date.
+
+## 2. Non-Negotiable Safety Rules
+
+1.  **Preserve the existing UI.** Do not change spacing, dimensions,
+    typography, colors, breakpoints, DOM order, image crop, visible
+    content, animations, interactions, or responsive behavior unless a
+    change is explicitly approved.
+2.  **Preserve all functionality.** Do not remove or alter forms,
+    validation, API calls, query parameters, filters, sorting,
+    pagination, search, authentication, cart/wishlist behavior,
+    analytics, tracking, CMS-driven content, or third-party
+    integrations.
+3.  **No speculative rewrites.** Do not replace a library,
+    state-management pattern, image component, data-fetching strategy,
+    or rendering mode without evidence that it is safe and beneficial.
+4.  **No dummy or fallback content.** Do not add static, hardcoded, or
+    placeholder CMS/API data to hide loading or performance problems.
+    Keep existing empty, loading, error, and unavailable states intact.
+5.  **No backend or CMS changes by default.** Optimise the frontend
+    first. Request approval before changes to backend APIs, CMS models,
+    commerce configuration, or infrastructure.
+6.  **No broad refactoring.** Make the smallest targeted change that
+    addresses a measured bottleneck.
+7.  **Keep SEO and accessibility stable.** Preserve metadata, canonical
+    URLs, headings, alt text, semantic elements, keyboard access, focus
+    states, and accessible names.
+8.  **Avoid layout shifts.** Reserve the correct space for images,
+    video, banners, fonts, skeletons, and other asynchronously loaded
+    content.
+9.  **Protect shared QA/UAT environments.** Avoid risky changes to
+    global loaders, shared layouts, caching, or rendering behavior
+    without regression testing.
+10. **Do not claim an improvement without measurement.** Compare
+    before-and-after results using the same test configuration.
+
+## 3. Required Workflow
+
+Follow this workflow for each page or screen independently.
+
+### Step 1 --- Establish a baseline
+
+For each target route, capture:
+
+-   Full URL and page/screen name.
+-   Desktop and mobile Lighthouse reports.
+-   Performance score, LCP, INP/TBT where available, CLS, and Speed
+    Index.
+-   Total transferred bytes, request count, JavaScript size, image/video
+    bytes, and font bytes.
+-   LCP element and its resource URL/type.
+-   Largest network requests and slowest API requests.
+-   Main-thread long tasks, unused JavaScript, render-blocking
+    resources, forced reflows, and console errors.
+-   Screenshots at the same viewport sizes and scroll positions.
+-   Functional test cases for that page.
+
+Use the same browser version, viewport, device preset, network
+throttling, cache state, and test procedure before and after changes.
+Run multiple tests and compare the median when possible.
+
+### Step 2 --- Identify the actual bottleneck
+
+Do not optimise based on a score alone. Classify the issue:
+
+-   **LCP:** slow server response, late discovery of the LCP resource,
+    oversized hero image/video, render-blocking CSS/JS, or client-side
+    rendering delay.
+-   **JavaScript:** large bundles, excessive hydration, long tasks,
+    duplicate dependencies, or non-critical scripts executing early.
+-   **Images/media:** oversized assets, incorrect responsive sizes,
+    inefficient formats, eager-loading below-the-fold media, or
+    expensive video delivery.
+-   **Network/API:** slow CMS/commerce/API responses, request
+    waterfalls, duplicate requests, or sequential calls that could
+    safely run in parallel.
+-   **Rendering/layout:** forced synchronous layout, repeated
+    measurements and writes, layout thrashing, or expensive component
+    trees.
+-   **Fonts:** render-blocking font files, too many weights, or late
+    font swaps.
+-   **Page weight:** excessive transfer size or unnecessary requests.
+
+Record evidence and the expected benefit before editing.
+
+### Step 3 --- Make one focused change at a time
+
+-   Keep the diff small and limited to the affected
+    page/component/resource.
+-   Do not combine unrelated optimisations in a single change.
+-   Preserve existing API response handling and business rules.
+-   Check loading, success, empty, error, unavailable, authenticated,
+    and unauthenticated states where applicable.
+-   Test desktop, mobile, and responsive breakpoints.
+-   Compare screenshots and functional behavior against the baseline.
+
+### Step 4 --- Measure and decide
+
+For every change, record:
+
+  -----------------------------------------------------------------------
+  Field                               What to record
+  ----------------------------------- -----------------------------------
+  Route / component                   Exact page and component changed
+
+  Evidence                            Lighthouse trace, network request,
+                                      profiler result, or bundle report
+
+  Change                              Small, specific optimisation
+
+  Before / after                      LCP, score, transfer size, and
+                                      relevant metric
+
+  Regression checks                   UI, functionality, SEO,
+                                      accessibility, console/network
+
+  Decision                            Keep, revise, or revert
+  -----------------------------------------------------------------------
+
+Keep the change only when it demonstrates a real benefit and passes
+regression checks. Revert it if it causes a visual, functional, SEO,
+accessibility, or stability regression.
+
+## 4. Page- and Screen-Wise Audit Matrix
+
+Create one row per actual route. Do not assume every route has the same
+bottleneck.
+
+  ------------------------------------------------------------------------
+  Page / screen     What to inspect   Safe optimisation Regression checks
+  category                            candidates        
+  ----------------- ----------------- ----------------- ------------------
+  Home / landing    LCP element, hero Optimise the      Hero
+  page              assets,           existing hero     priority/order,
+                    above-the-fold    asset; load only  carousel behavior,
+                    requests, CMS     the initial       CMS content,
+                    calls, sliders,   visible slide     navigation, mobile
+                    animations        eagerly; defer    layout
+                                      off-screen        
+                                      sections and      
+                                      non-critical      
+                                      scripts where     
+                                      safe              
+
+  PLP / listing     Product-card      Correct           Product
+  pages             image sizes,      responsive image  count/order,
+                    request count,    sizes; defer      filters, sort,
+                    filters, sorting, below-fold        pagination,
+                    pagination,       images; reduce    stock/price, empty
+                    product API       duplicate         state
+                    latency           requests; avoid   
+                                      unnecessary       
+                                      rerenders without 
+                                      changing          
+                                      filtering logic   
+
+  PDP / product     Main gallery      Prioritise the    Gallery order,
+  details           image,            actual LCP image; zoom, video/image
+                    thumbnails,       use appropriately priority, variant
+                    video,            sized gallery     selection,
+                    variant/size      assets; lazy-load pricing, stock,
+                    selection,        non-visible       pincode
+                    pricing and       gallery media;    
+                    availability      remove redundant  
+                    requests          work only when    
+                                      proven            
+
+  Search            Search request    Optimise only     Search terms,
+                    waterfall,        after measuring;  suggestions, Enter
+                    debounce          prevent duplicate key, filters,
+                    behavior, result  requests while    result order,
+                    rendering, image  preserving        empty state
+                    requests          existing query    
+                                      semantics and     
+                                      debounce          
+                                      expectations      
+
+  Login / signup /  Hydration,        Defer unrelated   OTP flow, resend
+  OTP               validation, OTP   scripts; reduce   timer, validation,
+                    calls,            unnecessary       email/phone
+                    third-party       rendering only if behavior,
+                    scripts           state and         redirects
+                                      validation remain 
+                                      unchanged         
+
+  Profile / account Repeated API      Load tab-specific Tab switching,
+  tabs              requests, tab     data when         defaults,
+                    rendering, large  appropriate only  address/order
+                    lists and images  if this preserves data, wishlist,
+                                      current           logout/login
+                                      expectations;     
+                                      avoid refetching  
+                                      unchanged data    
+                                      when safe         
+
+  Checkout / cart   API waterfalls,   Investigate       Totals, discounts,
+                    totals,           latency and       validation,
+                    address/pincode   duplicate         pincode autofill,
+                    requests, payment requests; defer   guest flow,
+                    scripts           unrelated assets; payment, order
+                                      optimise images   submission
+                                      outside the       
+                                      critical checkout 
+                                      path              
+
+  Forms /           Validation        Defer             Required fields,
+  appointment /     scripts, field    non-essential     labels,
+  contact           rendering,        resources;        validation,
+                    network timing    optimise only     submission,
+                                      proven expensive  error/success
+                                      code              states
+
+  Editorial / blog  Hero media, rich  Responsive        Content order, CMS
+  / learning pages  content images,   images; lazy-load text, links,
+                    embedded videos,  below-fold media  headings, image
+                    fonts             and embeds; defer alt text
+                                      non-essential     
+                                      widgets           
+
+  Shared header /   Shared JS, menu   Remove only       Menus, mobile
+  navigation /      state,            proven duplicate  navigation,
+  footer            fonts/icons,      work; load        search, links,
+                    duplicate data    non-critical      sticky behavior,
+                    calls             assets later      footer payments
+                                      without changing  
+                                      interaction       
+                                      timing            
+
+  Modals /          Mount cost, image Defer heavy       Open/close, focus,
+  carousels /       loading,          modal-only        keyboard behavior,
+  steppers          animation work    content until     step progression,
+                                      opened when safe; animation/layout
+                                      avoid loading     
+                                      off-screen media  
+
+  Any other route   Route-specific    Select only       All route-specific
+                    trace and network changes supported critical journeys
+                    evidence          by evidence       
+  ------------------------------------------------------------------------
+
+Replace categories with the real route list from the application.
+Prioritise pages with the worst mobile LCP and the most important user
+journeys.
+
+## 5. Optimisation Guidance by Area
+
+### 5.1 Page weight
+
+-   Identify what makes up the reported \~2.6 MB: HTML, JavaScript, CSS,
+    images, fonts, video, and third-party resources.
+-   Distinguish transferred/compressed size from decoded image or
+    JavaScript memory usage.
+-   Prioritise the largest avoidable resources; do not target a generic
+    byte reduction without evidence.
+-   Remove unused assets or dependencies only after confirming they are
+    not used dynamically or by other routes.
+-   Avoid downloading the same asset or API data repeatedly where the
+    current behavior allows safe reuse.
+-   Do not remove required analytics, consent, payment, authentication,
+    or monitoring scripts without approval.
+
+### 5.2 Image optimisation
+
+-   Use the repository's existing image pipeline/component where
+    possible.
+-   Serve appropriately sized images for the rendered dimensions and
+    device pixel ratio; use responsive `srcset`/`sizes` or the
+    framework's supported image component as appropriate.
+-   Use modern formats such as AVIF/WebP only where browser support,
+    image quality, CDN behavior, and existing CMS URLs are compatible.
+-   Preserve focal point, crop, aspect ratio, transparency, and visual
+    quality.
+-   Eager-load or prioritise only the actual above-the-fold LCP image
+    when justified by the trace.
+-   Lazy-load below-the-fold images and non-visible gallery media; do
+    not lazy-load the LCP image.
+-   Provide explicit width/height or a stable aspect ratio to prevent
+    layout shifts.
+-   Keep existing alt text and decorative-image semantics.
+-   For CMS-driven images, preserve current media URL resolution and
+    desktop/mobile image selection rules.
+
+### 5.3 Critical rendering and LCP
+
+-   Identify the exact LCP element from Lighthouse/DevTools before
+    changing loading priorities.
+-   Ensure the LCP image/resource can be discovered early in the initial
+    HTML or resource-loading path.
+-   Avoid applying lazy loading to the LCP image.
+-   Reduce render-blocking resources only when the dependency is
+    non-critical and visual output remains unchanged.
+-   Do not preload every image or font. Preload only a small number of
+    confirmed critical resources.
+-   Investigate server response time, API waterfalls, and client-side
+    rendering delay separately.
+-   Keep the existing content and loading states; do not introduce
+    placeholder content to make the page appear faster.
+
+### 5.4 JavaScript execution
+
+-   Inspect route-level bundles and long tasks before code splitting or
+    dependency changes.
+-   Use dynamic imports for genuinely non-critical, heavy features when
+    this does not delay required initial interactions or alter
+    SSR/hydration behavior.
+-   Defer non-critical third-party scripts using the framework's
+    supported loading strategy.
+-   Avoid unnecessary state updates, repeated computations, and
+    duplicate event handlers.
+-   Use memoisation only when profiling shows a benefit; do not add
+    `memo`, `useMemo`, or `useCallback` everywhere.
+-   Preserve event order, analytics behavior, keyboard interactions, and
+    server/client rendering consistency.
+-   Do not change SSR, ISR, caching, or client/server component
+    boundaries without a specific reason and regression plan.
+
+### 5.5 Layout processing and CLS
+
+-   Use browser performance traces to locate forced reflows or layout
+    thrashing.
+-   Avoid repeatedly reading layout measurements and then writing styles
+    in alternating loops.
+-   Batch DOM reads and writes where applicable.
+-   Prefer existing CSS/layout techniques over new JavaScript-driven
+    measurements.
+-   Reserve space for images, video, banners, fonts, and async content.
+-   Do not change dimensions, breakpoints, or layout structure as a
+    performance shortcut.
+-   Since CLS is already reported within the recommended benchmark,
+    protect that result and avoid regressions.
+
+### 5.6 Mobile and throttled-network performance
+
+-   Test at the same mobile viewport and network/CPU throttling profile
+    each time.
+-   Inspect the initial viewport first: LCP asset, CSS, fonts, scripts,
+    and requests needed to render it.
+-   Avoid downloading desktop-sized media on mobile when an appropriate
+    mobile asset exists.
+-   Prioritise reductions in critical request chains and main-thread
+    work, not just total bytes.
+-   Test on a cold cache as well as a repeat visit if both are relevant
+    to the report.
+-   Do not compare results from different throttling profiles as if they
+    were equivalent.
+
+### 5.7 API and CMS requests
+
+-   Use the Network panel to identify slow, duplicated, sequential, or
+    unnecessary requests.
+-   Do not change API contracts, payload shape, request methods,
+    authentication, retries, or error handling as part of a frontend
+    performance task unless approved.
+-   Parallelise independent requests only after confirming there is no
+    dependency between them and that loading/error behavior remains
+    correct.
+-   Do not add persistent caching or alter revalidation behavior without
+    checking freshness requirements and the existing ISR/client cache
+    strategy.
+-   Keep CMS content dynamic; never replace missing API content with
+    hardcoded content.
+
+## 6. Recommended Priority
+
+Prioritise by measured impact and regression risk, not by convenience.
+
+1.  **P0 --- Reproduce and locate mobile LCP bottleneck.** The reported
+    5.8--12.9 s range is the most urgent concern.
+2.  **P1 --- Fix confirmed critical-path issues.** Examples include an
+    oversized LCP image, delayed resource discovery, a render-blocking
+    dependency, or a slow critical API request.
+3.  **P2 --- Reduce unnecessary image/media transfer.** Focus on large
+    and below-the-fold resources.
+4.  **P3 --- Reduce route-specific JavaScript work.** Use bundle and
+    performance traces to guide changes.
+5.  **P4 --- Investigate forced layouts and repeated rendering.**
+6.  **P5 --- Repeat consistent tests and monitor regressions.**
+
+This order is provisional. If the trace identifies a different dominant
+bottleneck, follow the evidence.
+
+## 7. Acceptance Criteria
+
+A change is complete only when all applicable checks pass:
+
+-   [ ] No unintended UI differences at existing desktop and mobile
+    viewports.
+-   [ ] No change to business logic, API contracts, routes, or expected
+    user journeys.
+-   [ ] Existing CMS-driven content, media priorities, and
+    empty/loading/error states are preserved.
+-   [ ] No new console errors, hydration warnings, failed requests, or
+    accessibility issues.
+-   [ ] Filters, sorting, pagination, search, forms, authentication,
+    cart, checkout, and other route-specific interactions pass.
+-   [ ] SEO metadata, canonical URLs, headings, and alt text remain
+    correct.
+-   [ ] CLS remains within the existing recommended benchmark.
+-   [ ] Desktop and mobile Lighthouse tests are run under the recorded
+    baseline conditions.
+-   [ ] Before/after measurements and the exact code changes are
+    documented.
+-   [ ] The change is reverted if it causes a regression that cannot be
+    resolved safely.
+
+Do not set an arbitrary performance score as the only acceptance
+criterion. The goal is measurable improvement without regressions. A
+useful initial target is to reduce the current mobile LCP substantially
+while preserving the current SEO, accessibility, and CLS results; set a
+numeric target after the baseline has been reproduced.
+
+## 8. Required Output for Each Page
+
+For each route, produce a short audit report:
+
+1.  **Route and screen name**
+2.  **Baseline metrics** (desktop and mobile)
+3.  **LCP element and root cause**
+4.  **Largest resources / critical requests**
+5.  **Recommended minimal code changes**
+6.  **Files/components likely to change**
+7.  **Risk assessment** (low/medium/high) and why
+8.  **Functional/UI regression checklist**
+9.  **Before/after measurements**
+10. **Decision** (keep, revise, or revert)
+
+Do not claim a root cause until it is confirmed by a trace, bundle
+report, network evidence, or profiler.
+
+## 9. Copy-Paste Prompt for Cursor / AI Coding Assistant
+
+> Audit and improve performance **one page/route at a time** using the
+> performance report in this document. The baseline is Desktop
+> Performance 68/100 with LCP 2.05 s, Mobile Performance 39--45/100 with
+> LCP 5.8--12.9 s under throttled conditions, SEO 100/100, Accessibility
+> 100/100, CLS within the recommended benchmark, and reported page
+> weight approximately 2.6 MB.
+>
+> First inspect the existing code and identify the actual framework,
+> route structure, shared components, image pipeline, CMS/API
+> dependencies, and current rendering/caching strategy. Do not assume a
+> bottleneck. Reproduce or inspect Lighthouse, browser
+> Network/Performance traces, bundle output, and the exact LCP element
+> before proposing edits.
+>
+> Work only on the selected route and the smallest set of shared
+> components/resources demonstrably responsible for its bottleneck.
+> State the evidence, root cause, proposed change, expected benefit, and
+> regression risks before editing. Then implement the smallest safe
+> change.
+>
+> **Do not change existing UI/layout/design, content, responsive
+> breakpoints, DOM order, business logic, API contracts, routes, CMS
+> behavior, SEO, accessibility, or existing loading/empty/error states.
+> Do not add dummy/fallback content, remove integrations, or make
+> backend/CMS changes. Do not alter SSR/ISR/cache behavior, component
+> boundaries, or dependencies without evidence and explicit
+> justification.**
+>
+> Optimise image dimensions/formats/loading priority, critical
+> rendering, non-critical JavaScript, duplicate work, and layout
+> recalculation only where supported by evidence. Never lazy-load the
+> confirmed LCP image. Preserve stable dimensions to avoid CLS. Keep
+> CMS-driven media selection and current user interactions intact.
+>
+> After each change, run the relevant checks and compare screenshots at
+> matching viewport sizes. Test all affected states and user journeys,
+> inspect console/network/hydration errors, and rerun Lighthouse under
+> the same desktop and mobile throttling conditions. Report before/after
+> metrics, changed files, tests performed, remaining issues, and whether
+> the change should be kept or reverted. If a safe improvement cannot be
+> demonstrated, do not make speculative changes.
+>
+> Do not perform a large-scale refactor or optimise multiple unrelated
+> routes in one pass. Finish the selected route and document the result
+> before moving to the next route.
+
+## 10. Final Principle
+
+**Measure → identify → make one minimal change → test UI/functionality →
+measure again.**
+
+The best optimisation is not simply the one that increases Lighthouse
+points; it is the one that improves real loading performance while
+preserving the website's existing behavior and visual design.

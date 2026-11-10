@@ -1,0 +1,529 @@
+---
+description: "Audit, optimize, and verify a specific page or screen for Performance, Accessibility, Best Practices, SEO, and responsive behavior without breaking existing UI or functionality."
+globs:
+  - "app/**/*.{js,jsx,ts,tsx}"
+  - "pages/**/*.{js,jsx,ts,tsx}"
+  - "src/app/**/*.{js,jsx,ts,tsx}"
+  - "src/pages/**/*.{js,jsx,ts,tsx}"
+  - "components/**/*.{js,jsx,ts,tsx}"
+  - "src/components/**/*.{js,jsx,ts,tsx}"
+alwaysApply: false
+---
+
+# Page-Level Optimization Rule
+
+## Objective
+
+When asked to optimize a specific page, route, or screen, audit the existing implementation, identify actual issues, implement safe fixes, and verify the results across:
+
+1. Performance
+2. Accessibility
+3. Best Practices
+4. SEO
+5. Mobile and responsive behavior
+
+Optimize the real user experience rather than chasing Lighthouse scores through superficial changes.
+
+## 1. Scope and Safety Rules
+
+- Identify the exact target route and its page entry point before modifying code.
+- Inspect the repository instructions, existing conventions, framework version, package scripts, and relevant components.
+- Trace the target page's layouts, child components, styles, hooks, API calls, metadata, and assets.
+- Keep changes limited to the target page and its directly related dependencies.
+- Modify shared components only when necessary. Inspect their other usages and assess regression risks first.
+- Preserve existing UI/UX, content, responsive behavior, interactions, API contracts, authentication, and business logic.
+- Do not remove features, content, analytics, validation, or functionality merely to improve Lighthouse scores.
+- Never replace real API/CMS data with hardcoded, dummy, invented, or static fallback content.
+- Preserve the established loading, empty, error, and success states.
+- Do not change environment variables, secrets, hosting configuration, CDN settings, or backend services unless explicitly authorized and in scope.
+- Avoid adding dependencies unless there is a clear technical need.
+- Never suppress warnings, disable checks, or hide content merely to improve scores.
+- Do not claim that a test passed or a score improved unless it was actually verified.
+- If an issue originates from a backend, third-party script, CDN, hosting configuration, or external service, document the evidence and blocker.
+- If the requested route is unclear, ask one concise clarifying question.
+
+## 2. Initial Audit Checklist
+
+Before changing code:
+
+- [ ] Identify the exact target route and page entry file.
+- [ ] Trace relevant components, layouts, hooks, state, API clients, and styles.
+- [ ] Determine whether the page uses Server Components, Client Components, SSR, SSG, ISR, or client-side fetching.
+- [ ] Inspect image, video, font, icon, and other asset loading.
+- [ ] Inspect API requests, request waterfalls, duplicate requests, payload sizes, and caching.
+- [ ] Review browser console errors, hydration warnings, and failed network requests when browser tools are available.
+- [ ] Inspect existing lint, type-check, build, and test scripts.
+- [ ] Capture baseline Lighthouse results for desktop and mobile when possible.
+- [ ] Record the relevant Core Web Vitals and diagnostic findings.
+- [ ] Identify the root cause of each significant issue before implementing a fix.
+- [ ] Prioritize issues based on user impact, severity, confidence, and expected improvement.
+
+Do not guess at the cause based on a Lighthouse score alone.
+
+## 3. Performance Optimization
+
+### 3.1 Core Web Vitals
+
+- [ ] Identify the actual Largest Contentful Paint (LCP) element.
+- [ ] Investigate the critical resource chain affecting LCP.
+- [ ] Aim for LCP of 2.5 seconds or less.
+- [ ] Aim for Interaction to Next Paint (INP) of 200 milliseconds or less.
+- [ ] Aim for Cumulative Layout Shift (CLS) of 0.1 or less.
+- [ ] Use the 75th percentile of real-user visits when evaluating Core Web Vitals.
+- [ ] Review First Contentful Paint (FCP), Speed Index, Total Blocking Time (TBT), and long tasks as diagnostic metrics.
+- [ ] Avoid delaying critical content with unnecessary client-side JavaScript, effects, or API waterfalls.
+- [ ] Do not treat one Lighthouse run as proof of real-user INP or field performance.
+
+### 3.2 Image Optimization
+
+- [ ] Identify oversized, uncompressed, or unnecessarily large images.
+- [ ] Use the project's existing image optimization pipeline where appropriate.
+- [ ] Use responsive image sizes and suitable modern image formats when supported.
+- [ ] Avoid downloading desktop-sized images unnecessarily on mobile.
+- [ ] Provide image width and height or a stable aspect ratio.
+- [ ] Do not lazy-load the actual LCP image or critical above-the-fold images.
+- [ ] Use high fetch priority only for an identified critical image when appropriate.
+- [ ] Avoid assigning high priority to multiple competing resources.
+- [ ] Lazy-load below-the-fold images when appropriate.
+- [ ] Preserve the existing image/video priority rules and visual presentation.
+- [ ] Provide meaningful alt text for informative images.
+- [ ] Use empty alt text for purely decorative images.
+- [ ] Avoid layout shifts caused by images loading without reserved space.
+
+### 3.3 Video and Heavy Media
+
+- [ ] Avoid loading heavy videos before they are required.
+- [ ] Use appropriate video posters and lazy loading for non-critical media.
+- [ ] Avoid unnecessary autoplay or background video downloads.
+- [ ] Lazy-load heavy embeds, maps, and other non-critical components when beneficial.
+- [ ] Preserve required media behavior and the existing design.
+- [ ] Avoid downloading both desktop and mobile media variants when only one is required.
+
+### 3.4 JavaScript and React Optimization
+
+- [ ] Identify unnecessary client-side JavaScript and large dependencies.
+- [ ] Prefer Server Components for non-interactive UI where compatible with the existing architecture.
+- [ ] Keep client component boundaries as small as practical.
+- [ ] Do not add "use client" unnecessarily.
+- [ ] Use dynamic imports for genuinely heavy, non-critical components when beneficial.
+- [ ] Remove unused imports and dead code when safe.
+- [ ] Avoid unnecessary state updates, effects, event listeners, and repeated computations.
+- [ ] Avoid expensive calculations and DOM operations during rendering.
+- [ ] Reduce long-running main-thread tasks.
+- [ ] Avoid unnecessary re-renders and redundant data processing.
+- [ ] Use memoization only when it provides a meaningful benefit.
+- [ ] Avoid importing entire libraries when a smaller supported import is available.
+- [ ] Remove duplicate requests and duplicate component logic where safe.
+- [ ] Avoid unnecessary timers or artificial delays to hide loading problems.
+- [ ] Do not remove business logic or features to reduce JavaScript size.
+
+### 3.5 CSS and Rendering
+
+- [ ] Identify render-blocking resources where applicable.
+- [ ] Remove unused CSS only when it is safe to do so.
+- [ ] Avoid expensive animations, filters, shadows, and effects when they cause measurable performance issues.
+- [ ] Prefer efficient animations that avoid repeated layout and paint work.
+- [ ] Reserve space for dynamic content to prevent layout shifts.
+- [ ] Avoid forced synchronous layout and repeated DOM measurements.
+- [ ] Prevent unnecessary layout recalculations.
+- [ ] Preserve Figma spacing, typography, colors, responsive behavior, and visual fidelity.
+- [ ] Respect the existing styling approach and design tokens.
+
+### 3.6 Fonts
+
+- [ ] Load only the required font families and weights.
+- [ ] Avoid loading unnecessary font variants.
+- [ ] Use the existing font optimization pipeline or Next.js font capabilities where appropriate.
+- [ ] Use suitable font-display behavior.
+- [ ] Preload only fonts that are actually critical to initial rendering.
+- [ ] Avoid duplicate font downloads.
+- [ ] Prevent avoidable layout shifts caused by font swapping.
+
+### 3.7 API and Data Loading
+
+- [ ] Identify duplicate API calls.
+- [ ] Identify unnecessary serial request waterfalls.
+- [ ] Parallelize independent requests where safe.
+- [ ] Avoid requesting the same data repeatedly from multiple components when it can be safely reused.
+- [ ] Reduce payload sizes only when supported by the existing API contract.
+- [ ] Avoid blocking the initial render with non-critical requests.
+- [ ] Preserve API response handling and business logic.
+- [ ] Handle loading, empty, error, and retry states correctly.
+- [ ] Do not introduce dummy data or fabricated fallback content.
+- [ ] Do not assume a missing API value should be replaced with invented content.
+- [ ] Investigate slow backend responses before attributing the issue to frontend rendering.
+- [ ] Do not expose credentials, secrets, or sensitive API information in client-side code.
+
+### 3.8 Caching and Revalidation
+
+- [ ] Inspect the current caching strategy before changing it.
+- [ ] Cache only data that is safe and appropriate to reuse.
+- [ ] Preserve the freshness requirements of product prices, availability, stock, account data, and other dynamic information.
+- [ ] Never publicly cache personalized or sensitive responses.
+- [ ] Do not change SSR, SSG, ISR, cache settings, or revalidation behavior without understanding the consequences.
+- [ ] Avoid using localStorage or IndexedDB as a workaround without verifying the actual root cause.
+- [ ] Preserve authentication and user-specific data behavior.
+
+### 3.9 Third-Party Scripts
+
+- [ ] Inspect analytics, tag managers, chat widgets, video embeds, and other third-party scripts.
+- [ ] Defer non-critical scripts when appropriate.
+- [ ] Use framework-supported script loading strategies.
+- [ ] Do not remove required analytics, consent management, payment integrations, or business-critical scripts without authorization.
+- [ ] Distinguish application code from CDN, hosting, browser-injected, and third-party scripts where possible.
+- [ ] Document external limitations that cannot be fixed in the repository.
+
+## 4. Accessibility Optimization
+
+Target WCAG 2.2 AA, recognizing that automated checks cannot verify every requirement.
+
+### 4.1 Semantic HTML
+
+- [ ] Use semantic HTML elements appropriately.
+- [ ] Use meaningful header, nav, main, and footer landmarks.
+- [ ] Maintain a logical heading hierarchy.
+- [ ] Provide a clear page-level H1 where appropriate.
+- [ ] Use buttons for actions and links for navigation.
+- [ ] Avoid clickable non-interactive elements when native controls are suitable.
+- [ ] Provide accessible names and roles for interactive elements.
+- [ ] Use ARIA only when necessary.
+- [ ] Prefer native HTML semantics over unnecessary custom accessibility implementations.
+
+### 4.2 Keyboard Accessibility
+
+- [ ] Ensure all interactive elements can be operated with a keyboard.
+- [ ] Provide visible focus indicators.
+- [ ] Maintain a logical keyboard focus order.
+- [ ] Avoid positive tabindex values.
+- [ ] Ensure sticky headers and overlays do not obscure focused controls.
+- [ ] Avoid keyboard traps.
+- [ ] Do not make hover the only way to access important content or functionality.
+- [ ] Ensure keyboard navigation works in menus, tabs, accordions, dropdowns, and carousels.
+
+### 4.3 Forms and Validation
+
+- [ ] Provide programmatic labels for all form controls.
+- [ ] Use appropriate input types and autocomplete attributes.
+- [ ] Associate help text and validation errors with the relevant inputs.
+- [ ] Clearly identify required fields.
+- [ ] Communicate validation errors in text rather than relying on color alone.
+- [ ] Ensure error messages are accessible to assistive technologies.
+- [ ] Preserve existing validation rules and business requirements.
+- [ ] Prevent duplicate submissions when appropriate.
+- [ ] Communicate submission progress and outcomes accessibly.
+- [ ] Ensure disabled, invalid, required, and selected states are communicated correctly.
+
+### 4.4 Dialogs and Interactive Components
+
+- [ ] Manage focus correctly when dialogs and modals open.
+- [ ] Restore focus appropriately when dialogs close.
+- [ ] Support Escape behavior where appropriate.
+- [ ] Keep keyboard navigation within modal dialogs when required.
+- [ ] Provide accessible names for icon-only buttons.
+- [ ] Expose expanded, selected, checked, and other relevant states.
+- [ ] Ensure custom controls follow expected keyboard interaction patterns.
+- [ ] Avoid using ARIA attributes that conflict with native semantics.
+
+### 4.5 Contrast and Visual Accessibility
+
+- [ ] Check text contrast against WCAG 2.2 AA requirements.
+- [ ] Check relevant non-text contrast, including control boundaries and focus indicators.
+- [ ] Ensure text can resize without loss of functionality.
+- [ ] Test reflow at narrow viewport sizes and high zoom.
+- [ ] Ensure touch targets meet applicable WCAG 2.2 AA sizing or spacing requirements, subject to documented exceptions.
+- [ ] Do not use color, shape, position, or sound as the only indicator of meaning.
+- [ ] Respect prefers-reduced-motion.
+- [ ] Avoid unnecessary flashing and motion.
+- [ ] Ensure decorative images are ignored by assistive technologies.
+- [ ] Test keyboard navigation and automated accessibility checks where available.
+
+## 5. Best Practices
+
+### 5.1 Runtime and Browser Issues
+
+- [ ] Fix application-caused console errors.
+- [ ] Investigate React warnings and hydration mismatches.
+- [ ] Investigate deprecated browser API warnings.
+- [ ] Replace deprecated APIs when the application controls the code and a safe alternative exists.
+- [ ] Fix broken assets and failed resource requests.
+- [ ] Investigate unexpected runtime exceptions.
+- [ ] Fix invalid markup and duplicate element IDs.
+- [ ] Avoid suppressing warnings instead of resolving root causes.
+- [ ] Distinguish application errors from browser extensions, injected scripts, hosting, CDN, and third-party code.
+
+### 5.2 Security and Reliability
+
+- [ ] Avoid mixed content and insecure resource loading.
+- [ ] Use HTTPS for production endpoints and assets when required.
+- [ ] Validate and safely handle untrusted inputs and URL parameters.
+- [ ] Avoid exposing secrets, credentials, tokens, or sensitive personal information.
+- [ ] Do not place secret-bearing requests or credentials in client-side code.
+- [ ] Handle malformed API responses and network failures safely.
+- [ ] Validate external link behavior.
+- [ ] Use appropriate rel attributes for links opening new tabs when needed.
+- [ ] Avoid unnecessary permission prompts and intrusive dialogs.
+- [ ] Do not claim the page is secure based solely on a Lighthouse score.
+
+### 5.3 Third-Party and Dependency Checks
+
+- [ ] Review unnecessary or outdated dependencies where relevant.
+- [ ] Avoid adding libraries for functionality already available in the project or platform.
+- [ ] Check third-party script impact.
+- [ ] Preserve required payment, authentication, consent, and analytics functionality.
+- [ ] Document issues requiring dependency updates, infrastructure changes, or external team support.
+- [ ] Do not make unrelated dependency upgrades as part of a page-specific optimization.
+
+## 6. SEO Optimization
+
+### 6.1 Metadata
+
+- [ ] Provide a unique, descriptive page title.
+- [ ] Provide an appropriate, page-specific meta description.
+- [ ] Ensure the page has a meaningful H1.
+- [ ] Maintain a logical heading hierarchy.
+- [ ] Verify the viewport configuration.
+- [ ] Verify the document language.
+- [ ] Use framework-native metadata conventions.
+- [ ] Avoid duplicate or conflicting title, description, canonical, and robots tags.
+- [ ] Preserve existing routing and URL structures.
+
+### 6.2 Indexability and Crawlability
+
+- [ ] Verify that public pages intended for indexing are indexable.
+- [ ] Check robots directives and canonical URLs.
+- [ ] Avoid accidental noindex directives on public pages.
+- [ ] Ensure private or authenticated pages are not unintentionally exposed to search engines.
+- [ ] Ensure important public content is available in crawlable HTML.
+- [ ] Preserve suitable server rendering or static rendering for important public content where compatible.
+- [ ] Use descriptive internal link text.
+- [ ] Fix broken internal links.
+- [ ] Avoid unnecessary redirect chains.
+- [ ] Do not invent metadata or content that does not accurately describe the page.
+
+### 6.3 Images and Social Metadata
+
+- [ ] Provide meaningful alt text for informative images.
+- [ ] Use empty alt text for decorative images.
+- [ ] Add Open Graph metadata where appropriate.
+- [ ] Add social-sharing metadata where appropriate.
+- [ ] Verify that social image URLs are valid when applicable.
+- [ ] Avoid duplicate or conflicting metadata across layouts and pages.
+
+### 6.4 Structured Data
+
+- [ ] Add structured data only when appropriate to the page content.
+- [ ] Use valid schema types and properties.
+- [ ] Ensure structured data accurately reflects visible content.
+- [ ] Never fabricate prices, ratings, reviews, product availability, or business information.
+- [ ] Avoid adding irrelevant structured data just to improve an audit score.
+- [ ] Validate structured data when suitable tools are available.
+
+Do not promise higher search rankings based on metadata changes alone.
+
+## 7. Responsive and Mobile Optimization
+
+- [ ] Test the narrowest supported mobile viewport.
+- [ ] Test common mobile sizes, tablets, laptops, and desktops.
+- [ ] Fix horizontal overflow and clipped content.
+- [ ] Check overlapping elements, fixed widths, and incorrect positioning.
+- [ ] Verify responsive typography, spacing, images, and navigation.
+- [ ] Check mobile menus, dialogs, filters, forms, and carousels.
+- [ ] Ensure tap targets and keyboard interactions remain usable.
+- [ ] Verify content order and reading order across viewport sizes.
+- [ ] Ensure mobile layouts do not hide important content or functionality.
+- [ ] Avoid loading unnecessarily large desktop-only assets on mobile.
+- [ ] Check sticky elements and fixed controls for content obstruction.
+- [ ] Test loading, empty, error, and success states at mobile and desktop sizes.
+- [ ] Test throttled network and CPU conditions when browser tooling is available.
+- [ ] Confirm responsive fixes preserve the original design.
+
+## 8. Next.js-Specific Rules
+
+- [ ] Follow the installed Next.js version and existing App Router or Pages Router architecture.
+- [ ] Inspect package.json before assuming framework capabilities.
+- [ ] Use supported metadata exports or generateMetadata where appropriate in the App Router.
+- [ ] Use next/image or the established image solution when appropriate.
+- [ ] Verify remote image configuration rather than bypassing it.
+- [ ] Use next/font or the established font pipeline when appropriate.
+- [ ] Prefer Server Components by default in the App Router when client interactivity is unnecessary.
+- [ ] Keep client component boundaries small.
+- [ ] Add "use client" only where required.
+- [ ] Use framework-supported script loading strategies.
+- [ ] Use dynamic imports only when they provide a meaningful benefit.
+- [ ] Respect existing route handlers, middleware, authentication, and data-fetching conventions.
+- [ ] Avoid unsafe hydration workarounds.
+- [ ] Use suppressHydrationWarning only for a narrow, intentional, justified mismatch.
+- [ ] Do not introduce caching or revalidation behavior that changes data freshness or personalization.
+- [ ] Preserve existing API contracts and application architecture.
+
+## 9. Lighthouse Verification
+
+### 9.1 Performance
+
+- [ ] Record the Performance score before and after, when available.
+- [ ] Inspect LCP and identify the LCP element.
+- [ ] Review FCP, Speed Index, TBT, CLS, and related diagnostics.
+- [ ] Review render-blocking resources.
+- [ ] Review image sizing and loading priorities.
+- [ ] Review unused JavaScript and CSS.
+- [ ] Review network request chains and payload sizes.
+- [ ] Review layout shifts and long tasks.
+
+### 9.2 Accessibility
+
+- [ ] Review the Accessibility score and individual audit findings.
+- [ ] Fix automated violations that apply to the page.
+- [ ] Manually test keyboard navigation.
+- [ ] Check labels, accessible names, heading structure, and contrast.
+- [ ] Test dialogs, forms, and interactive components.
+- [ ] Document accessibility issues that automated tooling cannot verify.
+
+### 9.3 Best Practices
+
+- [ ] Review the Best Practices score and individual findings.
+- [ ] Investigate browser errors and unsafe resource loading.
+- [ ] Check failed requests and application runtime errors.
+- [ ] Investigate deprecated APIs and third-party issues.
+- [ ] Document external blockers.
+
+### 9.4 SEO
+
+- [ ] Review the SEO score and individual findings.
+- [ ] Verify title and meta description.
+- [ ] Verify crawlability and indexability.
+- [ ] Check canonical and robots metadata.
+- [ ] Check headings, links, and image alternatives.
+- [ ] Validate structured data where applicable.
+
+### 9.5 Consistent Measurement
+
+- [ ] Run Lighthouse in mobile and desktop modes when available.
+- [ ] Compare results under comparable conditions.
+- [ ] Avoid comparing runs with materially different network, CPU, cache, or environment settings.
+- [ ] Use multiple runs when results are variable.
+- [ ] Do not guarantee a specific score.
+- [ ] Do not fabricate baseline or final measurements.
+- [ ] Distinguish lab metrics from real-user field metrics.
+- [ ] Record any limitation preventing a reliable comparison.
+
+## 10. Implementation Workflow
+
+Follow this sequence for every page-level optimization task.
+
+### Step 1: Inspect
+
+Identify the route, page entry point, relevant components, data dependencies, and existing implementation.
+
+### Step 2: Establish Baseline
+
+Capture Lighthouse results, relevant metrics, console/network errors, and visual behavior when tooling is available.
+
+### Step 3: Identify Root Causes
+
+Create a prioritized issue list grouped into Performance, Accessibility, Best Practices, SEO, and Responsive behavior.
+
+For each issue, document:
+- Observed problem
+- Evidence
+- Root cause
+- Proposed fix
+- Expected impact
+- Regression risk
+
+### Step 4: Implement
+
+- Fix verified issues using the smallest safe change.
+- Preserve existing UI/UX and business behavior.
+- Avoid unrelated refactoring.
+- Review shared-component impact before modifying shared code.
+- Do not change external infrastructure or backend systems without authorization.
+
+### Step 5: Review the Diff
+
+Check for:
+- Unrelated file modifications
+- Visual regressions
+- API contract changes
+- Authentication or business logic changes
+- Accessibility regressions
+- New dependencies
+- Security risks
+- Unnecessary changes to caching or rendering behavior
+
+### Step 6: Run Verification
+
+- Run the available lint command.
+- Run the available type-check command.
+- Run relevant tests.
+- Run the production build when appropriate.
+- Run Lighthouse for desktop and mobile when available.
+- Recheck console errors and failed requests.
+- Verify important user interactions and API-driven states.
+- Compare before-and-after metrics only when measured.
+
+### Step 7: Report
+
+Summarize the work accurately. If browser automation or Lighthouse is unavailable, state that limitation and provide the next verification steps.
+
+## 11. Acceptance Criteria
+
+Consider the task complete only when:
+
+- [ ] The requested route has been identified.
+- [ ] Relevant code has been audited.
+- [ ] Actual issues have been fixed or documented.
+- [ ] Existing UI/UX and core functionality are preserved.
+- [ ] Desktop, tablet, and mobile behavior have been reviewed as far as the available environment allows.
+- [ ] Performance, Accessibility, Best Practices, and SEO have been assessed.
+- [ ] API/CMS content and business logic remain correct.
+- [ ] Loading, empty, error, and success states remain correct.
+- [ ] Lint, type-check, tests, and build results are reported accurately.
+- [ ] Lighthouse comparisons are reported only if actually measured.
+- [ ] Remaining limitations and external dependencies are documented.
+
+## 12. Required Final Report
+
+After completing the task, provide the following report.
+
+### Target Page
+- Route:
+- Page entry point:
+- Relevant components:
+
+### Issues and Root Causes
+Group findings under:
+- Performance
+- Accessibility
+- Best Practices
+- SEO
+- Responsive behavior
+
+### Files Modified
+For each file, explain the change and why it was needed.
+
+### Fixes Implemented
+Summarize the actual fixes and their expected or measured impact.
+
+### Verification Results
+Report:
+- Lint:
+- Type-check:
+- Tests:
+- Production build:
+- Desktop Lighthouse:
+- Mobile Lighthouse:
+- Console and network checks:
+- Responsive and functional checks:
+
+Use "Not run" or "Not available" when applicable.
+
+### Before-and-After Comparison
+Include scores and relevant metrics only when measurements exist. Never invent results.
+
+### Remaining Issues
+List unresolved problems, external dependencies, risks, and recommended next steps.
+
+### Regression Check
+State which existing UI elements, API integrations, forms, navigation flows, and interactive features were verified.
+
+Be specific, honest, and concise. Never claim an improvement without evidence.
