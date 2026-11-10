@@ -443,6 +443,33 @@ const parseDateOnly = (value: string): Date | undefined => {
 export const shouldShowFieldError = (touched: boolean, submitted: boolean, error?: string) =>
   Boolean(error && (touched || submitted));
 
+export const getFirstFieldWithError = <T extends string>(
+  errors: Partial<Record<T, string | undefined>>,
+  fieldOrder: readonly T[],
+): T | undefined => {
+  for (const field of fieldOrder) {
+    if (errors[field]) {
+      return field;
+    }
+  }
+  return undefined;
+};
+
+/** Show at most one checkout validation error — the earliest invalid field in form order. */
+export const shouldShowSequentialFieldError = (
+  field: string,
+  activeField: string | undefined,
+  touched: boolean,
+  submitted: boolean,
+  error?: string,
+): boolean => {
+  if (!error || !activeField || field !== activeField) {
+    return false;
+  }
+
+  return touched || submitted;
+};
+
 export type CheckoutContactOptions = {
   /** Mirrors the sign-in field: with SMS off there is no phone identity to accept. */
   emailOnly?: boolean;
@@ -580,6 +607,37 @@ export type CheckoutFormValues = {
   billingPhone: string;
   billingCountryCode?: string;
 };
+
+/** Checkout fields in the order they appear on the form step. */
+export const getCheckoutFormFieldOrder = (values: CheckoutFormValues): CheckoutFormField[] => {
+  const order: CheckoutFormField[] = [
+    "name",
+    "phoneOrEmail",
+    "shippingName",
+    "addressLine1",
+    "addressLine2",
+    "pincode",
+    "city",
+    "state",
+    "shippingPhone",
+  ];
+
+  if (!values.billingSameAsShipping) {
+    order.push(
+      "billingName",
+      "billingAddressLine1",
+      "billingAddressLine2",
+      "billingPincode",
+      "billingCity",
+      "billingState",
+      "billingPhone",
+    );
+  }
+
+  return order;
+};
+
+export const CHECKOUT_PAYMENT_FIELD_ORDER: readonly CheckoutPaymentField[] = ["cod"];
 
 export type CheckoutPaymentValues = {
   method: "card" | "upi" | "netbanking" | "cod";
