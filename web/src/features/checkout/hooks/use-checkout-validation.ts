@@ -7,14 +7,11 @@ import {
   type CheckoutFormValues,
   type CheckoutPaymentField,
   type CheckoutPaymentValues,
-  CHECKOUT_PAYMENT_FIELD_ORDER,
   getCheckoutFormErrors,
-  getCheckoutFormFieldOrder,
   getCheckoutPaymentErrors,
-  getFirstFieldWithError,
   isCheckoutFormValid,
   isCheckoutPaymentValid,
-  shouldShowSequentialFieldError,
+  shouldShowFieldError,
 } from "@/shared/utils/formValidation";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 
@@ -34,13 +31,6 @@ export const useCheckoutFormValidation = (
     [emailOnly, values],
   );
 
-  const fieldOrder = useMemo(() => getCheckoutFormFieldOrder(values), [values]);
-
-  const activeErrorField = useMemo(
-    () => getFirstFieldWithError(errors, fieldOrder),
-    [errors, fieldOrder],
-  );
-
   const isValid = useMemo(
     () => isCheckoutFormValid(values, INDIAN_STATES, { emailOnly }),
     [emailOnly, values],
@@ -52,14 +42,8 @@ export const useCheckoutFormValidation = (
 
   const showError = useCallback(
     (field: CheckoutFormField) =>
-      shouldShowSequentialFieldError(
-        field,
-        activeErrorField,
-        Boolean(touched[field]),
-        submitted,
-        errors[field],
-      ),
-    [activeErrorField, errors, submitted, touched],
+      shouldShowFieldError(Boolean(touched[field]), submitted, errors[field]),
+    [errors, submitted, touched],
   );
 
   const validateSubmit = useCallback(
@@ -109,11 +93,6 @@ export const useCheckoutPaymentValidation = (
     [codOffered, hasEngravedItems, orderTotal, values],
   );
 
-  const activeErrorField = useMemo(
-    () => getFirstFieldWithError(errors, CHECKOUT_PAYMENT_FIELD_ORDER),
-    [errors],
-  );
-
   const isValid = useMemo(
     () => isCheckoutPaymentValid(values, codOffered, hasEngravedItems, orderTotal),
     [codOffered, hasEngravedItems, orderTotal, values],
@@ -125,14 +104,8 @@ export const useCheckoutPaymentValidation = (
 
   const showError = useCallback(
     (field: CheckoutPaymentField) =>
-      shouldShowSequentialFieldError(
-        field,
-        activeErrorField,
-        Boolean(touched[field]),
-        submitted,
-        errors[field],
-      ),
-    [activeErrorField, errors, submitted, touched],
+      shouldShowFieldError(Boolean(touched[field]), submitted, errors[field]),
+    [errors, submitted, touched],
   );
 
   const validateSubmit = useCallback(
