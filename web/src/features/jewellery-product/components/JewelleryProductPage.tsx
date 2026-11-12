@@ -803,7 +803,9 @@ const JewelleryProductPage = ({
       )}
 
       <JewelleryProductToolbar
-        productCount={totalCount}
+        productCount={
+          !isLoading && !isSearching && products.length === 0 ? 0 : totalCount
+        }
         isSearching={isSearching}
         isSearchListing={Boolean(searchQuery)}
         sortValue={sortValue}

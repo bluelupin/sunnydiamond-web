@@ -245,12 +245,20 @@ export function useMagentoJewelleryListing({
     initialListing?.pendingProducts ? [...initialListing.pendingProducts] : [],
   );
   const isLoadingMoreRef = useRef(false);
-  const appliedFiltersKeyRef = useRef(
-    getJewelleryListingFiltersKey(
-      filters,
-      initialListing?.facets ?? EMPTY_JEWELLERY_FILTER_FACETS,
-    ),
+  const initialAppliedFiltersKey = getJewelleryListingFiltersKey(
+    filters,
+    initialListing?.facets ?? EMPTY_JEWELLERY_FILTER_FACETS,
   );
+  const appliedFiltersKeyRef = useRef(initialAppliedFiltersKey);
+  const [appliedListingFiltersKey, setAppliedListingFiltersKey] = useState(
+    () => initialAppliedFiltersKey,
+  );
+  const inFlightFiltersKeyRef = useRef<string | null>(null);
+
+  const syncAppliedFiltersKey = useCallback((key: string) => {
+    appliedFiltersKeyRef.current = key;
+    setAppliedListingFiltersKey(key);
+  }, []);
   const consumePrefetchedListingRef = useRef(Boolean(initialListing && initialListingParams));
   const seededListingCacheRef = useRef(false);
   const lastListingResetNonceRef = useRef(listingResetNonce);
@@ -278,12 +286,7 @@ export function useMagentoJewelleryListing({
 
   const applyInitialListing = useCallback((listing: JewelleryListingProductsData) => {
     setProducts(listing.products);
-    const exactPrice = getExactJewelleryPriceFilter(filtersRef.current, listing.facets);
-    setTotalCount(
-      exactPrice != null
-        ? listing.products.length + (listing.pendingProducts?.length ?? 0)
-        : listing.totalCount,
-    );
+    setTotalCount(listing.totalCount);
     setTotalPages(listing.totalPages);
     totalPagesRef.current = listing.totalPages;
     setFacets(listing.facets);
@@ -324,9 +327,8 @@ export function useMagentoJewelleryListing({
     consumePrefetchedListingRef.current = false;
     filtersRef.current = listingFilters;
     applyInitialListing(initialListing);
-    appliedFiltersKeyRef.current = getJewelleryListingFiltersKey(
-      listingFilters,
-      initialListing.facets,
+    syncAppliedFiltersKey(
+      getJewelleryListingFiltersKey(listingFilters, initialListing.facets),
     );
     setResolvedListingQueryKey(
       buildListingQueryKey(
@@ -348,6 +350,7 @@ export function useMagentoJewelleryListing({
     pageSize,
     search,
     sortValue,
+    syncAppliedFiltersKey,
   ]);
 
   const fetchInitialListing = useCallback(async (filtersOverride?: JewelleryFilterState) => {
@@ -360,6 +363,8 @@ export function useMagentoJewelleryListing({
     const fetchStartedAt = performance.now();
     const listingFilters = resolveListingFiltersForQuery(filtersOverride ?? filtersRef.current);
     filtersRef.current = listingFilters;
+
+    let listingApplied = false;
 
     try {
       const { listing } = await getMagentoJewelleryInitialListing({
@@ -377,6 +382,7 @@ export function useMagentoJewelleryListing({
       }
 
       applyInitialListing(listing);
+      listingApplied = true;
       setError(undefined);
 
       const durationMs = performance.now() - fetchStartedAt;
@@ -402,24 +408,36 @@ export function useMagentoJewelleryListing({
       setPendingCount(0);
       setError(message);
     } finally {
-      if (requestId === requestIdRef.current) {
-        setIsLoading(false);
-        const resolvedKey = buildListingQueryKey(
-          categoryUrlKey,
-          search,
-          sortValue,
-          pageSize,
-          listingFilters,
-          facetsRef.current,
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      setIsLoading(false);
+
+      const attemptedFiltersKey = getJewelleryListingFiltersKey(
+        listingFilters,
+        facetsRef.current,
+      );
+      if (inFlightFiltersKeyRef.current === attemptedFiltersKey) {
+        inFlightFiltersKeyRef.current = null;
+      }
+
+      if (listingApplied) {
+        const appliedKey = attemptedFiltersKey;
+        syncAppliedFiltersKey(appliedKey);
+        setResolvedListingQueryKey(
+          buildListingQueryKey(
+            categoryUrlKey,
+            search,
+            sortValue,
+            pageSize,
+            listingFilters,
+            facetsRef.current,
+          ),
         );
-        appliedFiltersKeyRef.current = getJewelleryListingFiltersKey(
-          listingFilters,
-          facetsRef.current,
-        );
-        setResolvedListingQueryKey(resolvedKey);
       }
     }
-  }, [applyInitialListing, categoryUrlKey, search, pageSize, sortValue]);
+  }, [applyInitialListing, categoryUrlKey, search, pageSize, sortValue, syncAppliedFiltersKey]);
 
   useEffect(() => {
     if (listingResetNonce !== lastListingResetNonceRef.current) {
@@ -430,7 +448,7 @@ export function useMagentoJewelleryListing({
 
     if (lastListingScopeKeyRef.current !== currentScopeKey) {
       lastListingScopeKeyRef.current = currentScopeKey;
-      appliedFiltersKeyRef.current = "";
+      syncAppliedFiltersKey("");
     }
 
     if (
@@ -460,7 +478,7 @@ export function useMagentoJewelleryListing({
       facetsRef.current = initialListing.facets;
 
       if (liveFiltersKey === prefetchedFiltersKey) {
-        appliedFiltersKeyRef.current = liveFiltersKey;
+        syncAppliedFiltersKey(liveFiltersKey);
         setResolvedListingQueryKey(
           buildListingQueryKey(
             categoryUrlKey,
@@ -474,7 +492,7 @@ export function useMagentoJewelleryListing({
         return;
       }
 
-      appliedFiltersKeyRef.current = prefetchedFiltersKey;
+      syncAppliedFiltersKey(prefetchedFiltersKey);
     }
 
     currentPageRef.current = 1;
@@ -491,6 +509,7 @@ export function useMagentoJewelleryListing({
     initialListing,
     prefetchedScopeKey,
     listingResetNonce,
+    syncAppliedFiltersKey,
   ]);
 
   useLayoutEffect(() => {
@@ -504,7 +523,12 @@ export function useMagentoJewelleryListing({
       return;
     }
 
-    appliedFiltersKeyRef.current = nextKey;
+    if (inFlightFiltersKeyRef.current === nextKey) {
+      return;
+    }
+
+    inFlightFiltersKeyRef.current = nextKey;
+    setResolvedListingQueryKey(null);
     currentPageRef.current = 1;
     setCurrentPage(1);
     pendingProductsRef.current = [];
@@ -522,9 +546,8 @@ export function useMagentoJewelleryListing({
     consumePrefetchedListingRef.current = false;
     clearMagentoJewelleryListingCache();
     facetsRef.current = EMPTY_JEWELLERY_FILTER_FACETS;
-    appliedFiltersKeyRef.current = getJewelleryListingFiltersKey(
-      filtersRef.current,
-      EMPTY_JEWELLERY_FILTER_FACETS,
+    syncAppliedFiltersKey(
+      getJewelleryListingFiltersKey(filtersRef.current, EMPTY_JEWELLERY_FILTER_FACETS),
     );
     currentPageRef.current = 1;
     setCurrentPage(1);
@@ -535,7 +558,7 @@ export function useMagentoJewelleryListing({
     setTotalPages(0);
     totalPagesRef.current = 0;
     void fetchInitialListing();
-  }, [listingResetNonce, fetchInitialListing]);
+  }, [listingResetNonce, fetchInitialListing, syncAppliedFiltersKey]);
 
   const retryListing = useCallback(() => {
     setError(undefined);
@@ -677,8 +700,41 @@ export function useMagentoJewelleryListing({
       ),
     [categoryUrlKey, search, sortValue, pageSize, filters, facets],
   );
+
+  const liveListingFiltersKey = useMemo(
+    () =>
+      getJewelleryListingFiltersKey(
+        resolveListingFiltersForQuery(filters),
+        facets,
+      ),
+    [filters, facets],
+  );
+
+  useEffect(() => {
+    if (
+      isLoading ||
+      resolvedListingQueryKey == null ||
+      liveListingFiltersKey !== appliedListingFiltersKey
+    ) {
+      return;
+    }
+
+    if (listingQueryKey !== resolvedListingQueryKey) {
+      setResolvedListingQueryKey(listingQueryKey);
+    }
+  }, [
+    appliedListingFiltersKey,
+    isLoading,
+    liveListingFiltersKey,
+    listingQueryKey,
+    resolvedListingQueryKey,
+  ]);
+
   const isSearching =
-    listingQueryKey !== resolvedListingQueryKey || isLoading;
+    isLoading ||
+    resolvedListingQueryKey == null ||
+    listingQueryKey !== resolvedListingQueryKey ||
+    liveListingFiltersKey !== appliedListingFiltersKey;
 
   const displayProducts = useMemo(
     () => sortJewelleryListingProducts(products, sortValue),
