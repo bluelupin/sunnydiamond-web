@@ -176,6 +176,7 @@ const JewelleryProductPage = ({
   const lastPriceParamsRef = useRef<string | null>(
     initialListing ? `${minPriceFromUrl}|${maxPriceFromUrl}` : null,
   );
+  const lastDrawerParamsRef = useRef<string | null>(null);
   const lastFacetPriceBoundsRef = useRef(
     initialListing?.facets
       ? `${initialListing.facets.minPrice}|${initialListing.facets.maxPrice}`
@@ -198,6 +199,10 @@ const JewelleryProductPage = ({
         minPrice: minPriceFromUrl,
         maxPrice: maxPriceFromUrl,
         sortSlug: searchParams?.get("sort"),
+        metalColor: searchParams?.get("metalColor"),
+        purity: searchParams?.get("purity"),
+        gemstone: searchParams?.get("gemstone"),
+        subcategory: searchParams?.get("subcategory"),
         facets: initialListing.facets,
       })
       : undefined;
@@ -312,6 +317,7 @@ const JewelleryProductPage = ({
               ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
             },
             preserved,
+            facets,
           ),
         );
       } else {
@@ -319,6 +325,7 @@ const JewelleryProductPage = ({
           applyPreservedJewelleryListingSearchToFilterState(
             createClearedDrawerFilterState(current),
             preserved,
+            facets,
           ),
         );
       }
@@ -326,7 +333,7 @@ const JewelleryProductPage = ({
 
     window.addEventListener("popstate", syncCategoryFromBrowserUrl);
     return () => window.removeEventListener("popstate", syncCategoryFromBrowserUrl);
-  }, []);
+  }, [facets]);
 
   /** /search keeps its own URL: filters and sort are added next to q, never a listing path. */
   const replaceSearchUrl = useCallback(
@@ -361,6 +368,7 @@ const JewelleryProductPage = ({
               ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
             },
             preservedSearchParams,
+            facets,
           ),
         );
       } else {
@@ -368,6 +376,7 @@ const JewelleryProductPage = ({
           applyPreservedJewelleryListingSearchToFilterState(
             createClearedDrawerFilterState(current),
             preservedSearchParams,
+            facets,
           ),
         );
       }
@@ -377,7 +386,7 @@ const JewelleryProductPage = ({
 
       replaceJewelleryListingUrl(nextUrlKey, preservedSearchParams);
     },
-    [searchParams],
+    [searchParams, facets],
   );
 
   useEffect(() => {
@@ -455,6 +464,7 @@ const JewelleryProductPage = ({
     lastDiamondShapeSlugRef.current = null;
     lastFancyColourSlugRef.current = null;
     lastPriceParamsRef.current = "|";
+    lastDrawerParamsRef.current = null;
     facetsSyncedRef.current = true;
 
     if (searchQuery) {
@@ -539,6 +549,15 @@ const JewelleryProductPage = ({
     const priceParamsChanged = lastPriceParamsRef.current !== priceParamsKey;
     lastPriceParamsRef.current = priceParamsKey;
 
+    const drawerParamsKey = [
+      liveUrlParams.get("metalColor") ?? "",
+      liveUrlParams.get("purity") ?? "",
+      liveUrlParams.get("gemstone") ?? "",
+      liveUrlParams.get("subcategory") ?? "",
+    ].join("|");
+    const drawerParamsChanged = lastDrawerParamsRef.current !== drawerParamsKey;
+    lastDrawerParamsRef.current = drawerParamsKey;
+
     const buildFiltersFromUrl = (preserve?: JewelleryFilterState) => {
       let nextDraft = createDefaultFilterState(facets);
 
@@ -610,7 +629,8 @@ const JewelleryProductPage = ({
       diamondShapeChanged ||
       fancyColourChanged ||
       collectionChanged ||
-      priceParamsChanged
+      priceParamsChanged ||
+      drawerParamsChanged
     ) {
       setFilters((current) =>
         reconcileJewelleryPriceFilterState(buildFiltersFromUrl(current), facets),
@@ -690,15 +710,16 @@ const JewelleryProductPage = ({
 
         if (searchQuery) {
           replaceSearchUrl(params);
-        } else if (
-          hasPrimaryListingContext(params) ||
-          nextFilters.collection.trim() ||
-          nextFilters.occasion.trim()
-        ) {
-          replaceJewelleryListingUrl(selectedCategoryUrlKey, params);
         } else {
-          const query = params.toString();
-          router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+          const currentPath =
+            typeof window !== "undefined" ? window.location.pathname : pathname ?? JEWELLERY_PATH;
+
+          if (hasPrimaryListingContext(params) || isJewelleryCategoryPath(currentPath)) {
+            replaceJewelleryListingUrl(selectedCategoryUrlKey, params);
+          } else if (pathname) {
+            const query = params.toString();
+            router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+          }
         }
       }
     },

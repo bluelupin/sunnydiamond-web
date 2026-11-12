@@ -1,6 +1,11 @@
 import type { JewelleryCategorySlug, JewelleryFilterState } from "../types";
-import { resolveDiamondShapeFacetOption } from "./diamondShapeListing";
-import { resolveFancyColourFacetOption } from "./fancyColourListing";
+import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import {
+  hasMagentoFilterFacets,
+  mergeListingFiltersWithUrlSearchParams,
+  reconcileJewelleryPriceFilterState,
+} from "../data/filters";
+import { buildGiftFinderListingFiltersFromUrl } from "@/features/gifting/utils/giftFinderRoutes";
 
 export const JEWELLERY_PATH = "/jewellery";
 export const JEWELLERY_SEARCH_PATH = "/search";
@@ -155,22 +160,38 @@ export function preserveJewelleryListingSearchParams(
 export function applyPreservedJewelleryListingSearchToFilterState(
   base: JewelleryFilterState,
   source?: URLSearchParams | string | null,
+  facets?: JewelleryFilterFacets,
 ): JewelleryFilterState {
   const preserved = preserveJewelleryListingSearchParams(source);
-  const next = { ...base };
-  const diamondShapeFromUrl = preserved.get("diamondShape")?.trim();
-  const fancyColourFromUrl = preserved.get("fancyColour")?.trim();
 
-  if (diamondShapeFromUrl) {
-    next.diamondShape =
-      resolveDiamondShapeFacetOption(diamondShapeFromUrl, [])?.value ?? diamondShapeFromUrl;
-  }
-  if (fancyColourFromUrl) {
-    next.fancyColour =
-      resolveFancyColourFacetOption(fancyColourFromUrl, [])?.value ?? fancyColourFromUrl;
+  if (facets && hasMagentoFilterFacets(facets)) {
+    return reconcileJewelleryPriceFilterState(
+      mergeListingFiltersWithUrlSearchParams(base, facets, preserved),
+      facets,
+    );
   }
 
-  return next;
+  const fromUrl = buildGiftFinderListingFiltersFromUrl({
+    occasion: preserved.get("occasion"),
+    collection: preserved.get("collection"),
+    diamondShape: preserved.get("diamondShape"),
+    fancyColour: preserved.get("fancyColour"),
+    minPrice: preserved.get("minPrice"),
+    maxPrice: preserved.get("maxPrice"),
+    metalColor: preserved.get(JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM),
+    purity: preserved.get(JEWELLERY_LISTING_PURITY_QUERY_PARAM),
+    gemstone: preserved.get(JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM),
+    subcategory: preserved.get(JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM),
+  });
+
+  return {
+    ...base,
+    ...fromUrl,
+    metalTypes: fromUrl.metalTypes.length > 0 ? fromUrl.metalTypes : base.metalTypes,
+    metalPurities: fromUrl.metalPurities.length > 0 ? fromUrl.metalPurities : base.metalPurities,
+    gemstoneType: fromUrl.gemstoneType || base.gemstoneType,
+    categories: fromUrl.categories.length > 0 ? fromUrl.categories : base.categories,
+  };
 }
 
 export const JEWELLERY_CATEGORY_QUERY_PARAM = "category";

@@ -7,7 +7,10 @@ import {
   getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
   hasActiveFilters,
+  hasMagentoFilterFacets,
+  mergeListingFiltersWithUrlSearchParams,
   parseJewelleryListingSortParam,
+  reconcileJewelleryPriceFilterState,
 } from "@/features/jewellery-product/data/filters";
 import { buildGiftFinderListingFiltersFromUrl } from "@/features/gifting/utils/giftFinderRoutes";
 import {
@@ -24,6 +27,7 @@ import {
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
 import {
   applyPreservedJewelleryListingSearchToFilterState,
+  preserveJewelleryListingSearchParams,
   readJewelleryListingUrlParams,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
@@ -100,15 +104,23 @@ function buildListingQueryKey(
 }
 
 /** Matches the filter payload used for Magento listing requests (replaceState-safe URL params). */
-function resolveListingFiltersForQuery(filters: JewelleryFilterState): JewelleryFilterState {
+function resolveListingFiltersForQuery(
+  filters: JewelleryFilterState,
+  facets?: JewelleryFilterFacets,
+): JewelleryFilterState {
   if (typeof window === "undefined") {
-    return applyPreservedJewelleryListingSearchToFilterState(filters);
+    return applyPreservedJewelleryListingSearchToFilterState(filters, null, facets);
   }
 
-  return applyPreservedJewelleryListingSearchToFilterState(
-    filters,
-    readJewelleryListingUrlParams(),
-  );
+  const preserved = preserveJewelleryListingSearchParams(readJewelleryListingUrlParams());
+  if (facets && hasMagentoFilterFacets(facets)) {
+    return reconcileJewelleryPriceFilterState(
+      mergeListingFiltersWithUrlSearchParams(filters, facets, preserved),
+      facets,
+    );
+  }
+
+  return applyPreservedJewelleryListingSearchToFilterState(filters, preserved, facets);
 }
 
 function seedInitialListingPageCaches(
@@ -158,6 +170,10 @@ export function createJewelleryListingPrefetchParams(
     minPrice?: number;
     maxPrice?: number;
     sortSlug?: string | null;
+    metalColor?: string | null;
+    purity?: string | null;
+    gemstone?: string | null;
+    subcategory?: string | null;
     facets?: JewelleryFilterFacets;
   },
 ): JewelleryListingPrefetchParams {
@@ -169,6 +185,10 @@ export function createJewelleryListingPrefetchParams(
       fancyColour: options?.fancyColourSlug,
       minPrice: options?.minPrice ? String(options.minPrice) : undefined,
       maxPrice: options?.maxPrice ? String(options.maxPrice) : undefined,
+      metalColor: options?.metalColor,
+      purity: options?.purity,
+      gemstone: options?.gemstone,
+      subcategory: options?.subcategory,
     },
     options?.facets,
   );
@@ -320,6 +340,7 @@ export function useMagentoJewelleryListing({
 
     const listingFilters = resolveListingFiltersForQuery(
       initialListingParams.filters ?? createEmptyFilterState(),
+      initialListing.facets,
     );
 
     lastAppliedServerListingRef.current = initialListing;
@@ -361,7 +382,10 @@ export function useMagentoJewelleryListing({
     markJewelleryPlpProductsFetchStart();
 
     const fetchStartedAt = performance.now();
-    const listingFilters = resolveListingFiltersForQuery(filtersOverride ?? filtersRef.current);
+    const listingFilters = resolveListingFiltersForQuery(
+      filtersOverride ?? filtersRef.current,
+      facetsRef.current,
+    );
     filtersRef.current = listingFilters;
 
     let listingApplied = false;
@@ -517,7 +541,7 @@ export function useMagentoJewelleryListing({
       return;
     }
 
-    const queryFilters = resolveListingFiltersForQuery(filters);
+    const queryFilters = resolveListingFiltersForQuery(filters, facetsRef.current);
     const nextKey = getJewelleryListingFiltersKey(queryFilters, facetsRef.current);
     if (nextKey === appliedFiltersKeyRef.current) {
       return;
@@ -695,7 +719,7 @@ export function useMagentoJewelleryListing({
         search,
         sortValue,
         pageSize,
-        resolveListingFiltersForQuery(filters),
+        resolveListingFiltersForQuery(filters, facets),
         facets,
       ),
     [categoryUrlKey, search, sortValue, pageSize, filters, facets],
@@ -704,7 +728,7 @@ export function useMagentoJewelleryListing({
   const liveListingFiltersKey = useMemo(
     () =>
       getJewelleryListingFiltersKey(
-        resolveListingFiltersForQuery(filters),
+        resolveListingFiltersForQuery(filters, facets),
         facets,
       ),
     [filters, facets],

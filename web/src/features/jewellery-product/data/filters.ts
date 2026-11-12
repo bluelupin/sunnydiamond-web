@@ -7,6 +7,10 @@ import {
   JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM,
   readJewelleryListingUrlParams,
 } from "../utils/jewelleryRoutes";
+import {
+  buildGiftFinderListingFiltersFromUrl,
+  type GiftFinderSearchParams,
+} from "@/features/gifting/utils/giftFinderRoutes";
 import { slugifyCollectionSlug, resolveCollectionFacetOption } from "../utils/collectionListing";
 import {
   slugifyDiamondShapeLabel,
@@ -571,6 +575,56 @@ function matchFacetLabelsFromCommaParam(
       return bySlug ?? token;
     })
     .filter(Boolean);
+}
+
+function giftFinderSearchParamsFromPreserved(preserved: URLSearchParams): GiftFinderSearchParams {
+  return {
+    occasion: preserved.get("occasion"),
+    collection: preserved.get("collection"),
+    diamondShape: preserved.get("diamondShape"),
+    fancyColour: preserved.get("fancyColour"),
+    minPrice: preserved.get("minPrice"),
+    maxPrice: preserved.get("maxPrice"),
+    metalColor: preserved.get(JEWELLERY_LISTING_METAL_COLOR_QUERY_PARAM),
+    purity: preserved.get(JEWELLERY_LISTING_PURITY_QUERY_PARAM),
+    gemstone: preserved.get(JEWELLERY_LISTING_GEMSTONE_QUERY_PARAM),
+    subcategory: preserved.get(JEWELLERY_LISTING_SUBCATEGORY_QUERY_PARAM),
+  };
+}
+
+/** Merges live filter state with preserved PLP query params (drawer + gift-finder fields). */
+export function mergeListingFiltersWithUrlSearchParams(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  preserved: URLSearchParams,
+): JewelleryFilterState {
+  const fromUrl = buildGiftFinderListingFiltersFromUrl(
+    giftFinderSearchParamsFromPreserved(preserved),
+    facets,
+  );
+
+  const merged: JewelleryFilterState = {
+    ...filters,
+    minPrice: fromUrl.minPrice,
+    maxPrice: fromUrl.maxPrice,
+  };
+
+  if (preserved.get("occasion")?.trim()) {
+    merged.occasion = fromUrl.occasion;
+  }
+  if (preserved.get("collection")?.trim()) {
+    merged.collection = fromUrl.collection;
+  }
+  if (preserved.get("diamondShape")?.trim()) {
+    merged.diamondShape = fromUrl.diamondShape;
+  }
+  if (preserved.get("fancyColour")?.trim()) {
+    merged.fancyColour = fromUrl.fancyColour;
+  }
+
+  return mergeJewelleryDrawerFiltersFromSearchParams(merged, preserved, facets, {
+    replaceWhenParamMissing: false,
+  });
 }
 
 /** Applies drawer filter query params (metal, purity, gemstone, subcategories) onto filter state. */
