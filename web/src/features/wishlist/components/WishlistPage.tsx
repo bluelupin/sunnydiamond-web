@@ -20,7 +20,7 @@ import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlis
 const WishlistPage = () => {
   const { wishlistedIds, isWishlistReady, toggleWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
-  const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
+  const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds, true);
   const [visibleCount, setVisibleCount] = useState(WISHLIST_VISIBLE_CAP);
   const [viewMode, setViewMode] = useState<WishlistViewMode>("grid");
   const [addToBagProduct, setAddToBagProduct] = useState<JewelleryListingProduct | null>(null);

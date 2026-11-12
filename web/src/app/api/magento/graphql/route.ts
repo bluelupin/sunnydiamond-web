@@ -3,6 +3,7 @@ import {
   getMagentoGraphqlUrl,
   MAGENTO_CATALOG_REVALIDATE_SECONDS,
   MAGENTO_DEFAULT_STORE_CODE,
+  MAGENTO_WISHLIST_REVALIDATE_SECONDS,
 } from "@/services/magento/config";
 import { CUSTOMER_TOKEN_COOKIE } from "@/services/auth/session";
 import { resolveClientIp } from "@/services/http/clientIp";
@@ -13,6 +14,7 @@ import {
   MAGENTO_JEWELLERY_PRODUCTS_QUERY,
 } from "@/services/magento/products/products.query";
 import { MAGENTO_PRODUCT_BY_URL_KEY_QUERY } from "@/services/magento/products/productDetail.query";
+import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "@/services/magento/products/productsBySkus.query";
 
 type GraphqlBody = {
   query?: string;
@@ -34,6 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   const query = body.query;
+  const isWishlistProductsQuery = query === MAGENTO_PRODUCTS_BY_SKUS_QUERY;
   const isCartOperation =
     /\b(cart\s*\(|customerCart|createGuestCart|addSimpleProductsToCart|addProductsToCart|updateCartItems|removeItemFromCart|setGuestEmailOnCart|setShippingAddressesOnCart|setBillingAddressOnCart|setShippingMethodsOnCart|setPaymentMethodOnCart|placeOrder|estimateShippingMethods|sunnyApplyGiftCard|sunnyRemoveGiftCard)\b/.test(
       query,
@@ -87,7 +90,13 @@ export async function POST(request: NextRequest) {
       ...(!useGet ? { body: JSON.stringify({ query: body.query, variables: body.variables }) } : {}),
       ...(isCartOperation || customerToken
         ? { cache: "no-store" as const }
-        : { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }),
+        : {
+            next: {
+              revalidate: isWishlistProductsQuery
+                ? MAGENTO_WISHLIST_REVALIDATE_SECONDS
+                : MAGENTO_CATALOG_REVALIDATE_SECONDS,
+            },
+          }),
     });
 
   try {

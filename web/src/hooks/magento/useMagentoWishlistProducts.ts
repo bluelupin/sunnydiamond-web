@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
+import { MAGENTO_WISHLIST_REVALIDATE_SECONDS } from "@/services/magento/config";
 import { orderWishlistProducts } from "@/features/wishlist/utils/wishlistProduct.utils";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 
@@ -20,7 +21,10 @@ function hasSameSkuSet(left: string[], right: string[]): boolean {
   return left.every((sku) => rightSet.has(sku));
 }
 
-export function useMagentoWishlistProducts(wishlistedSkus: string[]): UseMagentoWishlistProductsState {
+export function useMagentoWishlistProducts(
+  wishlistedSkus: string[],
+  refreshWhileOpen = false,
+): UseMagentoWishlistProductsState {
   const [products, setProducts] = useState<JewelleryListingProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -139,6 +143,54 @@ export function useMagentoWishlistProducts(wishlistedSkus: string[]): UseMagento
       controller.abort();
     };
   }, [skuKey]);
+
+  useEffect(() => {
+    if (!skuKey || !refreshWhileOpen) return;
+
+    const skus = skuKey.split("|");
+    const refreshMs = MAGENTO_WISHLIST_REVALIDATE_SECONDS * 1000;
+    let lastRefreshAt = Date.now();
+    let controller: AbortController | null = null;
+    let cancelled = false;
+
+    const refreshPrices = () => {
+      if (
+        cancelled ||
+        document.visibilityState !== "visible" ||
+        controller ||
+        Date.now() - lastRefreshAt < refreshMs ||
+        !hasSameSkuSet(skus, previousSkusRef.current)
+      ) return;
+
+      lastRefreshAt = Date.now();
+      const activeController = new AbortController();
+      controller = activeController;
+      const requestId = requestIdRef.current;
+
+      void getMagentoProductsBySkus(skus, activeController.signal)
+        .then((fetchedProducts) => {
+          if (cancelled || requestId !== requestIdRef.current) return;
+          setProducts(orderWishlistProducts(skus, fetchedProducts));
+          setError(undefined);
+        })
+        .catch(() => {
+          // Keep already loaded cards visible if a background refresh fails.
+        })
+        .finally(() => {
+          if (controller === activeController) controller = null;
+        });
+    };
+
+    const interval = window.setInterval(refreshPrices, refreshMs);
+    document.addEventListener("visibilitychange", refreshPrices);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshPrices);
+      controller?.abort();
+    };
+  }, [skuKey, refreshWhileOpen]);
 
   const skus = skuKey ? skuKey.split("|") : [];
   const awaitingInitialProductFetch =

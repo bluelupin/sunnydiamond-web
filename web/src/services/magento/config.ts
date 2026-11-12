@@ -29,6 +29,9 @@ export const MAGENTO_CATALOG_REVALIDATE_SECONDS = Number(
   process.env.MAGENTO_CATALOG_REVALIDATE_SECONDS ?? 3600,
 );
 
+/** Wishlist SKU prices follow the PLP's 60-second refresh cadence. */
+export const MAGENTO_WISHLIST_REVALIDATE_SECONDS = 60;
+
 /** Shared homepage/gifting trending snapshot and its on-demand invalidation tag. */
 export const MAGENTO_TRENDING_REVALIDATE_SECONDS = 900;
 export const MAGENTO_TRENDING_CACHE_TAG = "magento-trending-products";
