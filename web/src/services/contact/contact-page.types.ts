@@ -174,7 +174,7 @@ export type NormalizedContactInfoCard = {
   hours: Array<{ label: string; value: string }>;
   link: {
     label: string;
-    /** Present only when CMS provides `value` / `cta.url` — never invented from label. */
+    /** Present when CMS `cta.url` (or legacy `value`) is actionable. */
     href?: string;
     /** CMS CTA `targetType` when provided (`internal` | `external`). */
     targetType?: string;

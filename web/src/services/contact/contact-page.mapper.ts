@@ -298,12 +298,16 @@ const mapContactOption = (
   if (!title) return null;
 
   const type = cleanText(option.type)?.toLowerCase() ?? "";
-  // CTA requires both CMS URL and label — never invent either from the other.
-  const linkUrl = cleanText(option.value) ?? cleanText(option.cta?.url);
-  const buttonLabel = cleanText(option.buttonLabel) ?? cleanText(option.cta?.label);
+  // Nested `cta` is the CMS source of truth; `value` / `buttonLabel` are legacy fallbacks.
+  const linkUrl = cleanText(option.cta?.url) ?? cleanText(option.value);
+  const buttonLabel =
+    cleanText(option.cta?.label) ?? cleanText(option.buttonLabel);
   const description = cleanText(option.description);
-  // CMS removed `availability`; Call Us hours now live on `description` (same key as email/WhatsApp).
-  const hours = mapAvailabilityHours(option.description ?? option.availability);
+  const availability = cleanText(option.availability);
+  // Phone cards: prefer dedicated `availability` for hour rows when CMS provides it.
+  const hours = mapAvailabilityHours(
+    type === "phone" && availability ? availability : (description ?? availability),
+  );
   const lowerButton = buttonLabel?.toLowerCase() ?? "";
   const lowerUrl = linkUrl?.toLowerCase() ?? "";
 
@@ -319,45 +323,53 @@ const mapContactOption = (
   let href: string | undefined;
   let label: string | undefined;
 
-  if (linkUrl && buttonLabel) {
-    label = buttonLabel;
+  if (linkUrl) {
+    const lowerTitle = title.toLowerCase();
+    const isWhatsApp =
+      lowerButton.includes("whatsapp") ||
+      lowerUrl.includes("whatsapp") ||
+      lowerUrl.includes("wa.me") ||
+      lowerTitle.includes("whatsapp") ||
+      lowerTitle.includes("concierge");
 
     if (variant === "phone") {
       href = /^tel:/i.test(linkUrl) ? linkUrl : toTelHref(linkUrl);
+      label = buttonLabel ?? linkUrl.replace(/^tel:/i, "");
     } else if (variant === "email") {
       const emailSource = linkUrl.replace(/^mailto:/i, "");
       const email = formatEmailAddress(emailSource);
       href = /^mailto:/i.test(linkUrl) ? linkUrl : `mailto:${email}`;
-      if (buttonLabel.includes("@")) {
-        label = sanitizeEmailLinkLabel(buttonLabel);
+      const displayLabel = buttonLabel ?? email;
+      label = displayLabel.includes("@")
+        ? sanitizeEmailLinkLabel(displayLabel)
+        : resolveEmailLinkLabel(displayLabel, email);
+    } else if (isWhatsApp) {
+      if (isActionableContactTarget(linkUrl)) {
+        href = /^https?:\/\//i.test(linkUrl) ? linkUrl : toWhatsAppHref(linkUrl);
       }
+      label = resolveWhatsAppLinkLabel(buttonLabel);
+    } else if (/^https?:\/\//i.test(linkUrl) || linkUrl.startsWith("/")) {
+      href = linkUrl;
+      label = resolveLinkLabel(buttonLabel, linkUrl, title);
+    } else if (linkUrl.includes("@")) {
+      const email = formatEmailAddress(linkUrl);
+      href = `mailto:${email}`;
+      variant = "email";
+      const displayLabel = buttonLabel ?? email;
+      label = displayLabel.includes("@")
+        ? sanitizeEmailLinkLabel(displayLabel)
+        : resolveEmailLinkLabel(displayLabel, email);
+    } else if (isActionableContactTarget(linkUrl)) {
+      href = toWhatsAppHref(linkUrl);
+      label = resolveWhatsAppLinkLabel(buttonLabel);
     } else {
-      const isWhatsApp =
-        lowerButton.includes("whatsapp") ||
-        lowerUrl.includes("whatsapp") ||
-        lowerUrl.includes("wa.me");
-
-      if (isWhatsApp) {
-        if (isActionableContactTarget(linkUrl)) {
-          href = /^https?:\/\//i.test(linkUrl) ? linkUrl : toWhatsAppHref(linkUrl);
-        }
-      } else if (/^https?:\/\//i.test(linkUrl) || linkUrl.startsWith("/")) {
-        href = linkUrl;
-      } else if (linkUrl.includes("@")) {
-        const email = formatEmailAddress(linkUrl);
-        href = `mailto:${email}`;
-        variant = "email";
-        if (buttonLabel.includes("@")) {
-          label = sanitizeEmailLinkLabel(buttonLabel);
-        }
-      } else if (isActionableContactTarget(linkUrl)) {
-        href = toWhatsAppHref(linkUrl);
-      }
+      label = resolveLinkLabel(buttonLabel, linkUrl, title);
     }
 
-    // Invalid/unusable URL → hide CTA entirely (no hanging label).
     if (!href) {
       label = undefined;
+    } else if (!label?.trim()) {
+      label = buttonLabel ?? linkUrl;
     }
   }
 
