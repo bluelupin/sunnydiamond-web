@@ -20,6 +20,17 @@ const ENGRAVING_FONT_ASSETS: readonly EngravingFontAssetDefinition[] = [
     matchKeys: ["algerian"],
   },
   {
+    cssFamily: "SD Engraving Cargo",
+    matchKeys: [
+      "cargo",
+      "cargostd",
+      "cargostdstandard",
+      "cargostdstandardd",
+      /** Legacy Magento label — renders Cargo asset (Stencil font retired). */
+      "stencil",
+    ],
+  },
+  {
     cssFamily: "SD Engraving Edwardian Script",
     matchKeys: ["edwardianscript", "edwardianscriptitc"],
   },
@@ -63,6 +74,21 @@ const ENGRAVING_FONT_FAMILY_BY_KEY = new Map<string, string>(
   ),
 );
 
+/** Shop-facing copy for Magento labels (API/cart still use the Magento label). */
+export function formatEngravingFontDisplayLabel(magentoLabel: string): string {
+  const trimmed = magentoLabel.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  const normalized = normalizeEngravingFontLabel(trimmed);
+  if (normalized === "stencil" || normalized.startsWith("stencil")) {
+    return "Cargo";
+  }
+
+  return trimmed;
+}
+
 /** Resolves a Magento engraving font label to a loaded @font-face family, if known. */
 export function resolveEngravingFontCssFamily(magentoLabel: string): string | null {
   const normalized = normalizeEngravingFontLabel(magentoLabel);
@@ -91,6 +117,7 @@ export const ENGRAVING_PANEL_FONT_DROPDOWN_SIZE_PX_BY_CSS_FAMILY: EngravingFontS
     "SD Engraving Edwardian Script": 22,
     "SD Engraving Lucida Handwriting": 13,
     "SD Engraving Algerian": 14,
+    "SD Engraving Cargo": 14,
     "SD Engraving Monotype Corsiva": 18,
     "SD Engraving Pinyon Script": 18,
     "SD Engraving Pristina": 19,
@@ -105,6 +132,7 @@ export const DEFAULT_ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY: EngravingFont
     "SD Engraving Edwardian Script": 22,
     "SD Engraving Lucida Handwriting": 13,
     "SD Engraving Algerian": 14,
+    "SD Engraving Cargo": 14,
     "SD Engraving Monotype Corsiva": 18,
     "SD Engraving Pinyon Script": 18,
     "SD Engraving Pristina": 19,
@@ -152,6 +180,7 @@ export const ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY: Partial<
     "SD Engraving Edwardian Script": 22,
     "SD Engraving Lucida Handwriting": 13,
     "SD Engraving Algerian": 14,
+    "SD Engraving Cargo": 14,
     "SD Engraving Monotype Corsiva": 18,
     "SD Engraving Pinyon Script": 18,
     "SD Engraving Pristina": 19,
@@ -163,6 +192,7 @@ export const ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY: Partial<
     "SD Engraving Edwardian Script": 12,
     "SD Engraving Lucida Handwriting": 4,
     "SD Engraving Algerian": 9,
+    "SD Engraving Cargo": 9,
     "SD Engraving Monotype Corsiva": 6,
     "SD Engraving Pinyon Script": 6,
     "SD Engraving Pristina": 7,
@@ -174,6 +204,7 @@ export const ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY: Partial<
     "SD Engraving Edwardian Script": 11,
     "SD Engraving Lucida Handwriting": 7,
     "SD Engraving Algerian": 8,
+    "SD Engraving Cargo": 8,
     "SD Engraving Monotype Corsiva": 10,
     "SD Engraving Pinyon Script": 10,
     "SD Engraving Pristina": 11,
@@ -185,6 +216,7 @@ export const ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY: Partial<
     "SD Engraving Edwardian Script": 12,
     "SD Engraving Lucida Handwriting": 7,
     "SD Engraving Algerian": 9,
+    "SD Engraving Cargo": 9,
     "SD Engraving Monotype Corsiva": 11,
     "SD Engraving Pinyon Script": 11,
     "SD Engraving Pristina": 12,
@@ -196,6 +228,7 @@ export const ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY: Partial<
     "SD Engraving Edwardian Script": 9,
     "SD Engraving Lucida Handwriting": 9,
     "SD Engraving Algerian": 8,
+    "SD Engraving Cargo": 8,
     "SD Engraving Monotype Corsiva": 6,
     "SD Engraving Pinyon Script": 6,
     "SD Engraving Pristina": 7,
@@ -207,6 +240,7 @@ export const ENGRAVING_PREVIEW_FONT_SIZE_PX_BY_CSS_FAMILY_BY_CATEGORY: Partial<
     "SD Engraving Edwardian Script": 12,
     "SD Engraving Lucida Handwriting": 9.5,
     "SD Engraving Algerian": 10,
+    "SD Engraving Cargo": 10,
     "SD Engraving Monotype Corsiva": 14,
     "SD Engraving Pinyon Script": 13,
     "SD Engraving Pristina": 13,

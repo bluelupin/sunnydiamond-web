@@ -80,6 +80,8 @@ type InlineCustomSelectProps = {
   allowClearSelection?: boolean;
   /** Optional per-option inline styles (e.g. engraving font preview in the list). */
   getOptionStyle?: (option: string) => CSSProperties | undefined;
+  /** Optional display text when the stored option value differs from UI copy. */
+  getOptionLabel?: (option: string) => string;
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
@@ -115,8 +117,13 @@ const InlineCustomSelect = ({
   disabled = false,
   listPlacement = "portaled",
   getOptionStyle,
+  getOptionLabel,
   allowClearSelection = false,
 }: InlineCustomSelectProps) => {
+  const resolveOptionLabel = useCallback(
+    (option: string) => (getOptionLabel ? getOptionLabel(option) : option),
+    [getOptionLabel],
+  );
   const isInlineList = listPlacement === "inline";
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderList, setShouldRenderList] = useState(false);
@@ -260,7 +267,7 @@ const InlineCustomSelect = ({
 
   const selectedOption =
     value && !isOptionUnavailable(value) ? options.find((option) => option === value) : undefined;
-  const triggerLabel = selectedOption ?? placeholder;
+  const triggerLabel = selectedOption ? resolveOptionLabel(selectedOption) : placeholder;
   const showPlaceholder = !selectedOption;
   const selectedOptionStyle =
     selectedOption && getOptionStyle ? getOptionStyle(selectedOption) : undefined;
@@ -389,7 +396,7 @@ const InlineCustomSelect = ({
                 className={optionRowClassName}
               >
                 <span className="text-base text-darkblack" style={getOptionStyle?.(option)}>
-                  {option}
+                  {resolveOptionLabel(option)}
                 </span>
                 <span className="shrink-0 pl-4 font-gill text-sm font-normal leading-110 text-neutral500">
                   Out of Stock
@@ -415,7 +422,7 @@ const InlineCustomSelect = ({
               }}
               className={optionRowClassName}
             >
-              <span style={getOptionStyle?.(option)}>{option}</span>
+              <span style={getOptionStyle?.(option)}>{resolveOptionLabel(option)}</span>
             </button>
           );
         })}

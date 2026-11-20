@@ -22,6 +22,7 @@ import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import EngravingFontStyles from "./EngravingFontStyles";
 import EngravingPreviewImage from "./EngravingPreviewImage";
+import { formatEngravingFontDisplayLabel } from "@/features/products/constants/engravingFontAssets";
 import { resolveEngravingPanelFontOptionStyle } from "@/features/products/constants/engravingPanelFontOptionStyles";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
@@ -247,6 +248,7 @@ const MetalEngravingPanel = ({
                       listClassName="bg-aboutInactive"
                       optionClassName="text-base"
                       getOptionStyle={resolveEngravingPanelFontOptionStyle}
+                      getOptionLabel={formatEngravingFontDisplayLabel}
                     />
                     <FormFieldError
                       id="engraving-font-error"

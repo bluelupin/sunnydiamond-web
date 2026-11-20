@@ -9,6 +9,16 @@
 }
 
 @font-face {
+  font-family: "SD Engraving Cargo";
+  src:
+    url("/Engraving-fonts/Cargo/CargoStdStandardD/font.woff2") format("woff2"),
+    url("/Engraving-fonts/Cargo/CargoStdStandardD/font.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "SD Engraving Edwardian Script";
   src: url("/Engraving-fonts/edwardian-script-itc/edwardian-script-itc-400.ttf") format("truetype");
   font-weight: 400;
