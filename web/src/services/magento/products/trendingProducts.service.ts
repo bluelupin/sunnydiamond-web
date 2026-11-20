@@ -2,12 +2,16 @@ import type { FeaturedCarouselItem } from "@/types/homepage/featuredCarousel";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { resolveImageSrcString } from "@/shared/utils/image";
 import { magentoGraphqlFetch } from "../graphqlClient";
+import { MagentoGraphqlError } from "../magento.errors";
 import { isMagentoTrending } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
 import {
   mapMagentoProductsToJewelleryListing,
 } from "./products.mapper";
-import { MAGENTO_TRENDING_PRODUCTS_SCAN_QUERY } from "./trendingProducts.query";
+import {
+  MAGENTO_TRENDING_PRODUCTS_QUERY,
+  MAGENTO_TRENDING_PRODUCTS_SCAN_QUERY,
+} from "./trendingProducts.query";
 import {
   MAGENTO_TRENDING_CACHE_TAG,
   MAGENTO_TRENDING_REVALIDATE_SECONDS,
@@ -40,11 +44,8 @@ async function fetchTrendingCatalogPage(
   });
 }
 
-/**
- * Magento exposes `sd_trending` on product attributes but not in
- * `ProductAttributeFilterInput`, so we scan catalog pages and filter locally.
- */
-export async function getMagentoTrendingProducts(
+/** Temporary compatibility path for Magento deployments without the indexed filter. */
+async function scanMagentoTrendingProducts(
   limit = MAX_TRENDING_PRODUCTS,
   signal?: AbortSignal,
 ): Promise<JewelleryListingProduct[]> {
@@ -71,6 +72,35 @@ export async function getMagentoTrendingProducts(
   }
 
   return trending.slice(0, limit);
+}
+
+/** Fetch only products flagged as trending; old Magento schemas use the scan until upgraded. */
+export async function getMagentoTrendingProducts(
+  limit = MAX_TRENDING_PRODUCTS,
+  signal?: AbortSignal,
+): Promise<JewelleryListingProduct[]> {
+  try {
+    const data = await magentoGraphqlFetch<MagentoProductsResponse>({
+      query: MAGENTO_TRENDING_PRODUCTS_QUERY,
+      variables: { pageSize: limit },
+      preferGet: true,
+      signal,
+      revalidateSeconds: MAGENTO_TRENDING_REVALIDATE_SECONDS,
+      tags: [MAGENTO_TRENDING_CACHE_TAG],
+    });
+
+    return mapMagentoProductsToJewelleryListing(data.products?.items).slice(0, limit);
+  } catch (error) {
+    if (
+      !(error instanceof MagentoGraphqlError) ||
+      !error.message.includes('sd_trending') ||
+      !error.message.includes('ProductAttributeFilterInput')
+    ) {
+      throw error;
+    }
+
+    return scanMagentoTrendingProducts(limit, signal);
+  }
 }
 
 export function mapJewelleryListingToFeaturedCarouselItems(

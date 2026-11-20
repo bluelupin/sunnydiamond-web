@@ -53,3 +53,32 @@ export const MAGENTO_TRENDING_PRODUCTS_SCAN_QUERY = `
     }
   }
 ` as const;
+
+/** Magento indexes sd_trending once CatalogSetup enables it for GraphQL filtering. */
+export const MAGENTO_TRENDING_PRODUCTS_QUERY = `
+  query MagentoTrendingProducts($pageSize: Int!) {
+    products(
+      filter: { sd_trending: { eq: "1" } }
+      pageSize: $pageSize
+      currentPage: 1
+      sort: { position: ASC }
+    ) {
+      items {
+        sku
+        name
+        url_key
+        price_range {
+          minimum_price {
+            final_price {
+              value
+              currency
+            }
+          }
+        }
+        image {
+          url
+        }
+      }
+    }
+  }
+` as const;
