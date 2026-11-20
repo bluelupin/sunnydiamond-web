@@ -12,6 +12,7 @@ import { PWA_DISPLAY_BOOTSTRAP_SCRIPT } from "@/shared/pwa/pwaDisplayBootstrap";
 import PwaStandaloneUiSetup from "@/shared/pwa/PwaStandaloneUiSetup";
 import PwaLaunchSplashStatic from "@/shared/pwa/PwaLaunchSplashStatic";
 import { PWA_LAUNCH_SPLASH_CRITICAL_CSS } from "@/shared/pwa/pwaLaunchSplashCritical";
+import { BrandFontPreloads } from "@/shared/lib/fonts/brandFontPreloads";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -107,6 +108,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <BrandFontPreloads />
         <Script
           id="ui-platform-bootstrap"
           strategy="beforeInteractive"

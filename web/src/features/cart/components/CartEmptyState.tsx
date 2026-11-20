@@ -10,7 +10,6 @@ const CartEmptyState = () => (
     <div className="flex w-full max-w-[386px] flex-col items-center gap-6 md:gap-10">
       <div className="flex w-full flex-col items-center gap-6">
         <DiamondIcon className="size-10 text-gold500 md:size-16" aria-hidden />
-
         <div className="flex w-full flex-col items-center gap-6 text-center md:gap-4">
           <h1 className="w-full font-larken text-2xl font-light leading-110 text-darkblack md:text-32 md:max-w-[300px] max-w-[200px]">
             {cartEmptyContent.title}
@@ -20,7 +19,6 @@ const CartEmptyState = () => (
           </p>
         </div>
       </div>
-
       <CartPrimaryLink href={cartEmptyContent.ctaHref} className="w-auto shrink-0">
         {cartEmptyContent.ctaLabel}
       </CartPrimaryLink>

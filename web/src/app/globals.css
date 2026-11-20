@@ -51,12 +51,12 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --font-body: "Gill Sans";
-    --font-heading: "Larken";
-    --font-display: "Larken";
-    --font-gill: "Gill Sans";
-    --font-larken: "Larken";
-    --font-satoshi: "Gill Sans";
+    --font-body: "Gill Sans", Calibri, "Segoe UI", sans-serif;
+    --font-heading: "Larken", Georgia, "Times New Roman", serif;
+    --font-display: "Larken", Georgia, "Times New Roman", serif;
+    --font-gill: "Gill Sans", Calibri, "Segoe UI", sans-serif;
+    --font-larken: "Larken", Georgia, "Times New Roman", serif;
+    --font-satoshi: "Gill Sans", Calibri, "Segoe UI", sans-serif;
 
     --h1-font-size: 32px;
     --h1-line-height: 100%;
