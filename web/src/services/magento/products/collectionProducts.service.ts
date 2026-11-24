@@ -1,18 +1,10 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { magentoGraphqlFetch } from "../graphqlClient";
-import {
-  MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE,
-  productMatchesMagentoCollection,
-} from "./magentoAttribute.utils";
-import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
+import { getMagentoProductAttributeOptions } from "./productAttributeOptions.service";
+import { MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE } from "./magentoAttribute.utils";
+import type { MagentoProductListItem } from "./magentoProduct.types";
 import { mapMagentoProductsToJewelleryListing } from "./products.mapper";
-import {
-  MAGENTO_COLLECTION_PRODUCTS_FILTER_QUERY,
-  MAGENTO_COLLECTION_PRODUCTS_SCAN_QUERY,
-} from "./collectionProducts.query";
-
-const COLLECTION_SCAN_PAGE_SIZE = 50;
-const MAX_COLLECTION_SCAN_PAGES = 10;
+import { MAGENTO_COLLECTION_PRODUCTS_FILTER_QUERY } from "./collectionProducts.query";
 
 type MagentoCollectionProductsFilterResponse = {
   products?: {
@@ -31,83 +23,28 @@ export function resolveMagentoCollectionValue(strapiSlug: string): string {
   return value;
 }
 
-function isMatchingCollectionProduct(
-  item: MagentoProductListItem,
-  collectionValue: string,
-): boolean {
-  return productMatchesMagentoCollection(item.custom_attributesV2?.items, collectionValue);
-}
-
-async function fetchCollectionCatalogPage(
-  currentPage: number,
-  signal?: AbortSignal,
-): Promise<MagentoProductsResponse> {
-  return magentoGraphqlFetch<MagentoProductsResponse>({
-    query: MAGENTO_COLLECTION_PRODUCTS_SCAN_QUERY,
-    variables: {
-      search: "",
-      filter: {},
-      pageSize: COLLECTION_SCAN_PAGE_SIZE,
-      currentPage,
-      sort: { position: "ASC" },
-    },
-    signal,
-  });
-}
-
 async function fetchCollectionProductsByFilter(
-  collectionValue: string,
+  optionIds: string[],
   limit: number,
   signal?: AbortSignal,
 ): Promise<JewelleryListingProduct[]> {
   const data = await magentoGraphqlFetch<MagentoCollectionProductsFilterResponse>({
     query: MAGENTO_COLLECTION_PRODUCTS_FILTER_QUERY,
     variables: {
-      filter: { [MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE]: { in: [collectionValue] } },
+      filter: { [MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE]: { in: optionIds } },
       pageSize: limit,
     },
     signal,
-    cache: "no-store",
+    preferGet: true,
   });
 
   return mapMagentoProductsToJewelleryListing(data.products?.items).slice(0, limit);
 }
 
-async function fetchCollectionProductsByScan(
-  collectionValue: string,
-  limit: number,
-  signal?: AbortSignal,
-): Promise<JewelleryListingProduct[]> {
-  const firstPage = await fetchCollectionCatalogPage(1, signal);
-  const totalPages = firstPage.products?.page_info?.total_pages ?? 1;
-  const pagesToScan = Math.min(totalPages, MAX_COLLECTION_SCAN_PAGES);
-
-  const pageResponses = await Promise.all(
-    Array.from({ length: pagesToScan }, (_, index) => {
-      const currentPage = index + 1;
-      return currentPage === 1 ? Promise.resolve(firstPage) : fetchCollectionCatalogPage(currentPage, signal);
-    }),
-  );
-
-  const matched: JewelleryListingProduct[] = [];
-
-  for (const page of pageResponses) {
-    const pageItems = (page.products?.items ?? []).filter((item) =>
-      isMatchingCollectionProduct(item, collectionValue),
-    );
-    matched.push(...mapMagentoProductsToJewelleryListing(pageItems));
-
-    if (matched.length >= limit) {
-      break;
-    }
-  }
-
-  return matched.slice(0, limit);
-}
-
 /**
- * Fetch Magento products for a collection attribute value (e.g. `diwali`).
- * Tries GraphQL filter first; falls back to catalog scan when filter is unsupported.
+ * Resolve a CMS collection slug to Magento's select-option ID, then use the
+ * indexed collection filter. A catalog scan would make every homepage render
+ * wait for several unrelated product queries.
  */
 export async function getMagentoProductsByCollection(
   strapiCollectionSlug: string,
@@ -119,14 +56,15 @@ export async function getMagentoProductsByCollection(
     return [];
   }
 
-  try {
-    const filtered = await fetchCollectionProductsByFilter(collectionValue, limit, signal);
-    if (filtered.length > 0) {
-      return filtered;
-    }
-  } catch {
-    // Fall through to catalog scan.
+  const options = await getMagentoProductAttributeOptions(MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE, { signal });
+  const optionIds = options
+    .filter((item) => item.label.split(/[,;|]/).some(
+      (label) => resolveMagentoCollectionValue(label) === collectionValue,
+    ))
+    .map((item) => item.value);
+  if (optionIds.length === 0) {
+    return [];
   }
 
-  return fetchCollectionProductsByScan(collectionValue, limit, signal);
+  return fetchCollectionProductsByFilter(optionIds, limit, signal);
 }

@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
     });
 
   try {
+    const upstreamStartedAt = performance.now();
     let response = await fetchMagento(Boolean(customerToken));
 
     // Stale session cookies break guest-cart calls (cart_id is its own credential).
@@ -108,9 +109,16 @@ export async function POST(request: NextRequest) {
       response = await fetchMagento(false);
     }
 
+    const upstreamDuration = performance.now() - upstreamStartedAt;
+    const parseStartedAt = performance.now();
     const json = await response.json();
 
-    return NextResponse.json(json, { status: response.status });
+    return NextResponse.json(json, {
+      status: response.status,
+      headers: {
+        "Server-Timing": `magento;dur=${upstreamDuration.toFixed(1)}, json;dur=${(performance.now() - parseStartedAt).toFixed(1)}`,
+      },
+    });
   } catch {
     return NextResponse.json({ error: "Magento GraphQL proxy failed" }, { status: 502 });
   }
