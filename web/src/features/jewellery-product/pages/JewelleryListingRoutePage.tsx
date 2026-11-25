@@ -60,7 +60,7 @@ export async function JewelleryListingRoutePage({ searchParams }: PageProps) {
   const prefetchedCategoryUrlKey = hasPrimaryListingContext(params)
     ? resolveCategoryUrlKeyFromQueryParam(params.category)
     : null;
-  const initialListing = await prefetchJewelleryListing(prefetchedCategoryUrlKey, {
+  const prefetchedFilters = {
     collection: params.collection,
     occasion: params.occasion,
     diamondShape: params.diamondShape,
@@ -72,7 +72,8 @@ export async function JewelleryListingRoutePage({ searchParams }: PageProps) {
     purity: params.purity,
     gemstone: params.gemstone,
     subcategory: params.subcategory,
-  });
+  };
+  const initialListing = await prefetchJewelleryListing(prefetchedCategoryUrlKey, prefetchedFilters);
   const page = await getProductLandingPage();
   const seo = resolveJewellerySeoMetadata(page);
 
@@ -100,6 +101,7 @@ export async function JewelleryListingRoutePage({ searchParams }: PageProps) {
         <JewelleryProductPage
           initialListing={initialListing}
           prefetchedCategoryUrlKey={initialListing ? prefetchedCategoryUrlKey : undefined}
+          prefetchedFilters={prefetchedFilters}
           trustBadges={page.trustBadges}
           listingCards={page.listingCards}
         />

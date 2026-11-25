@@ -21,6 +21,10 @@ const JEWELLERY_LISTING_QUERY_KEYS = [
   "minPrice",
   "maxPrice",
   "sort",
+  "metalColor",
+  "purity",
+  "gemstone",
+  "subcategory",
 ] as const;
 
 const nextConfig: NextConfig = {

@@ -65,6 +65,7 @@ import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { resolveActiveCategorySlugFromFilters, resolveMainCategoryUrlKeyFromDrawerSelection } from "../utils/plpCategoryNav";
 import type { JewelleryCategory, JewelleryFilterState } from "../types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
+import type { JewelleryListingPrefetchFilters } from "@/lib/magento/prefetchMagento";
 import type {
   NormalizedProductLandingTrustBadge,
   NormalizedProductListingCard,
@@ -74,6 +75,7 @@ import { cn } from "@/shared/utils/cn";
 type JewelleryProductPageProps = {
   initialListing?: JewelleryListingProductsData;
   prefetchedCategoryUrlKey?: string | null;
+  prefetchedFilters?: JewelleryListingPrefetchFilters;
   trustBadges?: NormalizedProductLandingTrustBadge[];
   listingCards?: readonly NormalizedProductListingCard[];
   /** /search: the shopper's query; hides the category tabs, which would drop it. */
@@ -98,6 +100,7 @@ function createClearedDrawerFilterState(
 const JewelleryProductPage = ({
   initialListing,
   prefetchedCategoryUrlKey,
+  prefetchedFilters,
   trustBadges = [],
   listingCards = [],
   searchQuery,
@@ -126,6 +129,7 @@ const JewelleryProductPage = ({
   );
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
     if (initialListing?.facets) {
+      const liveUrlParams = readJewelleryListingUrlParams(searchParams?.toString());
       return buildGiftFinderListingFiltersFromUrl(
         {
           occasion: occasionSlug,
@@ -134,10 +138,10 @@ const JewelleryProductPage = ({
           collection: collectionSlug,
           minPrice: searchParams?.get("minPrice"),
           maxPrice: searchParams?.get("maxPrice"),
-          metalColor: searchParams?.get("metalColor"),
-          purity: searchParams?.get("purity"),
-          gemstone: searchParams?.get("gemstone"),
-          subcategory: searchParams?.get("subcategory"),
+          metalColor: liveUrlParams.get("metalColor"),
+          purity: liveUrlParams.get("purity"),
+          gemstone: liveUrlParams.get("gemstone"),
+          subcategory: liveUrlParams.get("subcategory"),
         },
         initialListing.facets,
       );
@@ -189,22 +193,14 @@ const JewelleryProductPage = ({
   const [listingResetNonce, setListingResetNonce] = useState(0);
   const pageSize = useJewelleryPlpPageSize();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  // Browser history can restore server data fetched before the URL filters changed.
   const initialListingParams =
     initialListing && prefetchedCategoryUrlKey !== undefined
-      ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, {
-        collectionSlug,
-        occasionSlug,
-        diamondShapeSlug,
-        fancyColourSlug,
-        minPrice: minPriceFromUrl,
-        maxPrice: maxPriceFromUrl,
-        sortSlug: searchParams?.get("sort"),
-        metalColor: searchParams?.get("metalColor"),
-        purity: searchParams?.get("purity"),
-        gemstone: searchParams?.get("gemstone"),
-        subcategory: searchParams?.get("subcategory"),
-        facets: initialListing.facets,
-      })
+      ? createJewelleryListingPrefetchParams(
+        prefetchedCategoryUrlKey,
+        prefetchedFilters,
+        initialListing.facets,
+      )
       : undefined;
 
   // /search has no category path, so a main category picked in the drawer lives in ?category=

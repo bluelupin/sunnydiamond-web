@@ -30,11 +30,16 @@ async function resolveJewelleryListingPrefetchFilters(
   const minFromUrl = parseGiftFinderPriceParam(listingFilters.minPrice);
   const maxFromUrl = parseGiftFinderPriceParam(listingFilters.maxPrice);
   const needsPriceClamp = minFromUrl > 0 || maxFromUrl > 0;
+  const needsFacetOptions =
+    listingFilters.metalColor?.trim() ||
+    listingFilters.purity?.trim() ||
+    listingFilters.subcategory?.trim();
 
-  if (!needsPriceClamp) {
+  if (!needsPriceClamp && !needsFacetOptions) {
     return { filters: buildGiftFinderListingFiltersFromUrl(listingFilters) };
   }
 
+  // Resolve URL labels to Magento option IDs and category UIDs using the listing's facets.
   const baseFilters = buildGiftFinderListingFiltersFromUrl(listingFilters);
   const { listing } = await getMagentoJewelleryInitialListing({
     categoryUrlKey,
@@ -43,6 +48,9 @@ async function resolveJewelleryListingPrefetchFilters(
       ...baseFilters,
       minPrice: 0,
       maxPrice: 0,
+      categories: [],
+      metalTypes: [],
+      metalPurities: [],
     },
     includeFacets: true,
   });

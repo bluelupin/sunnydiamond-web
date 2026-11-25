@@ -78,20 +78,21 @@ export async function JewelleryCategoryRoutePage({
     notFound();
   }
 
+  const prefetchedFilters: JewelleryListingPrefetchFilters = {
+    collection: query.collection,
+    occasion: query.occasion,
+    diamondShape: query.diamondShape,
+    fancyColour: query.fancyColour,
+    minPrice: query.minPrice,
+    maxPrice: query.maxPrice,
+    sort: query.sort,
+    metalColor: query.metalColor,
+    purity: query.purity,
+    gemstone: query.gemstone,
+    subcategory: query.subcategory,
+  };
   const [initialListing, page, nav] = await Promise.all([
-    prefetchJewelleryListing(categoryUrlKey, {
-      collection: query.collection,
-      occasion: query.occasion,
-      diamondShape: query.diamondShape,
-      fancyColour: query.fancyColour,
-      minPrice: query.minPrice,
-      maxPrice: query.maxPrice,
-      sort: query.sort,
-      metalColor: query.metalColor,
-      purity: query.purity,
-      gemstone: query.gemstone,
-      subcategory: query.subcategory,
-    } satisfies JewelleryListingPrefetchFilters),
+    prefetchJewelleryListing(categoryUrlKey, prefetchedFilters),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),
   ]);
@@ -130,6 +131,7 @@ export async function JewelleryCategoryRoutePage({
         <JewelleryProductPage
           initialListing={initialListing}
           prefetchedCategoryUrlKey={initialListing ? categoryUrlKey : undefined}
+          prefetchedFilters={prefetchedFilters}
           trustBadges={page.trustBadges}
           listingCards={page.listingCards}
         />

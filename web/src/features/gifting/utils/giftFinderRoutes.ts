@@ -62,7 +62,7 @@ export function buildGiftFinderListingFiltersFromUrl(
   searchParams: GiftFinderSearchParams,
   facets?: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
 ): JewelleryFilterState {
-  const filters = createEmptyFilterState();
+  let filters = createEmptyFilterState();
 
   const occasion = searchParams.occasion?.trim();
   if (occasion) {
@@ -88,14 +88,9 @@ export function buildGiftFinderListingFiltersFromUrl(
   const maxFromUrl = parseGiftFinderPriceParam(searchParams.maxPrice);
 
   if (facets && (minFromUrl > 0 || maxFromUrl > 0)) {
-    return applyGiftFinderPriceToFilterState(filters, facets, minFromUrl, maxFromUrl);
-  }
-
-  if (minFromUrl > 0) {
+    filters = applyGiftFinderPriceToFilterState(filters, facets, minFromUrl, maxFromUrl);
+  } else {
     filters.minPrice = minFromUrl;
-  }
-
-  if (maxFromUrl > 0) {
     filters.maxPrice = maxFromUrl;
   }
 
