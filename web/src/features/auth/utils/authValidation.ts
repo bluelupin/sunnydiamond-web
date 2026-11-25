@@ -7,8 +7,21 @@ import {
   validateRequiredName,
 } from "@/shared/utils/formValidation";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
+import { getSortedUniqueDialCodes } from "@/shared/constants/phoneCountryCodes";
 
 export const LOGIN_OTP_LENGTH = 6;
+
+export function parsePastedLoginPhone(value: string): { countryCode: string; national: string } | undefined {
+  const trimmed = value.trim();
+  if (!/^\+[\d\s()-]+$/.test(trimmed)) return undefined;
+
+  const number = `+${trimmed.replace(/\D/g, "")}`;
+  const countryCode = getSortedUniqueDialCodes().find((code) => number.startsWith(code));
+  if (!countryCode) return undefined;
+
+  const national = number.slice(countryCode.length);
+  return national ? { countryCode, national } : undefined;
+}
 
 export const normalizeIndianPhoneDigits = (value: string): string => {
   const digits = value.replace(/\D/g, "");

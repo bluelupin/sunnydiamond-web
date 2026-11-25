@@ -9,6 +9,7 @@ import { authCompositeFieldErrorStateClassName } from "@/shared/utils/formValida
 import {
   isEmailIdentifier,
   limitLoginIdentifier,
+  parsePastedLoginPhone,
   shouldShowLoginCountryCode,
   validateLoginIdentifier,
 } from "../utils/authValidation";
@@ -86,6 +87,19 @@ const LoginIdentifierField = ({
           inputMode={emailOnly || isEmailMode ? "email" : "text"}
           value={identifier}
           onChange={(event) => onIdentifierChange(limitLoginIdentifier(event.target.value, countryCode, emailOnly))}
+          onPaste={(event) => {
+            const input = event.currentTarget;
+            const replacesValue = input.value.length === 0 ||
+              (input.selectionStart === 0 && input.selectionEnd === input.value.length);
+            if (emailOnly || !replacesValue) return;
+
+            const phone = parsePastedLoginPhone(event.clipboardData.getData("text"));
+            if (!phone) return;
+
+            event.preventDefault();
+            onCountryCodeChange(phone.countryCode);
+            onIdentifierChange(phone.national);
+          }}
           placeholder={
             emailOnly ? "Enter Your Email Address." : "Enter your phone number or email address."
           }
