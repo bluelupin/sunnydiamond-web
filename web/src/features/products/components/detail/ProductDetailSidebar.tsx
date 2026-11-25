@@ -968,6 +968,7 @@ const ProductDetailSidebar = ({
           open
           onClose={() => setIsDeliveryStoreOpen(false)}
           store={deliveryStore}
+          product={sizeDisplayProduct}
         />
       ) : null}
 

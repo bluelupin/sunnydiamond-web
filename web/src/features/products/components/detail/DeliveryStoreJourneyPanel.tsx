@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import {
+  getAppointmentContactLocks,
+  signupMethodToContactLockKind,
+} from "@/features/auth/utils/authLoginIdentifier";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   appointmentFieldClassName,
@@ -24,11 +30,19 @@ import StoreVisitMapBlock from "./StoreVisitMapBlock";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { useCmsSection } from "@/hooks/homepage/useCmsSection";
 import type { NormalizedStoreLocatorShowroom } from "@/services/store-locator/store-locator-page.types";
+import type { Product } from "@/features/products/data/products";
+import { getProductSubmissionVariant } from "@/features/products/utils/productSubmissionVariant";
+import {
+  createProductSubmission,
+  ProductSubmissionRefusedError,
+  STORE_VISIT_FORM_TAG,
+} from "@/services/forms/product-form.service";
 
 type DeliveryStoreJourneyPanelProps = {
   open: boolean;
   onClose: () => void;
   store: DeliveryStoreLocation;
+  product: Product;
 };
 
 type JourneyStep = "availability" | "booking";
@@ -44,16 +58,35 @@ const DeliveryStoreJourneyPanel = ({
   open,
   onClose,
   store,
+  product,
 }: DeliveryStoreJourneyPanelProps) => {
   const { toast } = useToast();
+  const { status, customer } = useAuth();
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    signupMethodToContactLockKind(customer?.signupMethod),
+  );
+  const canPrefill = open && status === "authenticated";
+  const { contact } = useCustomerProfileContact(canPrefill);
+  const profileContact = canPrefill ? contact : null;
   const [step, setStep] = useState<JourneyStep>("availability");
-  const [name, setName] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  // Undefined lets the profile supply the initial value. An edit, including clearing a field, takes precedence.
+  const [nameInput, setName] = useState<string>();
+  const [countryCodeInput, setCountryCode] = useState<string>();
+  const [phoneInput, setPhone] = useState<string>();
+  const [emailInput, setEmail] = useState<string>();
+  const name = nameInput ?? profileContact?.fullName?.trim() ?? "";
+  const countryCode = countryCodeInput ?? (profileContact?.countryCode?.trim() || "+91");
+  const phone = phoneInput ?? profileContact?.phone?.trim() ?? "";
+  const email = emailInput ?? profileContact?.email?.trim() ?? "";
+  const handlePhoneChange = useCallback((value: string) => {
+    setPhone(value);
+    setCountryCode((current) => current ?? countryCode);
+  }, [countryCode]);
   const [date, setDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const pendingSubmission = useRef<Promise<void> | null>(null);
 
   const { data: showrooms, isLoading: isLoadingShowrooms } = useCmsSection(
     "store-locator-showrooms",
@@ -69,6 +102,10 @@ const DeliveryStoreJourneyPanel = ({
     }
   }, [open]);
 
+  useEffect(() => () => {
+    pendingSubmission.current = null;
+  }, []);
+
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date, note }),
     [name, countryCode, phone, email, date, note],
@@ -82,14 +119,53 @@ const DeliveryStoreJourneyPanel = ({
     onClose();
   };
 
-  const handleConfirmVisit = () => {
-    validateSubmit(() => {
+  const submitVisit = async () => {
+    if (pendingSubmission.current) return;
+
+    const preferredShowroom = showroom?.documentId ?? showroom?.id;
+    if (!preferredShowroom) {
+      toast({ title: "Store details unavailable", description: "Please try again shortly." });
+      return;
+    }
+
+    const request = Promise.resolve().then(() => createProductSubmission({
+      formTag: STORE_VISIT_FORM_TAG,
+      preferredShowroom,
+      productId: product.id,
+      productName: product.name,
+      ...getProductSubmissionVariant(product),
+      customerName: name.trim(),
+      customerPhone: `${countryCode} ${phone}`.trim(),
+      customerEmail: email.trim() || undefined,
+      requestDetails: note.trim() || undefined,
+      requestedDate: date || undefined,
+      selectedTimeSlot: selectedSlot ?? undefined,
+      sourcePage: window.location.pathname,
+    }));
+    pendingSubmission.current = request;
+    setIsSubmitting(true);
+
+    try {
+      await request;
+      if (pendingSubmission.current !== request) return;
       toast({
         title: "Visit confirmed",
         description: "Our representative will get in touch with you soon.",
       });
       handleClose();
-    });
+    } catch (error) {
+      if (pendingSubmission.current !== request) return;
+      toast({
+        title: error instanceof ProductSubmissionRefusedError && error.message
+          ? error.message
+          : "Could not book visit. Please try again.",
+      });
+    } finally {
+      if (pendingSubmission.current === request) {
+        pendingSubmission.current = null;
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const { windows } = useUiPlatform();
@@ -135,7 +211,14 @@ const DeliveryStoreJourneyPanel = ({
                   </span>
                 </div>
 
-                <StoreVisitMapBlock variant="availability">
+                <StoreVisitMapBlock
+                  variant="availability"
+                  showroomImage={showroom ? {
+                    desktopSrc: showroom.desktopImageUrl,
+                    mobileSrc: showroom.mobileImageUrl,
+                    alt: showroom.imageAlt || store.name,
+                  } : undefined}
+                >
                   {showroom ? (
                     <div className="flex flex-col gap-4">
                       {showroom.address ? (
@@ -231,7 +314,7 @@ const DeliveryStoreJourneyPanel = ({
                   selectedSlot={selectedSlot}
                   onNameChange={setName}
                   onCountryCodeChange={setCountryCode}
-                  onPhoneChange={setPhone}
+                  onPhoneChange={handlePhoneChange}
                   onEmailChange={setEmail}
                   onDateChange={setDate}
                   onNoteChange={setNote}
@@ -242,6 +325,8 @@ const DeliveryStoreJourneyPanel = ({
                   labelClassName={appointmentLabelClassName}
                   fieldClassName={appointmentFieldClassName}
                   selectedSlotStyle="gold"
+                  phoneLocked={phoneLocked}
+                  emailLocked={emailLocked}
                 />
               </div>
             </div>
@@ -252,8 +337,8 @@ const DeliveryStoreJourneyPanel = ({
               Our representative will get in touch with you soon
             </p>
             <DetailDarkButton
-              onClick={handleConfirmVisit}
-              disabled={submitted && !isValid}
+              onClick={() => validateSubmit(() => void submitVisit())}
+              disabled={isSubmitting || (submitted && !isValid)}
               className="disabled:cursor-not-allowed disabled:opacity-50"
             >
               CONFIRM VISIT
