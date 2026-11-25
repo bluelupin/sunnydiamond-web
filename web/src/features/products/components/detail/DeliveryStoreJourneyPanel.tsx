@@ -12,7 +12,7 @@ import {
 } from "@/shared/constants/appointmentForm";
 import {
   DELIVERY_STORE_ICONS,
-  DELIVERY_STORE_LOCATIONS,
+  type DeliveryStoreLocation,
 } from "@/features/products/data/deliveryStoreContent";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -22,22 +22,28 @@ import { cn } from "@/shared/utils/cn";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import StoreVisitMapBlock from "./StoreVisitMapBlock";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+import { useCmsSection } from "@/hooks/homepage/useCmsSection";
+import type { NormalizedStoreLocatorShowroom } from "@/services/store-locator/store-locator-page.types";
 
 type DeliveryStoreJourneyPanelProps = {
   open: boolean;
   onClose: () => void;
-  city?: string;
-  /** When set (e.g. from showroom CMS), overrides the static location map URL. */
-  mapUrl?: string | null;
+  store: DeliveryStoreLocation;
 };
 
 type JourneyStep = "availability" | "booking";
 
+async function fetchShowrooms(signal: AbortSignal): Promise<NormalizedStoreLocatorShowroom[]> {
+  const response = await fetch("/api/store-locator/showrooms", { signal });
+  if (!response.ok) throw new Error("Showrooms unavailable");
+  const { showrooms } = (await response.json()) as { showrooms: NormalizedStoreLocatorShowroom[] };
+  return showrooms;
+}
+
 const DeliveryStoreJourneyPanel = ({
   open,
   onClose,
-  city = "Coimbatore",
-  mapUrl: mapUrlProp,
+  store,
 }: DeliveryStoreJourneyPanelProps) => {
   const { toast } = useToast();
   const [step, setStep] = useState<JourneyStep>("availability");
@@ -49,8 +55,13 @@ const DeliveryStoreJourneyPanel = ({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
-  const store = DELIVERY_STORE_LOCATIONS[city] ?? DELIVERY_STORE_LOCATIONS.Coimbatore;
-  const directionsUrl = (mapUrlProp ?? store.mapUrl).trim();
+  const { data: showrooms, isLoading: isLoadingShowrooms } = useCmsSection(
+    "store-locator-showrooms",
+    fetchShowrooms,
+    { enabled: open },
+  );
+  const showroom = showrooms?.find((location) => location.slug === store.slug);
+  const directionsUrl = showroom?.mapUrl?.trim();
 
   useEffect(() => {
     if (!open) {
@@ -120,39 +131,49 @@ const DeliveryStoreJourneyPanel = ({
                     Available now at nearest store
                   </p>
                   <span className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack">
-                    {store.cityLabel}
+                    {store.name.toUpperCase()}
                   </span>
                 </div>
 
                 <StoreVisitMapBlock variant="availability">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex gap-3 items-center">
-                      <Image
-                        src={DELIVERY_STORE_ICONS.address}
-                        alt=""
-                        width={20}
-                        height={20}
-                        aria-hidden
-                        className={cn(!windows && "-translate-y-0.5", "mt-0.5 shrink-0")}
-                      />
-                      <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
-                        {store.address}
-                      </p>
+                  {showroom ? (
+                    <div className="flex flex-col gap-4">
+                      {showroom.address ? (
+                        <div className="flex gap-3 items-center">
+                          <Image
+                            src={DELIVERY_STORE_ICONS.address}
+                            alt=""
+                            width={20}
+                            height={20}
+                            aria-hidden
+                            className={cn(!windows && "-translate-y-0.5", "mt-0.5 shrink-0")}
+                          />
+                          <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
+                            {showroom.address}
+                          </p>
+                        </div>
+                      ) : null}
+                      {showroom.phone ? (
+                        <div className="flex gap-3 items-center">
+                          <Image
+                            src={DELIVERY_STORE_ICONS.phone}
+                            alt=""
+                            width={20}
+                            height={20}
+                            aria-hidden
+                            className={cn(!windows && "-translate-y-0.5", "mt-0.5 shrink-0")}
+                          />
+                          <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
+                            {showroom.phone}
+                          </p>
+                        </div>
+                      ) : null}
                     </div>
-                    <div className="flex gap-3 items-center">
-                      <Image
-                        src={DELIVERY_STORE_ICONS.phone}
-                        alt=""
-                        width={20}
-                        height={20}
-                        aria-hidden
-                        className={cn(!windows && "-translate-y-0.5", "mt-0.5 shrink-0")}
-                      />
-                      <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
-                        {store.phone}
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    <p role="status" className="font-gill text-base font-light leading-110 text-darkblack">
+                      {isLoadingShowrooms ? "Loading store details…" : "Store details unavailable"}
+                    </p>
+                  )}
                   {directionsUrl ? (
                     <DetailTextLink
                       href={directionsUrl}

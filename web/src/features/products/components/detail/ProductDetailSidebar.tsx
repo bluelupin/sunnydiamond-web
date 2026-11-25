@@ -38,6 +38,7 @@ import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
+import { getDeliveryStoreLocation } from "@/features/products/data/deliveryStoreContent";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
 import Reveal from "@/shared/Animation/Reveal";
@@ -211,6 +212,7 @@ const ProductDetailSidebar = ({
   const unavailableSizes = sizeOptions.filter(option => !option.inStock).map(option => option.label);
   const selectedSize = sizeOptions.find(option => option.label === ringSize);
   const sizeDisplayProduct = applySelectedSizeVariant(displayProduct, selectedSize?.variant);
+  const deliveryStore = getDeliveryStoreLocation(sizeDisplayProduct.storeCode);
   const sizePricing = selectedSize?.variant
     ? getProductDetailPricing(sizeDisplayProduct)
     : pricing;
@@ -752,11 +754,13 @@ const ProductDetailSidebar = ({
                 !windows && "-translate-y-0.5",
               )} />
               <p className="m-0 font-gill text-base font-light leading-110 text-darkblack">
-                Available now at nearest store
+                {deliveryStore ? "Available now at nearest store" : "In-store availability unconfirmed"}
               </p>
-              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)} className="self-center">
-                Coimbatore
-              </DetailTextLink>
+              {deliveryStore ? (
+                <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)} className="self-center">
+                  {deliveryStore.name}
+                </DetailTextLink>
+              ) : null}
             </div>
           </div>
         </div>
@@ -959,11 +963,11 @@ const ProductDetailSidebar = ({
         <RingSizeChartPanel open onClose={() => setIsRingSizeChartOpen(false)} guide={sizeGuide} />
       ) : null}
 
-      {isDeliveryStoreOpen ? (
+      {isDeliveryStoreOpen && deliveryStore ? (
         <DeliveryStoreJourneyPanel
           open
           onClose={() => setIsDeliveryStoreOpen(false)}
-          city="Coimbatore"
+          store={deliveryStore}
         />
       ) : null}
 

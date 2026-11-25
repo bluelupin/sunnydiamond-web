@@ -53,6 +53,7 @@ const plpCardImageShellClassName =
 export interface JewelleryProductCardProps {
   title: string;
   price: number;
+  storeName?: string;
   primaryImage: string | StaticImageData;
   modalImage?: string | StaticImageData;
   hoverImage?: string | StaticImageData;
@@ -71,12 +72,13 @@ export interface JewelleryProductCardProps {
 type ProductCopyProps = {
   title: string;
   price: number;
+  storeName?: string;
   href: string;
   className?: string;
   onSelect?: () => void;
 };
 
-const ProductCopy = ({ title, price, href, className, onSelect }: ProductCopyProps) => {
+const ProductCopy = ({ title, price, storeName, href, className, onSelect }: ProductCopyProps) => {
   const { lead, remainder } = splitPlpProductTitle(title);
   const titleLinkClassName = cn(
     "!leading-110 w-full max-w-full font-gill font-light lg:text-xl md:text-lg sm:text-base text-sm",
@@ -111,6 +113,7 @@ const ProductCopy = ({ title, price, href, className, onSelect }: ProductCopyPro
       <span aria-hidden>₹ </span>
       {formatJewelleryPrice(price)}
     </p>
+    {storeName ? <p className="font-gill text-sm">In store at {storeName}</p> : null}
   </div>
   );
 };
@@ -143,6 +146,7 @@ const ProductImage = ({
 const JewelleryProductCard = ({
   title,
   price,
+  storeName,
   primaryImage,
   modalImage,
   hoverImage,
@@ -403,6 +407,7 @@ const JewelleryProductCard = ({
           <ProductCopy
             title={title}
             price={price}
+            storeName={storeName}
             href={href}
             onSelect={onSelect}
             className={cn(shouldRevealLifestyle && lifestyleLayerOpaque && "text-white")}

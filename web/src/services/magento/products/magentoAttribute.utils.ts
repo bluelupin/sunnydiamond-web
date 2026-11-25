@@ -21,6 +21,13 @@ export function getMagentoCustomAttributeValue(
   return value || null;
 }
 
+export function getMagentoFeedStoreCode(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+): string | undefined {
+  const code = getMagentoCustomAttributeValue(items, "sd_feed_store")?.toUpperCase();
+  return code === "UNKNOWN" ? undefined : code;
+}
+
 function parseMagentoAttributeListValue(value: string): string[] {
   const trimmed = value.trim();
   if (!trimmed) {

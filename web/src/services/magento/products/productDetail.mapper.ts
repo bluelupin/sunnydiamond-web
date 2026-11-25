@@ -9,6 +9,7 @@ import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { getMagentoGraphqlUrl } from "@/services/magento/config";
 import {
   getMagentoCustomAttributeValue,
+  getMagentoFeedStoreCode,
   isMagentoPlaceholderImage,
   isMagentoBooleanTruthy,
   normalizeMagentoCatalogProductImageUrl,
@@ -246,6 +247,7 @@ function mapConfigurableVariant(
     image,
     images,
     inStock: child.stock_status === "IN_STOCK",
+    storeCode: getMagentoFeedStoreCode(child.custom_attributesV2?.items),
     attributes,
     optionUids,
     ...(priceBreakup ? { priceBreakup } : {}),
@@ -468,6 +470,7 @@ export function mapMagentoProductDetailToProduct(
     metal,
     ...(metalColorValue ? { metalColorValue } : {}),
     inStock: product.stock_status === "IN_STOCK",
+    storeCode: getMagentoFeedStoreCode(product.custom_attributesV2?.items),
     isLimitedEdition: isMagentoBooleanTruthy(getMagentoCustomAttributeValue(product.custom_attributesV2?.items, "sd_limited_edition")),
     featured: false,
     rating: Number.isFinite(rating) ? rating : 0,

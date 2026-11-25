@@ -215,6 +215,7 @@ export function applySelectedMetalVariant(
     originalPrice: variant.originalPrice,
     ...displayImages,
     inStock: variant.inStock,
+    storeCode: variant.storeCode,
     metal,
     metalColorValue: normalizeMetalKey(metalId),
     ...(purity || variant.detailAttributes
@@ -242,6 +243,7 @@ export function applySelectedSizeVariant(
   return {
     ...product,
     productSku: variant.sku,
+    storeCode: variant.storeCode,
     price: variant.price,
     originalPrice: variant.originalPrice,
     ...displayImages,

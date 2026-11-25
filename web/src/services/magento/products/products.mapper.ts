@@ -8,6 +8,7 @@ import type { MagentoProductDetailItem, MagentoProductListItem, MagentoMediaGall
 import {
   formatMagentoFacetLabel,
   getMagentoCustomAttributeValue,
+  getMagentoFeedStoreCode,
   isMagentoBestSeller,
   isMagentoBooleanTruthy,
   isMagentoPlaceholderImage,
@@ -113,7 +114,7 @@ function resolveListingVariantDisplay(product: MagentoProductListItem) {
     const key = `${metalColor.toLowerCase()}|${metalPurity?.toLowerCase() ?? ""}`;
     if (seen.has(key)) return [];
     seen.add(key);
-    return [{ metalColor, ...(metalPurity ? { metalPurity } : {}), price: variant.price }];
+    return [{ metalColor, ...(metalPurity ? { metalPurity } : {}), price: variant.price, storeCode: variant.storeCode }];
   });
 
   return {
@@ -168,6 +169,9 @@ export function mapMagentoProductToJewelleryListing(
     urlKey,
     name,
     price,
+    storeCode: defaultVariantDisplay
+      ? defaultVariantDisplay.storeCode
+      : getMagentoFeedStoreCode(customAttributes),
     ...(variantDisplay?.variantPrices.length ? { variantPrices: variantDisplay.variantPrices } : {}),
     ...(variantDisplay?.metalColorOptions.length ? { metalColorOptions: variantDisplay.metalColorOptions } : {}),
     primaryImage,
