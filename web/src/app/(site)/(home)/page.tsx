@@ -5,7 +5,7 @@ import HomePageView from "@/features/cms/components/HomePage";
 import { HomepageCmsProvider } from "@/shared/lib/providers/HomepageCmsProvider";
 import {
   getCachedHomepageShell,
-  prefetchHomepageBundle,
+  prefetchHomepageCms,
 } from "@/lib/homepage/prefetchHomepageCms";
 import { getHomepageSeo } from "@/services/homepage/seo.service";
 import {
@@ -62,7 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   const [prefetched, bespokePage, trendingSnapshot] = await Promise.all([
-    prefetchHomepageBundle(),
+    prefetchHomepageCms(),
     getContactBespokePage(),
     getTrendingProductsSnapshot(),
   ]);
@@ -82,7 +82,6 @@ export default async function Page() {
       shell={prefetched.shell}
       editorial={prefetched.editorial}
       shopping={prefetched.shopping}
-      alankara={prefetched.alankara ?? undefined}
     >
       <MagentoTrendingSeeder trendingProducts={trendingSnapshot.products} />
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl })} />

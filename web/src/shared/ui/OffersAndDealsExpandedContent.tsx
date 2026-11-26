@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCart } from "@/features/cart/context/CartContext";
-import { mockAvailableOffers, type MockOffer } from "@/shared/data/offersAndDealsMock";
+import { getRazorpayDisplayOffers, type RazorpayDisplayOffer } from "@/services/magento/offers/razorpayOffers.service";
 import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
@@ -100,43 +99,15 @@ const PromoField = ({
   </div>
 );
 
-const OfferCard = ({
-  offer,
-  selected,
-  onSelect,
-}: {
-  offer: MockOffer;
-  selected: boolean;
-  onSelect: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onSelect}
-    aria-pressed={selected}
-    className={cn(
-      "flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border bg-white px-3 py-4 text-left transition-colors lg:bg-white",
-      selected ? "border-gray600" : "border-white",
-    )}
-  >
-    <Image
-      src="/icons/kotal-bank-icon.svg"
-      alt=""
-      width="28"
-      height="24"
-      aria-hidden
-      className="h-6 w-7 shrink-0"
-    />
-    <div className="flex min-w-0 flex-1 flex-col gap-4">
-      <p
-        className="line-clamp-2 min-h-[calc(0.875rem*1.1*2)] font-gill text-sm font-light leading-110 text-darkblack"
-      >
-        {offer.headline}
-      </p>
-      <p className="shrink-0 whitespace-nowrap font-gill text-sm font-light leading-110 text-darkblack">
-        {offer.categoryLabel}
-      </p>
-    </div>
-  </button>
+const OfferCard = ({ offer }: { offer: RazorpayDisplayOffer }) => (
+  <div className="flex min-h-[100px] w-[214px] min-w-[214px] shrink-0 flex-col gap-2 border border-white bg-white px-3 py-4 text-left">
+    <p className="font-gill text-sm font-normal leading-110 text-darkblack">{offer.title}</p>
+    {offer.description ? <p className="font-gill text-sm font-light leading-110 text-darkblack">{offer.description}</p> : null}
+    {offer.min_amount != null ? <p className="font-gill text-xs text-gray600">Minimum order ₹{offer.min_amount.toLocaleString("en-IN")}</p> : null}
+    {offer.payment_methods.length ? <p className="font-gill text-xs text-gray600">{offer.payment_methods.join(", ")}</p> : null}
+    {offer.terms ? <p className="font-gill text-xs text-gray600">{offer.terms}</p> : null}
+    {offer.terms_url ? <a href={offer.terms_url} target="_blank" rel="noopener noreferrer" className="font-gill text-xs underline">Terms</a> : null}
+  </div>
 );
 
 const AppliedGiftCardSummary = ({
@@ -183,13 +154,20 @@ const OffersAndDealsExpandedContent = ({
     removeGiftCard,
     appliedGiftCardCode,
     giftCardProblem,
-    appliedLocalOfferId,
-    applyLocalOffer,
-    removeLocalOffer,
   } = useCart();
   const [giftCardCode, setGiftCardCode] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [giftCardBusy, setGiftCardBusy] = useState(false);
+  const [offers, setOffers] = useState<RazorpayDisplayOffer[]>([]);
+  const [offersLoading, setOffersLoading] = useState(true);
+  useEffect(() => {
+    let active = true;
+    getRazorpayDisplayOffers()
+      .then((items) => { if (active) setOffers(items); })
+      .catch(() => { if (active) setOffers([]); })
+      .finally(() => { if (active) setOffersLoading(false); });
+    return () => { active = false; };
+  }, []);
   const expandedBackground = expandedBackgroundByVariant[variant];
 
   const runGiftCardAction = async (action: () => Promise<void>, fallbackMessage: string) => {
@@ -227,15 +205,6 @@ const OffersAndDealsExpandedContent = ({
     void runGiftCardAction(removeGiftCard, "We could not remove this gift card. Please try again.");
   };
 
-  const handleOfferSelect = (offer: MockOffer) => {
-    if (appliedLocalOfferId === offer.id) {
-      removeLocalOffer();
-      return;
-    }
-
-    applyLocalOffer(offer.id);
-  };
-
   const hasAppliedGiftCard = Boolean(appliedGiftCardCode);
 
   const body = (
@@ -243,17 +212,15 @@ const OffersAndDealsExpandedContent = ({
       <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />
 
       <div className="flex flex-col gap-3">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">Bank Offers</p>
-        <div className="horizontalScroll flex items-start gap-2 overflow-auto">
-          {mockAvailableOffers.map((offer) => (
-            <OfferCard
-              key={offer.id}
-              offer={offer}
-              selected={appliedLocalOfferId === offer.id}
-              onSelect={() => handleOfferSelect(offer)}
-            />
-          ))}
-        </div>
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">Payment Offers</p>
+        {offersLoading ? <p className="font-gill text-sm text-gray600">Loading offers...</p> : offers.length ? (
+          <>
+            <div className="horizontalScroll flex items-start gap-2 overflow-auto">
+              {offers.map((offer) => <OfferCard key={offer.id} offer={offer} />)}
+            </div>
+            <p className="font-gill text-xs text-gray600">Eligibility and final discount are confirmed in Razorpay Checkout.</p>
+          </>
+        ) : <p className="font-gill text-sm text-gray600">No payment offers available right now.</p>}
       </div>
 
       <div className="h-[0.5px] w-full shrink-0 bg-neutral300 md:hidden" aria-hidden />
