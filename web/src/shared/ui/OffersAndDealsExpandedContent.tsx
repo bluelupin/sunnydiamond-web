@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCart } from "@/features/cart/context/CartContext";
@@ -99,16 +100,34 @@ const PromoField = ({
   </div>
 );
 
-const OfferCard = ({ offer }: { offer: RazorpayDisplayOffer }) => (
-  <div className="flex min-h-[100px] w-[214px] min-w-[214px] shrink-0 flex-col gap-2 border border-white bg-white px-3 py-4 text-left">
-    <p className="font-gill text-sm font-normal leading-110 text-darkblack">{offer.title}</p>
-    {offer.description ? <p className="font-gill text-sm font-light leading-110 text-darkblack">{offer.description}</p> : null}
-    {offer.min_amount != null ? <p className="font-gill text-xs text-gray600">Minimum order ₹{offer.min_amount.toLocaleString("en-IN")}</p> : null}
-    {offer.payment_methods.length ? <p className="font-gill text-xs text-gray600">{offer.payment_methods.join(", ")}</p> : null}
-    {offer.terms ? <p className="font-gill text-xs text-gray600">{offer.terms}</p> : null}
-    {offer.terms_url ? <a href={offer.terms_url} target="_blank" rel="noopener noreferrer" className="font-gill text-xs underline">Terms</a> : null}
-  </div>
-);
+const OfferCard = ({ offer }: { offer: RazorpayDisplayOffer }) => {
+  const headline = offer.description?.trim() || offer.title;
+  const hasDetails = offer.title !== headline || offer.min_amount != null || offer.payment_methods.length > 0 || Boolean(offer.terms || offer.terms_url);
+  const isKotakOffer = /\bkotak\b/i.test(`${offer.title} ${offer.description ?? ""}`);
+
+  return (
+    <div className="flex min-h-[100px] w-[214px] shrink-0 gap-3 bg-white px-3 py-4 text-left">
+      {isKotakOffer ? <Image src="/icons/kotal-bank-icon.svg" alt="" width={29} height={24} className="h-6 w-[29px] shrink-0" /> : null}
+      <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
+        <p className="font-gill text-sm font-normal leading-110 text-darkblack">{headline}</p>
+        {hasDetails ? (
+          <details className="font-gill text-sm font-normal leading-110 text-darkblack">
+            <summary className="cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden" aria-label="Bank Offer, show offer details">
+              Bank Offer
+            </summary>
+            <div className="flex flex-col gap-1 pt-2 text-xs text-gray600">
+              {offer.title !== headline ? <p>{offer.title}</p> : null}
+              {offer.min_amount != null ? <p>Minimum order ₹{offer.min_amount.toLocaleString("en-IN")}</p> : null}
+              {offer.payment_methods.length ? <p>{offer.payment_methods.join(", ")}</p> : null}
+              {offer.terms ? <p>{offer.terms}</p> : null}
+              {offer.terms_url ? <a href={offer.terms_url} target="_blank" rel="noopener noreferrer" className="underline">Terms</a> : null}
+            </div>
+          </details>
+        ) : <p className="font-gill text-sm font-normal leading-110 text-darkblack">Bank Offer</p>}
+      </div>
+    </div>
+  );
+};
 
 const AppliedGiftCardSummary = ({
   code,
@@ -212,7 +231,7 @@ const OffersAndDealsExpandedContent = ({
       <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />
 
       <div className="flex flex-col gap-3">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">Payment Offers</p>
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">Bank Offers</p>
         {offersLoading ? <p className="font-gill text-sm text-gray600">Loading offers...</p> : offers.length ? (
           <>
             <div className="horizontalScroll flex items-start gap-2 overflow-auto">
