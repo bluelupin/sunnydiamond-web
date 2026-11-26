@@ -102,28 +102,34 @@ const PromoField = ({
 
 const OfferCard = ({ offer }: { offer: RazorpayDisplayOffer }) => {
   const headline = offer.description?.trim() || offer.title;
-  const hasDetails = offer.title !== headline || offer.min_amount != null || offer.payment_methods.length > 0 || Boolean(offer.terms || offer.terms_url);
-  const isKotakOffer = /\bkotak\b/i.test(`${offer.title} ${offer.description ?? ""}`);
+  const banks = [...offer.card_issuers, ...offer.netbanking_banks];
+  const uniqueBankCodes = [...new Set(banks.map((bank) => bank.code))];
+  const bankLabel = offer.bank_names.length ? offer.bank_names.join(", ") : "Payment Offer";
+  const isKotakOffer = uniqueBankCodes.length === 1 && uniqueBankCodes[0] === "KKBK";
+  const hasDetails = offer.title !== headline || offer.min_amount != null || offer.payment_methods.length > 0 || offer.bank_names.length > 0 || offer.card_types.length > 0 || offer.card_networks.length > 0 || Boolean(offer.terms || offer.terms_url);
 
   return (
     <div className="flex min-h-[100px] w-[214px] shrink-0 gap-3 bg-white px-3 py-4 text-left">
-      {isKotakOffer ? <Image src="/icons/kotal-bank-icon.svg" alt="" width={29} height={24} className="h-6 w-[29px] shrink-0" /> : null}
+      {offer.icon_url ? <Image src={offer.icon_url} alt="" width={29} height={24} unoptimized className="h-6 w-[29px] shrink-0 object-contain" /> : isKotakOffer ? <Image src="/icons/kotal-bank-icon.svg" alt="" width={29} height={24} className="h-6 w-[29px] shrink-0" /> : uniqueBankCodes.length === 1 ? <span aria-hidden className="flex h-6 w-7 shrink-0 items-center justify-center bg-gray200 font-gill text-xs">{(banks[0]?.name ?? banks[0]?.code ?? "B").slice(0, 1)}</span> : null}
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
         <p className="font-gill text-sm font-normal leading-110 text-darkblack">{headline}</p>
         {hasDetails ? (
           <details className="font-gill text-sm font-normal leading-110 text-darkblack">
-            <summary className="cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden" aria-label="Bank Offer, show offer details">
-              Bank Offer
+            <summary className="cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden" aria-label={`${bankLabel}, show offer details`}>
+              {bankLabel}
             </summary>
             <div className="flex flex-col gap-1 pt-2 text-xs text-gray600">
               {offer.title !== headline ? <p>{offer.title}</p> : null}
               {offer.min_amount != null ? <p>Minimum order ₹{offer.min_amount.toLocaleString("en-IN")}</p> : null}
               {offer.payment_methods.length ? <p>{offer.payment_methods.join(", ")}</p> : null}
+              {offer.bank_names.length ? <p>Eligible banks: {offer.bank_names.join(", ")}</p> : null}
+              {offer.card_types.length ? <p>Cards: {offer.card_types.join(", ")}</p> : null}
+              {offer.card_networks.length ? <p>Networks: {offer.card_networks.join(", ")}</p> : null}
               {offer.terms ? <p>{offer.terms}</p> : null}
               {offer.terms_url ? <a href={offer.terms_url} target="_blank" rel="noopener noreferrer" className="underline">Terms</a> : null}
             </div>
           </details>
-        ) : <p className="font-gill text-sm font-normal leading-110 text-darkblack">Bank Offer</p>}
+        ) : <p className="font-gill text-sm font-normal leading-110 text-darkblack">{bankLabel}</p>}
       </div>
     </div>
   );
