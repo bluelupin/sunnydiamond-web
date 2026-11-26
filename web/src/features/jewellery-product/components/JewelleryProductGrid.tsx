@@ -8,7 +8,8 @@ import JewelleryListingPromoCard from "./JewelleryListingPromoCard";
 import { useJewelleryPlpViewport } from "../hooks/useJewelleryPlpViewport";
 import { PLP_PRIORITY_IMAGE_COUNT } from "../utils/jewelleryPlpImage";
 import { buildJewelleryPlpGridItems } from "../utils/plpListingCards";
-import { getJewelleryListingDisplayPrice } from "../utils/plpVariantPrice";
+import { getJewelleryListingDisplayPrice, getJewelleryListingDisplayVariant } from "../utils/plpVariantPrice";
+import { getDeliveryStoreLocation } from "@/features/products/data/deliveryStoreContent";
 import type { JewelleryListingProduct } from "../types";
 import type { NormalizedProductListingCard } from "@/services/product-landing/product-landing-page.types";
 
@@ -99,11 +100,15 @@ const JewelleryProductGrid = ({
         }
 
         const { product, productIndex } = item;
+        const variant = getJewelleryListingDisplayVariant(product, metalTypeQuery, metalPurityQuery);
+        const price = variant?.price ?? product.price;
+        const store = getDeliveryStoreLocation(variant ? variant.storeCode : product.storeCode);
         return (
           <JewelleryProductCard
             key={product.id}
             title={product.name}
-            price={getJewelleryListingDisplayPrice(product, metalTypeQuery, metalPurityQuery)}
+            price={price}
+            storeName={store?.name}
             primaryImage={product.primaryImage}
             modalImage={product.modalImage}
             hoverImage={product.hoverImage}
@@ -120,7 +125,7 @@ const JewelleryProductGrid = ({
             }
             onSelect={() => trackEvent("select_item", { item_list_id: "jewellery", items: [{
               item_id: product.sku, item_name: product.name,
-              price: getJewelleryListingDisplayPrice(product, metalTypeQuery, metalPurityQuery),
+              price,
             }] })}
           />
         );

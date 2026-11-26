@@ -1,11 +1,13 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import { DELIVERY_STORE_MAP_IMAGES } from "@/features/products/data/deliveryStoreContent";
 
 type StoreVisitMapBlockProps = {
   variant: "availability" | "store-select" | "booking-hero";
   heroImage?: string;
+  showroomImage?: { desktopSrc: string; mobileSrc: string; alt: string };
   children: ReactNode;
   cardClassName?: string;
 };
@@ -44,6 +46,7 @@ const MapLayersStack = () => (
 const StoreVisitMapBlock = ({
   variant,
   heroImage,
+  showroomImage,
   children,
   cardClassName,
 }: StoreVisitMapBlockProps) => {
@@ -82,7 +85,15 @@ const StoreVisitMapBlock = ({
   if (variant === "availability") {
     return (
       <div className="relative h-400 w-full shrink-0 overflow-hidden">
-        <MapLayersStack />
+        {showroomImage && (showroomImage.desktopSrc || showroomImage.mobileSrc) ? (
+          <ResponsiveImage
+            desktopSrc={showroomImage.desktopSrc || showroomImage.mobileSrc}
+            mobileSrc={showroomImage.mobileSrc}
+            alt={showroomImage.alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 480px"
+          />
+        ) : null}
         <div
           className={cn(
             "absolute inset-x-4 bottom-4 flex flex-col gap-6 bg-gray300 px-4 py-6",

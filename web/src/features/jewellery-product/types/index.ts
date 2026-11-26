@@ -45,8 +45,9 @@ export interface JewelleryListingProduct {
   urlKey: string;
   name: string;
   price: number;
-  /** Compact configurable prices so a filtered card can match the PDP selection. */
-  variantPrices?: Array<{ metalColor: string; metalPurity?: string; price: number }>;
+  storeCode?: string;
+  /** Compact variant data so a filtered card can match the PDP selection. */
+  variantPrices?: Array<{ metalColor: string; metalPurity?: string; price: number; storeCode?: string }>;
   metalColorOptions?: Array<{ id: string; label: string }>;
   primaryImage: string | StaticImageData;
   /** Model / lifestyle image — mobile swipe & desktop hover (`model_wear_image`, else l_/t_ gallery). */

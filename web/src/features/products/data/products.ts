@@ -32,6 +32,7 @@ export type ProductConfigurableVariant = {
   image: string;
   images: string[];
   inStock: boolean;
+  storeCode?: string;
   /** attribute_code → option label (e.g. sd_metal_color → rose-gold). */
   attributes: Record<string, string>;
   /** Configurable value UIDs required when adding the parent SKU to cart. */
@@ -71,6 +72,7 @@ export interface Product {
   /** Magento `sd_metal_color` slug (e.g. rose-gold). */
   metalColorValue?: string;
   inStock: boolean;
+  storeCode?: string;
   isLimitedEdition?: boolean;
   featured: boolean;
   bestseller?: boolean;

@@ -20,6 +20,16 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Product store availability
+
+The Magento product queries read `custom_attributesV2.items` for both the parent product and configurable children. The store code comes from the item with `code: "sd_feed_store"`. `stock_status` and `sunny_availability` are separate signals used for stock and purchase status, including made-to-order products.
+
+The product detail page uses the selected child's store code when the shopper changes metal or size. A child with `unknown` or a missing code clears the parent store. The jewellery listing uses the store for the same variant it uses for the card price. It displays a showroom only for a recognized code.
+
+Supported codes are `CBE` (Coimbatore), `CHE` (Chennai), `CLT` (Calicut), `EKM` (Kochi), `TCR` (Thrissur), and `TVM` (Trivandrum). The delivery drawer looks up the matching showroom by slug in `/api/store-locator/showrooms` for its address, phone number, and directions link.
+
+Verified against Magento UAT using the Adeline Diamond Earring (`2141124782035-feed`). Its Yellow Gold child reports `CBE`. Its White Gold child reports `unknown` while `stock_status` is `IN_STOCK` and `sunny_availability` is `MADE_TO_ORDER`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

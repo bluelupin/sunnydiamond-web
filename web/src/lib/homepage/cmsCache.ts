@@ -4,7 +4,7 @@ import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBloc
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
 import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.service";
 
-export type AppDataCacheKey = HomepageQueryKey | MagentoQueryKey;
+export type AppDataCacheKey = HomepageQueryKey | MagentoQueryKey | "store-locator-showrooms";
 
 export type CmsCacheEntry<T> = {
   value?: T;

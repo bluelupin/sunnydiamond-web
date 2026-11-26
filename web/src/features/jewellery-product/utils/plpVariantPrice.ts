@@ -11,13 +11,13 @@ function purityKey(value: string): string {
 }
 
 /** Use the same color-then-purity preference as the PDP URL selection. */
-export function getJewelleryListingDisplayPrice(
+export function getJewelleryListingDisplayVariant(
   product: JewelleryListingProduct,
   metalTypeQuery?: string,
   metalPurityQuery?: string,
-): number {
+) {
   const variants = product.variantPrices;
-  if (!variants?.length || (!metalTypeQuery && !metalPurityQuery)) return product.price;
+  if (!variants?.length || (!metalTypeQuery && !metalPurityQuery)) return undefined;
 
   const colors = metalTypeQuery?.split(",").map((value) => value.trim()).filter(Boolean) ?? [];
   const purities = metalPurityQuery?.split(",").map((value) => purityKey(value)).filter(Boolean) ?? [];
@@ -39,10 +39,16 @@ export function getJewelleryListingDisplayPrice(
       metalKey(variant.metalColor) === metalKey(selectedColor),
     );
     const selected = matchingColor.find(matchesPurity) ?? matchingColor[0];
-    if (selected) return selected.price;
+    if (selected) return selected;
   }
 
-  return purities.length > 0
-    ? variants.find(matchesPurity)?.price ?? product.price
-    : product.price;
+  return purities.length > 0 ? variants.find(matchesPurity) : undefined;
+}
+
+export function getJewelleryListingDisplayPrice(
+  product: JewelleryListingProduct,
+  metalTypeQuery?: string,
+  metalPurityQuery?: string,
+): number {
+  return getJewelleryListingDisplayVariant(product, metalTypeQuery, metalPurityQuery)?.price ?? product.price;
 }

@@ -11,18 +11,20 @@ export const DELIVERY_STORE_ICONS = {
 } as const;
 
 export type DeliveryStoreLocation = {
-  cityLabel: string;
-  address: string;
-  phone: string;
-  /** Google Maps (or CMS showroom mapUrl) for GET DIRECTION. */
-  mapUrl: string;
+  name: string;
+  slug: string;
 };
 
-export const DELIVERY_STORE_LOCATIONS: Record<string, DeliveryStoreLocation> = {
-  Coimbatore: {
-    cityLabel: "COIMBATORE",
-    address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd Ernakulam, Kerala 682035",
-    phone: "+91 97443 55555",
-    mapUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
-  },
-};
+// Magento returns a feed code. The showroom API identifies the same location by slug.
+const DELIVERY_STORE_LOCATIONS = new Map<string, DeliveryStoreLocation>([
+  ["CBE", { name: "Coimbatore", slug: "coimbatore" }],
+  ["CHE", { name: "Chennai", slug: "chennai" }],
+  ["CLT", { name: "Calicut", slug: "calicut" }],
+  ["EKM", { name: "Kochi", slug: "kochi" }],
+  ["TCR", { name: "Thrissur", slug: "thrissur" }],
+  ["TVM", { name: "Trivandrum", slug: "trivandrum" }],
+]);
+
+export function getDeliveryStoreLocation(storeCode?: string): DeliveryStoreLocation | undefined {
+  return DELIVERY_STORE_LOCATIONS.get(storeCode ?? "");
+}
