@@ -100,17 +100,58 @@ const PromoField = ({
   </div>
 );
 
+const bankAssetsByCode: Record<string, { name: string; icon: string }> = {
+  AUBL: { name: "AU Small Finance Bank", icon: "/icons/banks/aubl.svg" },
+  BARB: { name: "Bank of Baroda", icon: "/icons/bank-of-baroda.svg" },
+  CITI: { name: "Citibank", icon: "/icons/banks/citi.svg" },
+  DCBL: { name: "DCB Bank", icon: "/icons/banks/dcbl.svg" },
+  ESFB: { name: "Equitas Small Finance Bank", icon: "/icons/banks/esfb.svg" },
+  FDRL: { name: "Federal Bank", icon: "/icons/banks/fdrl.svg" },
+  HDFC: { name: "HDFC Bank", icon: "/icons/hdfc-bank.svg" },
+  HSBC: { name: "HSBC", icon: "/icons/banks/hsbc.svg" },
+  IBKL: { name: "IDBI Bank", icon: "/icons/banks/ibkl.svg" },
+  ICIC: { name: "ICICI Bank", icon: "/icons/banks/icic.svg" },
+  IDFB: { name: "IDFC FIRST Bank", icon: "/icons/banks/idfb.svg" },
+  INDB: { name: "IndusInd Bank", icon: "/icons/banks/indb.svg" },
+  KKBK: { name: "Kotak Mahindra Bank", icon: "/icons/kotal-bank-icon.svg" },
+  RATN: { name: "RBL Bank", icon: "/icons/banks/ratn.svg" },
+  SBIN: { name: "State Bank of India", icon: "/icons/banks/sbin.svg" },
+  SCBL: { name: "Standard Chartered Bank", icon: "/icons/banks/scbl.svg" },
+  STCB: { name: "SBM Bank India", icon: "/icons/banks/stcb.svg" },
+  UTIB: { name: "Axis Bank", icon: "/icons/banks/utib.svg" },
+};
+
+const bankCodeAliases: Record<string, string> = {
+  AXIS: "UTIB",
+  BOB: "BARB",
+  FEDERAL: "FDRL",
+  ICICI: "ICIC",
+  IDFC: "IDFB",
+  KOTAK: "KKBK",
+  RBL: "RATN",
+  SBI: "SBIN",
+  SBM: "STCB",
+};
+
+const normalizeBankCode = (code: string) => {
+  const normalized = code.trim().toUpperCase();
+  return bankCodeAliases[normalized] ?? normalized;
+};
+
 const OfferCard = ({ offer }: { offer: RazorpayDisplayOffer }) => {
   const headline = offer.description?.trim() || offer.title;
   const banks = [...offer.card_issuers, ...offer.netbanking_banks];
-  const uniqueBankCodes = [...new Set(banks.map((bank) => bank.code))];
-  const bankLabel = offer.bank_names.length ? offer.bank_names.join(", ") : "Payment Offer";
-  const isKotakOffer = uniqueBankCodes.length === 1 && uniqueBankCodes[0] === "KKBK";
-  const hasDetails = offer.title !== headline || offer.min_amount != null || offer.payment_methods.length > 0 || offer.bank_names.length > 0 || offer.card_types.length > 0 || offer.card_networks.length > 0 || Boolean(offer.terms || offer.terms_url);
+  const uniqueBankCodes = [...new Set(banks.map((bank) => normalizeBankCode(bank.code)).filter(Boolean))];
+  const bankAsset = uniqueBankCodes.length === 1 ? bankAssetsByCode[uniqueBankCodes[0]] : null;
+  const eligibleBankNames = offer.bank_names.length
+    ? offer.bank_names
+    : [...new Set(banks.map((bank) => bank.name || bankAssetsByCode[normalizeBankCode(bank.code)]?.name || bank.code))];
+  const bankLabel = eligibleBankNames.length ? eligibleBankNames.join(", ") : "Payment Offer";
+  const hasDetails = offer.title !== headline || offer.min_amount != null || offer.payment_methods.length > 0 || eligibleBankNames.length > 0 || offer.card_types.length > 0 || offer.card_networks.length > 0 || Boolean(offer.terms || offer.terms_url);
 
   return (
     <div className="flex min-h-[100px] w-[214px] shrink-0 gap-3 bg-white px-3 py-4 text-left">
-      {offer.icon_url ? <Image src={offer.icon_url} alt="" width={29} height={24} unoptimized className="h-6 w-[29px] shrink-0 object-contain" /> : isKotakOffer ? <Image src="/icons/kotal-bank-icon.svg" alt="" width={29} height={24} className="h-6 w-[29px] shrink-0" /> : uniqueBankCodes.length === 1 ? <span aria-hidden className="flex h-6 w-7 shrink-0 items-center justify-center bg-gray200 font-gill text-xs">{(banks[0]?.name ?? banks[0]?.code ?? "B").slice(0, 1)}</span> : null}
+      {bankAsset?.icon ? <Image src={bankAsset.icon} alt="" width={29} height={24} className="h-6 w-[29px] shrink-0 object-contain" /> : null}
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
         <p className="font-gill text-sm font-normal leading-110 text-darkblack">{headline}</p>
         {hasDetails ? (
@@ -122,7 +163,7 @@ const OfferCard = ({ offer }: { offer: RazorpayDisplayOffer }) => {
               {offer.title !== headline ? <p>{offer.title}</p> : null}
               {offer.min_amount != null ? <p>Minimum order ₹{offer.min_amount.toLocaleString("en-IN")}</p> : null}
               {offer.payment_methods.length ? <p>{offer.payment_methods.join(", ")}</p> : null}
-              {offer.bank_names.length ? <p>Eligible banks: {offer.bank_names.join(", ")}</p> : null}
+              {eligibleBankNames.length ? <p>Eligible banks: {eligibleBankNames.join(", ")}</p> : null}
               {offer.card_types.length ? <p>Cards: {offer.card_types.join(", ")}</p> : null}
               {offer.card_networks.length ? <p>Networks: {offer.card_networks.join(", ")}</p> : null}
               {offer.terms ? <p>{offer.terms}</p> : null}
@@ -237,13 +278,12 @@ const OffersAndDealsExpandedContent = ({
       <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />
 
       <div className="flex flex-col gap-3">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">Bank Offers</p>
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">Payment Offers</p>
         {offersLoading ? <p className="font-gill text-sm text-gray600">Loading offers...</p> : offers.length ? (
           <>
             <div className="horizontalScroll flex items-start gap-2 overflow-auto">
               {offers.map((offer) => <OfferCard key={offer.id} offer={offer} />)}
             </div>
-            <p className="font-gill text-xs text-gray600">Eligibility and final discount are confirmed in Razorpay Checkout.</p>
           </>
         ) : <p className="font-gill text-sm text-gray600">No payment offers available right now.</p>}
       </div>

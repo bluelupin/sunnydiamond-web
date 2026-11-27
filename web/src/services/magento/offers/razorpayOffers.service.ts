@@ -17,7 +17,6 @@ export type RazorpayDisplayOffer = {
   bank_names: string[];
   card_types: string[];
   card_networks: string[];
-  icon_url: string | null;
 };
 
 export async function getRazorpayDisplayOffers(): Promise<RazorpayDisplayOffer[]> {
@@ -27,7 +26,7 @@ export async function getRazorpayDisplayOffers(): Promise<RazorpayDisplayOffer[]
         id title description terms terms_url starts_at ends_at min_amount payment_methods
         card_issuers { code name }
         netbanking_banks { code name }
-        bank_names card_types card_networks icon_url
+        bank_names card_types card_networks
       }
     }`,
     cache: "no-store",
